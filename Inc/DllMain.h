@@ -1,0 +1,74 @@
+/*////////////////////////////////////////////////////////////////////////////
+
+This file is part of DynItemInst.
+
+Copyright © 2015 David Goeth
+
+All Rights reserved.
+
+THE WORK (AS DEFINED BELOW) IS PROVIDED
+UNDER THE TERMS OF THIS CREATIVE COMMONS
+PUBLIC LICENSE ("CCPL" OR "LICENSE").
+THE WORK IS PROTECTED BY COPYRIGHT AND/OR
+OTHER APPLICABLE LAW. ANY USE OF THE WORK
+OTHER THAN AS AUTHORIZED UNDER THIS LICENSE
+OR COPYRIGHT LAW IS PROHIBITED.
+
+BY EXERCISING ANY RIGHTS TO THE WORK PROVIDED
+HERE, YOU ACCEPT AND AGREE TO BE BOUND BY THE
+TERMS OF THIS LICENSE. TO THE EXTENT THIS
+LICENSE MAY BE CONSIDERED TO BE A CONTRACT,
+THE LICENSOR GRANTS YOU THE RIGHTS CONTAINED
+HERE IN CONSIDERATION OF YOUR ACCEPTANCE OF
+SUCH TERMS AND CONDITIONS.
+
+Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
+
+/////////////////////////////////////////////////////////////////////////////**/
+
+#ifndef __DLLMAIN_H_
+#define __DLLMAIN_H_
+
+#include <api/core.h>
+
+/**
+* @file
+*/
+
+/**
+ * Hooks needed target functions.
+ * This function is exported to use it external (e.g. via Ikarus Script package).
+ */
+void Hook();
+
+/**
+ * Unhooks needed target functions.
+ * This function is exported to use it external (e.g. via Ikarus Script package).
+ */
+void Unhook();
+
+/**
+ * Called by G2Ext.
+ */
+HRESULT G2EXT_API G2Ext_ModVersion(int& nMajor, int& nMinor, G2EXT_DLL_TYPE& tType);
+
+/**
+ * Called by G2Ext.
+ */
+HRESULT G2EXT_API G2Ext_ModPrepare(ICoreOutgame* pCore);
+
+/**
+ * Called by G2Ext. Is Responsible for initialize objects derived from G2Ext and initialize
+ * global hook system.
+ */
+HRESULT G2EXT_API G2Ext_ModInit(ICoreIngame* pCore);
+
+/**
+ * DLL entry point called by the system. It's main purpose is to release allocated memory
+ * when the process terminates. Therefore false memory leaks from detection tools can be avoided. 
+ * Surely not a necessary behaviour but a cleaner solution. 
+*/
+BOOL APIENTRY DllMain( HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved);
+
+
+#endif __DLLMAIN_H_

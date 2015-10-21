@@ -1,0 +1,27 @@
+/** 
+*   \page symIndInst Parser symbols, indices and instance ids
+*
+*	Additional Notes to indices of parser symbols and instance ids:
+*	Actually where is only a formal difference. Given that you have an index to an instance, index and 
+*	instance id are interchangeable. In the following I give some backgrounds:
+*	Parser symbols are used to structure and store information about tokens defined in the daedalus scripting 
+*	language. Among parser symbols you can count variables, functions, classes and instances.
+*	Each parser symbol has an index and a name by what
+*	you can access the symbols by the parser symbol table which is probably nothing more than
+*	a (multi) hash map. Each oCItem holds a reference to its instance, but more specific each oCItem
+*	holds the index to a parser symbol that represents the instance. So the index of an item instance
+*	is used for getting the parser symbol and specifying that an oCItem has a certain type. 
+*	While the game is loading each oCItem is initialized by its instance and to get its instance 
+*	the index is used. This is the reason why changes to an oCItem aren't permanent, because all attributes 
+*	are taken from the instance the parser symbol is referencing at.
+*	I decided to use the same principle. All dynamic instances are stored internally in a (separate) hash map
+*	and i give each instance an id. Then a parser symbol is created and the instance id is used as index for
+*	this symbol. As a result, instance id and index are the same, but they're refer to different concepts. 
+*	An index can refer to any parser symbol, but an instance id is an index for an instance and a key for the 
+*	latter. This is the reason why both words are used in the code.
+*
+*/
+
+/**
+ * \mainpage Documentation of the DynItemInst_G2Ext library
+ */
