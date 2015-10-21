@@ -28,9 +28,10 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 
 #ifndef __UTIL_H__
 #define __UTIL_H__
-#define SAFE_DELETE(pointer) util::SafeDelete(reinterpret_cast<void**>(&pointer));
+#define SAFE_DELETE(pointer) util::safeDelete(reinterpret_cast<void**>(&pointer));
 
 #include <vector>
+#include <Windows.h>
 
 /**
 * Contains functions that are useful for several classes.
@@ -88,13 +89,40 @@ namespace util {
 	 * Takes the address of an pointer and deletes the pointer and sets its content to NULL.
 	 * \param address The address of the pointer
 	 */
-	void SafeDelete(void**);
+	void safeDelete(void** address);
 
 	/**
 	 * Provides the pth to the current working directory of this application.
 	 * \return The current working directory
 	 */
-	std::string getCurrentWorkingDir(); 
+	std::string getCurrentWorkingDir();
+
+	/**
+	 * Provides the name of a module referenced by a given handle.
+	 * \param handle The handle to the module for which the name is desired
+	 * \return The name of the module referenced by the module handle.
+	 */
+	std::string getModuleName(HMODULE handle);
+
+	/**
+	 * Provides the directory path of a module referenced by a given handle.
+	 * \param handle The handle to the module for which the directory path is desired
+	 * \return The directory path of the module referenced by the module handle.
+	 */
+	std::string getModuleDirectory(HMODULE handle);
+
+	/**
+	 * Sets the module handle for this namespace.
+	 * \param handle The handle which should be assigned to the namespace module handle.
+	 */
+	void setModuleHandle(HMODULE handle);
+
+	/**
+	 * Provides the module handle of this namespace.
+	 * Attention: In order to work properly, the method util::setModuleHandle has to have been called before.
+	 * \return The module handle hold by this namespace.
+	 */
+	HMODULE getModuleHandle();
 };
 
 #endif __UTIL_H__

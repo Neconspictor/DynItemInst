@@ -77,7 +77,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>.\MinHook\include;.\G2ExtSDK;.\boost_1_42_0;.\Inc;$(IncludePath)</IncludePath>
     <LibraryPath>.\MinHook\lib;$(LibraryPath)</LibraryPath>
-    <TargetName>DynItemInst</TargetName>
+    <TargetName>DynItemInst_G2Ext</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>

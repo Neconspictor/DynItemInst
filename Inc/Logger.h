@@ -114,7 +114,7 @@ public:
 	/**
 	 * The name of the log file.
 	 */
-	static const std::string logFileName;
+	static std::string logFileName;
 
 private:
 
