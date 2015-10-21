@@ -1,0 +1,15 @@
+Third party libraries packages are included under their own licences.
+
+Boost 1.42 C++ libraries 
+
+ * Author: 	Way too many to list...
+ * Homepage: 	http://www.boost.org/
+ * Licence: 	http://www.boost.org/LICENSE_1_0.txt
+
+
+MinHook C++ libraries 
+
+ * Author: 	Tsuda Kageyu
+ * Homepage: 	https://github.com/TsudaKageyu/minhook
+ * Licence: 	https://github.com/TsudaKageyu/minhook/blob/master/LICENSE.txt
+
