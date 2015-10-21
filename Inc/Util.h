@@ -28,7 +28,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 
 #ifndef __UTIL_H__
 #define __UTIL_H__
-#define SAFE_DELETE(pointer) util::SafeDelete(reinterpret_cast<void**>(&pointer));
+#define SAFE_DELETE(pointer) util::safeDelete(reinterpret_cast<void**>(&pointer));
 
 #include <vector>
 #include <Windows.h>
@@ -89,7 +89,7 @@ namespace util {
 	 * Takes the address of an pointer and deletes the pointer and sets its content to NULL.
 	 * \param address The address of the pointer
 	 */
-	void SafeDelete(void** address);
+	void safeDelete(void** address);
 
 	/**
 	 * Provides the pth to the current working directory of this application.
@@ -119,7 +119,7 @@ namespace util {
 
 	/**
 	 * Provides the module handle of this namespace.
-	 * Attention: In order to work proper, the method setModuleHandle has to have called before.
+	 * Attention: In order to work properly, the method util::setModuleHandle has to have been called before.
 	 * \return The module handle hold by this namespace.
 	 */
 	HMODULE getModuleHandle();

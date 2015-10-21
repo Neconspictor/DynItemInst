@@ -39,7 +39,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 
 HMODULE hModule;
 
-void util::SafeDelete(void** pointer)
+void util::safeDelete(void** pointer)
 {
 	if (*pointer != NULL)
 	{
