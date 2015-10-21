@@ -1,6 +1,5 @@
 /release/
 /debug/
-/doc/html/
-/doc/latex/
+/doc/doxygen/
 *.sdf
 *.opensdf
