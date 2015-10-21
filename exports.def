@@ -1,4 +1,4 @@
-LIBRARY	"DynItemInst_G2Ext"
+LIBRARY	"DynItemInst_Ikarus"
 EXPORTS
 	Hook
 	Unhook
