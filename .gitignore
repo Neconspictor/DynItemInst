@@ -1,0 +1,6 @@
+﻿./release/
+./debug/
+./doc/html/
+./doc/latex/
+*.sdf
+*.opensdf
