@@ -37,6 +37,8 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <direct.h>   // _mkdir
 #endif
 
+HMODULE hModule;
+
 void util::SafeDelete(void** pointer)
 {
 	if (*pointer != NULL)
@@ -54,7 +56,33 @@ std::string util::getCurrentWorkingDir()
     return std::string( buffer ).substr( 0, pos);
 }
 
+std::string util::getModuleName(HMODULE handle)
+{
+	char buffer[MAX_PATH];
+	GetModuleFileName(handle, buffer, sizeof(buffer)/sizeof(buffer[0])); 
+	std::string::size_type pos = std::string( buffer ).find_last_of( "\\/" );
+	std::string result = std::string( buffer ).substr(pos +1);
+	pos = result.find_last_of( "." );
+	return result.substr(0, pos);
+}
 
+std::string util::getModuleDirectory(HMODULE handle)
+{
+	char buffer[MAX_PATH];
+	GetModuleFileName(handle, buffer, sizeof(buffer)/sizeof(buffer[0])); 
+	std::string::size_type pos = std::string( buffer ).find_last_of( "\\/" );
+    return std::string( buffer ).substr( 0, pos);
+}
+
+void util::setModuleHandle(HMODULE handle)
+{
+	hModule = handle;
+}
+
+HMODULE util::getModuleHandle()
+{
+	return hModule;
+}
 
 bool util::existsDir(const std::string& path)
 {

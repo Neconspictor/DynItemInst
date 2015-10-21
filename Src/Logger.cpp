@@ -37,7 +37,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 class zERROR;
 
 Logger* Logger::instance = NULL;
-const std::string Logger::logFileName = "DynItemInst_Log";
+std::string Logger::logFileName;
 
 typedef int (__thiscall* ZERROR_REPORT)(void* pThis, int errorType, int, zSTRING const &, signed char, UINT, int, char*, char*);
 ZERROR_REPORT zErrorReport;
@@ -45,6 +45,7 @@ ZERROR_REPORT zErrorReport;
 Logger::Logger()
 {
 	zErrorReport = (ZERROR_REPORT)ZERROR_REPORT_ADDRESS;
+	logFileName = util::getModuleName(util::getModuleHandle()) + std::string("Log");
 }
 
 Logger::~Logger()
@@ -56,7 +57,7 @@ Logger* Logger::getLogger()
 	if (instance == NULL)
 	{
 		instance = new Logger();	
-		std::string logFilePath = util::getCurrentWorkingDir() + std::string("\\") 
+		std::string logFilePath = util::getModuleDirectory(util::getModuleHandle()) + std::string("\\") 
 			+ logFileName + std::string(".txt");
 		std::ofstream logFile(logFilePath.c_str());
 		if (logFile.is_open())
@@ -72,7 +73,7 @@ void Logger::release()
 
 void Logger::writeToFile(std::string message)
 {
-	std::string logFilePath = util::getCurrentWorkingDir() + std::string("\\") 
+	std::string logFilePath = util::getModuleDirectory(util::getModuleHandle()) + std::string("\\") 
 			+ logFileName + std::string(".txt");
 	FILE* pFile;
 	fopen_s(&pFile, logFilePath.c_str(),"a");

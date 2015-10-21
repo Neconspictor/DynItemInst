@@ -108,12 +108,13 @@ public:
 	 * \param toConsole Should the log message be written to console (std::cout)?
 	 */
 	void log(LogLevel level, std::stringstream* stream, bool toFile = false, bool tozSpy = true, bool toConsole = false);
+
 public:
 
 	/**
 	 * The name of the log file.
 	 */
-	static const std::string logFileName;
+	static std::string logFileName;
 
 private:
 	static Logger* instance;

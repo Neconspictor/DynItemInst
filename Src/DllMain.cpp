@@ -30,6 +30,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <DllMain.h>
 #include <HookManager.h>
 #include <Logger.h>
+#include <Util.h>
 
 std::stringstream logStream;
 
@@ -61,6 +62,7 @@ BOOL APIENTRY DllMain( HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpRese
     switch(ul_reason_for_call)
     {
     case DLL_PROCESS_ATTACH: 
+		util::setModuleHandle(hModule);
 		logStream<< "DLL_Process_Attach called."<< std::endl;
 		Logger::getLogger()->log(Logger::Info, &logStream, true, false);
 		Hook();
