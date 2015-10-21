@@ -1,0 +1,132 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Inc\AdditMemory.h" />
+    <ClInclude Include="Inc\DllMain.h" />
+    <ClInclude Include="Inc\DynItemInst.h" />
+    <ClInclude Include="Inc\DaedalusExports.h" />
+    <ClInclude Include="Inc\HookManager.h" />
+    <ClInclude Include="Inc\ISerialization.h" />
+    <ClInclude Include="Inc\DynInstance.h" />
+    <ClInclude Include="Inc\Logger.h" />
+    <ClInclude Include="Inc\Module.h" />
+    <ClInclude Include="Inc\ObjectManager.h" />
+    <ClInclude Include="Inc\ocgameExtended.h" />
+    <ClInclude Include="Inc\oCItemExtended.h" />
+    <ClInclude Include="Inc\oCMobContainer.h" />
+    <ClInclude Include="Inc\Util.h" />
+    <ClInclude Include="Inc\zCOptionExtended.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Src\DllMain.cpp" />
+    <ClCompile Include="Src\DynItemInst.cpp" />
+    <ClCompile Include="Src\DaedalusExports.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Src\HookManager.cpp" />
+    <ClCompile Include="Src\DynInstance.cpp" />
+    <ClCompile Include="Src\Logger.cpp" />
+    <ClCompile Include="Src\Module.cpp" />
+    <ClCompile Include="Src\ObjectManager.cpp" />
+    <ClCompile Include="Src\Util.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="doc\notes.txt" />
+    <None Include="exports.def">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+    </None>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{F49E2048-15A5-46EB-9737-D31109C3DA55}</ProjectGuid>
+    <RootNamespace>DynItemInst</RootNamespace>
+    <ProjectName>DynItemInst_Ikarus</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v90</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v90</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>.\MinHook\include;.\G2ExtSDK;.\boost_1_42_0;.\Inc;$(IncludePath)</IncludePath>
+    <LibraryPath>.\MinHook\lib;$(LibraryPath)</LibraryPath>
+    <TargetName>DynItemInst_G2Ext</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>
+    </LinkIncremental>
+    <IncludePath>.\MinHook\include;.\G2ExtSDK;.\boost_1_42_0;.\Inc;$(IncludePath)</IncludePath>
+    <LibraryPath>.\MinHook\lib;$(LibraryPath)</LibraryPath>
+    <TargetName>DynItemInst_Ikarus</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <IntrinsicFunctions>
+      </IntrinsicFunctions>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <WholeProgramOptimization>
+      </WholeProgramOptimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;DYNITEMINST_EXPORTS;DETOURS_X86;DETOURS_32BIT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>.\boost_1_42_0\libs\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libboost_serialization-vc90-mt-gd-1_42.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>exports.def</ModuleDefinitionFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;DYNITEMINST_EXPORTS;DETOURS_X86;DETOURS_32BIT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>
+      </EnableCOMDATFolding>
+      <OptimizeReferences>
+      </OptimizeReferences>
+      <AdditionalLibraryDirectories>.\boost_1_42_0\libs\release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libboost_serialization-vc90-mt-1_42.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>exports.def</ModuleDefinitionFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

@@ -1,0 +1,9 @@
+LIBRARY	"DynItemInst_G2Ext"
+EXPORTS
+	Hook
+	Unhook
+	DII_CreateNewItem
+	DII_CreateNewInstance
+	DII_IsDynamic
+	DII_DeleteItem
+	DII_GetUserData
