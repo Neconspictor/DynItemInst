@@ -164,7 +164,6 @@ zCPar_Symbol* DynItemInst::zCPar_SymbolTableGetSymbolStringHook(void* pThis, zST
 	if (result != NULL)
 	{
 		zSTRING copy = symbolName;
-		std::cout << copy.ToChar() << std::endl;
 	}
 
 	if (result == NULL)
@@ -315,7 +314,7 @@ DynItemInst::~DynItemInst()
 		AdditMemory* addit = manager->getAddit(additId);
 		if (addit == NULL) {
 			logStream << "DynItemInst::modifyItem: Warning: Addit is null!!!" << std::endl;
-			logStream << item->name.ToChar() << additId << std::endl;
+			logStream << item->name.ToChar() << " : " << additId << std::endl;
 			Logger::getLogger()->log(Logger::Warning, &logStream, false, true, true);
 			return;
 		}
@@ -360,7 +359,6 @@ DynItemInst::~DynItemInst()
 		//world->RemoveVob(copy);
 		//manager->setOrgInstance(item, instanceId);
 		//manager->assignInstanceId(item, instanceId);
-		std::cout << "Item.name : "  << copy->name.ToChar() << std::endl;
 	}
 }
 
@@ -532,7 +530,7 @@ void DynItemInst::oCMobContainerOpenHook(void* pThis, oCNpc* npc)
 			list = list->GetNext();
 			continue;
 		}
-		std::cout << manager->getInstanceId(*item) << " : " <<item->instanz << std::endl;
+
 		int instanceId = manager->getInstanceId(*item);
 		bool change = false;
 		if (instanceId == -1)

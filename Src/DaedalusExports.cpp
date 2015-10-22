@@ -77,7 +77,6 @@ int DaedalusExports::DII_CreateNewInstance(oCItem* item) //Func int CreateNewIte
 	Logger::getLogger()->log(Logger::Info, &logStream, false, true, true);
 
 	logStream << "CreateNewInstance::key: " << key << std::endl;
-	logStream << "I was here!" << std::endl;
 	Logger::getLogger()->log(Logger::Info, &logStream);
 	return key;
 }
