@@ -117,6 +117,8 @@ int Externals::DII_CreateNewInstance() //Func int DII_CreateNewInstance(var C_It
 	// Create new instance with item
 	ObjectManager* manager = ObjectManager::getObjectManager();
 	int key = manager->createNewInstanceId(item);
+	logStream << "DII_CreateNewInstance::key : " << key << std::endl;
+	Logger::getLogger()->log(Logger::Info, &logStream, false, true, false);
 	parser->SetReturn(key);
 	return 0;
 }
