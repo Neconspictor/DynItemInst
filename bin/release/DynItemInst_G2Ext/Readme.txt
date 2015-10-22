@@ -1,3 +1,18 @@
+[Beschreibung]
+Dynamic Item Instances (DynItemInst) ist eine in C++ geschriebene Laufzeitbibliothek, 
+die es ermöglicht, dass man in Gothic 2 DNdR zur Laufzeit Instanzen von Items
+generieren kann. Damit ist es z.B. problemlos möglich Features wie 
+'Waffen schärfen' oder 'Rüstungen verbessern' zu implementieren, ohne dass man die 
+benötigten Item Instanzen vorm Parsen der Skripte erstellt haben muss.
+
+[Description]
+Dynamic Item Instances (DynItemInst) is a runtime library written in c++ which 
+allows to create item instances at runtime for the game Gothic 2 TNotR.
+Therefore it is easily possible to implement features such as 'sharp weapons' 
+or 'improve armour' without the need of pre-generating the additional 
+item instances.
+
+
 [German]
 
 Installationsanleitung:
