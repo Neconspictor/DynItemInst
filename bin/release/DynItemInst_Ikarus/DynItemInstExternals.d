@@ -1,20 +1,10 @@
-
-// ***********************************************************************					
-// Represents additional memory for dynamic item instances (dii).
-// This additional memory is created for each dii and can be freely used.						
-// ***********************************************************************
-CLASS DII_USER_DATA
-{
-	VAR INT data	[100];
-};
-
-// ***************************************************					
+// ***************************************************		
 // Is used to specify whether the library is loaded.						
 // ***************************************************
 var int dii_Initialized;
 
 
-// ************************************************************					
+// ************************************************************			
 // Creates a new item. The item will have the instance id n0.				
 // ************************************************************
 FUNC C_ITEM DII_CreateNewItem (VAR INT n0) {
@@ -34,10 +24,10 @@ FUNC C_ITEM DII_CreateNewItem (VAR INT n0) {
 	MEM_PtrToInst(ret);
 };
 
-// ************************************************************					
+// *********************************************************************				
 // Creates a new dynamic item instance (dii) on the base of the item n0.
-// Objects having this new dii will have identic attributes like n0.			
-// ************************************************************
+// Objects having this new dii will have identic properties like n0.			
+// *********************************************************************
 FUNC INT DII_CreateNewInstance (VAR C_ITEM n0) {
 	if (!dii_Initialized) {
 		return 0;
@@ -57,8 +47,10 @@ FUNC INT DII_CreateNewInstance (VAR C_ITEM n0) {
 	return +ret;
 };
 
-// ************************************************************					
-// Checks whether a given item n0 has a dynamic item instance.			
+// ************************************************************			
+// Checks whether a given item n0 has a dynamic item instance.
+// If the item is dynamic, TRUE (1) otherwise FALSE (0) will
+// be returned.		
 // ************************************************************
 FUNC INT DII_IsDynamic(VAR C_ITEM n0) {
 	if (!dii_Initialized) {
@@ -79,7 +71,7 @@ FUNC INT DII_IsDynamic(VAR C_ITEM n0) {
 	return +ret;
 };
 
-// ***************************************************************				
+// ***************************************************************	
 // Deletes a provided item and removes it from the current world.			
 // ***************************************************************
 FUNC VOID DII_DeleteItem (VAR C_ITEM n0) {
@@ -98,10 +90,11 @@ FUNC VOID DII_DeleteItem (VAR C_ITEM n0) {
 	};
 };
 
-// ******************************************************************			
+// **********************************************************************
 // Provides access to the user data of a given dynamic item instance 
-// which has the instance id n0.			
-// ******************************************************************
+// which has the instance id n0. If the given instance id isn't dynamic,
+// a new DII_USER_DATA object will be returned.			
+// **********************************************************************
 FUNC DII_USER_DATA DII_GetUserData (VAR INT n0) {
 	if (!dii_Initialized) {
 		return;
