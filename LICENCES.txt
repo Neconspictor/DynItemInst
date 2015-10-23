@@ -1,8 +1,8 @@
 Licence for DynItemInst_Ikarus binaries
 
-
-G2Ext is a fan-made engine SDK for Gothic II TNotR.
-Copyright (C) 2009, 2010 by Paindevs and Patrick Vogel
+DynItemInst_G2Ext is a library for allowing the creation of item instances at runtime
+in the game Gothic 2 TNotR
+Copyright (C) 2015 David Goeth
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
