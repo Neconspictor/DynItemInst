@@ -1,6 +1,6 @@
 Licence for DynItemInst_Ikarus binaries
 
-DynItemInst_G2Ext is a library for allowing the creation of item instances at runtime
+DynItemInst_Ikarus is a library for allowing the creation of item instances at runtime
 in the game Gothic 2 TNotR
 Copyright (C) 2015 David Goeth
 
