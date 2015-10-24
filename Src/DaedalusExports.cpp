@@ -35,6 +35,8 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <DaedalusExports.h>
 
 
+const float DaedalusExports::LIB_VERSION = 1.01f;
+
 DaedalusExports::DaedalusExports() : Module()
 {
 	moduleDesc = "DaedalusExports";
@@ -105,7 +107,6 @@ void DaedalusExports::DII_DeleteItem(oCItem* item)
 
 	if (item == NULL) {return;}
 	oCGame::GetGame()->GetWorld()->RemoveVob(item);
-	//oCItem::operator delete(item);
 	oCItemOperatorDelete(item);
 }
 
@@ -120,4 +121,10 @@ DII_UserData::Data* DaedalusExports::DII_GetUserData(int instanceId) // Func DII
 
 	DynInstance* storeItem = manager->getInstanceItem(instanceId);
 	return storeItem->getUserData();
+}
+
+
+float DaedalusExports::DII_GetLibVersion()
+{
+	return LIB_VERSION;
 }

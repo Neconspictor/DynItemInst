@@ -65,7 +65,6 @@ BOOL APIENTRY DllMain( HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpRese
 		util::setModuleHandle(hModule);
 		logStream<< "DLL_Process_Attach called."<< std::endl;
 		Logger::getLogger()->log(Logger::Info, &logStream, true, false);
-		Hook();
 		break;
 	case DLL_PROCESS_DETACH:
 		logStream<< "DLL_Process_Detach called."<< std::endl;

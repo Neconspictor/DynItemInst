@@ -7,3 +7,4 @@ EXPORTS
 	DII_IsDynamic
 	DII_DeleteItem
 	DII_GetUserData
+	DII_GetLibVersion

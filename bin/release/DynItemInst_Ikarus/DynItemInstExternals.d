@@ -3,6 +3,38 @@
 // ***************************************************
 var int dii_Initialized;
 
+INSTANCE  DII_DUMMY_ITEM(C_Item)  
+{
+	name 			=	"Don't use me for regular use...";
+	description		=  "DynItemInst Dummy item";
+	mainflag		= 0;
+	flags 			= 0;
+	
+};
+
+// ************************************************************			
+// Provides the version of the used DynItemInst_Ikarus.dll			
+// ************************************************************
+FUNC INT DII_GetLibVersion() {
+	var int adr;
+	adr = GetProcAddress (LoadLibrary (".\DynItemInst_Ikarus\DynItemInst_Ikarus.DLL"), "DII_GetLibVersion");
+	CALL_RetValIsFloat();
+	CALL__cdecl(adr);
+	CALL_RetValAsFloat();
+};
+
+// ****************************************************************			
+// Returns the expected version of the used DynItemInst_Ikarus.dll 			
+// ****************************************************************
+FUNC INT _DII_GetExpectedLibVersion() {
+	//expected lib version: 1.01
+	var int integral;
+	var int fraction;
+	
+	integral = mkf(1);
+	fraction = divf(1, 100);
+	return addf(integral, fraction);
+};
 
 // ************************************************************			
 // Creates a new item. The item will have the instance id n0.				
@@ -109,14 +141,25 @@ FUNC DII_USER_DATA DII_GetUserData (VAR INT n0) {
 		CALL__cdecl(adr);
 		call = CALL_End();
 	};
-	MEM_PtrToInst(ret);
+	MEM_PtrToInst(ret);		
 };
 
-// *****************************************************************	
-// Loads and inits the library DynItemInst_Ikarus.DLL			
-// *****************************************************************
+// **********************************************************************************
+// Loads and inits the library DynItemInst_Ikarus.DLL. If the loaded library version
+// doesn't conform to the expected one, no initialization will be performed and a 
+// error message will be appear to the user in form of a message box.
+// **********************************************************************************
 FUNC void DII_Init()
 {
+	var int expectedLibVersion;
+	var int libVersion;
+	expectedLibVersion = _DII_GetExpectedLibVersion();
+	libVersion = DII_GetLibVersion();
+	if (libVersion != expectedLibVersion) {
+		MEM_MessageBox("DII_Init(): Library version doesn't conform to expected one! No initialization will be performed.", "Initialization error", 0);
+		return;
+	};
+	
     var int adr;
     adr = GetProcAddress (LoadLibrary (".\DynItemInst_Ikarus\DynItemInst_Ikarus.DLL"), "Hook");
     CALL__stdcall(adr);

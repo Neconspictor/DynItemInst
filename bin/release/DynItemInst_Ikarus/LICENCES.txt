@@ -1,4 +1,4 @@
-Licence for DynItemInst_Ikarus binaries
+Licence for DynItemInst_Ikarus (v. 1.01) binaries
 
 DynItemInst_Ikarus is a library for allowing the creation of item instances at runtime
 in the game Gothic 2 TNotR
@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 -------------------------------------------------------------------------------------------
 
-Licence for the DynItemInst_Ikarus API headers and source code
+Licence for the DynItemInst_Ikarus (v. 1.01) API headers and source code
 
 THE WORK (AS DEFINED BELOW) IS PROVIDED
 UNDER THE TERMS OF THIS CREATIVE COMMONS

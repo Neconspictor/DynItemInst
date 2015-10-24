@@ -1,3 +1,5 @@
+Dynamic Item Instance - Version 1.01
+
 [Beschreibung]
 Dynamic Item Instances (DynItemInst) ist eine in C++ geschriebene Laufzeitbibliothek, 
 die es ermöglicht, dass man in Gothic 2 DNdR zur Laufzeit Instanzen von Items

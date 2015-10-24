@@ -103,6 +103,18 @@ public:
 	 * \return The user data of the provided instance id
 	 */
 	static DII_UserData::Data* DII_GetUserData(int instanceId);
+
+	/**
+	 * Provides the version of the library.
+	 */
+	static float DII_GetLibVersion();
+
+public:
+
+	/**
+	 * The version of this library.
+	 */
+	static const float LIB_VERSION;
 };
 
 #endif __DaedalusExportsH__
