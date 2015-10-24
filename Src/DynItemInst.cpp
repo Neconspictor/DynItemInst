@@ -31,7 +31,6 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <DynItemInst.h>
 #include <ObjectManager.h>
 #include <Util.h>
-#include <iostream>
 #include <HookManager.h>
 #include <Windows.h>
 #include <api/g2/zcworld.h>
@@ -160,12 +159,6 @@ zCPar_Symbol* DynItemInst::zCPar_SymbolTableGetSymbolHook(void* pThis, int index
 zCPar_Symbol* DynItemInst::zCPar_SymbolTableGetSymbolStringHook(void* pThis, zSTRING const & symbolName)
 {
 	zCPar_Symbol* result = ObjectManager::getObjectManager()->getSymbolByName(symbolName);
-
-	if (result != NULL)
-	{
-		zSTRING copy = symbolName;
-	}
-
 	if (result == NULL)
 	{
 		result = zCPar_SymbolTableGetSymbolString(pThis, symbolName);
@@ -340,7 +333,7 @@ DynItemInst::~DynItemInst()
 		copy->instanz = instanz;
 
 		// is the item equipped?
-		if (item->HasFlag(0x40000000))
+		if (item->HasFlag(OCITEM_FLAG_EQUIPPED))
 		{
 			oCNpc* owner = inventory->GetOwner();
 			owner->Equip(item);
@@ -477,7 +470,7 @@ void __thiscall DynItemInst::oCGameChangeLevelHook(void* pThis, zSTRING const & 
 		oCItem* item = list->GetData();
 		if (item != NULL)
 		{
-			if (item->HasFlag(0x40000000))
+			if (item->HasFlag(OCITEM_FLAG_EQUIPPED))
 			{
 				tempList.push_back(item);
 				idList.push_back(manager->getInstanceId(*item));

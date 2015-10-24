@@ -258,6 +258,8 @@ private:
 	static const int OCMOB_CONTAINER_OPEN = 0x00726500;
 	static const int ZCVISUAL_LOAD_VISUAL = 0x00606AD0;
 
+	static const int OCITEM_FLAG_EQUIPPED = 0x40000000;
+
 	static std::vector<zCPar_Symbol*>* symbols;
 	static bool showExtendedDebugInfo;
 	static int saveGameSlotNumber;
