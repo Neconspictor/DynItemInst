@@ -261,10 +261,6 @@ DynItemInst::~DynItemInst()
 
 	std::string currentDir = manager->getCurrentDirectoryPath();
 
-	//copy all files from the current savegame folder to the slotDirectory folder
-//	if (saveGameSlotNumber != -1) {
-//		util::copyContentTo(currentSaveGameDir,saveGameDir);
-//	}
 	util::copyContentTo(currentDir,saveGameDir, FILE_PATERN);
 	util::copyContentTo(saveGameDir,currentDir, FILE_PATERN);
 
@@ -285,7 +281,6 @@ DynItemInst::~DynItemInst()
 
 	manager->saveNewInstances(const_cast<char*>(saveGameDir.c_str()), const_cast<char*>(saveInstances.c_str()));
 	manager->saveWorldObjects(heroItemSize, const_cast<char*>(saveGameDir.c_str()), const_cast<char*>(saveAddit.c_str()));
-	//reset
 
 	util::copyFileTo(saveGameDir + std::string("\\") +  saveInstances, currentDir  + 
 		std::string("\\") + saveInstances);
@@ -296,7 +291,6 @@ DynItemInst::~DynItemInst()
 
 	restoreDynamicInstances(game);
 	manager->removeAllAdditionalMemory();	
-
 };
 
  void DynItemInst::restoreItem(oCItem* item,  oCNpcInventory* inventory) {
@@ -321,7 +315,6 @@ DynItemInst::~DynItemInst()
 		// is item located in the world?
 		if (inventory == NULL)
 		{
-		
 			manager->setInstanceId(item, instanceId);
 			manager->assignInstanceId(item, instanceId);
 			item->SetVisual(zCVisualLoadVisual(item->visual));
@@ -346,12 +339,9 @@ DynItemInst::~DynItemInst()
 			owner->EquipItem(copy);
 			return;
 		}
-		//copy->flags = flags;
+
 		inventory->RemoveByPtr(item, instanz);
 		inventory->Insert(copy);
-		//world->RemoveVob(copy);
-		//manager->setOrgInstance(item, instanceId);
-		//manager->assignInstanceId(item, instanceId);
 	}
 }
 
@@ -362,9 +352,8 @@ DynItemInst::~DynItemInst()
 	if (id == NULL) return;
 	
 	zCParser* parser = zCParser::GetParser();
-	int saveId = parser->GetIndex("ITAR_PIR_L_Addon");
+	int saveId = parser->GetIndex("DII_DUMMY_ITEM");
 	manager->setInstanceId(item, saveId);
-	//item->instanz = -id;
 	manager->createAdditionalMemory(item, id, isHeroItem);
 }
 
@@ -486,7 +475,6 @@ void __thiscall DynItemInst::oCGameChangeLevelHook(void* pThis, zSTRING const & 
 	tempList.clear();
 
 	oCGameChangeLevel(pThis, first, second);
-	//restoreAfterSaveGameWriting(oCGame::GetGame());
 	inv = oCNpc::GetHero()->GetInventory();
 	inv->UnpackAllItems();
 	
