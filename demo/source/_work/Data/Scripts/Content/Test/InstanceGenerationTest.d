@@ -4,6 +4,10 @@ Func void InstanceCreationTest() {
 	VAR C_ITEM testItem2;
 	var int instanceId;
 	var DII_USER_DATA userData;
+	var int libVersion;
+	
+	libVersion = DII_GetLibVersion();
+	Print(ConcatStrings("Library version: ", toStringf(libVersion)));
 	
 	testItem = DII_CreateNewItem(ItMw_1h_vlk_dagger);
 	testItem2 = DII_CreateNewItem(ItMw_1h_vlk_dagger);

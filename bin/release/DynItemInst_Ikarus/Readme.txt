@@ -1,4 +1,4 @@
-Dynamic Item Instance - Version 1.01
+Dynamic Item Instances - Version 1.01
 
 [Beschreibung]
 Dynamic Item Instances (DynItemInst) ist eine in C++ geschriebene Laufzeitbibliothek, 
@@ -89,6 +89,14 @@ FUNC VOID DII_DeleteItem (VAR C_ITEM n0);
 // ***************************************************
 FUNC DII_USER_DATA DII_GetUserData (VAR INT n0);
 
+// *****************************************************************		
+// Liefert die Versionsnummer der DynItemInst_Ikarus Bibliothek.
+// Wichtig: Die Versionsnummer ist ein float, der in einem 
+// Integer zurückgegeben wird. Man sollte daher diese Funktion z.B. 
+// zusammen mit dem float-Packet von Ikarus verwenden.		
+// *****************************************************************
+FUNC INT DII_GetLibVersion();
+
 
 Beispielaufrufe: 
 
@@ -96,6 +104,10 @@ var c_item item;
 var int instance;
 var int test;
 var DII_UserData userData;
+var int libVersion;
+
+libVersion = DII_GetLibVersion();		// Hole die Versionsnummer der Bibliothek.
+printf(libVersion);				// Gebe die Versionsnummer in float Darstellung auf dem Bildschirm aus.
 item = DII_CreateNewItem(ItMw_1h_vlk_dagger); 	// item ist nun ein Dolch
 item.value = 666;				// item hat einen Wert von 666 Gold;
 instance = DII_CreateNewInstance(item);		// Eine neue instance wurde erstellt und in instance gespeichert.
@@ -178,6 +190,13 @@ FUNC VOID DII_DeleteItem (VAR C_ITEM n0);
 // **********************************************************************
 FUNC DII_USER_DATA DII_GetUserData (VAR INT n0);
 
+// *****************************************************************		
+// Provides the version number of the DynItemInst_Ikarus library.
+// Important: The version number is a float digit, that is returned 
+// as an integer. Therefore you should use this function along with
+// e.g. the float package of Ikarus.	
+// *****************************************************************
+FUNC INT DII_GetLibVersion();
 
 Example calls:
 
@@ -185,6 +204,10 @@ var c_item item;
 var int instance;
 var int test;
 var DII_UserData userData;
+var int libVersion;
+
+libVersion = DII_GetLibVersion();		// Get the library version.
+printf(libVersion);				// prints the gotten library version in float notation.
 item = DII_CreateNewItem(ItMw_1h_vlk_dagger); 	// item is now a dagger
 item.value = 666;				// item has a value of 666 gold pieces.
 instance = DII_CreateNewInstance(item);		// A new instance was created and its id is stored in instance.

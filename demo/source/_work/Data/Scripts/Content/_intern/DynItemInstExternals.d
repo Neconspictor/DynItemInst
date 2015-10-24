@@ -12,9 +12,12 @@ INSTANCE  DII_DUMMY_ITEM(C_Item)
 	
 };
 
-// ************************************************************			
-// Provides the version of the used DynItemInst_Ikarus.dll			
-// ************************************************************
+// *****************************************************************		
+// Provides the version number of the DynItemInst_Ikarus library.
+// Important: The version number is a float digit, that is returned 
+// as an integer. Therefore you should use this function along with
+// e.g. the float package of Ikarus.	
+// *****************************************************************
 FUNC INT DII_GetLibVersion() {
 	var int adr;
 	adr = GetProcAddress (LoadLibrary (".\DynItemInst_Ikarus\DynItemInst_Ikarus.DLL"), "DII_GetLibVersion");
@@ -23,8 +26,9 @@ FUNC INT DII_GetLibVersion() {
 	CALL_RetValAsFloat();
 };
 
-// ****************************************************************			
-// Returns the expected version of the used DynItemInst_Ikarus.dll 			
+// ****************************************************************
+// Returns the expected version of the used DynItemInst_Ikarus.dll.
+// The return value will be float stored in an integer.		
 // ****************************************************************
 FUNC INT _DII_GetExpectedLibVersion() {
 	//expected lib version: 1.01
