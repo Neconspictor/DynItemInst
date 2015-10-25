@@ -1,0 +1,14 @@
+Changelog for DynItemInst_Ikarus (v.1.01):
+
+- Library has integrated now a version number. 
+   Added function DII_GetLibVersion() to request it;
+
+- Library uses now an own dummy item for saving
+  all dynamic instances. Before there was used
+  the instance 'ITAR_PIR_L_ADDON' but this implies
+  that the user has defined this instance.
+
+- fixed issue that library hooks target functions when it is loaded
+  by system.
+
+- updated demo: Now the library version is displayed at screen.
