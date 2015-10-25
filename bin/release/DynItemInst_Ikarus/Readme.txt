@@ -19,7 +19,7 @@ item instances.
 
 Installationsanweisung:
 
-Die Datei DynItemInst_Ikarus.zip unter <Gothic II Pfad>/System/ entpacken. 
+Die zip Datei unter <Gothic II Pfad>/System/ entpacken. 
 Es sollte ein Unterordner namens "DynItemInst_Ikarus" entpackt werden, 
 in dem Lizenzbestimmungen, diese Readme, die DLL und die Dateien 
 DynItemInstExternals.d und DynItemInstClasses.d enthalten sind. 
@@ -126,7 +126,7 @@ DII_DeleteItem(item);				// unser temporäres item wird nicht mehr benötigt.
 
 installation manual:
 
-Unpack the file DynItemInst_Ikarus.zip to <Gothic II installation path>/System/.
+Unpack the file zip file to <Gothic II installation path>/System/.
 After unpacking there should have been created a subfolder called 
 'DynItemInst_Ikarus' where you can find licence terms, this readme, the dll 
 and two files called 'DynItemInstExternals.d' and 'DynItemInstClasses.d'. 
