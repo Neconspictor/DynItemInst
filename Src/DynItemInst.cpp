@@ -102,10 +102,10 @@ void DynItemInst::hookModule()
 	hookManager->addFunctionHook((LPVOID*)&loadSavegame, loadSavegameHook, moduleDesc);
 	hookManager->addFunctionHook((LPVOID*)&writeSavegame, writeSavegameHook, moduleDesc);
 	hookManager->addFunctionHook((LPVOID*)&oCItemGetValue, oCItemGetValueHook, moduleDesc);
-	hookManager->addFunctionHook((LPVOID*)&zCPar_SymbolTableGetSymbol, zCPar_SymbolTableGetSymbolHook, moduleDesc);
-	hookManager->addFunctionHook((LPVOID*)&zCPar_SymbolTableGetSymbolString, zCPar_SymbolTableGetSymbolStringHook, moduleDesc);
-	hookManager->addFunctionHook((LPVOID*)&zCPar_SymbolTableGetIndex, zCPar_SymbolTableGetIndexHook,  moduleDesc);
-	hookManager->addFunctionHook((LPVOID*)&zCParserGetIndex, zCParserGetIndexHook, moduleDesc);
+	//hookManager->addFunctionHook((LPVOID*)&zCPar_SymbolTableGetSymbol, zCPar_SymbolTableGetSymbolHook, moduleDesc);
+	//hookManager->addFunctionHook((LPVOID*)&zCPar_SymbolTableGetSymbolString, zCPar_SymbolTableGetSymbolStringHook, moduleDesc);
+	//hookManager->addFunctionHook((LPVOID*)&zCPar_SymbolTableGetIndex, zCPar_SymbolTableGetIndexHook,  moduleDesc);
+	//hookManager->addFunctionHook((LPVOID*)&zCParserGetIndex, zCParserGetIndexHook, moduleDesc);
 	hookManager->addFunctionHook((LPVOID*)&createInstance, createInstanceHook, moduleDesc);
 	hookManager->addFunctionHook((LPVOID*)&oCGameLoadGame, oCGameLoadGameHook, moduleDesc);
 	hookManager->addFunctionHook((LPVOID*)&oCGameChangeLevel, oCGameChangeLevelHook, moduleDesc);
@@ -137,7 +137,8 @@ void DynItemInst::unHookModule()
 int DynItemInst::oCItemGetValueHook(void* pThis) {
 	oCItem* item = static_cast<oCItem*>(pThis);
 	ObjectManager* manager = ObjectManager::getObjectManager();
-	if (manager->getDynInstanceId(item) > ObjectManager::INSTANCE_BEGIN) {
+	//if (manager->getDynInstanceId(item) > ObjectManager::INSTANCE_BEGIN) {
+	if (manager->IsModified(item)) {
 		return item->value;
 	}
 	return oCItemGetValue(pThis);
@@ -423,16 +424,19 @@ void DynItemInst::restoreDynamicInstances(oCGame* game) {
 		logStream << "DynItemInst::createInstanceHook: symbol is null! InstanceId: " << instanceId << std::endl;
 		Logger::getLogger()->log(Logger::Info, &logStream, false, true, true);
 	}
+
+	int result = createInstance(pThis, instanceId, source);;
+
 	bool isTarget = symbol && (symbol->filenr == ObjectManager::ZCPAR_SYMBOL_MARK_ID);
 	if (isTarget)
 	{
 		oCItem* item = (oCItem*)source;
 		ObjectManager* manager = ObjectManager::getObjectManager();
 		manager->InitItemWithDynInstance(item, instanceId);	
-		return manager->getDynInstanceId(item);
+		result = manager->getDynInstanceId(item);
 	}
 
-	return createInstance(pThis, instanceId, source);
+	return result;
 }
 
 void DynItemInst::oCGameLoadGameHook(void* pThis, int second, zSTRING const& worldName)

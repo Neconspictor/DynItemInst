@@ -86,13 +86,34 @@ int ObjectManager::createNewInstanceId(oCItem* item) {
 
 	if (old == NULL) return 0;
 
-	int instanceId = INSTANCE_BEGIN - 1;
-	if (nextInstances.empty()) {
+	int* indexCount = (int*)(((BYTE*) parser) + 0x18 + 0x8);
+	int key = *indexCount;
+	/*if (nextInstances.empty()) {
 		instanceId += (static_cast<int>(instanceMap.size()) + 1);
 	} else {
 		instanceId = static_cast<int>(nextInstances.front());
 		nextInstances.pop();
-	}
+	}*/
+
+	typedef void (__thiscall* ZCParSymbolTableInsert) (void*, zCPar_Symbol*);
+	ZCParSymbolTableInsert zCParSymbolTableInsert = (ZCParSymbolTableInsert) 0x007A3F00;
+	std::stringstream ss;
+
+
+	symbol->parent = old->parent;
+	symbol->bitfield = old->bitfield;
+	
+	// Generate unique name
+	ss << old->name.ToChar() << "_" << key;
+	symbol->name = zSTRING(ss.str().c_str());
+	symbol->offset = 0;
+	symbol->next = 0;
+	symbol->content.data_ptr = 0;//parser->GetSymbol(parser->GetIndex("DII_TestConstructor"));
+	symbol->filenr = ZCPAR_SYMBOL_MARK_ID;
+
+	zCParSymbolTableInsert(((BYTE*) parser) + 0x10, symbol);
+	ss << "Index: "<< parser->GetIndex(symbol->name) << std::endl;
+	Logger::getLogger()->log(Logger::Info, &ss, false, true, true);
 
 	DynInstance* instanceItem = new DynInstance();
 	if (IsModified(item))
@@ -101,33 +122,29 @@ int ObjectManager::createNewInstanceId(oCItem* item) {
 		instanceItem->copyUserData(*oldStoreItem);
 	}
 	instanceItem->store(*item);
-	instanceMap.insert(pair<int, DynInstance*>(instanceId, instanceItem));
-	symbol->parent = old->parent;
-	symbol->bitfield = old->bitfield;
-	
-	// Generate unique name
-	std::stringstream ss;
-	ss << old->name.ToChar() << "_" << instanceId;
-	symbol->name = zSTRING(ss.str().c_str());
-	symbol->offset = 0;//0x20C;
-	symbol->next = 0;
-	symbol->content.data_ptr = 0;//parser->GetSymbol(parser->GetIndex("DII_TestConstructor"));
-	symbol->filenr = ZCPAR_SYMBOL_MARK_ID;
+	instanceMap.insert(pair<int, DynInstance*>(key, instanceItem));
 
-	setParentInstanceId(instanceId, parentId);
+	setParentInstanceId(key, parentId);
 
 	instanceItem->setParserSymbolBitfield(symbol->bitfield);
 	instanceItem->setZCPar_SymbolName(symbol->name.ToChar());
-	instanceItem->setInstanceID(instanceId);
+	instanceItem->setInstanceID(key);
 
-	newInstanceToSymbolMap.insert(std::pair<int, zCPar_Symbol*>(instanceId, symbol));
+	newInstanceToSymbolMap.insert(std::pair<int, zCPar_Symbol*>(key, symbol));
 
 	std::string symbolName = symbol->name.ToChar();
 	std::transform(symbolName.begin(), symbolName.end(),symbolName.begin(), ::toupper);
 	nameToSymbolMap.insert(std::pair<std::string, zCPar_Symbol*>(symbolName, symbol));
-	nameToIndexMap.insert(std::pair<std::string, int>(symbolName, instanceId));
+	nameToIndexMap.insert(std::pair<std::string, int>(symbolName, key));
 
-	return instanceId;
+	ss << "indexCount: "<< *indexCount << std::endl;
+	Logger::getLogger()->log(Logger::Info, &ss, false, true, true);
+		ss << "key: "<< key << std::endl;
+	Logger::getLogger()->log(Logger::Info, &ss, false, true, true);
+
+
+
+	return key;
 };
 
 void ObjectManager::createInstanceById(int id, DynInstance* item) {
@@ -328,7 +345,7 @@ zCPar_Symbol* createNewSymbol(ObjectManager::ParserInfo* old)
 	result->bitfield = old->bitfield;
 
 	result->name = zSTRING(old->name.c_str());
-	result->offset = 0;//0x20C;
+	result->offset = 0;
 	result->next = 0;
 	result->content.data_ptr = 0;//parser->GetSymbol(parser->GetIndex("DII_TestConstructor"));
 	result->filenr = ObjectManager::ZCPAR_SYMBOL_MARK_ID;
@@ -574,8 +591,9 @@ bool ObjectManager::hasAdditAssignment(oCItem& item){
 // Provides the id of additional memory for a given oCItem
 int ObjectManager::getAdditId(oCItem& item) {
 	if (item.instanz < 0) return item.instanz;
-	if (getInstanceId(item) >= INSTANCE_BEGIN) return getInstanceId(item);
-	return NULL;
+	//if (getInstanceId(item) >= INSTANCE_BEGIN) return getInstanceId(item);
+	return getInstanceId(item);
+	//return NULL;
 }
 
 // Provides additional Memory for a specific additional memory id
@@ -603,7 +621,8 @@ int ObjectManager::calcAdditKey(bool isHeroItem){
 	if (isHeroItem) {
 		return HERO_ADDIT_BEGIN + (static_cast<int>(keyToAdditMap.size()) +1);
 	}
-	return INSTANCE_BEGIN + (static_cast<int>(keyToAdditMap.size()) + 1);
+	//return INSTANCE_BEGIN + (static_cast<int>(keyToAdditMap.size()) + 1);
+	return (static_cast<int>(keyToAdditMap.size()) + 1);
 };
 
 void ObjectManager::loadWorldObjects(char* filename) {

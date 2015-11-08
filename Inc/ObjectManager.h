@@ -44,7 +44,7 @@ public:
 	/**
 	 * New instance ids will have numbers which will start at this number in ascending order.
 	 */
-	static const int INSTANCE_BEGIN = 5000000;
+	//static const int INSTANCE_BEGIN = 5000000;
 
 	/**
 	 * New additional memory for hero items will have keys with a value beginning at this constant.
