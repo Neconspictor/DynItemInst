@@ -63,6 +63,7 @@ public:
 	struct ParserInfo
 	{
 		int newInstanceId;
+		int oldInstanceId;
 		std::string name;
 		int bitfield;
 		DynInstance* container;
@@ -91,7 +92,7 @@ public:
 	 * \return The list of all oCMobContainers the current oCGame contains.
 	 */
 	std::list<oCMobContainer*>* getMobContainers();
-
+	void changeKeyIfFreeIdAvailable(int* key, int indexCount);
 	/**
 	 * Creates a new oCItem instance which will be initialized with the members of the provided oCItem.
 	 * \param item The item to use for instance creation.
@@ -351,6 +352,16 @@ public:
 	 */
 	bool hasAdditAssignment(oCItem& item);
 
+	bool getIkarusUsed();
+	void setIkarusUsed(bool used);
+	void updateIkarusSymbols();
+
+	void callForAllItems(std::function<void(oCItem*)> func);
+
+	int getInstanceBegin();
+
+	int * getParserInstanceCount();
+
 private:
 
 	/**
@@ -380,6 +391,8 @@ private:
 	std::queue<int> nextAdditKeys;
 
 	std::stringstream logStream;
+	bool ObjectManager::ikarusUsed = false;
+	int ObjectManager::instanceBegin = -1;
 
 private:
 
@@ -397,6 +410,10 @@ private:
 	 */
 	bool initByNewInstanceId(oCItem* item);
 
+	zCPar_Symbol* createNewSymbol(ParserInfo* old);
+	bool addSymbolToSymbolTable(zCPar_Symbol* symbol);
+	DynInstance * createNewInstanceItem(int instanceId);
+
 	/**
 	 * Logs the current status of the provided zCPar_Symbol pointer.
 	 * \param sym The symbol to log.
@@ -407,6 +424,8 @@ private:
 	 * Creates for all registered instances zCPar_Symbols and registers the latter.
 	 */
 	void createParserSymbols();
+
+	zCPar_Symbol * createNewSymbol(int instanceId, zCPar_Symbol * old);
 
 	/**
 	 * Calculates a new key for an AdditMemory object. The argument isHeroItem specifies whether

@@ -68,7 +68,7 @@ public:
 	 * \param instanceId The instance id of the oCItem to be created.
 	 * \return The created item. If no item could be created, NULL will be returned.
 	 */
-	static oCItem* __cdecl  DII_CreateNewItem(int instanceId);
+	static void __cdecl  DII_CreateNewItem(zCPar_Symbol* symbol, int instanceId);
 
 	/**
 	 * An external for creating a new instance id from a given c_item.
@@ -88,13 +88,6 @@ public:
 	static int DII_IsDynamic(oCItem* item);
 
 	/**
-	 * An external for removing a c_item from the current world and deleting it.
-	 * Daedalus syntax: Func void DII_DeleteItem(C_Item item)
-	 * \param item The oCItem to delete
-	 */
-	static void DII_DeleteItem(oCItem* item);
-
-	/**
 	 * An external for getting additional memory of the instance of the given c_item.
 	 * Only for dynamic instances such a memory will be created. If the provided c_item
 	 * hasn't a dynamic instance id, NULL will be set as return result.
@@ -108,6 +101,9 @@ public:
 	 * Provides the version of the library.
 	 */
 	static float DII_GetLibVersion();
+
+	static void DII_IkarusUsed();
+	static void DII_DoStatistics();
 
 public:
 

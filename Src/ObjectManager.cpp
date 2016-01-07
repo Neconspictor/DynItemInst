@@ -40,9 +40,17 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include "api/g2/zcparser.h"
 #include <ocgameExtended.h>
 #include <Logger.h>
+#include <set>
 using namespace std;
 
-ObjectManager* ObjectManager::instanz = 0;
+ObjectManager* ObjectManager::instanz = nullptr;
+
+typedef void(__thiscall* ZCParSymbolTableInsert) (void*, zCPar_Symbol*);
+ZCParSymbolTableInsert zCParSymbolTableInsert = (ZCParSymbolTableInsert)0x007A3F00;
+typedef void(__thiscall* ZCParSymbolTableSetSize)(void*, int);
+ZCParSymbolTableSetSize zCParSymbolTableSetSize = (ZCParSymbolTableSetSize)0x007A4430;
+
+
 
 ObjectManager::ObjectManager()
 {
@@ -58,7 +66,7 @@ zCPar_SymbolTable* zCParserGetSymbolTable(void* parser)
 
 
 ObjectManager* ObjectManager::getObjectManager() {
-	if (instanz == NULL)
+	if (instanz == nullptr)
 	{
 		instanz = new ObjectManager();
 	}
@@ -66,63 +74,57 @@ ObjectManager* ObjectManager::getObjectManager() {
 };
 
 void ObjectManager::release() {
-	if (instanz != NULL) {
+	if (instanz != nullptr) {
 		instanz->releaseInstances();
 		delete instanz;
-		instanz = NULL;
+		instanz = nullptr;
 	}
 };
 
 int ObjectManager::createNewInstanceId(oCItem* item) {
-	if (item == NULL) return 0;
+	if (item == nullptr) return 0;
 
 	//Create new zCPar_Symbol for the newly created instance and register it to gothic.
 	zCParser* parser = zCParser::GetParser();
-	zCPar_Symbol* symbol = new zCPar_Symbol();
-	ZeroMemory(symbol, sizeof(zCPar_Symbol));
 
 	int parentId = getInstanceId(*item);
 	zCPar_Symbol* old = parser->GetSymbol(parentId);
 
-	if (old == NULL) return 0;
+	if (old == nullptr) return 0;
 
-	int* indexCount = (int*)(((BYTE*) parser) + 0x18 + 0x8);
+	int* indexCount = getParserInstanceCount();
 	int key = *indexCount;
-	/*if (nextInstances.empty()) {
-		instanceId += (static_cast<int>(instanceMap.size()) + 1);
-	} else {
-		instanceId = static_cast<int>(nextInstances.front());
-		nextInstances.pop();
-	}*/
 
-	typedef void (__thiscall* ZCParSymbolTableInsert) (void*, zCPar_Symbol*);
-	ZCParSymbolTableInsert zCParSymbolTableInsert = (ZCParSymbolTableInsert) 0x007A3F00;
-	std::stringstream ss;
+	if (instanceBegin < 0)
+	{
+		instanceBegin = key;
+	}
+	/*
+	changeKeyIfFreeIdAvailable(&key, *indexCount);
+	logStream << "Tried to change key." << endl;
+	Logger::getLogger()->log(Logger::Info, &logStream, false, true, true);
+	*/
 
 
-	symbol->parent = old->parent;
-	symbol->bitfield = old->bitfield;
-	
-	// Generate unique name
-	ss << old->name.ToChar() << "_" << key;
-	symbol->name = zSTRING(ss.str().c_str());
-	symbol->offset = 0;
-	symbol->next = 0;
-	symbol->content.data_ptr = 0;//parser->GetSymbol(parser->GetIndex("DII_TestConstructor"));
-	symbol->filenr = ZCPAR_SYMBOL_MARK_ID;
+	zCPar_Symbol* symbol = createNewSymbol(key, old);
 
-	zCParSymbolTableInsert(((BYTE*) parser) + 0x10, symbol);
-	ss << "Index: "<< parser->GetIndex(symbol->name) << std::endl;
-	Logger::getLogger()->log(Logger::Info, &ss, false, true, true);
+	if (!addSymbolToSymbolTable(symbol))
+	{
+		if (*indexCount < key) *indexCount = key;
+		if (*indexCount == key) *indexCount += 1;
+	};
 
-	DynInstance* instanceItem = new DynInstance();
+	DynInstance* instanceItem = createNewInstanceItem(key);
 	if (IsModified(item))
 	{
 		DynInstance* oldStoreItem = getInstanceItem(parentId);
 		instanceItem->copyUserData(*oldStoreItem);
+		if (instanceBegin > parentId)
+		{
+			instanceBegin = parentId;
+		}
 	}
 	instanceItem->store(*item);
-	instanceMap.insert(pair<int, DynInstance*>(key, instanceItem));
 
 	setParentInstanceId(key, parentId);
 
@@ -130,19 +132,17 @@ int ObjectManager::createNewInstanceId(oCItem* item) {
 	instanceItem->setZCPar_SymbolName(symbol->name.ToChar());
 	instanceItem->setInstanceID(key);
 
-	newInstanceToSymbolMap.insert(std::pair<int, zCPar_Symbol*>(key, symbol));
+	newInstanceToSymbolMap.insert(pair<int, zCPar_Symbol*>(key, symbol));
 
-	std::string symbolName = symbol->name.ToChar();
-	std::transform(symbolName.begin(), symbolName.end(),symbolName.begin(), ::toupper);
-	nameToSymbolMap.insert(std::pair<std::string, zCPar_Symbol*>(symbolName, symbol));
-	nameToIndexMap.insert(std::pair<std::string, int>(symbolName, key));
+	string symbolName = symbol->name.ToChar();
+	//transform(symbolName.begin(), symbolName.end(), symbolName.begin(), ::toupper);
+	nameToSymbolMap.insert(pair<string, zCPar_Symbol*>(symbolName, symbol));
+	nameToIndexMap.insert(pair<string, int>(symbolName, key));
 
-	ss << "indexCount: "<< *indexCount << std::endl;
-	Logger::getLogger()->log(Logger::Info, &ss, false, true, true);
-		ss << "key: "<< key << std::endl;
-	Logger::getLogger()->log(Logger::Info, &ss, false, true, true);
-
-
+	logStream << "ObjectManager::createNewInstanceId(): indexCount = " << *indexCount << endl;
+	Logger::getLogger()->log(Logger::Info, &logStream, false, true, true);
+	logStream << "ObjectManager::createNewInstanceId(): key = " << key << endl;
+	Logger::getLogger()->log(Logger::Info, &logStream, false, true, true);
 
 	return key;
 };
@@ -153,22 +153,39 @@ void ObjectManager::createInstanceById(int id, DynInstance* item) {
 	it = instanceMap.find(id);
 	if (it != instanceMap.end())
 	{
-		logStream << "Warning: instance id already exists! Nothing will be created." << std::endl;
-		Logger::getLogger()->log(Logger::Info, &logStream, false, true, true);
+		logStream << "Warning: instance id already exists! Nothing will be created." << endl;
+		Logger::getLogger()->log(Logger::Info, &logStream, true, true, true);
 		return;
 	}
 
 	instanceMap.insert(pair<int, DynInstance*>(id, item));
+
+	if (instanceBegin < 0 || instanceBegin > id)
+	{
+		instanceBegin = id;
+	}
 }
 
 void ObjectManager::releaseInstances() {
+	instanceBegin = -1;
+
+	//release all allocated parser symbols and update parser symbol table
+	zCParser* parser = zCParser::GetParser();
+	zCPar_SymbolTable* currSymbolTable = zCParserGetSymbolTable(parser);
+	int allocatedSize = instanceMap.size();
+	int* symTableSize = getParserInstanceCount();
+	*symTableSize = *symTableSize - allocatedSize;
+	logStream << "ObjectManager::releaseInstances(): allocatedSize = " << allocatedSize << endl;
+	Logger::getLogger()->log(Logger::Info, &logStream, false, true, true);
+	logStream << "ObjectManager::releaseInstances(): symTableSize = " << *symTableSize << endl;
+	Logger::getLogger()->log(Logger::Info, &logStream, false, true, true);
 
 	// Release all allocated memory referenced by the instance map
 	map<int, DynInstance*>::iterator it;
 	for (it = instanceMap.begin(); it != instanceMap.end(); ++it) {
 		DynInstance* item = (*it).second;
 		delete item;
-		(*it).second = 0;
+		(*it).second = nullptr;
 	}
 
 	// clear all data structures
@@ -178,7 +195,6 @@ void ObjectManager::releaseInstances() {
 	newInstanceToSymbolMap.clear();
 	nameToIndexMap.clear();
 	nameToSymbolMap.clear();
-
 };
 
 bool ObjectManager::assignInstanceId(oCItem* item, int id){
@@ -216,7 +232,7 @@ bool ObjectManager::initByNewInstanceId(oCItem* item) {
 NULL will be returned.
 */
 int ObjectManager::getDynInstanceId(oCItem* item){
-	if (item == NULL) return NULL;
+	if (item == nullptr) return NULL;
 	int* pointer = reinterpret_cast<int*>((BYTE*)item + 0x330);
 	int instanceId = *pointer;
 	map<int, DynInstance*>::iterator it;
@@ -244,7 +260,7 @@ DynInstance* ObjectManager::getInstanceItem(int instanceId){
 	it = instanceMap.find(instanceId);
 	if (it == instanceMap.end())
 	{
-		return NULL;		
+		return nullptr;		
 	}
 	return (*it).second;
 }; 
@@ -334,26 +350,124 @@ std::list<oCMobContainer*>* ObjectManager::getMobContainers() {
 	return containerList;
 };
 
+void ObjectManager::changeKeyIfFreeIdAvailable(int* key, int indexCount)
+{
+	set<int> usedIds;
+	auto func = [&](oCItem* itm)
+	{
+		if (itm == nullptr) return;
+		int instanceId = getInstanceId(*itm);
+		if (instanceId >= instanceBegin)
+		{
+			usedIds.insert(instanceId);
+		}
+	};
 
-zCPar_Symbol* createNewSymbol(ObjectManager::ParserInfo* old)
+	//call the collection function func for all items in the world
+	callForAllItems(func);
+
+	for (auto it = usedIds.begin(); it != usedIds.end(); ++it)
+	{
+		logStream << "usedId: " << *it << endl;
+		Logger::getLogger()->log(Logger::Info, &logStream, false, true, true);
+	}
+
+	auto first = usedIds.begin();
+	auto second = ++usedIds.begin();
+	int diff;
+	bool foundId = false;
+	for (; second != usedIds.end() && (first != usedIds.end()); ++first, ++second)
+	{
+		diff = *second - *first;
+		logStream << "first: " << *first << endl;
+		logStream << "second: " << *second << endl;
+		Logger::getLogger()->log(Logger::Info, &logStream, false, true, true);
+		if (diff <= 0)
+		{
+			logStream << "ObjectManager::createNewInstanceId: strange diff: " << diff << endl;
+			Logger::getLogger()->log(Logger::Info, &logStream, false, true, true);
+		}
+		else if (diff > 1)
+		{
+			//there exists a dyn. instance id with no item using it. We gonna reuse it.
+			*key = *first + 1;
+			foundId = true;
+			break;
+		}
+	}
+
+	//compare last element of usedIds with the last index if no usable id was previously found
+	if (usedIds.begin() != usedIds.end() && !foundId)
+	{
+		int lastUsedId = *(--usedIds.end());
+		int lastIndex = indexCount - 1;
+		logStream << "lastUsedId: " << lastUsedId << endl;
+		logStream << "lastIndex: " << lastIndex << endl;
+		Logger::getLogger()->log(Logger::Info, &logStream, false, true, true);
+		if (lastIndex - lastUsedId >= 1)
+		{
+			*key = lastUsedId + 1;
+		}
+	}
+};
+
+
+
+
+zCPar_Symbol* ObjectManager::createNewSymbol(ParserInfo* old)
 {
 	zCParser* parser = zCParser::GetParser();
+	zCPar_Symbol* ref = parser->GetSymbol(old->oldInstanceId);
+	zCPar_SymbolTable* currSymbolTable = zCParserGetSymbolTable(parser);
+	zCPar_Symbol* result = currSymbolTable->GetSymbol(old->name.c_str());
+	if (result) { return result; }
+
 	zCPar_Symbol* parent = parser->GetSymbol("C_ITEM");
 
-	zCPar_Symbol* result = new zCPar_Symbol();
-	result->parent = parent;
-	result->bitfield = old->bitfield;
-
+	result = new zCPar_Symbol();
+	result->parent = ref->parent;
+	result->bitfield = ref->bitfield;
 	result->name = zSTRING(old->name.c_str());
 	result->offset = 0;
-	result->next = 0;
-	result->content.data_ptr = 0;//parser->GetSymbol(parser->GetIndex("DII_TestConstructor"));
-	result->filenr = ObjectManager::ZCPAR_SYMBOL_MARK_ID;
-	result->line = 0;
-	result->line_anz = 0;
-	result->pos_beg = 0;
-	result->pos_anz = 0;
-	
+	result->next = ref->next;
+	result->content.data_ptr = 0;//ref->content.data_ptr;
+	result->filenr = ref->filenr;//ZCPAR_SYMBOL_MARK_ID;
+	result->line = ref->line;
+	result->line_anz = ref->line_anz;
+	result->pos_beg = ref->pos_beg;
+	result->pos_anz = ref->pos_anz;
+
+	return result;
+}
+
+bool ObjectManager::addSymbolToSymbolTable(zCPar_Symbol* symbol)
+{
+	zCParser* parser = zCParser::GetParser();
+	int* indexCount = getParserInstanceCount();
+	int countBefore = *indexCount;
+	zCParSymbolTableInsert(((BYTE*)parser) + 0x10, symbol);
+	logStream << "ObjectManager::addSymbolToSymbolTable(): Name = " << symbol->name.ToChar() << endl;
+	logStream << "ObjectManager::addSymbolToSymbolTable(): Index = " << parser->GetIndex(symbol->name) << endl;
+	logStream << "ObjectManager::addSymbolToSymbolTable(): countBefore = " << countBefore << endl;
+	logStream << "ObjectManager::addSymbolToSymbolTable(): index count = " << *indexCount << endl;
+	Logger::getLogger()->log(Logger::Info, &logStream, false, true, true);
+
+	// Some Ikarus functions need the correct length of the current symbol table.
+	updateIkarusSymbols();
+
+	return countBefore != *indexCount;
+}
+
+
+DynInstance* ObjectManager::createNewInstanceItem(int instanceId)
+{
+	DynInstance* result = getInstanceItem(instanceId);
+	if (!result)
+	{
+		result = new DynInstance();
+		instanceMap.insert(pair<int, DynInstance*>(instanceId, result));
+	}
+
 	return result;
 };
 
@@ -391,23 +505,88 @@ void ObjectManager::logSymbolData(zCPar_Symbol* sym)
 
 void ObjectManager::createParserSymbols()
 {
-	std::vector<ParserInfo>::iterator it;
+	vector<ParserInfo>::iterator it;
 	for (it = indexZCParSymbolNameMap.begin(); it != indexZCParSymbolNameMap.end(); ++it)
 	{
 		ParserInfo info = *it;
 		zCPar_Symbol* symbol = createNewSymbol(&info);
-		int index = zCParser::GetParser()->GetIndex(symbol->name);
-		index = info.newInstanceId;
+		zCParser* parser = zCParser::GetParser();
+		if (!addSymbolToSymbolTable(symbol))
+		{
+			logStream << "adding wasn't successful: " << symbol->name.ToChar() << endl;
+			Logger::getLogger()->log(Logger::Warning, &logStream, false, true, true);
+			zCPar_SymbolTable* currSymbolTable = zCParserGetSymbolTable(parser);
+			int index = currSymbolTable->GetIndex(info.name.c_str());
+			int* symTableSize = getParserInstanceCount();
+			logStream << "index: " << index << endl;
+			logStream << "symTableSize: " << *symTableSize << endl;
+			Logger::getLogger()->log(Logger::Info, &logStream, false, true, true);
+			if (index >= *symTableSize)
+			{
+				*symTableSize = index + 1;
+				updateIkarusSymbols();
+				logStream << "ObjectManager::createParserSymbols(): symTableSize = " << *symTableSize << endl;
+				Logger::getLogger()->log(Logger::Info, &logStream, false, true, true);
+			}
+		}
+
+		int index = parser->GetIndex(symbol->name);
+
+		if (index != info.newInstanceId)
+		{
+			logStream << "ObjectManager::createParserSymbols(): index and newInstanceId don't match!" << endl;
+			logStream << "index: " << index << ", newInstanceId: " << info.newInstanceId << endl;
+			Logger::getLogger()->log(Logger::Warning, &logStream, false, true, true);
+		}
+
 		int newInstanceId = info.newInstanceId;
 		updateContainerItem(&info);
-		newInstanceToSymbolMap.insert(std::pair<int, zCPar_Symbol*>(newInstanceId, symbol));
-		std::string symbolName = symbol->name.ToChar();
-		std::transform(symbolName.begin(), symbolName.end(),symbolName.begin(), ::toupper);
-		nameToSymbolMap.insert(std::pair<std::string, zCPar_Symbol*>(symbolName, symbol));
-		nameToIndexMap.insert(std::pair<std::string, int>(symbolName, index));
+		newInstanceToSymbolMap.insert(pair<int, zCPar_Symbol*>(newInstanceId, symbol));
+		string symbolName = symbol->name.ToChar();
+		transform(symbolName.begin(), symbolName.end(), symbolName.begin(), ::toupper);
+		nameToSymbolMap.insert(pair<string, zCPar_Symbol*>(symbolName, symbol));
+		nameToIndexMap.insert(pair<string, int>(symbolName, index));
 		//zCPar_Symbol* result = zCParser::GetParser()->GetSymbol(index);
 		//logSymbolData(result);
 	}
+}
+
+zCPar_Symbol* ObjectManager::createNewSymbol(int instanceId, zCPar_Symbol* old)
+{
+
+	zCPar_Symbol* symbol;
+	zCParser* parser = zCParser::GetParser();
+	//zCPar_Symbol* ref = parser->GetSymbol(parser->GetIndex("ItMw_1h_vlk_dagger"));
+
+	symbol = parser->GetSymbol(instanceId);
+
+	// Symbol already exists?
+	if (symbol) return symbol;
+
+	symbol = new zCPar_Symbol();
+	ZeroMemory(symbol, sizeof(zCPar_Symbol));
+
+	stringstream name; name << "DII_" << instanceId;
+	symbol->name = zSTRING(name.str().c_str());
+	symbol->parent = old->parent;
+	symbol->bitfield = old->bitfield;
+	symbol->offset = 0;
+	symbol->content.data_ptr = 0;
+	/*symbol->next = old->next;
+	symbol->content.data_ptr = 0;//ref->content.data_ptr;
+	symbol->filenr = old->filenr;//ZCPAR_SYMBOL_MARK_ID;
+	symbol->line = old->line;
+	symbol->line_anz = old->line_anz;
+	symbol->pos_beg = old->pos_beg;
+	symbol->pos_anz = old->pos_anz;*/
+	/*symbol->parent = old->parent;
+	symbol->bitfield = old->bitfield;
+	symbol->offset = 0;
+	symbol->next = nullptr;
+	symbol->content.data_ptr = nullptr; DII_TestConstructor
+	symbol->filenr = ZCPAR_SYMBOL_MARK_ID;*/
+
+	return symbol;
 };
 
 
@@ -724,4 +903,123 @@ void ObjectManager::getHeroAddits(std::list<AdditMemory*>& list) {
 			list.push_back(it->second);
 		}
 	}
+}
+
+bool ObjectManager::getIkarusUsed()
+{
+	return ikarusUsed;
+}
+
+void ObjectManager::setIkarusUsed(bool used)
+{
+	ikarusUsed = used;
+}
+
+void ObjectManager::updateIkarusSymbols()
+{
+	// Some Ikarus functions need the correct length of the current symbol table.
+	// MEM_Reinit_Parser() updates all involved references.
+	if (ikarusUsed)
+	{
+		zSTRING arg("MEM_ReinitParser");
+
+		//CallFunc needs uppercase string
+		zCParser::GetParser()->CallFunc(arg.Upper());
+	}
+}
+
+void ObjectManager::callForAllItems(function<void(oCItem*)> func)
+{
+	zCWorld* world = oCGame::GetGame()->GetWorld();
+	zCListSort<oCNpc>* npcList = world->GetNpcList();
+	std::list<oCItem*> tempList;
+	std::list<oCItem*>::iterator it;
+
+	while (npcList != NULL) {
+		oCNpc* npc = npcList->GetData();
+		if (npc == NULL) {
+			npcList = npcList->GetNext();
+			continue;
+		}
+
+		oCNpcInventory* inventory = npc->GetInventory();
+		if (inventory == NULL) {
+			npcList = npcList->GetNext();
+			continue;
+		}
+
+		inventory->UnpackAllItems();
+		zCListSort<oCItem>* list = reinterpret_cast<zCListSort<oCItem>*>(inventory->inventory_data);
+		while (list != NULL) {
+			oCItem* item = list->GetData();
+			if (item != NULL) tempList.push_back(item);
+
+			list = list->GetNext();
+		}
+		npcList = npcList->GetNext();
+
+		for (it = tempList.begin(); it != tempList.end(); ++it)
+		{
+			func(*it);
+		}
+		tempList.clear();
+	}
+
+	tempList.clear();
+	zCListSort<oCItem>* itemList = world->GetItemList();
+	while (itemList != NULL) {
+		oCItem* item = itemList->GetData();
+		if (item != NULL)
+		{
+			tempList.push_back(item);
+		}
+		itemList = itemList->GetNext();
+	}
+
+	it = tempList.begin();
+	for (; it != tempList.end(); ++it)
+	{
+		func(*it);
+	}
+	tempList.clear();
+
+	list<oCMobContainer*>* containerList = getMobContainers();
+	auto contIt = containerList->begin();
+	for (; contIt != containerList->end(); ++contIt)
+	{
+		oCMobContainer* container = *contIt;
+		int address = (int)container->containList_next;
+		zCListSort<oCItem>* listAddress = reinterpret_cast<zCListSort<oCItem>*>(address);
+		zCListSort<oCItem>* list = listAddress;
+
+		while (list != NULL) {
+			oCItem* item = list->GetData();
+			if (item != NULL) {
+				tempList.push_back(item);
+			}
+			list = list->GetNext();
+		}
+
+		it = tempList.begin();
+		for (; it != tempList.end(); ++it)
+		{
+			func(*it);
+		}
+		tempList.clear();
+	}
+
+	// containerList has to be deleted manually.
+	containerList->clear();
+	delete containerList;
+}
+
+int ObjectManager::getInstanceBegin()
+{
+	return instanceBegin;
+}
+
+int* ObjectManager::getParserInstanceCount()
+{
+	zCParser* parser = zCParser::GetParser();
+	return (int*)(((BYTE*)parser) + 0x18 + 0x8);
 }

@@ -27,15 +27,17 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 /////////////////////////////////////////////////////////////////////////////*/
 
 
+#include <api/g2/zcparser.h>
 #include "api/g2/ocitem.h"
 #include <api/g2/ocgame.h>
 #include <ObjectManager.h>
 #include <api/g2/oCObjectFactory.h>
 #include <Logger.h>
 #include <DaedalusExports.h>
+#include <set>
 
 
-const float DaedalusExports::LIB_VERSION = 1.01f;
+const float DaedalusExports::LIB_VERSION = 1.02f;
 
 DaedalusExports::DaedalusExports() : Module()
 {
@@ -57,10 +59,40 @@ void DaedalusExports::unHookModule()
 }
 
 
-oCItem* __cdecl DaedalusExports::DII_CreateNewItem(int instanceId) // Func VOID CreateNewItem(VAR INT instanceId)
+void __cdecl DaedalusExports::DII_CreateNewItem(zCPar_Symbol* symbol, int instanceId) // Func void DII_CreateNewItem(var C_Item item, VAR INT instanceId)
 {
-	oCItem* result = oCObjectFactory::GetFactory()->CreateItem(instanceId);
-	return result;
+	zCParser* parser = zCParser::GetParser();
+	int index = parser->GetIndex(symbol->name);
+	oCItem* item = (oCItem*)symbol->offset;
+
+	// Check if provided instance id is valid
+	zCPar_Symbol* newInstanceSym = parser->GetSymbol(instanceId);
+
+	if (newInstanceSym == nullptr)
+	{
+		logStream << "newInstanceSym is Null! No item will be created!" << std::endl;
+		Logger::getLogger()->log(Logger::Warning, &logStream, false, true, true);
+		return;
+	}
+
+	// Create new item and store it in global variable 'ITEM'
+	if (item != nullptr)
+	{
+
+		int refCtr = *(int*)((BYTE*)item + 0x4);
+		logStream << "refCtr: " << refCtr << std::endl;
+		Logger::getLogger()->log(Logger::Warning, &logStream, false, true, true);
+		typedef void(__thiscall* OCItemInitByScript)(void* pThis, int, int);
+		OCItemInitByScript oCItemInitByScript = (OCItemInitByScript)0x00711BD0;
+		oCItemInitByScript(item, instanceId, refCtr);
+	}
+	else
+	{
+		item = oCObjectFactory::GetFactory()->CreateItem(instanceId);
+	}
+
+	// update the c_item
+	symbol->offset = (int)item;
 }
 
 
@@ -85,7 +117,6 @@ int DaedalusExports::DII_CreateNewInstance(oCItem* item) //Func int CreateNewIte
 
 int DaedalusExports::DII_IsDynamic(oCItem* item) // Func DII_IsDynamic(VAR C_ITEM item)
 {
-
 	if (item == NULL) {return FALSE;}
 
 	bool modified = ObjectManager::getObjectManager()->IsModified(item);
@@ -102,13 +133,6 @@ void oCItemOperatorDelete(oCItem* item)
 	XCALL(0x007144A0);
 }
 
-void DaedalusExports::DII_DeleteItem(oCItem* item)
-{
-
-	if (item == NULL) {return;}
-	oCGame::GetGame()->GetWorld()->RemoveVob(item);
-	oCItemOperatorDelete(item);
-}
 
 DII_UserData::Data* DaedalusExports::DII_GetUserData(int instanceId) // Func DII_UserData DII_GetUserData(var int instanceId)
 {
@@ -127,4 +151,56 @@ DII_UserData::Data* DaedalusExports::DII_GetUserData(int instanceId) // Func DII
 float DaedalusExports::DII_GetLibVersion()
 {
 	return LIB_VERSION;
+}
+
+void DaedalusExports::DII_IkarusUsed()	// Func void DII_IkarusUsed()
+{
+	ObjectManager::getObjectManager()->setIkarusUsed(true);
+}
+
+void DaedalusExports::DII_DoStatistics()
+{
+	ObjectManager* manager = ObjectManager::getObjectManager();
+	Logger* logger = Logger::getLogger();
+	int instanceBegin = manager->getInstanceBegin();
+
+	if (instanceBegin < 0)
+	{
+		logStream << "Nothing to do, instanceBegin < 0!" << std::endl;
+		logger->log(Logger::Info, &logStream, false, true, true);
+		return;
+	}
+
+	int dynamicItemCount = 0;
+	auto compare = [](oCItem* first, oCItem* second)->bool {
+		return first < second;
+	};
+
+	std::set<oCItem*, std::function<bool(oCItem*, oCItem*)>> itemSet(compare);
+
+	auto func = [&](oCItem* item) ->void {
+		if (item == nullptr) return;
+
+		int id = manager->getInstanceId(*item);
+		if (id >= instanceBegin)
+		{
+			auto it = itemSet.find(item);
+			if (*it == nullptr)
+			{
+				itemSet.insert(item);
+				++dynamicItemCount;
+
+				logStream << "Found item with dynamic instance id: " << id << std::endl;
+				int refCtr = *(int*)((BYTE*)item + 0x4);
+				logStream << "refCtr: " << refCtr << std::endl;
+				logger->log(Logger::Info, &logStream, false, true, true);
+
+			}
+		}
+	};
+
+	manager->callForAllItems(func);
+
+	logStream << "Statistics: " << dynamicItemCount << " items have a dynamic instance id." << std::endl;
+	logger->log(Logger::Info, &logStream, false, true, true);
 }

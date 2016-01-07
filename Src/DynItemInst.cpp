@@ -200,9 +200,11 @@ DynItemInst::~DynItemInst()
 
  void DynItemInst::loadSavegameHook(void* pThis,int saveGameSlotNumber, int b)
 {   
+	saveGameIsLoading = true;
 	loadSavegame(pThis, saveGameSlotNumber, b);
 	loadDynamicInstances();
 	initAdditMemory();
+	saveGameIsLoading = false;
 };
 
 
@@ -413,13 +415,18 @@ void DynItemInst::restoreDynamicInstances(oCGame* game) {
 	tempList.clear();
 
 	DynItemInst::denyMultiSlot = false;
+}
+
+bool DynItemInst::isSaveGameLoading()
+{
+	return saveGameIsLoading;
 };
 
 
  int DynItemInst::createInstanceHook(void* pThis, int instanceId, void* source)
 {
 	zCPar_Symbol* symbol = zCParser::GetParser()->GetSymbol(instanceId);
-	if (symbol == NULL)
+	if (symbol == nullptr)
 	{
 		logStream << "DynItemInst::createInstanceHook: symbol is null! InstanceId: " << instanceId << std::endl;
 		Logger::getLogger()->log(Logger::Info, &logStream, false, true, true);
@@ -427,7 +434,8 @@ void DynItemInst::restoreDynamicInstances(oCGame* game) {
 
 	int result = createInstance(pThis, instanceId, source);;
 
-	bool isTarget = symbol && (symbol->filenr == ObjectManager::ZCPAR_SYMBOL_MARK_ID);
+	int instanceBegin = ObjectManager::getObjectManager()->getInstanceBegin();
+	bool isTarget = symbol && (instanceId >= instanceBegin) && (instanceBegin > 0);
 	if (isTarget)
 	{
 		oCItem* item = (oCItem*)source;

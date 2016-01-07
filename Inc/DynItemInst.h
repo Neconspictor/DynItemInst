@@ -216,6 +216,8 @@ public:
 	 */
 	static void restoreDynamicInstances(oCGame* game);
 
+	static bool isSaveGameLoading();
+
     /*! @copydoc Module::hookModule()
 	 */
 	virtual void hookModule() override;
@@ -266,6 +268,7 @@ private:
 
 	static bool denyMultiSlot;
 	static bool levelChange;
+	static bool saveGameIsLoading;
 
 };
 
