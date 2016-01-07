@@ -30,9 +30,9 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include "Util.h"
 #include <MinHook.h>
 #ifdef _DEBUG
-	#pragma comment (lib, "libMinHook-x86-v90-mdd.lib")
+	#pragma comment (lib, "libMinHook-x86-v140-mdd.lib")
 #else
-	#pragma comment (lib, "libMinHook-x86-v90-md.lib")
+	#pragma comment (lib, "libMinHook-x86-v140-md.lib")
 #endif
 #include <string>
 #include <DynItemInst.h>

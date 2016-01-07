@@ -278,7 +278,7 @@ void ObjectManager::saveNewInstances(char* directoryPath, char* filename) {
 
 void ObjectManager::loadNewInstances(char* filename) {
 	ifstream ifs(filename);
-	if (ifs == NULL) {
+	if (ifs.fail()) {
 		return;
 	}
 
@@ -627,7 +627,7 @@ int ObjectManager::calcAdditKey(bool isHeroItem){
 
 void ObjectManager::loadWorldObjects(char* filename) {
 	ifstream ifs(filename);
-	if (ifs == NULL) {
+	if (ifs.fail()) {
 		logStream << "ObjectManager::loadWorldObjects: Warning: File was not found!" << std::endl;
 		logStream << "ObjectManager::loadWorldObjects: File name : " << filename << std::endl;
 		Logger::getLogger()->log(Logger::Warning, &logStream, false, true, true);
@@ -650,7 +650,7 @@ void ObjectManager::loadWorldObjects(char* filename) {
 
 void ObjectManager::loadHeroData(char* filename) {
 	ifstream ifs(filename);
-	if (ifs == NULL) {
+	if (ifs.fail()) {
 		//writeToConsole("ERROR loadHeroData: file was not found!");
 		return;
 	}

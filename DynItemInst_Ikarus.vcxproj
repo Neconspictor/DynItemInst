@@ -55,13 +55,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v90</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v90</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -76,14 +76,14 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>.\MinHook\include;.\G2ExtSDK;.\boost_1_42_0;.\Inc;$(IncludePath)</IncludePath>
+    <IncludePath>.\MinHook\include;.\G2ExtSDK;.\boost_1_59_0;.\Inc;$(IncludePath)</IncludePath>
     <LibraryPath>.\MinHook\lib;$(LibraryPath)</LibraryPath>
     <TargetName>DynItemInst_G2Ext</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>
     </LinkIncremental>
-    <IncludePath>.\MinHook\include;.\G2ExtSDK;.\boost_1_42_0;.\Inc;$(IncludePath)</IncludePath>
+    <IncludePath>.\MinHook\include;.\G2ExtSDK;.\boost_1_59_0;.\Inc;$(IncludePath)</IncludePath>
     <LibraryPath>.\MinHook\lib;$(LibraryPath)</LibraryPath>
     <TargetName>DynItemInst_Ikarus</TargetName>
   </PropertyGroup>
@@ -102,7 +102,7 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>.\boost_1_42_0\libs\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>.\boost_1_59_0\bin\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>libboost_serialization-vc90-mt-gd-1_42.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>exports.def</ModuleDefinitionFile>
     </Link>
@@ -121,8 +121,8 @@
       </EnableCOMDATFolding>
       <OptimizeReferences>
       </OptimizeReferences>
-      <AdditionalLibraryDirectories>.\boost_1_42_0\libs\release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libboost_serialization-vc90-mt-1_42.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>.\boost_1_59_0\bin\release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libboost_serialization-vc140-mt-1_59.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>exports.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>

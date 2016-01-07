@@ -38,7 +38,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include "api/interface.h"
 
 #include <vector>
-#include <hash_map>
+#include <unordered_map>
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -225,7 +225,7 @@ typedef HRESULT (__stdcall *G2EXT_PLUGIN_VERSIONCHK_FUNC)	(int&, int&, G2EXT_DLL
 #define G2EXT_PLUGIN_INIT_FUNC_NAME		"G2Ext_PluginInit"
 #define G2EXT_PLUGIN_PREPARE_FUNC_NAME	"G2Ext_PluginPrepare"
 
-typedef stdext::hash_map<UINT, UINT>	hmKey;
+typedef std::unordered_map<UINT, UINT>	hmKey;
 typedef std::list<oCItem*>				lstItem;
 typedef std::list<oCNpc*>				lstNpc;
 typedef std::list<zCVob*>				lstVob;
