@@ -5,6 +5,6 @@ EXPORTS
 	DII_CreateNewItem
 	DII_CreateNewInstance
 	DII_IsDynamic
-	DII_DeleteItem
 	DII_GetUserData
 	DII_GetLibVersion
+	DII_UpdateInstance

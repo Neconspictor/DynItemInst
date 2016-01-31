@@ -26,6 +26,7 @@
     <ClInclude Include="Inc\oCMobContainer.h" />
     <ClInclude Include="Inc\Util.h" />
     <ClInclude Include="Inc\zCOptionExtended.h" />
+    <ClInclude Include="Inc\zCPar_SymbolTable.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\DllMain.cpp" />

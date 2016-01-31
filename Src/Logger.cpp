@@ -36,7 +36,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 
 class zERROR;
 
-Logger* Logger::instance = NULL;
+Logger* Logger::instance = nullptr;
 std::string Logger::logFileName;
 
 typedef int (__thiscall* ZERROR_REPORT)(void* pThis, int errorType, int, zSTRING const &, signed char, UINT, int, char*, char*);
@@ -54,7 +54,7 @@ Logger::~Logger()
 
 Logger* Logger::getLogger()
 {
-	if (instance == NULL)
+	if (instance == nullptr)
 	{
 		instance = new Logger();	
 		std::string logFilePath = util::getModuleDirectory(util::getModuleHandle()) + std::string("\\") 

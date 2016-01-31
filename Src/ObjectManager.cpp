@@ -41,15 +41,10 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <ocgameExtended.h>
 #include <Logger.h>
 #include <set>
+#include <zCPar_SymbolTable.h>
 using namespace std;
 
 ObjectManager* ObjectManager::instanz = nullptr;
-
-typedef void(__thiscall* ZCParSymbolTableInsert) (void*, zCPar_Symbol*);
-ZCParSymbolTableInsert zCParSymbolTableInsert = (ZCParSymbolTableInsert)0x007A3F00;
-typedef void(__thiscall* ZCParSymbolTableSetSize)(void*, int);
-ZCParSymbolTableSetSize zCParSymbolTableSetSize = (ZCParSymbolTableSetSize)0x007A4430;
-
 
 
 ObjectManager::ObjectManager()
@@ -58,10 +53,10 @@ ObjectManager::ObjectManager()
 	this->nextInstances = std::queue<int>();
 };
 
-zCPar_SymbolTable* zCParserGetSymbolTable(void* parser)
+g2ext_extended::zCPar_SymbolTable* zCParserGetSymbolTable(void* parser)
 {
 	BYTE* pointer = ((BYTE*)parser) + 0x10;
-	return (zCPar_SymbolTable*)pointer;
+	return (g2ext_extended::zCPar_SymbolTable*)pointer;
 }
 
 
@@ -171,7 +166,7 @@ void ObjectManager::releaseInstances() {
 
 	//release all allocated parser symbols and update parser symbol table
 	zCParser* parser = zCParser::GetParser();
-	zCPar_SymbolTable* currSymbolTable = zCParserGetSymbolTable(parser);
+	g2ext_extended::zCPar_SymbolTable* currSymbolTable = zCParserGetSymbolTable(parser);
 	int allocatedSize = instanceMap.size();
 	int* symTableSize = getParserInstanceCount();
 	*symTableSize = *symTableSize - allocatedSize;
@@ -233,11 +228,10 @@ NULL will be returned.
 */
 int ObjectManager::getDynInstanceId(oCItem* item){
 	if (item == nullptr) return NULL;
-	int* pointer = reinterpret_cast<int*>((BYTE*)item + 0x330);
-	int instanceId = *pointer;
+	int instanceId = getInstanceId(*item);
 	map<int, DynInstance*>::iterator it;
 	it = instanceMap.find(instanceId);
-	if (it == instanceMap.end()) { return NULL;}
+	if (it == instanceMap.end()){return NULL;}
 	return instanceId;
 }
 
@@ -246,8 +240,7 @@ void ObjectManager::setDynInstanceId(oCItem* item, int id){
 	it = instanceMap.find(id);
 	if (it != instanceMap.end())
 	{
-		int* pointer = reinterpret_cast<int*>((BYTE*)item + 0x330);
-		*pointer = id;
+		setInstanceId(item, id);
 	} else
 	{
 		logStream << "ObjectManager::setInstanceId: Warning: parameter id has no assigned index. Nothing will be done." << std::endl;
@@ -317,6 +310,7 @@ void ObjectManager::loadNewInstances(char* filename) {
 		info.name = storeItem->getZCPar_SymbolName();
 		info.bitfield = storeItem->getParserSymbolBitfield();
 		info.newInstanceId = id;
+		info.oldInstanceId = storeItem->getParentInstanceId();
 		info.container = item;
 		indexZCParSymbolNameMap.push_back(info);
 	}
@@ -335,10 +329,10 @@ std::list<oCMobContainer*>* ObjectManager::getMobContainers() {
 	zCWorld* world = oCGame::GetGame()->GetWorld();
 	zCListSort<zCVob>* vobList = world->GetVobList();
 	oCMobContainer* dummy = new oCMobContainer();
-	while(vobList != NULL) {
+	while(vobList != nullptr) {
 		zCVob* vob = vobList->GetData();
 		vobList = vobList->GetNext();
-		if (vob == NULL){
+		if (vob == nullptr){
 			continue;
 		}
 
@@ -418,7 +412,7 @@ zCPar_Symbol* ObjectManager::createNewSymbol(ParserInfo* old)
 {
 	zCParser* parser = zCParser::GetParser();
 	zCPar_Symbol* ref = parser->GetSymbol(old->oldInstanceId);
-	zCPar_SymbolTable* currSymbolTable = zCParserGetSymbolTable(parser);
+	g2ext_extended::zCPar_SymbolTable* currSymbolTable = zCParserGetSymbolTable(parser);
 	zCPar_Symbol* result = currSymbolTable->GetSymbol(old->name.c_str());
 	if (result) { return result; }
 
@@ -445,7 +439,8 @@ bool ObjectManager::addSymbolToSymbolTable(zCPar_Symbol* symbol)
 	zCParser* parser = zCParser::GetParser();
 	int* indexCount = getParserInstanceCount();
 	int countBefore = *indexCount;
-	zCParSymbolTableInsert(((BYTE*)parser) + 0x10, symbol);
+	g2ext_extended::zCPar_SymbolTable* symbolTable = zCParserGetSymbolTable(parser);
+	symbolTable->Insert(symbol);
 	logStream << "ObjectManager::addSymbolToSymbolTable(): Name = " << symbol->name.ToChar() << endl;
 	logStream << "ObjectManager::addSymbolToSymbolTable(): Index = " << parser->GetIndex(symbol->name) << endl;
 	logStream << "ObjectManager::addSymbolToSymbolTable(): countBefore = " << countBefore << endl;
@@ -515,7 +510,7 @@ void ObjectManager::createParserSymbols()
 		{
 			logStream << "adding wasn't successful: " << symbol->name.ToChar() << endl;
 			Logger::getLogger()->log(Logger::Warning, &logStream, false, true, true);
-			zCPar_SymbolTable* currSymbolTable = zCParserGetSymbolTable(parser);
+			g2ext_extended::zCPar_SymbolTable* currSymbolTable = zCParserGetSymbolTable(parser);
 			int index = currSymbolTable->GetIndex(info.name.c_str());
 			int* symTableSize = getParserInstanceCount();
 			logStream << "index: " << index << endl;
@@ -905,27 +900,15 @@ void ObjectManager::getHeroAddits(std::list<AdditMemory*>& list) {
 	}
 }
 
-bool ObjectManager::getIkarusUsed()
-{
-	return ikarusUsed;
-}
-
-void ObjectManager::setIkarusUsed(bool used)
-{
-	ikarusUsed = used;
-}
 
 void ObjectManager::updateIkarusSymbols()
 {
 	// Some Ikarus functions need the correct length of the current symbol table.
 	// MEM_Reinit_Parser() updates all involved references.
-	if (ikarusUsed)
-	{
 		zSTRING arg("MEM_ReinitParser");
 
 		//CallFunc needs uppercase string
 		zCParser::GetParser()->CallFunc(arg.Upper());
-	}
 }
 
 void ObjectManager::callForAllItems(function<void(oCItem*)> func)
@@ -935,24 +918,24 @@ void ObjectManager::callForAllItems(function<void(oCItem*)> func)
 	std::list<oCItem*> tempList;
 	std::list<oCItem*>::iterator it;
 
-	while (npcList != NULL) {
+	while (npcList != nullptr) {
 		oCNpc* npc = npcList->GetData();
-		if (npc == NULL) {
+		if (npc == nullptr) {
 			npcList = npcList->GetNext();
 			continue;
 		}
 
 		oCNpcInventory* inventory = npc->GetInventory();
-		if (inventory == NULL) {
+		if (inventory == nullptr) {
 			npcList = npcList->GetNext();
 			continue;
 		}
 
 		inventory->UnpackAllItems();
 		zCListSort<oCItem>* list = reinterpret_cast<zCListSort<oCItem>*>(inventory->inventory_data);
-		while (list != NULL) {
+		while (list != nullptr) {
 			oCItem* item = list->GetData();
-			if (item != NULL) tempList.push_back(item);
+			if (item != nullptr) tempList.push_back(item);
 
 			list = list->GetNext();
 		}
@@ -967,9 +950,9 @@ void ObjectManager::callForAllItems(function<void(oCItem*)> func)
 
 	tempList.clear();
 	zCListSort<oCItem>* itemList = world->GetItemList();
-	while (itemList != NULL) {
+	while (itemList != nullptr) {
 		oCItem* item = itemList->GetData();
-		if (item != NULL)
+		if (item != nullptr)
 		{
 			tempList.push_back(item);
 		}
@@ -992,9 +975,9 @@ void ObjectManager::callForAllItems(function<void(oCItem*)> func)
 		zCListSort<oCItem>* listAddress = reinterpret_cast<zCListSort<oCItem>*>(address);
 		zCListSort<oCItem>* list = listAddress;
 
-		while (list != NULL) {
+		while (list != nullptr) {
 			oCItem* item = list->GetData();
-			if (item != NULL) {
+			if (item != nullptr) {
 				tempList.push_back(item);
 			}
 			list = list->GetNext();

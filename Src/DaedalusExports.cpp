@@ -28,8 +28,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 
 
 #include <api/g2/zcparser.h>
-#include "api/g2/ocitem.h"
-#include <api/g2/ocgame.h>
+#include "oCItemExtended.h"
 #include <ObjectManager.h>
 #include <api/g2/oCObjectFactory.h>
 #include <Logger.h>
@@ -59,10 +58,11 @@ void DaedalusExports::unHookModule()
 }
 
 
-void __cdecl DaedalusExports::DII_CreateNewItem(zCPar_Symbol* symbol, int instanceId) // Func void DII_CreateNewItem(var C_Item item, VAR INT instanceId)
+void __cdecl DaedalusExports::DII_CreateNewItem(int index, int instanceId) // Func void DII_CreateNewItem(var C_Item item, VAR INT instanceId)
 {
+	if (index <= 0) return;
 	zCParser* parser = zCParser::GetParser();
-	int index = parser->GetIndex(symbol->name);
+	zCPar_Symbol* symbol = parser->GetSymbol(index);
 	oCItem* item = (oCItem*)symbol->offset;
 
 	// Check if provided instance id is valid
@@ -79,12 +79,12 @@ void __cdecl DaedalusExports::DII_CreateNewItem(zCPar_Symbol* symbol, int instan
 	if (item != nullptr)
 	{
 
-		int refCtr = *(int*)((BYTE*)item + 0x4);
-		logStream << "refCtr: " << refCtr << std::endl;
-		Logger::getLogger()->log(Logger::Warning, &logStream, false, true, true);
+		//int refCtr = *(int*)((BYTE*)item + 0x4);
+		//logStream << "refCtr: " << refCtr << std::endl;
+		//Logger::getLogger()->log(Logger::Warning, &logStream, false, true, true);
 		typedef void(__thiscall* OCItemInitByScript)(void* pThis, int, int);
 		OCItemInitByScript oCItemInitByScript = (OCItemInitByScript)0x00711BD0;
-		oCItemInitByScript(item, instanceId, refCtr);
+		oCItemInitByScript(item, instanceId, 1);
 	}
 	else
 	{
@@ -93,12 +93,14 @@ void __cdecl DaedalusExports::DII_CreateNewItem(zCPar_Symbol* symbol, int instan
 
 	// update the c_item
 	symbol->offset = (int)item;
+	logStream << "symbol->offset: " << symbol->offset << std::endl;
+	Logger::getLogger()->log(Logger::Warning, &logStream, false, true, true);
 }
 
 
 int DaedalusExports::DII_CreateNewInstance(oCItem* item) //Func int CreateNewItem(var C_Item item)
 {
-	if (item == NULL) {return NULL;}
+	if (item == nullptr) {return NULL;}
 
 	logStream << "Param: " << item->name.ToChar();
 	Logger::getLogger()->log(Logger::Info, &logStream, false, true, true);
@@ -117,7 +119,7 @@ int DaedalusExports::DII_CreateNewInstance(oCItem* item) //Func int CreateNewIte
 
 int DaedalusExports::DII_IsDynamic(oCItem* item) // Func DII_IsDynamic(VAR C_ITEM item)
 {
-	if (item == NULL) {return FALSE;}
+	if (item == nullptr) {return FALSE;}
 
 	bool modified = ObjectManager::getObjectManager()->IsModified(item);
 	if (modified)
@@ -140,7 +142,7 @@ DII_UserData::Data* DaedalusExports::DII_GetUserData(int instanceId) // Func DII
 
 	if (!manager->IsModified(instanceId))
 	{
-		return NULL;
+		return nullptr;
 	}
 
 	DynInstance* storeItem = manager->getInstanceItem(instanceId);
@@ -151,11 +153,6 @@ DII_UserData::Data* DaedalusExports::DII_GetUserData(int instanceId) // Func DII
 float DaedalusExports::DII_GetLibVersion()
 {
 	return LIB_VERSION;
-}
-
-void DaedalusExports::DII_IkarusUsed()	// Func void DII_IkarusUsed()
-{
-	ObjectManager::getObjectManager()->setIkarusUsed(true);
 }
 
 void DaedalusExports::DII_DoStatistics()
@@ -194,7 +191,6 @@ void DaedalusExports::DII_DoStatistics()
 				int refCtr = *(int*)((BYTE*)item + 0x4);
 				logStream << "refCtr: " << refCtr << std::endl;
 				logger->log(Logger::Info, &logStream, false, true, true);
-
 			}
 		}
 	};
@@ -203,4 +199,36 @@ void DaedalusExports::DII_DoStatistics()
 
 	logStream << "Statistics: " << dynamicItemCount << " items have a dynamic instance id." << std::endl;
 	logger->log(Logger::Info, &logStream, false, true, true);
+}
+
+void DaedalusExports::DII_UpdateInstance(oCItem* item)
+{
+	ObjectManager* manager = ObjectManager::getObjectManager();
+	int index = manager->getDynInstanceId(item);
+	if (index > 0)
+	{
+		DynInstance* dynInstance = manager->getInstanceItem(index);
+		dynInstance->store(*item);
+
+		//update all items of this id
+		auto func = [&](oCItem* itm) ->void {
+			if (itm == nullptr) return;
+			
+			int id = manager->getDynInstanceId(itm);
+			if (id == index)
+			{
+				int refCtr = *(int*)((BYTE*)itm + 0x4);
+				typedef void(__thiscall* OCItemInitByScript)(void* pThis, int, int);
+				OCItemInitByScript oCItemInitByScript = (OCItemInitByScript)0x00711BD0;
+				
+				oCItemInitByScript(itm, id, itm->instanz);
+			}
+		};
+		manager->callForAllItems(func);
+
+	} else
+	{
+		logStream << "DII_UpdateInstance: Couldn't update dynamic instance of item at address" << item << std::endl;
+		Logger::getLogger()->log(Logger::Warning, &logStream, false, true, true);
+	}
 }

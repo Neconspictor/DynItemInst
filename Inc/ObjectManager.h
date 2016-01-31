@@ -352,8 +352,6 @@ public:
 	 */
 	bool hasAdditAssignment(oCItem& item);
 
-	bool getIkarusUsed();
-	void setIkarusUsed(bool used);
 	void updateIkarusSymbols();
 
 	void callForAllItems(std::function<void(oCItem*)> func);
@@ -391,7 +389,6 @@ private:
 	std::queue<int> nextAdditKeys;
 
 	std::stringstream logStream;
-	bool ObjectManager::ikarusUsed = false;
 	int ObjectManager::instanceBegin = -1;
 
 private:

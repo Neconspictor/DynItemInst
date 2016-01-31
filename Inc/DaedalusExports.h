@@ -68,7 +68,7 @@ public:
 	 * \param instanceId The instance id of the oCItem to be created.
 	 * \return The created item. If no item could be created, NULL will be returned.
 	 */
-	static void __cdecl  DII_CreateNewItem(zCPar_Symbol* symbol, int instanceId);
+	static void __cdecl  DII_CreateNewItem(int index, int instanceId);
 
 	/**
 	 * An external for creating a new instance id from a given c_item.
@@ -102,8 +102,9 @@ public:
 	 */
 	static float DII_GetLibVersion();
 
-	static void DII_IkarusUsed();
 	static void DII_DoStatistics();
+
+	static void DII_UpdateInstance(oCItem* item);
 
 public:
 

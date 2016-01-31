@@ -40,12 +40,12 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <sstream>
 #include <Logger.h>
 
-HookManager* HookManager::instance = NULL;
+HookManager* HookManager::instance = nullptr;
 std::stringstream HookManager::logStream = std::stringstream();
 
 HookManager* HookManager::getHookManager()
 {
-	if (instance == NULL)
+	if (instance == nullptr)
 	{
 		instance = new HookManager();
 	}
@@ -54,7 +54,7 @@ HookManager* HookManager::getHookManager()
 
 void HookManager::release()
 {
-	if (instance == NULL) return;
+	if (instance == nullptr) return;
 
 	std::list<Module*>::iterator it;
 	it = instance->modules.begin();
@@ -94,14 +94,14 @@ void HookManager::unregisterHook(LPVOID original, LPVOID hook)
 LPVOID HookManager::getOriginalAddress(LPVOID hook)
 {
 	std::map<LPVOID,LPVOID>::iterator it = hookToOriginalAddress.find(hook);
-	if (it == hookToOriginalAddress.end()) {return NULL;}
+	if (it == hookToOriginalAddress.end()) {return nullptr;}
 	return it->second;
 }
 
 LPVOID HookManager::getHookAddress(LPVOID original)
 {
 	std::multimap<LPVOID,LPVOID>::iterator it = originalToHookAddress.find(original);
-	if (it == originalToHookAddress.end()) {return NULL;}
+	if (it == originalToHookAddress.end()) {return nullptr;}
 	return it->second;
 };
 
@@ -156,7 +156,7 @@ void HookManager::addFunctionHook(LPVOID* source, LPVOID destination, std::strin
 void HookManager::removeFunctionHook(LPVOID* source, LPVOID destination, std::string description)
 {
 	LPVOID original = getOriginalAddress(destination);
-	if (original == NULL)
+	if (original == nullptr)
 	{
 		logStream.setf(std::ios::hex, std::ios::basefield);
 		logStream << "HookManager::removeFunctionHook: Error: Couldn't find original function for function hook 0x"<< destination
@@ -202,7 +202,7 @@ HookManager::~HookManager()
 HookManager::HookManager()
 {
 	called = false;
-	this->instance = NULL;
+	this->instance = nullptr;
 };
 
 void HookManager::hook()
@@ -230,7 +230,7 @@ void HookManager::hook()
 
 void HookManager::unhook()
 {
-	if (instance == NULL) return;
+	if (instance == nullptr) return;
 	instance->unHookModules();
 	release();
 	logStream << "HookManager::unHook: Unhooking done."<< std::endl;

@@ -60,6 +60,15 @@ public:
 	 */
 	virtual ~DynItemInst();
 
+	static void oCItemGetValueHookNaked();
+	static void loadSavegameHookNaked();
+	static void writeSavegameHookNaked();
+	static void createInstanceHookNaked();
+	static void oCGameLoadGameHookNaked();
+	static void oCGameChangeLevelHookNaked();
+	static void oCItemMulitSlotHookNaked();
+	static void oCMobContainerOpenHookNaked();
+
 	/**
 	 * Extends functionality of oCItem::GetValue().
 	 * It is needed for displaying ingame the right item value for a dynamic instance.
@@ -67,6 +76,8 @@ public:
 	 * \return The value of the oCItem
 	 */
 	static int __thiscall oCItemGetValueHook(void* pThis);
+
+	//static void oCItemGetValueHookNaked();
 
 	/**
 	 * Extends functionality of oCGame::loadSavegame(int,int)
@@ -207,7 +218,7 @@ public:
 	 * \param isHeroItem is the item located in the player's inventory?
 	 * that the item is located in the current world.
 	 */
-	static void modifyItemForSaving(oCItem* item, bool isHeroItem);
+	static int modifyItemForSaving(oCItem* item, bool isHeroItem);
 
 	/**
 	 * Restores all items, previously modified through modifyItemForSaving(oCItem* item, bool isHeroItem).
@@ -217,6 +228,8 @@ public:
 	static void restoreDynamicInstances(oCGame* game);
 
 	static bool isSaveGameLoading();
+
+	static oCItem* makeEquippedCopy(oCItem* item, oCNpcInventory* inventory);
 
     /*! @copydoc Module::hookModule()
 	 */
@@ -271,5 +284,124 @@ private:
 	static bool saveGameIsLoading;
 
 };
+
+
+#define LEGO_HOOKENGINE_PREAMBLE __asm      \
+/* Port output */         \
+{                         \
+/*96 Bytes for hook engine stuff*/\
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+						  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+						  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+						  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+						  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+						  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+						  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+						  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+						  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+						  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+						  \
+/*5 Bytes for jump instruction*/\
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+}
 
 #endif __DYN_ITEM_INST_H
