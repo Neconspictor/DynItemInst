@@ -355,8 +355,28 @@ DynItemInst::~DynItemInst()
 			{
 				logStream << "item should be unequiped now..." << std::endl;
 				Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
-				npc->Equip(item);
+				//npc->Equip(item);
 				//item->SetFlag(OCITEM_FLAG_EQUIPPED);
+				/*typedef int(__thiscall* OCNpcGetWeaponMode)(oCNpc*);
+				OCNpcGetWeaponMode oCNpcGetWeaponMode = (OCNpcGetWeaponMode)0x00738C40;
+				int weaponMode = oCNpcGetWeaponMode(npc);
+
+				typedef int(__thiscall* OCNpcEV_ForceRemoveWeapon)(oCNpc* pThis, void*);
+				OCNpcEV_ForceRemoveWeapon oCNpcEV_ForceRemoveWeapon = (OCNpcEV_ForceRemoveWeapon)0x0074EC40;
+				oCNpcEV_ForceRemoveWeapon(npc, nullptr);
+
+				typedef struct
+				{
+					oCItem* item;
+					int data[100];
+				} TEST;
+
+				typedef void(__thiscall* OCNpcSetToFightMode)(oCNpc* pThis, void*);
+				OCNpcSetToFightMode oCNpcSetToFightMode = (OCNpcSetToFightMode)0x0074CC10;
+				TEST* test = new TEST();
+				test->item = item;
+				oCNpcSetToFightMode(npc, test);
+				//delete test;*/
 			}
 
 			list = list->GetNext();
@@ -452,16 +472,20 @@ DynItemInst::~DynItemInst()
 
 		if (equipped)
 		{
-			DynItemInst::denyMultiSlot = false;
+			logStream << "Restore equipped item..." << std::endl;
+			Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
+			//DynItemInst::denyMultiSlot = false;
 			oCNpc* owner = inventory->GetOwner();
+
+			//owner->EquipItem(item);
 
 			typedef int(__thiscall* OCNpcGetWeaponMode)(oCNpc*);
 			OCNpcGetWeaponMode oCNpcGetWeaponMode = (OCNpcGetWeaponMode)0x00738C40;
 			int weaponMode = oCNpcGetWeaponMode(owner);
 
-			//typedef void(__thiscall* OCItemInitByScript)(void* pThis, int, int);
-			//OCItemInitByScript oCItemInitByScript = (OCItemInitByScript)0x00711BD0;
-			//oCItemInitByScript(item, instanceId, instanz);
+			/*typedef void(__thiscall* OCItemInitByScript)(void* pThis, int, int);
+			OCItemInitByScript oCItemInitByScript = (OCItemInitByScript)0x00711BD0;
+			oCItemInitByScript(item, instanceId, instanz);*/
 
 			typedef int(__thiscall* OCNpcEV_ForceRemoveWeapon)(oCNpc* pThis, void*);
 			OCNpcEV_ForceRemoveWeapon oCNpcEV_ForceRemoveWeapon = (OCNpcEV_ForceRemoveWeapon) 0x0074EC40;
@@ -481,6 +505,7 @@ DynItemInst::~DynItemInst()
 			typedef int(__thiscall* OCNpcSetRightHand)(oCNpc*, oCVob*);
 			OCNpcSetRightHand oCNpcSetRightHand = (OCNpcSetRightHand)0x0073B1C0;
 
+			//oCGame::GetGame()->GetWorld()->AddVob(item);
 			//if (oCNpcGetWeapon(owner) == item)
 			//{
 				oCNpcEV_ForceRemoveWeapon(owner, nullptr);
@@ -495,8 +520,8 @@ DynItemInst::~DynItemInst()
 				int data[100];
 			} TEST;
 
-			//1h weapons
-			/*if (item->HasFlag(1<<14) || item->HasFlag(1 << 15))
+			/*//1h weapons
+			if (item->HasFlag(1<<14) || item->HasFlag(1 << 15))
 			{
 				void* rightHand = oCNpcGetInvSlot(owner, "NPC_NODE_RIGHTHAND");
 				oCVob* rightItem = oCNpcRemoveFromSlot(owner, rightHand, 0, 1);
@@ -651,7 +676,11 @@ DynItemInst::~DynItemInst()
 			inventory->Insert(copy);
 			DynItemInst::denyMultiSlot = true;
 			copy = getInvItemByInstanceId(inventory, instanceId)->GetData();
+
 			owner->EquipItem(copy);*/
+
+			logStream << "Restored equipped item!" << std::endl;
+			Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
 			return;
 		}
 
@@ -666,7 +695,7 @@ DynItemInst::~DynItemInst()
 	}
 }
 
-zSTRING instanceNames[] = {"DII_DUMMY_ITEM", "DII_DUMMY_ITEM2", "DII_DUMMY_ITEM3", "DII_DUMMY_ITEM4", "DII_DUMMY_ITEM5", "DII_DUMMY_ITEM6",
+zSTRING instanceNames[] = {"DII_DUMMY_ITEM2", "DII_DUMMY_ITEM3", "DII_DUMMY_ITEM4", "DII_DUMMY_ITEM5", "DII_DUMMY_ITEM6",
 "DII_DUMMY_ITEM7", "DII_DUMMY_ITEM8", "DII_DUMMY_ITEM9", "DII_DUMMY_ITEM10"};
 int instanceNamePos = 0;
 
@@ -681,7 +710,7 @@ int instanceNamePos = 0;
 	
 	if (item->HasFlag(OCITEM_FLAG_EQUIPPED))
 	{
-		if (instanceNamePos == 10) instanceNamePos = 0;
+		if (instanceNamePos == 9) instanceNamePos = 0;
 		saveId = parser->GetIndex(instanceNames[instanceNamePos]);
 		++instanceNamePos;
 	} else

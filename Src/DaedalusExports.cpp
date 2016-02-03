@@ -34,6 +34,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <Logger.h>
 #include <DaedalusExports.h>
 #include <set>
+#include <ocgameExtended.h>
 
 
 const float DaedalusExports::LIB_VERSION = 1.02f;
@@ -80,11 +81,13 @@ void __cdecl DaedalusExports::DII_CreateNewItem(int index, int instanceId) // Fu
 	{
 
 		//int refCtr = *(int*)((BYTE*)item + 0x4);
+		//refCtr = (std::max)(refCtr, 1);
 		//logStream << "refCtr: " << refCtr << std::endl;
 		//Logger::getLogger()->log(Logger::Warning, &logStream, false, true, true);
 		typedef void(__thiscall* OCItemInitByScript)(void* pThis, int, int);
 		OCItemInitByScript oCItemInitByScript = (OCItemInitByScript)0x00711BD0;
 		oCItemInitByScript(item, instanceId, 1);
+		oCGame::GetGame()->GetWorld()->AddVob(item);
 	}
 	else
 	{
