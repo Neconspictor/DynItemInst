@@ -634,7 +634,14 @@ std::string ObjectManager::getSaveGameDirectoryPath(int saveGameSlotNumber) {
 
 	std::stringstream ss;
 	//write full path to the savegame
-	ss << gothicDirPath.ToChar() << saveGamesDirName.ToChar() << "savegame" << saveGameSlotNumber;
+	// write right save game folder 
+	if (saveGameSlotNumber == 0) //quicksave folder
+	{
+		ss << gothicDirPath.ToChar() << saveGamesDirName.ToChar() << "quicksave";
+	} else
+	{
+		ss << gothicDirPath.ToChar() << saveGamesDirName.ToChar() << "savegame" << saveGameSlotNumber;
+	}
 	return ss.str();
 };
 

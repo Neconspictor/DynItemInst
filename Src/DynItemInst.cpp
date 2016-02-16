@@ -395,7 +395,7 @@ DynItemInst::~DynItemInst()
 	DynItemInst::denyMultiSlot = false;
 
 	//finally write the savegame and restore items that are reseted by the savegame writing method
-	std::string saveGameDir;  
+	std::string saveGameDir;
 	if (saveGameSlotNumber != -1)
 	{
 		saveGameDir = manager->getSaveGameDirectoryPath(saveGameSlotNumber);	
