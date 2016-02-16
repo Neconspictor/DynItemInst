@@ -407,7 +407,7 @@ DynItemInst::~DynItemInst()
 	std::string currentDir = manager->getCurrentDirectoryPath();
 
 	util::copyContentTo(currentDir,saveGameDir, FILE_PATERN);
-	util::copyContentTo(saveGameDir,currentDir, FILE_PATERN);
+	//util::copyContentTo(saveGameDir,currentDir, FILE_PATERN);
 
 	zSTRING worldName = ocworld->GetWorldName();
 	std::string saveAddit = SAVE_ITEM_ADDIT + std::string(const_cast<char*>(worldName.ToChar())) + 
@@ -918,7 +918,7 @@ bool DynItemInst::isSaveGameLoading()
 void DynItemInst::oCGameLoadGameHook(void* pThis, int second, zSTRING const& worldName)
 {
 	logStream << "DynItemInst::oCGameLoadGameHook: release new instances..."<< std::endl;
-	Logger::getLogger()->log(Logger::Info, &logStream, false, true, true);
+	Logger::getLogger()->log(Logger::Info, &logStream, true, true, true);
 	ObjectManager* manager = ObjectManager::getObjectManager();
 	manager->releaseInstances();
 	oCGameLoadGame(pThis, second, worldName);
