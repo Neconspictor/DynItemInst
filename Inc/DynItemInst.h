@@ -261,6 +261,23 @@ public:
 	static const std::string FILE_PATERN;
 
 private:
+
+	 struct InstanceNames
+	{
+		std::string base;
+		std::string nearFight;
+		std::string distanceFight;
+		std::string rune;
+		std::string other;
+
+		int nearFightCounter;
+		int distanceFightCounter;
+		int runeCounter;
+		int otherCounter;
+	};
+
+	 static InstanceNames instanceNames;
+
 	static const int LOAD_SAVEGAME_ADDRESS = 0x006C67D0;
 	static const int WRITE_SAVEGAME_ADDRESS = 0x006C5250;
 	static const int OCITEM_GET_VALUE_ADDRESS = 0x00712650;
@@ -289,6 +306,17 @@ private:
 	static bool denyMultiSlot;
 	static bool levelChange;
 	static bool saveGameIsLoading;
+
+
+	class DII_InstanceNameNotFoundException : protected std::exception {
+	private:
+		std::string err_msg;
+
+	public:
+		DII_InstanceNameNotFoundException(const char *msg) : err_msg(msg) {};
+		~DII_InstanceNameNotFoundException() throw() {};
+		const char *what() const throw() { return this->err_msg.c_str(); };
+	};
 
 };
 

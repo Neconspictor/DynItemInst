@@ -50,6 +50,8 @@ bool DynItemInst::denyMultiSlot = false;
 bool DynItemInst::levelChange = false;
 bool DynItemInst::saveGameIsLoading = false;
 
+DynItemInst::InstanceNames DynItemInst::instanceNames = { "DII_DUMMY_ITEM_", "NF_","FF_" , "RUNE_", "OTH_", 1, 1, 1, 1 };
+
 std::vector<zCPar_Symbol*>* DynItemInst::symbols = new std::vector<zCPar_Symbol*>();
 bool DynItemInst::showExtendedDebugInfo = false;
 
@@ -355,6 +357,12 @@ DynItemInst::~DynItemInst()
 
  void DynItemInst::writeSavegameHook(void* pThis,int saveGameSlotNumber, int b)
 {   
+	// reset instance name counters
+	instanceNames.nearFightCounter = 1;
+	instanceNames.distanceFightCounter = 1;
+	instanceNames.runeCounter = 1;
+	instanceNames.otherCounter = 1;
+
 	oCGame* game = oCGame::GetGame();
 	zCWorld* world = game->GetWorld();
 	oCWorld* ocworld = game->GetGameWorld();
@@ -515,10 +523,63 @@ DynItemInst::~DynItemInst()
 		// is the item equipped?
 		int equipped = item->HasFlag(OCITEM_FLAG_EQUIPPED);
 
-		oCItemInitByScript(item, instanceId, item->instanz);
-		//world->AddVob(item);
+		//oCItemInitByScript(item, instanceId, item->instanz);
 
 		if (equipped)
+		{
+			logStream << "DynItemInst::restoreItem: Restore equipped item..." << std::endl;
+			Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
+
+			oCNpc* owner = inventory->GetOwner();
+			int weaponMode = oCNpcGetWeaponMode(owner);
+
+			if (isReadiedWeapon(weaponMode, item))
+			{
+				logStream << "DynItemInst::restoreItem: Force to remove weapon..." << std::endl;
+				Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
+				oCNpcEV_ForceRemoveWeapon(owner, item);
+			}
+
+			int amount = item->instanz;
+			if (amount != 1)
+			{
+				logStream << "DynItemInst::restoreItem: amount > 1!";
+				Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
+			}
+
+			int munitionAvailable = 0;
+
+			//item->SetFlag(OCITEM_FLAG_EQUIPPED);
+			inventory->Remove(item, item->instanz);
+			zCListSort<oCItem>* list = getInvItemByInstanceId(inventory, instanceId);
+			oCItem* copy = oCObjectFactory::GetFactory()->CreateItem(instanceId);
+
+			if (list != nullptr)
+			{
+				item = list->GetData();
+				copy->instanz = item->instanz + amount;
+				inventory->Remove(item, item->instanz);
+			}
+
+			world->AddVob(copy);
+			inventory->Insert(copy);
+			copy = getInvItemByInstanceId(inventory, instanceId)->GetData();
+			owner->Equip(copy);
+
+
+			logStream << "DynItemInst::restoreItem: item is now equipped!" << std::endl;
+			logStream << "DynItemInst::restoreItem: Weapon mode: " << weaponMode << std::endl;
+			Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
+
+			copy = getInvItemByInstanceId(inventory, instanceId)->GetData();
+			oCNpcSetWeaponMode2(owner, weaponMode);  //3 for one hand weapons
+
+			logStream << "DynItemInst::restoreItem: Restored equipped item!" << std::endl;
+			Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
+			return;
+		}
+
+		/*if (equipped)
 		{
 			logStream << "DynItemInst::restoreItem: Restore equipped item..." << std::endl;
 			Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
@@ -693,17 +754,18 @@ DynItemInst::~DynItemInst()
 			logStream << "DynItemInst::restoreItem: Restored equipped item!" << std::endl;
 			Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
 			return;
-		}
+		}*/
+		
+		oCItemInitByScript(item, instanceId, item->instanz);
 		inventory->Remove(item, item->instanz);
 		inventory->Insert(item);
 	}
 }
 
-zSTRING instanceNames[] = {"DII_DUMMY_ITEM2", "DII_DUMMY_ITEM3", "DII_DUMMY_ITEM4", "DII_DUMMY_ITEM5", "DII_DUMMY_ITEM6",
-"DII_DUMMY_ITEM7", "DII_DUMMY_ITEM8", "DII_DUMMY_ITEM9", "DII_DUMMY_ITEM10"};
-int instanceNamePos = 0;
 
  int DynItemInst::modifyItemForSaving(oCItem* item, bool isHeroItem) {
+	 logStream << "DynItemInst::modifyItemForSaving: called!" <<std::endl;
+	 Logger::getLogger()->log(Logger::Info, &logStream, true, true, true);
 	if (item == nullptr) return NULL;
 	ObjectManager* manager = ObjectManager::getObjectManager();
 	int id = manager->getDynInstanceId(item);
@@ -714,9 +776,40 @@ int instanceNamePos = 0;
 	
 	if (item->HasFlag(OCITEM_FLAG_EQUIPPED))
 	{
-		if (instanceNamePos == 9) instanceNamePos = 0;
-		saveId = parser->GetIndex(instanceNames[instanceNamePos]);
-		++instanceNamePos;
+		std::stringstream ss;
+		if (item->HasFlag(2)) //near fight
+		{
+			ss << instanceNames.base << instanceNames.nearFight << instanceNames.nearFightCounter;
+			++instanceNames.nearFightCounter;
+		} else if (item->HasFlag(4)) // distance fight
+		{
+			ss << instanceNames.base << instanceNames.distanceFight << instanceNames.distanceFightCounter;
+			++instanceNames.distanceFightCounter;
+		} else if (item->HasFlag(512)) // runes 
+		{
+			ss << instanceNames.base << instanceNames.rune << instanceNames.runeCounter;
+			++instanceNames.runeCounter;
+		}
+		else // other
+		{
+			ss << instanceNames.base << instanceNames.other << instanceNames.otherCounter;
+			++instanceNames.otherCounter;
+		}
+
+		std::string name = ss.str();
+		saveId = parser->GetIndex(name.c_str());
+		logStream << "DynItemInst::modifyItemForSaving: instance name: " << name << std::endl;
+		Logger::getLogger()->log(Logger::Info, &logStream, true, true, true);
+		logStream << "DynItemInst::modifyItemForSaving: saveId= " << saveId << std::endl;
+		Logger::getLogger()->log(Logger::Info, &logStream, true, true, true);
+
+		if (saveId <= 0)
+		{
+			logStream << "instance name not found: " << name << std::endl;
+			Logger::getLogger()->log(Logger::Fatal, &logStream, true, true, true);
+			//throw new DynItemInst::DII_InstanceNameNotFoundException(ss.str().c_str());
+		}
+		
 	} else
 	{
 		saveId = parser->GetIndex("DII_DUMMY_ITEM");
