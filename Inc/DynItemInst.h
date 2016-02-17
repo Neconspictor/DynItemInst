@@ -243,6 +243,8 @@ private:
 	static std::string getClearedWorldName(zSTRING const & worldName);
 	static void loadDynamicInstances();
 	static void initAdditMemory();
+	static bool isReadiedWeapon(int weaponMode, oCItem* item);
+	static void updateRangedWeapon(oCItem* item, oCNpcInventory* inventory, bool munitionUsesRightHand);
 
 public:
 	static const std::string SAVE_ITEM_FILE_EXT;

@@ -81,20 +81,33 @@ typedef void ( __thiscall* OCMobContainerOpen )(void*, oCNpc*);
 OCMobContainerOpen oCMobContainerOpen;
 
 
+typedef void(__thiscall* OCItemInitByScript)(void* pThis, int, int);
+OCItemInitByScript oCItemInitByScript = (OCItemInitByScript)0x00711BD0;
+typedef int(__thiscall* OCNpcEV_ForceRemoveWeapon)(oCNpc* pThis, void*);
+OCNpcEV_ForceRemoveWeapon oCNpcEV_ForceRemoveWeapon = (OCNpcEV_ForceRemoveWeapon)0x0074EC40;
+typedef oCItem*(__thiscall* OCNpcGetWeapon)(oCNpc* pThis);
+OCNpcGetWeapon oCNpcGetWeapon = (OCNpcGetWeapon)0x007377A0;
+typedef int(__thiscall* OCNpcSetRightHand)(oCNpc*, oCVob*);
+OCNpcSetRightHand oCNpcSetRightHand = (OCNpcSetRightHand)0x0073B1C0;
+typedef int(__thiscall* OCNpcGetWeaponMode)(oCNpc*);
+OCNpcGetWeaponMode oCNpcGetWeaponMode = (OCNpcGetWeaponMode)0x00738C40;
+typedef int(__thiscall* OCNpcSetWeaponMode2)(oCNpc*, int);
+OCNpcSetWeaponMode2 oCNpcSetWeaponMode2 = (OCNpcSetWeaponMode2)0x00738E80;
+typedef int(__thiscall* OCNpcIsMunitionAvailable)(oCNpc*, oCItem*);
+OCNpcIsMunitionAvailable oCNpcIsMunitionAvailable = (OCNpcIsMunitionAvailable)0x0073C6E0;
+typedef int(__thiscall* OCNpcSetLeftHand)(oCNpc*, oCVob*);
+OCNpcSetLeftHand oCNpcSetLeftHand = (OCNpcSetLeftHand)0x0073B0C0;
+
+
 
 void DynItemInst::hookModule()
 {
 	loadSavegame = (LoadSavegame) (LOAD_SAVEGAME_ADDRESS);
 	writeSavegame = (WriteSavegame) (WRITE_SAVEGAME_ADDRESS);
 	oCItemGetValue = (OCItemGetValue) (OCITEM_GET_VALUE_ADDRESS);
-	//zCPar_SymbolTableGetSymbol = (ZCPar_SymbolTableGetSymbol) (ZCPAR_SYMBOL_TABLE_GETSYMBOLE);
-	//zCPar_SymbolTableGetSymbolString = (ZCPar_SymbolTableGetSymbolString) (ZCPAR_SYMBOL_TABLE_GETSYMBOLE_STRING);
-	//zCPar_SymbolTableGetIndex = (ZCPar_SymbolTableGetIndex)(ZCPAR_SYMBOL_TABLE_GETINDEX);
-	//zCParserGetIndex = (ZCParserGetIndex)(ZCPARSER_GETINDEX);
 	createInstance = (CreateInstance) (ZCPARSER_CREATE_INSTANCE);
 	oCGameLoadGame = (OCGameLoadGame) OCGAME_LOAD_GAME_ADDRESS;
 
-	//oCGameLoadWorld = reinterpret_cast<OCGameLoadWorld>(OCGAME_LOAD_WORLD_ADDRESS);
 	oCGameChangeLevel = reinterpret_cast<OCGameChangeLevel>(OCGAME_CHANGE_LEVEL_ADDRESS);
 	oCItemMulitSlot = (OCItemMulitSlot) OCITEM_MULTI_SLOT;
 	oCMobContainerOpen = (OCMobContainerOpen) OCMOB_CONTAINER_OPEN;
@@ -103,10 +116,7 @@ void DynItemInst::hookModule()
 	hookManager->addFunctionHook((LPVOID*)&loadSavegame, loadSavegameHookNaked, moduleDesc);
 	hookManager->addFunctionHook((LPVOID*)&writeSavegame, writeSavegameHookNaked, moduleDesc);
 	hookManager->addFunctionHook((LPVOID*)&oCItemGetValue, oCItemGetValueHookNaked, moduleDesc);
-	//hookManager->addFunctionHook((LPVOID*)&zCPar_SymbolTableGetSymbol, zCPar_SymbolTableGetSymbolHook, moduleDesc);
-	//hookManager->addFunctionHook((LPVOID*)&zCPar_SymbolTableGetSymbolString, zCPar_SymbolTableGetSymbolStringHook, moduleDesc);
-	//hookManager->addFunctionHook((LPVOID*)&zCPar_SymbolTableGetIndex, zCPar_SymbolTableGetIndexHook,  moduleDesc);
-	//hookManager->addFunctionHook((LPVOID*)&zCParserGetIndex, zCParserGetIndexHook, moduleDesc);
+
 	hookManager->addFunctionHook((LPVOID*)&createInstance, createInstanceHookNaked, moduleDesc);
 	hookManager->addFunctionHook((LPVOID*)&oCGameLoadGame, oCGameLoadGameHookNaked, moduleDesc);
 	hookManager->addFunctionHook((LPVOID*)&oCGameChangeLevel, oCGameChangeLevelHookNaked, moduleDesc);
@@ -125,10 +135,7 @@ void DynItemInst::unHookModule()
 	hookManager->removeFunctionHook((LPVOID*)&loadSavegame, loadSavegameHookNaked, moduleDesc);
 	hookManager->removeFunctionHook((LPVOID*)&writeSavegame, writeSavegameHookNaked, moduleDesc);
 	hookManager->removeFunctionHook((LPVOID*)&oCItemGetValue, oCItemGetValueHookNaked, moduleDesc);
-	//hookManager->removeFunctionHook((LPVOID*)&zCPar_SymbolTableGetSymbol, zCPar_SymbolTableGetSymbolHook, moduleDesc);
-	//hookManager->removeFunctionHook((LPVOID*)&zCPar_SymbolTableGetSymbolString, zCPar_SymbolTableGetSymbolStringHook, moduleDesc);
-	//hookManager->removeFunctionHook((LPVOID*)&zCPar_SymbolTableGetIndex, zCPar_SymbolTableGetIndexHook,moduleDesc);
-	//hookManager->removeFunctionHook((LPVOID*)&zCParserGetIndex, zCParserGetIndexHook, moduleDesc);
+
 	hookManager->removeFunctionHook((LPVOID*)&createInstance, createInstanceHookNaked, moduleDesc);
 	hookManager->removeFunctionHook((LPVOID*)&oCGameLoadGame, oCGameLoadGameHookNaked, moduleDesc);
 	hookManager->removeFunctionHook((LPVOID*)&oCGameChangeLevel, oCGameChangeLevelHookNaked, moduleDesc);
@@ -445,7 +452,7 @@ DynItemInst::~DynItemInst()
 		int additId = -item->instanz;
 		AdditMemory* addit = manager->getAddit(additId);
 		if (addit == nullptr) {
-			logStream << "DynItemInst::modifyItem: Warning: Addit is null!!!" << std::endl;
+			logStream << "DynItemInst::restoreItem: Addit is null!!!" << std::endl;
 			logStream << item->name.ToChar() << " : " << additId << std::endl;
 			Logger::getLogger()->log(Logger::Warning, &logStream, false, true, true);
 			return;
@@ -469,84 +476,29 @@ DynItemInst::~DynItemInst()
 		// is the item equipped?
 		int equipped = item->HasFlag(OCITEM_FLAG_EQUIPPED);
 
+		oCItemInitByScript(item, instanceId, item->instanz);
 
 		if (equipped)
 		{
-			logStream << "Restore equipped item..." << std::endl;
+			logStream << "DynItemInst::restoreItem: Restore equipped item..." << std::endl;
 			Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
-			//DynItemInst::denyMultiSlot = false;
+
 			oCNpc* owner = inventory->GetOwner();
-
-			//owner->EquipItem(item);
-
-			typedef int(__thiscall* OCNpcGetWeaponMode)(oCNpc*);
-			OCNpcGetWeaponMode oCNpcGetWeaponMode = (OCNpcGetWeaponMode)0x00738C40;
 			int weaponMode = oCNpcGetWeaponMode(owner);
 
-			/*typedef void(__thiscall* OCItemInitByScript)(void* pThis, int, int);
-			OCItemInitByScript oCItemInitByScript = (OCItemInitByScript)0x00711BD0;
-			oCItemInitByScript(item, instanceId, instanz);*/
-
-			typedef int(__thiscall* OCNpcEV_ForceRemoveWeapon)(oCNpc* pThis, void*);
-			OCNpcEV_ForceRemoveWeapon oCNpcEV_ForceRemoveWeapon = (OCNpcEV_ForceRemoveWeapon) 0x0074EC40;
-			
-			typedef oCItem*(__thiscall* OCNpcGetWeapon)(oCNpc* pThis);
-			OCNpcGetWeapon oCNpcGetWeapon = (OCNpcGetWeapon)0x007377A0;
-
-			typedef void*(__thiscall* OCNpcGetInvSlot)(oCNpc*, zSTRING const &);
-			OCNpcGetInvSlot oCNpcGetInvSlot = (OCNpcGetInvSlot)0x00749AE0;
-
-			typedef oCVob*(__thiscall* OCNpcRemoveFromSlot)(oCNpc*, void*, int, int);
-			OCNpcRemoveFromSlot oCNpcRemoveFromSlot = (OCNpcRemoveFromSlot)0x0074A340;
-
-			typedef oCItem*(__thiscall* OCNpcPutInInv)(oCNpc*, oCItem*);
-			OCNpcPutInInv oCNpcPutInInv = (OCNpcPutInInv)0x00749350;
-
-			typedef int(__thiscall* OCNpcSetRightHand)(oCNpc*, oCVob*);
-			OCNpcSetRightHand oCNpcSetRightHand = (OCNpcSetRightHand)0x0073B1C0;
-
-			//oCGame::GetGame()->GetWorld()->AddVob(item);
-			//if (oCNpcGetWeapon(owner) == item)
-			//{
-				oCNpcEV_ForceRemoveWeapon(owner, nullptr);
-			//}
-
-			typedef void(__thiscall* OCNpcSetToFightMode)(oCNpc* pThis, void*);
-			OCNpcSetToFightMode oCNpcSetToFightMode = (OCNpcSetToFightMode)0x0074CC10;
-
-			typedef struct
+			if (isReadiedWeapon(weaponMode, item))
 			{
-				oCItem* item;
-				int data[100];
-			} TEST;
+				logStream << "DynItemInst::restoreItem: Force to remove weapon..." << std::endl;
+				Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
+				oCNpcEV_ForceRemoveWeapon(owner, item);
+			}
 
-			/*//1h weapons
-			if (item->HasFlag(1<<14) || item->HasFlag(1 << 15))
-			{
-				void* rightHand = oCNpcGetInvSlot(owner, "NPC_NODE_RIGHTHAND");
-				oCVob* rightItem = oCNpcRemoveFromSlot(owner, rightHand, 0, 1);
-				if (rightItem == nullptr)
-				{
-					logStream << "rightItem is null!" << std::endl;
-					Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
-				}
-
-				item = oCNpcPutInInv(owner, item);
-				oCNpcSetRightHand(owner, nullptr);
-				TEST* test = new TEST();
-				typedef void(__thiscall* OCMsgWeaponConstructor)(void*);
-				OCMsgWeaponConstructor oCMsgWeaponConstructor = (OCMsgWeaponConstructor)0x00766710;
-				oCMsgWeaponConstructor(test);
-				//test->item = copy;
-				oCNpcSetToFightMode(owner, test);
-			}*/
-
-
-
-			//oCItemInitByScript(item, instanceId, item->instanz);
-			//item->SetFlag(OCITEM_FLAG_EQUIPPED);
-			
 			int amount = item->instanz;
+			if (amount != 1)
+			{
+				logStream << "DynItemInst::restoreItem: amount > 1!";
+				Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
+			}
 			inventory->Remove(item, item->instanz);
 			zCListSort<oCItem>* list = getInvItemByInstanceId(inventory, instanceId);
 			oCItem* copy = oCObjectFactory::GetFactory()->CreateItem(instanceId);
@@ -559,136 +511,54 @@ DynItemInst::~DynItemInst()
 			world->AddVob(copy);
 			inventory->Insert(copy);
 			copy = getInvItemByInstanceId(inventory, instanceId)->GetData();
-			//copy->SetFlag(OCITEM_FLAG_EQUIPPED);
 			owner->Equip(copy);
 
-			logStream << "item is now equipped!" << std::endl;
-			logStream << "Weapon mode: " << weaponMode << std::endl;
+			logStream << "DynItemInst::restoreItem: item is now equipped!" << std::endl;
+			logStream << "DynItemInst::restoreItem: Weapon mode: " << weaponMode << std::endl;
 			Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
 
 			copy = getInvItemByInstanceId(inventory, instanceId)->GetData();
 
-			//typedef int(__thiscall* OCNpcDoSetToFightMode)(oCNpc*, oCItem*);
-			//OCNpcDoSetToFightMode oCNpcDoSetToFightMode = (OCNpcDoSetToFightMode)0x00745350;
-			//oCNpcDoSetToFightMode(owner, copy);
-			
-			/*typedef int(__thiscall* OCNpcInitByScript)(oCNpc*, int, int);
-			OCNpcInitByScript oCNpcInitByScript = (OCNpcInitByScript)0x0072EE70;
-			oCNpcInitByScript(owner, owner->GetInstance(), owner->instanz);*/
-
-
-			/*typedef void(__thiscall* OCNpcDoRemoveMunition)(oCNpc*);
-			OCNpcDoRemoveMunition oCNpcDoRemoveMunition = (OCNpcDoRemoveMunition)0x00744470;
-			oCNpcDoRemoveMunition(owner);*/
-
-			/*if (oCNpcGetWeapon(owner) != item )
-			{
-				return;
-			}*/
-
-			typedef int(__thiscall* OCNpcSetWeaponMode2)(oCNpc*, int);
-			OCNpcSetWeaponMode2 oCNpcSetWeaponMode2 = (OCNpcSetWeaponMode2)0x00738E80;
 			oCNpcSetWeaponMode2(owner, weaponMode);  //3 for one hand weapons
-
-
-			typedef int(__thiscall* OCNpcIsMunitionAvailable)(oCNpc*, oCItem*);
-			OCNpcIsMunitionAvailable oCNpcIsMunitionAvailable = (OCNpcIsMunitionAvailable)0x0073C6E0;
-
-			typedef int(__thiscall* OCNpcSetLeftHand)(oCNpc*, oCVob*);
-			OCNpcSetLeftHand oCNpcSetLeftHand = (OCNpcSetLeftHand)0x0073B0C0;
-
 			int munitionAvailable = oCNpcIsMunitionAvailable(owner, copy);
 
-			// Is readied weapon a bow?
-			if (copy->HasFlag(1 << 19) && munitionAvailable && weaponMode == 5)
+			if (munitionAvailable)
 			{
-				logStream << "Bow is readied!" << std::endl;
-				logStream << "Weapon mode: " << weaponMode << std::endl;
+				logStream << "DynItemInst::restoreItem: Munition is available." << std::endl;
 				Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
-
-				oCItem* arrow = getInvItemByInstanceId(inventory, copy->munition)->GetData();
-				arrow->instanz -= 1;
-
-				oCItem* arrow2 = oCObjectFactory::GetFactory()->CreateItem(arrow->GetInstance());
-
-				oCNpcSetRightHand(owner, arrow2);
-
-			}else if (weaponMode == 5) {
-				logStream << "Bow is readied but item is no bow!" << std::endl;
-				Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
-
-				oCItem* readiedWeapon = oCNpcGetWeapon(owner);
-				if (readiedWeapon != nullptr)
-				{
-					zCListSort<oCItem>* list = getInvItemByInstanceId(inventory, readiedWeapon->munition);
-					if (list)
-					{
-						oCItem* arrow = list->GetData();
-						arrow->instanz -= 1;
-						oCItem* arrow2 = oCObjectFactory::GetFactory()->CreateItem(arrow->GetInstance());
-
-						oCNpcSetRightHand(owner, arrow2);
-					}
-				}
-			// crossbow
-			} else if (copy->HasFlag(1 << 20) && munitionAvailable && weaponMode == 6)
-			{
-				logStream << "Crossbow is readied!" << std::endl;
-				logStream << "Weapon mode: " << weaponMode << std::endl;
-				Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
-
-				oCItem* bolt = getInvItemByInstanceId(inventory, copy->munition)->GetData();
-				bolt->instanz -= 1;
-
-				oCItem* bolt2 = oCObjectFactory::GetFactory()->CreateItem(bolt->GetInstance());
-
-				oCNpcSetLeftHand(owner, bolt2);
-			} else if (weaponMode == 6)
-			{
-				logStream << "Crossbow is readied but item is no crossbow!" << std::endl;
-				Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
-
-				oCItem* readiedWeapon = oCNpcGetWeapon(owner);
-				if (readiedWeapon != nullptr)
-				{
-					zCListSort<oCItem>* list = getInvItemByInstanceId(inventory, readiedWeapon->munition);
-					if (list)
-					{
-						oCItem* bolt = list->GetData();
-						bolt->instanz -= 1;
-						oCItem* bolt2 = oCObjectFactory::GetFactory()->CreateItem(bolt->GetInstance());
-
-						oCNpcSetLeftHand(owner, bolt2);
-					}
-				}
 			}
 
-			DynItemInst::denyMultiSlot = true;
-			
-			/*oCItem* copy = oCObjectFactory::GetFactory()->CreateItem(instanceId);
-			world->AddVob(copy);
-			copy->instanz = instanz;
-			oCNpc* owner = inventory->GetOwner();
-			owner->Equip(item);
-			inventory->RemoveByPtr(item, instanz);
-			DynItemInst::denyMultiSlot = false;
-			world->AddVob(copy);
-			inventory->Insert(copy);
-			DynItemInst::denyMultiSlot = true;
-			copy = getInvItemByInstanceId(inventory, instanceId)->GetData();
+			// Is readied weapon a bow?
+			if (copy->HasFlag(1 << 19) && weaponMode == 5)
+			{
+				logStream << "DynItemInst::restoreItem: Bow is readied!" << std::endl;
+				logStream << "DynItemInst::restoreItem: Weapon mode: " << weaponMode << std::endl;
+				Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
 
-			owner->EquipItem(copy);*/
+				updateRangedWeapon(item, inventory, true);
+			}
+			else if (weaponMode == 5) {
+				logStream << "DynItemInst::restoreItem: Bow is readied but item is no bow!" << std::endl;
+				Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
+			}
+			else if (copy->HasFlag(1 << 20) && munitionAvailable && weaponMode == 6)
+			{
+				logStream << "DynItemInst::restoreItem: Crossbow is readied!" << std::endl;
+				logStream << "DynItemInst::restoreItem: Weapon mode: " << weaponMode << std::endl;
+				Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
 
-			logStream << "Restored equipped item!" << std::endl;
+				updateRangedWeapon(item, inventory, false);
+			}
+			else if (weaponMode == 6)
+			{
+				logStream << "DynItemInst::restoreItem: Crossbow is readied but item is no crossbow!" << std::endl;
+				Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
+			}
+
+			logStream << "DynItemInst::restoreItem: Restored equipped item!" << std::endl;
 			Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
 			return;
 		}
-
-
-		typedef void(__thiscall* OCItemInitByScript)(void* pThis, int, int);
-		OCItemInitByScript oCItemInitByScript = (OCItemInitByScript)0x00711BD0;
-
-		oCItemInitByScript(item, instanceId, item->instanz);
 
 		inventory->Remove(item, item->instanz);
 		inventory->Insert(item);
@@ -758,10 +628,7 @@ int instanceNamePos = 0;
 	 {
 		 copy->instanz = amount;
 	 }
-	 //copy->SetFlag(OCITEM_FLAG_EQUIPPED);
-	 //owner->EquipItem(copy);
 
-	 //copy = getInvItemByInstanceId(inventory, instanceId)->GetData();
 	 return copy;
  }
 
@@ -819,45 +686,9 @@ void DynItemInst::restoreDynamicInstances(oCGame* game) {
 			}
 		}
 
-		/*typedef int(__thiscall* OCNpcEV_ForceRemoveWeapon)(oCNpc* pThis, void*);
-		OCNpcEV_ForceRemoveWeapon oCNpcEV_ForceRemoveWeapon = (OCNpcEV_ForceRemoveWeapon)0x0074EC40;
-		
-		for (it = equippedItems.begin(); it != equippedItems.end(); ++it)
-		{
-			*it = makeEquippedCopy(*it, inventory);
-			logStream << "id1: " << (*it)->GetInstance() << std::endl;
-			Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
-		}
-
-		DynItemInst::denyMultiSlot = false;
-
-
-		for (it = equippedItems.begin(); it != equippedItems.end(); ++it)
-		{
-			int instanceId = (*it)->GetInstance();
-			logStream << "id: " << instanceId<< std::endl;
-			Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
-			//world->AddVob(*it);
-			inventory->Insert(*it);
-			*it = getInvItemByInstanceId(inventory, instanceId)->GetData();
-		}
-
-		if (!equippedItems.empty())
-		{
-			oCNpcEV_ForceRemoveWeapon(npc, nullptr);
-		}
-		DynItemInst::denyMultiSlot = true;
-
-		for (it = equippedItems.begin(); it != equippedItems.end(); ++it)
-		{
-			//restoreItem(*it, inventory);
-			npc->EquipItem(*it);
-		}*/
-
 		for (it = equippedItems.begin(); it != equippedItems.end(); ++it)
 		{
 			restoreItem(*it, inventory);
-			//npc->EquipItem(*it);
 		}
 
 		tempList.clear();
@@ -1074,4 +905,80 @@ void DynItemInst::initAdditMemory()
 	manager->removeAllAdditionalMemory();
 	logStream << "loadSavegameHook finished." << std::endl;
 	Logger::getLogger()->log(Logger::Info, &logStream, false, true, true);
+}
+
+bool DynItemInst::isReadiedWeapon(int weaponMode, oCItem* item)
+{
+	switch(weaponMode)
+	{
+
+	case 3:
+		if (item->HasFlag(2))
+		{
+			return true;
+		}
+		break;
+	case 4:
+		if (item->HasFlag(2))
+		{
+			return true;
+		}
+		break;
+	case 5:
+		if (item->HasFlag(1<<19))
+		{
+			return true;
+		}
+		break;
+	case 6:
+		if (item->HasFlag(1<<20))
+		{
+			return true;
+		}
+		break;
+	default: break;
+	}
+
+	return false;
+}
+
+void DynItemInst::updateRangedWeapon(oCItem* item, oCNpcInventory* inventory, bool munitionUsesRightHand)
+{
+	zCListSort<oCItem>* list = getInvItemByInstanceId(inventory, item->munition);
+	oCItem* munition = list->GetData();
+	int arrowId = ObjectManager::getObjectManager()->getInstanceId(*munition);
+	zCListSort<oCItem>* list2 = list->GetNext();
+	oCItem* munition2 = nullptr;
+	oCNpc* owner = inventory->GetOwner();
+
+	if (list2)
+	{
+		munition2 = list2->GetData();
+	}
+
+	if (munition2 && munition2->instanz > 1)
+	{
+		logStream << "DynItemInst::updateRangedWeapon: munition2->instanz > 1!";
+		Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
+	}
+
+	int amount = munition->instanz;
+	inventory->Remove(munition, munition->instanz);
+	if (munition2)
+	{
+		inventory->Remove(munition2, munition2->instanz);
+		amount += munition2->instanz;
+	}
+	munition = oCObjectFactory::GetFactory()->CreateItem(munition->GetInstance());
+	munition->instanz = amount;
+	inventory->Insert(munition);
+	munition = getInvItemByInstanceId(inventory, arrowId)->GetData();
+
+	if (munitionUsesRightHand)
+	{
+		oCNpcSetRightHand(owner, munition->SplitItem(1));
+	} else
+	{
+		oCNpcSetLeftHand(owner, munition->SplitItem(1));
+	}
 };
