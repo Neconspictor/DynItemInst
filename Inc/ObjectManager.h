@@ -260,7 +260,7 @@ public:
 	 * \param id The instance id the additional memory should store.
 	 * \param isHeroItem Is the given item in the player's inventory?
 	 */
-	void createAdditionalMemory(oCItem* item, int id, bool isHeroItem = false);
+	void createAdditionalMemory(oCItem* item, int id, bool isHeroItem = false, bool activeSpellItem = false);
 
 	/**
 	 * Deletes AdditionalMemory on the base of its key.

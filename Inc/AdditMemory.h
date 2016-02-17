@@ -56,6 +56,7 @@ private:
 		ar & instanceId;
 		ar & instanz;
 		ar & flags;
+		ar & activeSpellItem;
     }
 public:
 
@@ -67,6 +68,7 @@ public:
 		instanceId = 0;
 		instanz = 0;
 		flags = 0;
+		activeSpellItem = 0;
 
 		referenceCount = 0;	//don't serialize it!
 		visited = false;
@@ -76,6 +78,7 @@ public:
 	int instanceId;
 	int instanz;
 	int flags;
+	bool activeSpellItem;
 	int referenceCount;	//don't serialize it!
 	bool visited;
 

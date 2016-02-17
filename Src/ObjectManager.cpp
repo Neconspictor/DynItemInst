@@ -720,7 +720,7 @@ int ObjectManager::getIndexByName(zSTRING symbolName)
 	return it->second;
 }
 
-void ObjectManager::createAdditionalMemory(oCItem* item, int id, bool isHeroItem){
+void ObjectManager::createAdditionalMemory(oCItem* item, int id, bool isHeroItem, bool activeSpellItem){
 	if (item->instanz <= 0)
 	{
 		std::cout << "Warning: item->instanz <= 0!" << std::endl;
@@ -734,6 +734,7 @@ void ObjectManager::createAdditionalMemory(oCItem* item, int id, bool isHeroItem
 	addit->referenceCount = 1;
 	addit->flags = item->flags;
 	addit->instanz = item->instanz;
+	addit->activeSpellItem = activeSpellItem;
 	item->instanz = -additKey;
 	keyToAdditMap.insert(pair<int,AdditMemory*>(addit->additId, addit));
 }

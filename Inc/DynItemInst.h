@@ -184,6 +184,11 @@ public:
 	 */
 	static void __thiscall oCMobContainerOpenHook(void* pThis, oCNpc* npc);
 
+
+
+	static void __thiscall oCMag_BookSetFrontSpellHook(void* pThis, int number);
+
+
 	/**
 	 * Calls the gothic 2 function zCVisual::LoadVisual(zSTRING const &)
 	 * \param name The name of the visual to load
