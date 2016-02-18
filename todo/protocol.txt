@@ -1,0 +1,4 @@
+- fixed loading of possible obsolete dii files
+- fixed bug, where quicksave folder wasn't supported for saving dii items
+- equipped items and drawn weapons are right placed, now
+- Runes don't vanish after saving
