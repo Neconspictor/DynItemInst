@@ -40,6 +40,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <api/g2/ocnpc.h>
 #include <api/g2/ocnpcinventory.h>
 #include <api/g2/oCObjectFactory.h>
+#include <unordered_map>
 
 const std::string DynItemInst::SAVE_ITEM_FILE_EXT = ".SAV";
 const std::string DynItemInst::SAVE_ITEM_INSTANCES  = "DII_INSTANCES";
@@ -129,6 +130,16 @@ typedef int(__thiscall* OCMag_BookGetSelectedSpellNr)(oCMag_Book*);
 OCMag_BookGetSelectedSpellNr oCMag_BookGetSelectedSpellNr = (OCMag_BookGetSelectedSpellNr)0x004777D0;
 typedef void(__thiscall* OCMag_BookNextRegisterAt)(oCMag_Book*, int);
 OCMag_BookNextRegisterAt oCMag_BookNextRegisterAt = (OCMag_BookNextRegisterAt)0x00479C40;
+typedef void(__thiscall* OCNpcMakeSpellBook)(oCNpc*);
+OCNpcMakeSpellBook oCNpcMakeSpellBook = (OCNpcMakeSpellBook)0x0075F040;
+typedef void(__thiscall* OCNpcDestroySpellBook)(oCNpc*);
+OCNpcDestroySpellBook oCNpcDestroySpellBook = (OCNpcDestroySpellBook)0x0075F0C0;
+typedef void(__thiscall* OCNpcOpenSpellBook)(oCNpc*, int);
+OCNpcOpenSpellBook oCNpcOpenSpellBook = (OCNpcOpenSpellBook)0x0073E990;
+typedef int (__thiscall* OCMag_GetNoOfSpellByKey)(oCMag_Book*, int);
+OCMag_GetNoOfSpellByKey oCMag_GetNoOfSpellByKey = (OCMag_GetNoOfSpellByKey)0x00479CE0;
+typedef oCSpell*(__thiscall* OCMag_BookGetSelectedSpell)(oCMag_Book*);
+OCMag_BookGetSelectedSpell oCMag_BookGetSelectedSpell = (OCMag_BookGetSelectedSpell)0x00477780;
 
 void DynItemInst::hookModule()
 {
@@ -391,26 +402,47 @@ DynItemInst::~DynItemInst()
 		}
 		inventory->UnpackAllItems();
 		zCListSort<oCItem>* list = reinterpret_cast<zCListSort<oCItem>*>(inventory->inventory_data);
+		oCMag_Book* magBook = oCNpcGetSpellBook(npc);
+		int selectedSpellKey = -1;
+		if (magBook) {
+			oCSpell* selectedSpell = oCMag_BookGetSelectedSpell(magBook);
+			if (selectedSpell)
+			{
+				selectedSpellKey = oCSpellGetSpellID(selectedSpell);
+			}
+			logStream << "DynItemInst::writeSavegameHook: selectedSpellKey=" << selectedSpellKey<< std::endl;
+			Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
+		} else
+		{
+			logStream << "DynItemInst::writeSavegameHook: magBook is null!" << std::endl;
+			Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
+		}
 		while(list != nullptr) {
 			oCItem* item = list->GetData();
-			int id = modifyItemForSaving(item, true);
+			int id = modifyItemForSaving(item, isHero);
 			int equiped = id && item->HasFlag(OCITEM_FLAG_EQUIPPED);
-			oCMag_Book* magBook = oCNpcGetSpellBook(npc);
-			int selectedSpellKey = oCMag_BookGetSelectedSpellNr(magBook);
+			magBook = oCNpcGetSpellBook(npc);
 			int spellKey = oCMag_BookGetKeyByItem(magBook, item);
+			if (!equiped)
+			{
+				spellKey = -1;
+			}
 			// selected spell key begins at 0, but spell key strangely at 1 
-			bool activeSpellItem = selectedSpellKey == (spellKey - 1);
+			bool activeSpellItem = (selectedSpellKey  == (item->spell));
+			logStream << "DynItemInst::writeSavegameHook: SET SELECTED SPELL" << std::endl;
+			logStream << "DynItemInst::writeSavegameHook: spell name= " << item->description.ToChar() << std::endl;
 			logStream << "DynItemInst::writeSavegameHook: selectedSpellKey= " << selectedSpellKey << std::endl;
 			logStream << "DynItemInst::writeSavegameHook: spellKey= " << spellKey << std::endl;
 			logStream << "DynItemInst::writeSavegameHook: activeSpellItem= " << activeSpellItem << std::endl;
+			logStream << "DynItemInst::writeSavegameHook: create addit memory= " << (id > 0) << std::endl;
 			Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
-			if (id) manager->createAdditionalMemory(item, id, true, activeSpellItem);
+			if (id) manager->createAdditionalMemory(item, id, isHero, activeSpellItem, spellKey);
 			if (equiped)
 			{
 				logStream << "item should be unequiped now..." << std::endl;
 				Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
-				//npc->Equip(item);
-				//item->SetFlag(OCITEM_FLAG_EQUIPPED);
+				npc->Equip(item);
+				item->SetFlag(OCITEM_FLAG_EQUIPPED);
 				/*typedef int(__thiscall* OCNpcGetWeaponMode)(oCNpc*);
 				OCNpcGetWeaponMode oCNpcGetWeaponMode = (OCNpcGetWeaponMode)0x00738C40;
 				int weaponMode = oCNpcGetWeaponMode(npc);
@@ -492,7 +524,7 @@ DynItemInst::~DynItemInst()
 	manager->removeAllAdditionalMemory();	
 };
 
- void DynItemInst::restoreItem(oCItem* item,  oCNpcInventory* inventory) {
+ void DynItemInst::restoreItem(oCItem* item,  oCNpcInventory* inventory, std::unordered_map<int, oCItem*>* equippedSpells, oCItem** activeSpellItem) {
 	if (item == nullptr) return;
 	if (item->instanz < 0) {
 		ObjectManager* manager = ObjectManager::getObjectManager();
@@ -522,62 +554,6 @@ DynItemInst::~DynItemInst()
 
 		// is the item equipped?
 		int equipped = item->HasFlag(OCITEM_FLAG_EQUIPPED);
-
-		//oCItemInitByScript(item, instanceId, item->instanz);
-
-		/*if (equipped)
-		{
-			logStream << "DynItemInst::restoreItem: Restore equipped item..." << std::endl;
-			Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
-
-			oCNpc* owner = inventory->GetOwner();
-			int weaponMode = oCNpcGetWeaponMode(owner);
-
-			if (isReadiedWeapon(weaponMode, item))
-			{
-				logStream << "DynItemInst::restoreItem: Force to remove weapon..." << std::endl;
-				Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
-				oCNpcEV_ForceRemoveWeapon(owner, item);
-			}
-
-			int amount = item->instanz;
-			if (amount != 1)
-			{
-				logStream << "DynItemInst::restoreItem: amount > 1!";
-				Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
-			}
-
-			int munitionAvailable = 0;
-
-			//item->SetFlag(OCITEM_FLAG_EQUIPPED);
-			inventory->Remove(item, item->instanz);
-			zCListSort<oCItem>* list = getInvItemByInstanceId(inventory, instanceId);
-			oCItem* copy = oCObjectFactory::GetFactory()->CreateItem(instanceId);
-
-			if (list != nullptr)
-			{
-				item = list->GetData();
-				copy->instanz = item->instanz + amount;
-				inventory->Remove(item, item->instanz);
-			}
-
-			world->AddVob(copy);
-			inventory->Insert(copy);
-			copy = getInvItemByInstanceId(inventory, instanceId)->GetData();
-			owner->Equip(copy);
-
-
-			logStream << "DynItemInst::restoreItem: item is now equipped!" << std::endl;
-			logStream << "DynItemInst::restoreItem: Weapon mode: " << weaponMode << std::endl;
-			Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
-
-			copy = getInvItemByInstanceId(inventory, instanceId)->GetData();
-			oCNpcSetWeaponMode2(owner, weaponMode);  //3 for one hand weapons
-
-			logStream << "DynItemInst::restoreItem: Restored equipped item!" << std::endl;
-			Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
-			return;
-		}*/
 
 		if (equipped)
 		{
@@ -619,16 +595,25 @@ DynItemInst::~DynItemInst()
 
 			if (!item->HasFlag(512)) //item isn't a rune
 			{
-				if (list != nullptr)
+				/*if (list != nullptr)
 				{
 					item = list->GetData();
 					copy->instanz = item->instanz + amount;
 					inventory->Remove(item, item->instanz);
-				}
+				}*/
+				/*item->ClearFlag(OCITEM_FLAG_EQUIPPED);
+				DynItemInst::denyMultiSlot = false;
+				inventory->RemoveByPtr(item, item->instanz);
+				DynItemInst::denyMultiSlot = true;
 				world->AddVob(copy);
+				inventory->Insert(copy);*/
+				//oCItemInitByScript(item, instanceId, item->instanz);
+				inventory->Remove(item);
+				DynItemInst::denyMultiSlot = false;
 				inventory->Insert(copy);
 				copy = getInvItemByInstanceId(inventory, instanceId)->GetData();
 				owner->Equip(copy);
+				DynItemInst::denyMultiSlot = true;
 				logStream << "DynItemInst::restoreItem: item is now equipped!" << std::endl;
 				logStream << "DynItemInst::restoreItem: Weapon mode: " << weaponMode << std::endl;
 				Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
@@ -641,7 +626,8 @@ DynItemInst::~DynItemInst()
 			} else
 			{
 				oCItemInitByScript(item, instanceId, item->instanz);
-				item->SetFlag(OCITEM_FLAG_EQUIPPED);
+				//item->SetFlag(OCITEM_FLAG_EQUIPPED);
+				item->ClearFlag(OCITEM_FLAG_EQUIPPED);
 			}
 
 			if (munitionAvailable)
@@ -657,11 +643,7 @@ DynItemInst::~DynItemInst()
 				logStream << "DynItemInst::restoreItem: Weapon mode: " << weaponMode << std::endl;
 				Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
 
-				updateRangedWeapon(item, inventory, true);
-			}
-			else if (weaponMode == 5) {
-				logStream << "DynItemInst::restoreItem: Bow is readied but item is no bow!" << std::endl;
-				Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
+				updateRangedWeapon(copy, inventory, true);
 			}
 			else if (copy && copy->HasFlag(1 << 20) && munitionAvailable && weaponMode == 6)
 			{
@@ -669,23 +651,43 @@ DynItemInst::~DynItemInst()
 				logStream << "DynItemInst::restoreItem: Weapon mode: " << weaponMode << std::endl;
 				Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
 
-				updateRangedWeapon(item, inventory, false);
+				updateRangedWeapon(copy, inventory, false);
 			}
-			else if (weaponMode == 6)
-			{
-				logStream << "DynItemInst::restoreItem: Crossbow is readied but item is no crossbow!" << std::endl;
-				Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
-			} else if (item && item->HasFlag(512)) // Magic 
+			else if (item && item->HasFlag(512)) // Magic 
 			{
 				logStream << "DynItemInst::restoreItem: Readied weapon is a magic thing!" << std::endl;
 				Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
 				oCMag_Book* magBook = oCNpcGetSpellBook(owner);
+				oCNpcEV_ForceRemoveWeapon(owner, item);
+				//oCMag_BookDoClose(magBook);
+				magBook = oCNpcGetSpellBook(owner);
+				int itemSpellKey = oCMag_BookGetKeyByItem(magBook, item);
+				if (itemSpellKey <= 7)
+				{
+					oCMag_BookDeRegisterItem(magBook, item);
+					oCMag_BookNextRegisterAt(magBook, itemSpellKey-1);
+				}
+				if (addit->spellKey >= 0)
+				{
+					if (!equippedSpells)
+					{
+						logStream << "DynItemInst::restoreItem: equippedSpells is null!" << std::endl;
+						Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
+					} else
+					{
+						equippedSpells->insert(std::pair<int, oCItem*>(addit->spellKey, item));
+					}
+				}
+
+				//oCMag_BookDeRegisterItem(magBook, item);
+				//owner->Equip(item);
+				magBook = oCNpcGetSpellBook(owner);
 				if (magBook)
 				{	
-					oCSpell* spell = oCSpell_GetSelectedSpell(magBook);
+					/*oCSpell* spell = oCSpell_GetSelectedSpell(magBook);
 
-						oCNpcEV_ForceRemoveWeapon(owner, item);
-						oCMag_BookDoClose(magBook);
+						//oCNpcEV_ForceRemoveWeapon(owner, item);
+						//oCMag_BookDoClose(magBook);
 
 
 					// Return Index of oCMag_BookGetKeyByItem begins at 1
@@ -740,7 +742,7 @@ DynItemInst::~DynItemInst()
 						itemSpellKey = oCMag_BookGetKeyByItem(magBook, item);
 						logStream << "DynItemInst::restoreItem: itemSpellKey = " << itemSpellKey << std::endl;
 						Logger::getLogger()->log(Logger::Info, &logStream, true, true, true);
-					}
+					}*/
 
 					/*if (addit->activeSpellItem)
 					{
@@ -755,6 +757,11 @@ DynItemInst::~DynItemInst()
 						Logger::getLogger()->log(Logger::Info, &logStream, true, true, true);
 						oCNpcSetWeaponMode2(owner, weaponMode);
 					}*/
+					if (addit->activeSpellItem && activeSpellItem)
+					{
+						*activeSpellItem = item;
+					}
+
 					oCNpcSetWeaponMode2(owner, weaponMode);
 					//oCMag_BookRegister(magBook, item, 1);
 					//oCMag_DoOpen(magBook);
@@ -923,13 +930,98 @@ void DynItemInst::restoreDynamicInstances(oCGame* game) {
 			}
 		}
 
+		oCItem* temp = nullptr;
+		oCItem** selectedSpellItem = &temp;
+		std::unordered_map<int, oCItem*> equippedSpells;
+
+		//oCNpcDestroySpellBook(npc);
+		//oCNpcMakeSpellBook(npc);
+
 		for (it = equippedItems.begin(); it != equippedItems.end(); ++it)
 		{
-			restoreItem(*it, inventory);
+			restoreItem(*it, inventory, &equippedSpells, selectedSpellItem);
 		}
 
 		tempList.clear();
 		equippedItems.clear();
+		
+		for (auto it2 = equippedSpells.begin(); it2 != equippedSpells.end(); ++it2)
+		{
+			int key = it2->first;
+			oCItem* item = it2->second;
+			oCMag_Book* magBook = npc->GetSpellBook();
+			oCMag_BookNextRegisterAt(magBook, key);
+			npc->Equip(item);
+		}
+		equippedSpells.clear();
+
+		if (*selectedSpellItem)
+		{
+			logStream << "DynItemInst::restoreItem: SET SELECTED SPELL KEY!!!!" << std::endl;
+			oCMag_Book* magBook = npc->GetSpellBook();
+			int itemSpellKey = oCMag_BookGetKeyByItem(magBook, *selectedSpellItem);
+			int noOfSpellKey = oCMag_GetNoOfSpellByKey(magBook, itemSpellKey);
+			oCSpell* spell = oCMag_BookGetSpellByKey(magBook, itemSpellKey);
+			oCMag_BookSetFrontSpell(magBook, noOfSpellKey-1);
+			//oCNpcOpenSpellBook(npc, itemSpellKey);
+			bool found = false;
+			logStream << "DynItemInst::restoreItem: itemSpellKey = " << itemSpellKey << std::endl;
+			logStream << "DynItemInst::restoreItem: itemSpellKey = " << spell << std::endl;
+			Logger::getLogger()->log(Logger::Info, &logStream, true, true, true);
+			//int index = oCMag_BookGetSelectedSpellNr(magBook);
+			/*while (!found)
+			{
+				//logStream << "DynItemInst::restoreItem: index= " << index << std::endl;
+				//Logger::getLogger()->log(Logger::Info, &logStream, true, true, true);
+				int selectedSpellKey = oCMag_BookGetSelectedSpellNr(magBook);
+				oCSpell* selectedSpell = oCMag_BookGetSpellByKey(magBook, selectedSpellKey);
+				logStream << "DynItemInst::restoreItem: selectedSpell is Null: " << selectedSpell << std::endl;
+				logStream << "DynItemInst::restoreItem: selectedSpellKey = " << selectedSpellKey << std::endl;
+				Logger::getLogger()->log(Logger::Info, &logStream, true, true, true);
+				if (selectedSpell && oCSpellGetSpellID(selectedSpell) == (*selectedSpellItem)->spell)
+				{
+					logStream << "DynItemInst::restoreItem: spell found!"  << std::endl;
+					logStream << "DynItemInst::restoreItem: item name: " << (*selectedSpellItem)->description.ToChar() << std::endl;
+					logStream << "DynItemInst::restoreItem: selectedSpell nr : " << oCSpellGetSpellID(selectedSpell) << std::endl;
+					itemSpellKey = oCMag_BookGetKeyByItem(magBook, *selectedSpellItem);
+					logStream << "DynItemInst::restoreItem: expected spell key: " << itemSpellKey << std::endl;
+					logStream << "DynItemInst::restoreItem: selectedSpellKey = " << selectedSpellKey << std::endl;
+					Logger::getLogger()->log(Logger::Info, &logStream, true, true, true);
+					found = true;  
+					break;
+				}
+
+				//++index;
+				// max 7 spells are possible; index begins at 0
+				//if (index > 6) index = 0;
+				if (itemSpellKey == 0)
+				{
+					itemSpellKey = 1;
+				} else
+				{
+					itemSpellKey = 0;
+				}
+				oCMag_BookSetFrontSpell(magBook, itemSpellKey);
+			}
+			// argument index of oCMag_BookSetFrontSpell begins at 0
+			/*magBook = oCNpcGetSpellBook(npc);
+			int selectedSpellKey = oCMag_BookGetSelectedSpellNr(magBook);
+			logStream << "DynItemInst::restoreItem: selectedSpellKey = " << selectedSpellKey << std::endl;
+			logStream << "DynItemInst::restoreItem: expected spell key: " << itemSpellKey-1 << std::endl;
+			int diff = std::abs(selectedSpellKey - (itemSpellKey - 1));
+			oCMag_BookSetFrontSpell(magBook, itemSpellKey-1);
+			magBook = oCNpcGetSpellBook(npc);
+			logStream << "DynItemInst::restoreItem: new selectedSpellKey = " << oCMag_BookGetSelectedSpellNr(magBook) << std::endl;
+			itemSpellKey = oCMag_BookGetKeyByItem(magBook, *selectedSpellItem);
+			logStream << "DynItemInst::restoreItem: new expectedSpellKey = " << itemSpellKey-1 << std::endl;
+			logStream << "DynItemInst::restoreItem: item name: " << (*selectedSpellItem)->description.ToChar() << std::endl;
+			logStream << "DynItemInst::restoreItem: item spell nr : " << (*selectedSpellItem)->spell << std::endl;
+			oCSpell* selectedSpell = oCMag_BookGetSpellByKey(magBook, selectedSpellKey);
+			logStream << "DynItemInst::restoreItem: selectedSpell nr : " << oCSpellGetSpellID(selectedSpell) << std::endl;
+			Logger::getLogger()->log(Logger::Info, &logStream, true, true, true);
+			//oCNpcSetWeaponMode2(npc, weaponMode);*/
+		}
+		selectedSpellItem = nullptr;
 	}
 
 	tempList.clear();

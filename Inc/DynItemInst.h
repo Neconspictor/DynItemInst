@@ -37,6 +37,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <vector>
 #include <oCItemExtended.h>
 #include <ocgameExtended.h>
+#include <unordered_map>
 
 
 class oCMobContainer;
@@ -214,7 +215,7 @@ public:
 	 * \param inventory The inventory the provided item is contained. If this field is NULL, it is expected
 	 * that the item is located in the current world.
 	 */
-	static void restoreItem(oCItem* item, oCNpcInventory* inventory = NULL);
+	static void restoreItem(oCItem* item, oCNpcInventory* inventory = nullptr, std::unordered_map<int, oCItem*>* equippedSpells = nullptr, oCItem** activeSpellItem = nullptr);
 
 	/**
 	 * Modifies a given oCItem for savegame writing if it has a dynamic instance id.
