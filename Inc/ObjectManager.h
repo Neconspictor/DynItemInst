@@ -52,6 +52,11 @@ public:
 	static const int HERO_ADDIT_BEGIN = 2000000000;
 
 	/**
+	* New additional memory for special items will have keys with a value beginning at this constant.
+	*/
+	static const int SPECIAL_ADDIT_BEGIN = 1500000000;
+
+	/**
 	 * This number will be used to mark zCPar_Symbols of new instances.
 	 */
 	static const int ZCPAR_SYMBOL_MARK_ID = -6666666;
@@ -359,6 +364,8 @@ public:
 	int getInstanceBegin();
 
 	int * getParserInstanceCount();
+
+	int getIdForSpecialPurposes();
 
 private:
 

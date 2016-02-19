@@ -804,7 +804,6 @@ int ObjectManager::calcAdditKey(bool isHeroItem){
 	if (isHeroItem) {
 		return HERO_ADDIT_BEGIN + (static_cast<int>(keyToAdditMap.size()) +1);
 	}
-	//return INSTANCE_BEGIN + (static_cast<int>(keyToAdditMap.size()) + 1);
 	return (static_cast<int>(keyToAdditMap.size()) + 1);
 };
 
@@ -1014,4 +1013,9 @@ int* ObjectManager::getParserInstanceCount()
 {
 	zCParser* parser = zCParser::GetParser();
 	return (int*)(((BYTE*)parser) + 0x18 + 0x8);
+}
+
+int ObjectManager::getIdForSpecialPurposes()
+{
+	return SPECIAL_ADDIT_BEGIN;
 }
