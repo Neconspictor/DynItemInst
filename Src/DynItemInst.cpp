@@ -51,7 +51,7 @@ bool DynItemInst::denyMultiSlot = false;
 bool DynItemInst::levelChange = false;
 bool DynItemInst::saveGameIsLoading = false;
 
-DynItemInst::InstanceNames DynItemInst::instanceNames = { "DII_DUMMY_ITEM_", "NF_","FF_" , "RUNE_", "OTH_", 1, 1, 1, 1 };
+DynItemInst::InstanceNames DynItemInst::instanceNames = { "DII_DUMMY_ITEM_", "NF_","FF_" , "RUNE_", "OTHER_", 1, 1, 1, 1 };
 
 std::vector<zCPar_Symbol*>* DynItemInst::symbols = new std::vector<zCPar_Symbol*>();
 bool DynItemInst::showExtendedDebugInfo = false;
@@ -144,7 +144,8 @@ typedef void(__thiscall* OCMag_BookStopSelectedSpell)(oCMag_Book*);
 OCMag_BookStopSelectedSpell oCMag_BookStopSelectedSpell = (OCMag_BookStopSelectedSpell)0x00477910;
 typedef void(__thiscall* OCMag_BookKillSelectedSpell)(oCMag_Book*);
 OCMag_BookKillSelectedSpell oCMag_BookKillSelectedSpell = (OCMag_BookKillSelectedSpell)0x00477A90;
-
+typedef void(__thiscall* OCItemInsertEffect)(oCItem*);
+OCItemInsertEffect oCItemInsertEffect = (OCItemInsertEffect)0x00712C40;
 void DynItemInst::hookModule()
 {
 	loadSavegame = (LoadSavegame) (LOAD_SAVEGAME_ADDRESS);
@@ -424,6 +425,9 @@ DynItemInst::~DynItemInst()
 			logStream << "DynItemInst::writeSavegameHook: magBook is null!" << std::endl;
 			Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
 		}
+
+		resetInstanceNameStruct();
+
 		while(list != nullptr) {
 			oCItem* item = list->GetData();
 			int id = modifyItemForSaving(item, isHero);
@@ -449,7 +453,17 @@ DynItemInst::~DynItemInst()
 			{
 				logStream << "item should be unequiped now..." << std::endl;
 				Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
+				//Deny invocation of equip function
+				int unEquipFunction = item->on_unequip;
+				item->on_unequip = 0;
+
+				//unequip item
 				npc->Equip(item);
+
+				//restore functions
+				item->on_unequip = unEquipFunction;
+				
+				//Mark item as equipped
 				item->SetFlag(OCITEM_FLAG_EQUIPPED);
 				/*typedef int(__thiscall* OCNpcGetWeaponMode)(oCNpc*);
 				OCNpcGetWeaponMode oCNpcGetWeaponMode = (OCNpcGetWeaponMode)0x00738C40;
@@ -565,6 +579,7 @@ DynItemInst::~DynItemInst()
 			manager->setInstanceId(item, instanceId);
 			manager->assignInstanceId(item, instanceId);
 			item->SetVisual(zCVisualLoadVisual(item->visual));
+			oCItemInsertEffect(item);
 			return;
 		}
 
@@ -573,15 +588,12 @@ DynItemInst::~DynItemInst()
 
 		if (equipped)
 		{
+
 			logStream << "DynItemInst::restoreItem: Restore equipped item..." << std::endl;
 			Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
 
 			oCNpc* owner = inventory->GetOwner();
-			logStream << "DynItemInst::restoreItem: Hello" << std::endl;
-			Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
 			int weaponMode = oCNpcGetWeaponMode(owner);
-			logStream << "DynItemInst::restoreItem: Hello" << std::endl;
-			Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
 
 			if (isReadiedWeapon(weaponMode, item) && !item->HasFlag(512))
 			{
@@ -589,9 +601,6 @@ DynItemInst::~DynItemInst()
 				Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
 				oCNpcEV_ForceRemoveWeapon(owner, item);
 			}
-
-			logStream << "DynItemInst::restoreItem: Hello" << std::endl;
-			Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
 
 			int amount = item->instanz;
 			if (amount != 1)
@@ -603,9 +612,6 @@ DynItemInst::~DynItemInst()
 			zCListSort<oCItem>* list = getInvItemByInstanceId(inventory, instanceId);
 			oCItem* copy = oCObjectFactory::GetFactory()->CreateItem(instanceId);
 			int munitionAvailable = 0;
-
-			logStream << "DynItemInst::restoreItem: Hello4" << std::endl;
-			Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
 
 			if (!item->HasFlag(512)) //item isn't a rune
 			{
@@ -626,7 +632,15 @@ DynItemInst::~DynItemInst()
 				DynItemInst::denyMultiSlot = false;
 				inventory->Insert(copy);
 				copy = getInvItemByInstanceId(inventory, instanceId)->GetData();
+
+				//Deny invocation of equip function
+				int equipFunction = copy->on_equip; 
+				copy->on_equip = 0;
 				owner->Equip(copy);
+
+				//restore function
+				copy->on_equip = equipFunction;
+
 				DynItemInst::denyMultiSlot = true;
 				logStream << "DynItemInst::restoreItem: item is now equipped!" << std::endl;
 				logStream << "DynItemInst::restoreItem: Weapon mode: " << weaponMode << std::endl;
@@ -737,6 +751,8 @@ DynItemInst::~DynItemInst()
 	
 	if (item->HasFlag(OCITEM_FLAG_EQUIPPED))
 	{
+		logStream << "DynItemInst::modifyItemForSaving: item->description: " << item->description.ToChar() << std::endl;
+		Logger::getLogger()->log(Logger::Info, &logStream, true, true, true);
 		std::stringstream ss;
 		if (item->HasFlag(2)) //near fight
 		{
@@ -799,6 +815,8 @@ DynItemInst::~DynItemInst()
 
 	 oCNpc* owner = inventory->GetOwner();
 	 int amount = item->instanz;
+	 
+	 //TODO: deny invocation od equip function maybe?
 	  owner->EquipItem(item);
 	 inventory->Remove(item, item->instanz);
 	 zCListSort<oCItem>* list = getInvItemByInstanceId(inventory, instanceId);
@@ -856,6 +874,11 @@ void DynItemInst::restoreDynamicInstances(oCGame* game) {
 			if (item->instanz < 0) {
 				int additId = -item->instanz;
 				AdditMemory* addit = manager->getAddit(additId);
+				if (!addit)
+				{
+					logStream << "DynItemInst::restoreDynamicInstances: addit is null! additKey=" << additId << std::endl;
+					Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
+				}
 				equiped = addit->flags & OCITEM_FLAG_EQUIPPED;
 			}
 			if (equiped)
@@ -900,6 +923,7 @@ void DynItemInst::restoreDynamicInstances(oCGame* game) {
 			int noOfSpellKey = oCMag_GetNoOfSpellByKey(magBook, itemSpellKey);
 			oCSpell* spell = oCMag_BookGetSpellByKey(magBook, itemSpellKey);
 			
+
 			logStream << "DynItemInst::restoreDynamicInstances: itemSpellKey = " << itemSpellKey << std::endl;
 			logStream << "DynItemInst::restoreDynamicInstances: itemSpellKey = " << spell << std::endl;
 			Logger::getLogger()->log(Logger::Info, &logStream, true, true, true);
@@ -1210,4 +1234,12 @@ void DynItemInst::updateRangedWeapon(oCItem* item, oCNpcInventory* inventory, bo
 	{
 		oCNpcSetLeftHand(owner, munition->SplitItem(1));
 	}
+}
+
+void DynItemInst::resetInstanceNameStruct()
+{
+	instanceNames.nearFightCounter = 1;
+	instanceNames.distanceFightCounter = 1;
+	instanceNames.runeCounter = 1;
+	instanceNames.otherCounter = 1;
 };

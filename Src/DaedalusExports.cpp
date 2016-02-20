@@ -86,12 +86,13 @@ void __cdecl DaedalusExports::DII_CreateNewItem(int index, int instanceId) // Fu
 		typedef void(__thiscall* OCItemInitByScript)(void* pThis, int, int);
 		OCItemInitByScript oCItemInitByScript = (OCItemInitByScript)0x00711BD0;
 		oCItemInitByScript(item, instanceId, 1);
-		oCGame::GetGame()->GetWorld()->AddVob(item);
+		//oCGame::GetGame()->GetWorld()->AddVob(item);
 
 	}
 	else
 	{
 		item = oCObjectFactory::GetFactory()->CreateItem(instanceId);
+		//oCGame::GetGame()->GetWorld()->AddVob(item);
 	}
 
 	// update the c_item

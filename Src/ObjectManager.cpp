@@ -768,7 +768,7 @@ void ObjectManager::removeAllAdditionalMemory(){
 
 bool ObjectManager::hasAdditAssignment(oCItem& item){
 	AdditMemory* addit = getAddit(item);
-	return (addit != NULL);
+	return (addit != nullptr);
 }
 
 // Provides the id of additional memory for a given oCItem
@@ -783,7 +783,7 @@ int ObjectManager::getAdditId(oCItem& item) {
 AdditMemory* ObjectManager::getAddit(int additId) {
 	map<int,AdditMemory*>::iterator it;
 	it = keyToAdditMap.find(additId);
-	if (it == keyToAdditMap.end()) return NULL;
+	if (it == keyToAdditMap.end()) return nullptr;
 	return it->second;
 }
 

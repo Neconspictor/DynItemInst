@@ -1,7 +1,1 @@
- - rune needs exact key after loading; 
-hint: runes are ordered during loading phase (and are selected) on base of their dii instance id!!!
-->order is unpredictable
--> Order must be manually reimplemented 
--> save all in addit save files (for all npcs!!!);
-Important also for all other equipped displayed items (especially weapons); 
-All in all: For each world there have to be a npc-save file additionally! :(
+-If two dii items with same instance id are equipped, both will be unequipped!

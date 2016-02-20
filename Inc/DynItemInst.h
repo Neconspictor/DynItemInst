@@ -90,12 +90,12 @@ public:
 	static void __thiscall loadSavegameHook(void* pThis,int saveGameSlotNumber, int b);
 
 	/**
-	 * Extends functionality of oCGame::writeSavegame(int,int)
-	 * It is used for saving dynamic instances.
-	 * \param pThis A pointer to a valid oCGame object.
-	 * \param saveGameSlotNumber The slot number of the savegame to be written to.
-	 * \param b 
-	 */
+		 * Extends functionality of oCGame::writeSavegame(int,int)
+		 * It is used for saving dynamic instances.
+		 * \param pThis A pointer to a valid oCGame object.
+		 * \param saveGameSlotNumber The slot number of the savegame to be written to.
+		 * \param b 
+		 */
 	static void __thiscall writeSavegameHook(void* pThis,int saveGameSlotNumber, int b);
 
 	/**
@@ -251,6 +251,7 @@ private:
 	static void initAdditMemory();
 	static bool isReadiedWeapon(int weaponMode, oCItem* item);
 	static void updateRangedWeapon(oCItem* item, oCNpcInventory* inventory, bool munitionUsesRightHand);
+	static void resetInstanceNameStruct();
 
 public:
 	static const std::string SAVE_ITEM_FILE_EXT;
