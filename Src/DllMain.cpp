@@ -63,6 +63,9 @@ BOOL APIENTRY DllMain( HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpRese
     {
     case DLL_PROCESS_ATTACH: 
 		util::setModuleHandle(hModule);
+
+		// only for debug builds
+		util::setDebug(true);
 		logStream<< "DLL_Process_Attach called."<< std::endl;
 		Logger::getLogger()->log(Logger::Info, &logStream, true, false);
 		break;

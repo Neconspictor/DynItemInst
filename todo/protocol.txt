@@ -5,3 +5,4 @@
 - fixed issue with equip and unequip function call while saving and loading
 - spellfxs for items are restored after loading
 - removed double creation of spell effect visuals
+- fixed bug: If two dii items with same instance id are equipped, both will be unequipped!

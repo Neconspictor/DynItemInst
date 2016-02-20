@@ -33,11 +33,15 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <string>
 #include <sys/stat.h> // stat
 #include <errno.h>    // errno, ENOENT, EEXIST
+#include <Logger.h>
 #if defined(_WIN32)
 #include <direct.h>   // _mkdir
 #endif
 
-HMODULE hModule;
+
+HMODULE util::hModule = 0;
+bool util::debugEnabled = false;
+std::stringstream util::logStream;
 
 void util::safeDelete(void** pointer)
 {
@@ -82,6 +86,28 @@ void util::setModuleHandle(HMODULE handle)
 HMODULE util::getModuleHandle()
 {
 	return hModule;
+}
+
+void util::assertDIIRequirements(bool expression, std::string errorMessage)
+{
+	if (!expression)
+	{
+		logStream << "DII-Assertion failed: " << errorMessage << std::endl;
+		Logger::getLogger()->log(Logger::Fatal, &logStream, true, true, true);
+	}
+}
+
+void util::debug(std::stringstream* ss)
+{
+	if (debugEnabled)
+	{
+		Logger::getLogger()->log(Logger::Info, ss, true, true, true);
+	}
+}
+
+void util::setDebug(bool enable)
+{
+	debugEnabled = enable;
 }
 
 bool util::existsDir(const std::string& path)

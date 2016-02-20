@@ -209,12 +209,12 @@ public:
 	static zCListSort<oCItem>* getInvItemByInstanceId(oCNpcInventory* inventory, int instanceId);
 
 	/**
-	 * Restores a given oCItem from savegame if it was previously modified by modifyItemForSaving(oCItem* item, bool isHeroItem).
-	 * If the provided item isn't modified nothing will be done.
-	 * \param item The item which should be restored.
-	 * \param inventory The inventory the provided item is contained. If this field is NULL, it is expected
-	 * that the item is located in the current world.
-	 */
+				 * Restores a given oCItem from savegame if it was previously modified by modifyItemForSaving(oCItem* item, bool isHeroItem).
+				 * If the provided item isn't modified nothing will be done.
+				 * \param item The item which should be restored.
+				 * \param inventory The inventory the provided item is contained. If this field is NULL, it is expected
+				 * that the item is located in the current world.
+				 */
 	static void restoreItem(oCItem* item, oCNpcInventory* inventory = nullptr, std::unordered_map<int, oCItem*>* equippedSpells = nullptr, oCItem** activeSpellItem = nullptr);
 
 	/**
@@ -252,6 +252,8 @@ private:
 	static bool isReadiedWeapon(int weaponMode, oCItem* item);
 	static void updateRangedWeapon(oCItem* item, oCNpcInventory* inventory, bool munitionUsesRightHand);
 	static void resetInstanceNameStruct();
+	static int getSlotNumber(oCNpcInventory* inventory, oCItem* item);
+	static oCItem* searchItemInInvbyInstanzValue(oCNpcInventory* inventory, int searchValue);
 
 public:
 	static const std::string SAVE_ITEM_FILE_EXT;

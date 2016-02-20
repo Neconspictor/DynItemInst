@@ -36,21 +36,22 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 /**
 * Contains functions that are useful for several classes.
 */
-namespace util {
+class util {
+public:
 
 	/**
 	 * Checks if the specified path is an directory and exists.
 	 * \param path The directory path to check.
 	 * \return Exists the specified directory path?
 	 */
-	bool existsDir(const std::string& path);
+	static bool existsDir(const std::string& path);
 
 	/**
 	 * Creates the provied folder structure.
 	 * \param path The directory path to create
 	 * \return Was the path creation successful?
 	 */
-	bool makePath(const std::string& path);
+	static bool makePath(const std::string& path);
 
 	/**
 	 * Splits the given text 'text' on the base of the separation character 'sep'
@@ -60,7 +61,7 @@ namespace util {
 	 * \param sep Always this character was found in the text the latter will be splitted at the
 	 * current position.
 	 */
-	void split(std::vector<std::string> &tokens, const std::string &text, char sep);
+	static void split(std::vector<std::string> &tokens, const std::string &text, char sep);
 
 	/**
 	 * Copies all files from a specified source path which additionally begin with the pattern
@@ -69,60 +70,74 @@ namespace util {
 	 * \param des The directory to copy to
 	 * \param pattern Only files, which names begin with this pattern, will be treated.
 	 */
-	void copyContentTo(std::string source, std::string dest, std::string pattern);
+	static void copyContentTo(std::string source, std::string dest, std::string pattern);
 
 	/**
 	 * Deletes all files from the folder 'folder' which begin with the pattern 'pattern'.
 	 * \param folder The directory to delete the files from.
 	 * \param pattern Only files, which names begin with this pattern, will be treated.
 	 */
-	void deleteAllFiles(std::string folder, std::string pattern);
+	static void deleteAllFiles(std::string folder, std::string pattern);
 
 	/**
 	 * Copies a file and moves its copy to a specified destination.
 	 * \param from The file to be copied.
 	 * \param to The file path the file should be copied to.
 	 */
-	void copyFileTo(std::string from, std::string to);
+	static void copyFileTo(std::string from, std::string to);
 
 	/**
 	 * Takes the address of an pointer and deletes the pointer and sets its content to NULL.
 	 * \param address The address of the pointer
 	 */
-	void safeDelete(void** address);
+	static void safeDelete(void** address);
 
 	/**
 	 * Provides the pth to the current working directory of this application.
 	 * \return The current working directory
 	 */
-	std::string getCurrentWorkingDir(); 
+	static std::string getCurrentWorkingDir();
 
 	/**
 	 * Provides the name of a module referenced by a given handle.
 	 * \param handle The handle to the module for which the name is desired
 	 * \return The name of the module referenced by the module handle.
 	 */
-	std::string getModuleName(HMODULE handle);
+	static std::string getModuleName(HMODULE handle);
 
 	/**
 	 * Provides the directory path of a module referenced by a given handle.
 	 * \param handle The handle to the module for which the directory path is desired
 	 * \return The directory path of the module referenced by the module handle.
 	 */
-	std::string getModuleDirectory(HMODULE handle);
+	static std::string getModuleDirectory(HMODULE handle);
 
 	/**
 	 * Sets the module handle for this namespace.
 	 * \param handle The handle which should be assigned to the namespace module handle.
 	 */
-	void setModuleHandle(HMODULE handle);
+	static void setModuleHandle(HMODULE handle);
 
 	/**
 	 * Provides the module handle of this namespace.
 	 * Attention: In order to work properly, the method util::setModuleHandle has to have been called before.
 	 * \return The module handle hold by this namespace.
 	 */
-	HMODULE getModuleHandle();
+	static HMODULE getModuleHandle();
+
+	static void assertDIIRequirements(bool expression, std::string errorMessage);
+
+	static void debug(std::stringstream* ss);
+
+	static void setDebug(bool enable);
+private:
+	util() {};
+	~util() {};
+
+	static bool debugEnabled;
+	static HMODULE hModule;
+	static std::stringstream logStream;
+
 };
 
 #endif __UTIL_H__

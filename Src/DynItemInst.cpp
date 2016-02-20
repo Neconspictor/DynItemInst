@@ -51,7 +51,7 @@ bool DynItemInst::denyMultiSlot = false;
 bool DynItemInst::levelChange = false;
 bool DynItemInst::saveGameIsLoading = false;
 
-DynItemInst::InstanceNames DynItemInst::instanceNames = { "DII_DUMMY_ITEM_", "NF_","FF_" , "RUNE_", "OTHER_", 1, 1, 1, 1 };
+DynItemInst::InstanceNames DynItemInst::instanceNames = { "DII_DUMMY_ITEM", "_NF_","_FF_" , "_RUNE_", "_OTHER_", 1, 1, 1, 1 };
 
 std::vector<zCPar_Symbol*>* DynItemInst::symbols = new std::vector<zCPar_Symbol*>();
 bool DynItemInst::showExtendedDebugInfo = false;
@@ -441,17 +441,11 @@ DynItemInst::~DynItemInst()
 			}
 			// selected spell key begins at 0, but spell key strangely at 1 
 			bool activeSpellItem = (selectedSpellKey  == (item->spell));
-			logStream << "DynItemInst::writeSavegameHook: SET SELECTED SPELL" << std::endl;
-			logStream << "DynItemInst::writeSavegameHook: spell name= " << item->description.ToChar() << std::endl;
-			logStream << "DynItemInst::writeSavegameHook: selectedSpellKey= " << selectedSpellKey << std::endl;
-			logStream << "DynItemInst::writeSavegameHook: spellKey= " << spellKey << std::endl;
-			logStream << "DynItemInst::writeSavegameHook: activeSpellItem= " << activeSpellItem << std::endl;
 			logStream << "DynItemInst::writeSavegameHook: create addit memory= " << (id > 0) << std::endl;
 			Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
 			if (id) manager->createAdditionalMemory(item, id, isHero, activeSpellItem, spellKey);
 			if (equiped)
 			{
-				logStream << "item should be unequiped now..." << std::endl;
 				Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
 				//Deny invocation of equip function
 				int unEquipFunction = item->on_unequip;
@@ -465,26 +459,6 @@ DynItemInst::~DynItemInst()
 				
 				//Mark item as equipped
 				item->SetFlag(OCITEM_FLAG_EQUIPPED);
-				/*typedef int(__thiscall* OCNpcGetWeaponMode)(oCNpc*);
-				OCNpcGetWeaponMode oCNpcGetWeaponMode = (OCNpcGetWeaponMode)0x00738C40;
-				int weaponMode = oCNpcGetWeaponMode(npc);
-
-				typedef int(__thiscall* OCNpcEV_ForceRemoveWeapon)(oCNpc* pThis, void*);
-				OCNpcEV_ForceRemoveWeapon oCNpcEV_ForceRemoveWeapon = (OCNpcEV_ForceRemoveWeapon)0x0074EC40;
-				oCNpcEV_ForceRemoveWeapon(npc, nullptr);
-
-				typedef struct
-				{
-					oCItem* item;
-					int data[100];
-				} TEST;
-
-				typedef void(__thiscall* OCNpcSetToFightMode)(oCNpc* pThis, void*);
-				OCNpcSetToFightMode oCNpcSetToFightMode = (OCNpcSetToFightMode)0x0074CC10;
-				TEST* test = new TEST();
-				test->item = item;
-				oCNpcSetToFightMode(npc, test);
-				//delete test;*/
 			}
 
 			list = list->GetNext();
@@ -500,7 +474,7 @@ DynItemInst::~DynItemInst()
 		itemList = itemList->GetNext();
 	}
 
-	DynItemInst::denyMultiSlot = false;
+	denyMultiSlot = false;
 
 	//finally write the savegame and restore items that are reseted by the savegame writing method
 	std::string saveGameDir;
@@ -552,12 +526,16 @@ DynItemInst::~DynItemInst()
 		ObjectManager* manager = ObjectManager::getObjectManager();
 		int additId = -item->instanz;
 		AdditMemory* addit = manager->getAddit(additId);
-		if (addit == nullptr) {
+		//mark additKey as visited
+		if (addit == nullptr || addit->visited) {
 			logStream << "DynItemInst::restoreItem: Addit is null!!!" << std::endl;
 			logStream << item->name.ToChar() << " : " << additId << std::endl;
 			Logger::getLogger()->log(Logger::Warning, &logStream, false, true, true);
 			return;
 		}
+
+		//Each item should only once be restored
+		addit->visited = true;
 
 		int instanceId; 
 		if (addit->instanceId == manager->getIdForSpecialPurposes())
@@ -582,6 +560,9 @@ DynItemInst::~DynItemInst()
 			oCItemInsertEffect(item);
 			return;
 		}
+
+		bool originalMultiSlotSetting = denyMultiSlot;
+		denyMultiSlot = true;
 
 		// is the item equipped?
 		int equipped = item->HasFlag(OCITEM_FLAG_EQUIPPED);
@@ -615,24 +596,30 @@ DynItemInst::~DynItemInst()
 
 			if (!item->HasFlag(512)) //item isn't a rune
 			{
-				/*if (list != nullptr)
-				{
-					item = list->GetData();
-					copy->instanz = item->instanz + amount;
-					inventory->Remove(item, item->instanz);
-				}*/
-				/*item->ClearFlag(OCITEM_FLAG_EQUIPPED);
-				DynItemInst::denyMultiSlot = false;
-				inventory->RemoveByPtr(item, item->instanz);
-				DynItemInst::denyMultiSlot = true;
-				world->AddVob(copy);
-				inventory->Insert(copy);*/
-				//oCItemInitByScript(item, instanceId, item->instanz);
-				inventory->Remove(item);
-				DynItemInst::denyMultiSlot = false;
-				inventory->Insert(copy);
-				copy = getInvItemByInstanceId(inventory, instanceId)->GetData();
+				int slotNumber = getSlotNumber(inventory, item);
+				util::assertDIIRequirements(slotNumber >= 0, "slotNumber >= 0");
+				logStream << "DynItemInst::restoreItem: slotnumber= " << slotNumber << std::endl;
+				logStream << "DynItemInst::restoreItem: item->description= " << item->description.ToChar() << std::endl;
+				logStream << "DynItemInst::restoreItem: item->GetInstance()= " << item->GetInstance() << std::endl;
+				logStream << "DynItemInst::restoreItem: copy->description= " << copy->description.ToChar() << std::endl;
+				logStream << "DynItemInst::restoreItem: copy->GetInstance()= " << copy->GetInstance() << std::endl;
+				util::debug(&logStream);
 
+				inventory->Remove(item);
+				
+				//store some attribute to search for the copy after it was inserted into the inventory
+				int copyStoreValue = copy->instanz;
+				//assign any value that will be unique
+				int searchValue = -666;
+				copy->instanz = searchValue;
+
+				//DynItemInst::denyMultiSlot = false;
+				inventory->Insert(copy);
+
+				// Since multi-slotting was denied, copy is now on a own slot (not merged) and can be accessed
+				copy = searchItemInInvbyInstanzValue(inventory, searchValue);
+				util::assertDIIRequirements(copy != nullptr, "item to insert shouldn't be null!");
+				copy->instanz = copyStoreValue;
 				//Deny invocation of equip function
 				int equipFunction = copy->on_equip; 
 				copy->on_equip = 0;
@@ -641,16 +628,12 @@ DynItemInst::~DynItemInst()
 				//restore function
 				copy->on_equip = equipFunction;
 
-				DynItemInst::denyMultiSlot = true;
 				logStream << "DynItemInst::restoreItem: item is now equipped!" << std::endl;
 				logStream << "DynItemInst::restoreItem: Weapon mode: " << weaponMode << std::endl;
 				Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
 				copy = getInvItemByInstanceId(inventory, instanceId)->GetData();
 				oCNpcSetWeaponMode2(owner, weaponMode);  //3 for one hand weapons
 				munitionAvailable = oCNpcIsMunitionAvailable(owner, copy);
-
-				logStream << "DynItemInst::restoreItem: Hello5" << std::endl;
-				Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
 			} else
 			{
 				oCItemInitByScript(item, instanceId, item->instanz);
@@ -723,12 +706,14 @@ DynItemInst::~DynItemInst()
 
 			logStream << "DynItemInst::restoreItem: Restored equipped item!" << std::endl;
 			Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
+			denyMultiSlot = originalMultiSlotSetting;
 			return;
 		}
 		
 		oCItemInitByScript(item, instanceId, item->instanz);
 		inventory->Remove(item, item->instanz);
 		inventory->Insert(item);
+		denyMultiSlot = originalMultiSlotSetting;
 	}
 }
 
@@ -835,7 +820,7 @@ DynItemInst::~DynItemInst()
  }
 
 void DynItemInst::restoreDynamicInstances(oCGame* game) {
-	DynItemInst::denyMultiSlot = true;
+	denyMultiSlot = true;
 	zCWorld* world = game->GetWorld();
 	zCListSort<oCNpc>* npcList = world->GetNpcList();
 	ObjectManager* manager = ObjectManager::getObjectManager();
@@ -874,19 +859,20 @@ void DynItemInst::restoreDynamicInstances(oCGame* game) {
 			if (item->instanz < 0) {
 				int additId = -item->instanz;
 				AdditMemory* addit = manager->getAddit(additId);
-				if (!addit)
-				{
-					logStream << "DynItemInst::restoreDynamicInstances: addit is null! additKey=" << additId << std::endl;
-					Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
-				}
+				util::assertDIIRequirements(addit, "DynItemInst::restoreDynamicInstances: addit != nullptr");
 				equiped = addit->flags & OCITEM_FLAG_EQUIPPED;
 			}
 			if (equiped)
 			{
 				item->SetFlag(OCITEM_FLAG_EQUIPPED);
 				equippedItems.push_back(*it);
-				logStream << "id2: " << (*it)->GetInstance() << std::endl;
-				Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
+				int instanceId = (*it)->GetInstance();
+				logStream << "DynItemInst::restoreDynamicInstances: item with following id is marked as equipped: " << instanceId << std::endl;
+				util::debug(&logStream);
+				//control that instanceId is that of a marked equipped item
+				int checkInstanceId = zCParser::GetParser()->GetIndex(zSTRING(instanceNames.base.c_str()));
+				util::assertDIIRequirements(instanceId != checkInstanceId, "instanceId != checkInstanceId");
+				
 			} else
 			{
 				restoreItem(*it, inventory);
@@ -958,6 +944,9 @@ void DynItemInst::restoreDynamicInstances(oCGame* game) {
 	tempList.clear();
 
 	DynItemInst::denyMultiSlot = false;
+
+	logStream << "DynItemInst::restoreDynamicInstances: FINISHED RESTORING" << std::endl;
+	util::debug(&logStream);
 }
 
 bool DynItemInst::isSaveGameLoading()
@@ -1242,4 +1231,36 @@ void DynItemInst::resetInstanceNameStruct()
 	instanceNames.distanceFightCounter = 1;
 	instanceNames.runeCounter = 1;
 	instanceNames.otherCounter = 1;
+}
+
+int DynItemInst::getSlotNumber(oCNpcInventory* inventory, oCItem* item)
+{
+	int itemNumber = inventory->GetNumItemsInCategory();
+	for (int i = 0; i < itemNumber; ++i)
+	{
+		oCItem* slotItem = inventory->GetItem(i);
+		if (slotItem == item)
+		{
+			return i;
+		}
+	}
+
+	//item isn't in the inventory
+	return -1;
+}
+
+oCItem* DynItemInst::searchItemInInvbyInstanzValue(oCNpcInventory* inventory, int searchValue)
+{
+	int itemNumber = inventory->GetNumItemsInCategory();
+	for (int i = 0; i < itemNumber; ++i)
+	{
+		oCItem* slotItem = inventory->GetItem(i);
+		if (slotItem->instanz == searchValue)
+		{
+			return slotItem;
+		}
+	}
+
+	//no item was found
+	return nullptr;
 };

@@ -1,1 +1,2 @@
--If two dii items with same instance id are equipped, both will be unequipped!
+- refactoring
+- maybe config file for fine tuning logging (not important)
