@@ -39,6 +39,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <DaedalusExports.h>
 #include <sstream>
 #include <Logger.h>
+#include <Configuration.h>
 
 HookManager* HookManager::instance = nullptr;
 std::stringstream HookManager::logStream = std::stringstream();

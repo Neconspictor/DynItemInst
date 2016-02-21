@@ -37,6 +37,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #if defined(_WIN32)
 #include <direct.h>   // _mkdir
 #endif
+#include <sstream>
 
 
 HMODULE util::hModule = 0;

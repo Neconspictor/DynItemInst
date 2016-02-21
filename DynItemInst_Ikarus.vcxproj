@@ -12,6 +12,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Inc\AdditMemory.h" />
+    <ClInclude Include="Inc\Configuration.h" />
     <ClInclude Include="Inc\DllMain.h" />
     <ClInclude Include="Inc\DynItemInst.h" />
     <ClInclude Include="Inc\DaedalusExports.h" />
@@ -29,6 +30,7 @@
     <ClInclude Include="Inc\zCPar_SymbolTable.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Configuration.cpp" />
     <ClCompile Include="Src\DllMain.cpp" />
     <ClCompile Include="Src\DynItemInst.cpp" />
     <ClCompile Include="Src\DaedalusExports.cpp">

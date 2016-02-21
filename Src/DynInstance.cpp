@@ -29,6 +29,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include "DynInstance.h"
 #include "api/g2/zcparser.h"
 #include <Logger.h>
+#include <sstream>
 
 std::stringstream DynInstance::logStream;
 

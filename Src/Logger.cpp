@@ -33,6 +33,8 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <Windows.h>
 #include <io.h>
 #include <iostream>
+#include <sstream>
+#include <Configuration.h>
 
 class zERROR;
 
@@ -45,7 +47,6 @@ ZERROR_REPORT zErrorReport;
 Logger::Logger()
 {
 	zErrorReport = (ZERROR_REPORT)ZERROR_REPORT_ADDRESS;
-	logFileName = util::getModuleName(util::getModuleHandle()) + std::string("Log");
 }
 
 Logger::~Logger()
@@ -56,12 +57,17 @@ Logger* Logger::getLogger()
 {
 	if (instance == nullptr)
 	{
-		instance = new Logger();	
+		instance = new Logger();
+		Configuration::load("DII_Configuration.ini");
+		Configuration::save("DII_Configuration.ini");
+		logFileName = Configuration::getLogFile();
 		std::string logFilePath = util::getModuleDirectory(util::getModuleHandle()) + std::string("\\") 
-			+ logFileName + std::string(".txt");
+			+ logFileName;
 		std::ofstream logFile(logFilePath.c_str());
 		if (logFile.is_open())
 			logFile.close();
+
+		instance->logLevel = Configuration::getLogLevel();
 	}
 	return instance;
 }
@@ -74,7 +80,7 @@ void Logger::release()
 void Logger::writeToFile(std::string message)
 {
 	std::string logFilePath = util::getModuleDirectory(util::getModuleHandle()) + std::string("\\") 
-			+ logFileName + std::string(".txt");
+			+ logFileName;
 	FILE* pFile;
 	fopen_s(&pFile, logFilePath.c_str(),"a");
 	fputs(message.c_str(), pFile);

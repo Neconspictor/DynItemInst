@@ -28,7 +28,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 
 #ifndef __LOGGER_H__
 #define __LOGGER_H__
-#include <sstream>
+#include <string>
 
 /**
  * Provides basic logging functionality to different streams. Currently supported:
@@ -118,6 +118,8 @@ public:
 
 private:
 	static Logger* instance;
+
+	int logLevel;
 
 	/**
 	 * The address of the gothic 2 function zERROR::Report(int, int, zSTRING const &, signed char, UINT, int, char*, char*)

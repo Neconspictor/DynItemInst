@@ -31,6 +31,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <HookManager.h>
 #include <Logger.h>
 #include <Util.h>
+#include <Configuration.h>
 
 std::stringstream logStream;
 
