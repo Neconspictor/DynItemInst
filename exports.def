@@ -8,3 +8,5 @@ EXPORTS
 	DII_GetUserData
 	DII_GetLibVersion
 	DII_UpdateInstance
+	DII_AssignInstanceId
+	DII_EquipItem

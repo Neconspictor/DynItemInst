@@ -35,6 +35,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <DaedalusExports.h>
 #include <set>
 #include <ocgameExtended.h>
+#include <DynItemInst.h>
 
 
 const float DaedalusExports::LIB_VERSION = 1.02f;
@@ -119,6 +120,17 @@ int DaedalusExports::DII_CreateNewInstance(oCItem* item) //Func int CreateNewIte
 	logStream << "CreateNewInstance::key: " << key << std::endl;
 	Logger::getLogger()->log(Logger::Info, &logStream);
 	return key;
+}
+
+void DaedalusExports::DII_EquipItem(oCNpc* npc, int instanceId)
+{
+	if (npc == nullptr) return;
+	oCNpcInventory* inv = npc->GetInventory();
+	if (inv == nullptr) return;
+
+	oCItem* item = DynItemInst::getInvItemByInstanceId2(inv, instanceId);
+	if (item == nullptr) return;
+	npc->Equip(item);
 }
 
 int DaedalusExports::DII_IsDynamic(oCItem* item) // Func DII_IsDynamic(VAR C_ITEM item)
@@ -235,4 +247,10 @@ void DaedalusExports::DII_UpdateInstance(oCItem* item)
 		logStream << "DII_UpdateInstance: Couldn't update dynamic instance of item at address" << item << std::endl;
 		Logger::getLogger()->log(Logger::Warning, &logStream, false, true, true);
 	}
+}
+
+void DaedalusExports::DII_AssignInstanceId(oCItem* item, int instanceId)
+{
+	ObjectManager* manager = ObjectManager::getObjectManager();
+	manager->assignInstanceId(item, instanceId);
 }

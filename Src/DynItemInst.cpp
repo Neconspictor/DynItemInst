@@ -434,7 +434,13 @@ DynItemInst::~DynItemInst()
 			int equiped = id && item->HasFlag(OCITEM_FLAG_EQUIPPED);
 			
 			magBook = oCNpcGetSpellBook(npc);
-			int spellKey = oCMag_BookGetKeyByItem(magBook, item);
+			int spellKey; 
+			if (magBook) {
+				spellKey = oCMag_BookGetKeyByItem(magBook, item);
+			} else
+			{
+				spellKey = -1;
+			}
 			if (!equiped)
 			{
 				spellKey = -1;
@@ -610,7 +616,7 @@ DynItemInst::~DynItemInst()
 				//store some attribute to search for the copy after it was inserted into the inventory
 				int copyStoreValue = copy->instanz;
 				//assign any value that will be unique
-				int searchValue = -666;
+				int searchValue = -6666666;
 				copy->instanz = searchValue;
 
 				//DynItemInst::denyMultiSlot = false;
@@ -623,15 +629,16 @@ DynItemInst::~DynItemInst()
 				//Deny invocation of equip function
 				int equipFunction = copy->on_equip; 
 				copy->on_equip = 0;
+				copy->ClearFlag(OCITEM_FLAG_EQUIPPED);
 				owner->Equip(copy);
 
 				//restore function
-				copy->on_equip = equipFunction;
 
 				logStream << "DynItemInst::restoreItem: item is now equipped!" << std::endl;
 				logStream << "DynItemInst::restoreItem: Weapon mode: " << weaponMode << std::endl;
 				Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
 				copy = getInvItemByInstanceId(inventory, instanceId)->GetData();
+				copy->on_equip = equipFunction;
 				oCNpcSetWeaponMode2(owner, weaponMode);  //3 for one hand weapons
 				munitionAvailable = oCNpcIsMunitionAvailable(owner, copy);
 			} else
@@ -1088,6 +1095,7 @@ zCVisual* DynItemInst::zCVisualLoadVisual(zSTRING const& name)
 
 zCListSort<oCItem>* DynItemInst::getInvItemByInstanceId(oCNpcInventory* inventory, int instanceId)
 {
+	inventory->UnpackCategory();
 	ObjectManager* manager = ObjectManager::getObjectManager();
 	zCListSort<oCItem>* list = reinterpret_cast<zCListSort<oCItem>*>(inventory->inventory_data);
 	while(list != nullptr) {
@@ -1098,6 +1106,23 @@ zCListSort<oCItem>* DynItemInst::getInvItemByInstanceId(oCNpcInventory* inventor
 		}
 		list = list->GetNext();
 	}
+
+	return nullptr;
+};
+
+oCItem* DynItemInst::getInvItemByInstanceId2(oCNpcInventory* inventory, int instanceId)
+{
+	inventory->UnpackCategory();
+	int itemNumber = inventory->GetNumItemsInCategory();
+	for (int i = 0; i < itemNumber; ++i)
+	{
+		oCItem* itm = inventory->GetItem(i);
+		if (itm != nullptr && itm->GetInstance() == instanceId)
+		{
+			return itm;
+		}
+	}
+
 	return nullptr;
 };
 
@@ -1143,6 +1168,9 @@ void DynItemInst::initAdditMemory()
 
 	restoreDynamicInstances(oCGame::GetGame());
 	manager->removeAllAdditionalMemory();
+
+	//zCParser* parser = zCParser::GetParser();
+	//parser->CallFunc(parser->GetIndex("DII_AFTER_LOADING_FINISHED_CALLBACK"));
 	logStream << "loadSavegameHook finished." << std::endl;
 	Logger::getLogger()->log(Logger::Info, &logStream, false, true, true);
 }
@@ -1251,6 +1279,7 @@ int DynItemInst::getSlotNumber(oCNpcInventory* inventory, oCItem* item)
 
 oCItem* DynItemInst::searchItemInInvbyInstanzValue(oCNpcInventory* inventory, int searchValue)
 {
+	inventory->UnpackCategory();
 	int itemNumber = inventory->GetNumItemsInCategory();
 	for (int i = 0; i < itemNumber; ++i)
 	{

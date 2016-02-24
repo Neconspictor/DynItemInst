@@ -208,6 +208,8 @@ public:
 	 */
 	static zCListSort<oCItem>* getInvItemByInstanceId(oCNpcInventory* inventory, int instanceId);
 
+	static oCItem* getInvItemByInstanceId2(oCNpcInventory* inventory, int instanceId);
+
 	/**
 				 * Restores a given oCItem from savegame if it was previously modified by modifyItemForSaving(oCItem* item, bool isHeroItem).
 				 * If the provided item isn't modified nothing will be done.

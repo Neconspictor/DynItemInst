@@ -79,6 +79,8 @@ public:
 	 */
 	static int DII_CreateNewInstance(oCItem* item);
 
+	static void DII_EquipItem(oCNpc* npc, int instanceId);
+
 	/**
 	 * An external for checking if a given c_item has a dynamic instance id.
 	 * Daedalus syntax: Func int DII_IsDynamic(C_Item item)
@@ -105,6 +107,8 @@ public:
 	static void DII_DoStatistics();
 
 	static void DII_UpdateInstance(oCItem* item);
+
+	static void DII_AssignInstanceId(oCItem* item, int instanceId);
 
 public:
 

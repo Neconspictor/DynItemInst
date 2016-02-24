@@ -1,2 +1,3 @@
 - refactoring
 - maybe config file for fine tuning logging (not important)
+- if two items are dynamic and one is equipped, the other is selected while loading, too! -> fix that!
