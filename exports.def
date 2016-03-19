@@ -1,4 +1,4 @@
-LIBRARY	"DynItemInst_Ikarus"
+LIBRARY	"LoA-DII"
 EXPORTS
 	Hook
 	Unhook

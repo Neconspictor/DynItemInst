@@ -57,6 +57,7 @@
     <ProjectGuid>{F49E2048-15A5-46EB-9737-D31109C3DA55}</ProjectGuid>
     <RootNamespace>DynItemInst</RootNamespace>
     <ProjectName>DynItemInst_Ikarus</ProjectName>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -85,14 +86,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>.\MinHook\include;.\G2ExtSDK;.\boost_1_59_0;.\Inc;$(IncludePath)</IncludePath>
     <LibraryPath>.\MinHook\lib;$(LibraryPath)</LibraryPath>
-    <TargetName>DynItemInst_G2Ext</TargetName>
+    <TargetName>LoA_DII</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>
     </LinkIncremental>
     <IncludePath>.\MinHook\include;.\G2ExtSDK;.\boost_1_59_0;.\Inc;$(IncludePath)</IncludePath>
     <LibraryPath>.\MinHook\lib;$(LibraryPath)</LibraryPath>
-    <TargetName>DynItemInst_Ikarus</TargetName>
+    <TargetName>LoA-DII</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

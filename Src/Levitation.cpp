@@ -7,6 +7,8 @@
 #include <LevitationBean.h>
 #include <Logger.h>
 #include <Util.h>
+#include <queue>
+#include <DynItemInst.h>
 
 using namespace LevitationUtil;
 
@@ -31,9 +33,15 @@ OCNpcIsMovLock oCNpcIsMovLock = (OCNpcIsMovLock)0x007380E0;
 typedef void(__thiscall* ZCModelCalcModelBBox3DWorld)(zCModel*);
 ZCModelCalcModelBBox3DWorld zCModelCalcModelBBox3DWorld = (ZCModelCalcModelBBox3DWorld)0x00579170;
 
+//.text:00511320 public: int __thiscall zCAIPlayer::CheckEnoughSpaceMoveDir(class zVEC3 const &, int) proc near
+typedef int(__thiscall* ZCAIPlayerCheckEnoughSpaceMoveDir)(void*, zVEC3 const &, int); ZCAIPlayerCheckEnoughSpaceMoveDir zCAIPlayerCheckEnoughSpaceMoveDir;
+
 namespace LevitationUtil
 {
 	ZVEC3Normalize zVEC3Normalize = (ZVEC3Normalize)0x00490EA0;
+	OCNpcResetPos oCNpcResetPos = (OCNpcResetPos)0x006824D0;
+	//.text:0061E0D0 public: virtual void __thiscall zCVob::EndMovement(int) proc near
+	ZCVobEndMovement zCVobEndMovement = (ZCVobEndMovement)0x0061E0D0;
 }
 
 int COLLISION_HEAD_SIZE_Y = 25;
@@ -81,6 +89,8 @@ void Levitation::hookModule()
 	zCVobCheckAndResolveCollisions = reinterpret_cast<ZCVobCheckAndResolveCollisions>((ZCVOB_CHECK_AND_RESOLVE_COLLISION_ADDRESS));
 	zCVobGetVelocity = reinterpret_cast<zVEC3(__thiscall*)(void*)>(ZCVOB_GET_VELOCITY_ADDRESS);
 
+	zCAIPlayerCheckEnoughSpaceMoveDir = (ZCAIPlayerCheckEnoughSpaceMoveDir)0x00511320;
+
 	HookManager* hookManager = HookManager::getHookManager();
 	hookManager->addFunctionHook((LPVOID*)&zCVobDoFrameActivity, zCVobDoFrameActivityHook, moduleDesc);
 	hookManager->addFunctionHook((LPVOID*)&zCVobSetPhysicsEnabled, zCVobSetPhysicsEnabledHook, moduleDesc);
@@ -92,6 +102,8 @@ void Levitation::hookModule()
 
 	hookManager->addFunctionHook((LPVOID*)&zCTriggerOnTouch, zCTriggerOnTouchHook, moduleDesc);
 	hookManager->addFunctionHook((LPVOID*)&zCVobHasEnoughSpace, zCVobHasEnoughSpaceHook, moduleDesc);
+
+	hookManager->addFunctionHook((LPVOID*)&zCAIPlayerCheckEnoughSpaceMoveDir, zCAIPlayerCheckEnoughSpaceMoveDirHook, moduleDesc);
 }
 
 void Levitation::unHookModule()
@@ -198,7 +210,7 @@ void Levitation::zCVobDoFrameActivityHook(void* pThis)
 			float moveUpDistance = speed * float(frameTimePast) / 1000;
 			pos = hero->GetPosition();
 			pos.y += moveUpDistance;
-			hero->SetPositionWorld(pos);
+			//hero->SetPositionWorld(pos);
 			heroLevitationBean->setHoverDistance(heroLevitationBean->getDistanceToGround(pos));
 			//heroLevitationBean->increaseHoverDistance(moveUpDistance);
 		}
@@ -262,7 +274,7 @@ void Levitation::zCVobSetPhysicsEnabledHook(void* pThis, int second)
 	if (hero != NULL && (pThis == hero) && Levitation::adjustHeroPosition) {
 		zCInput* input = zCInput::GetInput();
 		//if (input->KeyPressed(0x1A)) return; //zCVobSetPhysicsEnabled(pThis, true);
-		//return;
+		return;
 	}
 	zCVobSetPhysicsEnabled(pThis, second);
 }
@@ -287,7 +299,7 @@ void Levitation::zCVobSetCollDetHook(void* pThis, int second)
 {
 	oCNpc* hero = oCNpc::GetHero();
 	if (hero != nullptr && (pThis == hero) && adjustHeroPosition) {
-		//return zCVobSetCollDet(pThis, 0);
+		return zCVobSetCollDet(pThis, 0);
 	}
 	zCVobSetCollDet(pThis, second);
 }
@@ -296,7 +308,7 @@ int Levitation::zCAIPlayerCheckFloorSlidingHook(void* pThis)
 {
 	oCNpc* hero = oCNpc::GetHero();
 	if (hero != NULL && (pThis == hero) && adjustHeroPosition) {
-		//return 1;
+		return 1;
 	}
 	return zCAIPlayerCheckFloorSliding(pThis);
 }
@@ -306,7 +318,7 @@ void Levitation::DoSurfaceAlignmentHook(void* pThis)
 	oCNpc* hero = oCNpc::GetHero();
 	bool adjust = (hero == pThis) && Levitation::adjustHeroPosition;
 	if (adjust) {
-		//return;
+		return;
 	}
 	return doSurfaceAlignment(pThis);
 }
@@ -316,7 +328,8 @@ void Levitation::zCVobCheckAndResolveCollisionsHook(void* pThis)
 	oCNpc* hero = oCNpc::GetHero();
 	bool adjust = (hero != NULL) && (hero == pThis) && Levitation::adjustHeroPosition;
 	if (adjust) {
-		//if (Levitation::noCollision && !HookManager::loadGame && !HookManager::changeLevel) return;
+		//if (Levitation::noCollision && !DynItemInst::loadGame && !HookManager::changeLevel) return;
+		return;
 	}
 	zCVobCheckAndResolveCollisions(pThis);
 }
@@ -353,6 +366,19 @@ int Levitation::zCVobIsColliding(void* pThis)
 int Levitation::zCBspBaseCollectPolysInBBox3D(void*, zTBBox3D const&, zCPolygon**&, int&)
 {
 	XCALL(ZCBSPBASE_COLLECT_POLYS_IN_BBOX3D);
+}
+
+int Levitation::zCAIPlayerCheckEnoughSpaceMoveDirHook(void* pThis, zVEC3 const& vec, int second)
+{
+	int result = zCAIPlayerCheckEnoughSpaceMoveDir(pThis, vec, second);
+	oCNpc* hero = oCNpc::GetHero();
+	if (result && hero != nullptr && (pThis == hero) && adjustHeroPosition) {
+		logStream << "zCAIPlayerCheckEnoughSpaceMoveDirHook: called!"  << std::endl;
+		util::logInfo(&logStream);
+		return 0;
+	}
+
+	return result;
 }
 
 void levitate() {
@@ -436,10 +462,10 @@ void levitate() {
 			//testPos.x += look.x*1;
 			//testPos.y += look.y*1;
 			//testPos.z += look.z*1;
-			zMAT4 testMat = *mat;
-			testMat.m[0][3] = testPos.x;
-			testMat.m[1][3] = testPos.y;
-			testMat.m[2][3] = testPos.z;
+			//zMAT4 testMat = *mat;
+			//testMat.m[0][3] = testPos.x;
+			//testMat.m[1][3] = testPos.y;
+			//testMat.m[2][3] = testPos.z;
 			//zCVobSetPhysicsEnabled(hero, false);
 			//writeToConsole("HasEnoughSpace: ", zCVobHasEnoughSpace(hero, testPos));
 			//hero->SetPosition(0,-100000,0);
@@ -567,8 +593,183 @@ int calcPastFrameTime() {
 	return diff;
 };
 
+zVEC3 getCollidingPolyNormal(oCNpc* hero, const zMAT4& mat)
+{
+	bool intersected = false;
+	zVEC3 pos(mat.m[0][3], mat.m[1][3], mat.m[2][3]);
+	zCPolygon** polys;
+	void* pointer = (void*)*(int*)((BYTE*)hero + 0x0b8);
+	pointer = (void*)*(int*)((BYTE*)pointer + 0x1b4);
+	int third = 0;
+
+	zCModel* model = hero->GetModel();
+	zCModelCalcModelBBox3DWorld(model);
+	zTBBox3D box = LevitationBean::zCModelGetBBox3D(model);
+
+	//make rec a little bit bigger than box
+	zTBBox3D rec;
+	rec.bbox3D_maxs = zVEC3(100, 100, 100);//box.bbox3D_maxs;//zVEC3(100,100,100);
+										   //logStream << "Test:  box.bbox3D_maxs: " << box.bbox3D_maxs << std::endl;
+										   //util::logInfo(&logStream);
+	rec.bbox3D_mins = zVEC3(-100, -100, -100);// box.bbox3D_mins;//zVEC3(-100, -100, -100);
+											  //logStream << "Test:  box.bbox3D_mins: " << box.bbox3D_mins << std::endl;
+											  //util::logInfo(&logStream);
+	rec.bbox3D_maxs += pos;
+	rec.bbox3D_mins += pos;
+	box.bbox3D_maxs += pos;
+	box.bbox3D_mins += pos;
+
+	Levitation::zCBspBaseCollectPolysInBBox3D(pointer, rec, polys, third);
+	if (polys != nullptr) {
+		//writeToConsole("Collision detected: ", third);
+		//logStream << "Test: Collision detected: " << third << std::endl;
+		//util::logInfo(&logStream);
+		if (third)
+		{
+			//create plane from intersecting poly
+			Plane plane;
+			zVEC3 look = zVEC3(mat.m[0][2], mat.m[1][2], mat.m[2][2]);
+			zVEC3Normalize(&look);
+			zVEC3 oldPos = zVEC3(heroLevitationBean->oldXPos, heroLevitationBean->oldYPos, heroLevitationBean->oldZPos);
+			zVEC3 dir = pos - oldPos;
+			zVEC3Normalize(&dir);
+
+			Plane::initPlaneByVectors(plane, pos, look);
+			plane.convertToHNF();
+			Line motionLine(oldPos, look);
+
+			for (int i = 0; i < third; ++i)
+			{
+				zCPolygon* poly = polys[i];
+
+				if (poly->CheckBBoxPolyIntersection(rec))
+				{
+					if (poly->CheckBBoxPolyIntersection(box))
+					{
+						zVEC3* polyNormal = poly->getPolyNormal();
+
+						//we have found what we wanted -> a collision!
+						return zVEC3(polyNormal->x, polyNormal->y, polyNormal->z);
+						
+					}
+				}
+			}
+		}
+	}
+
+	//nothing found - return null vector
+	return zVEC3(0,0,0);
+}
+
+
+bool checkCollision(oCNpc* hero, const zMAT4& mat)
+{
+	bool intersected = false;
+	zVEC3 pos (mat.m[0][3], mat.m[1][3], mat.m[2][3]);
+	zCPolygon** polys;
+	void* pointer = (void*)*(int*)((BYTE*)hero + 0x0b8);
+	pointer = (void*)*(int*)((BYTE*)pointer + 0x1b4);
+	int third = 0;
+
+	zCModel* model = hero->GetModel();
+	zCModelCalcModelBBox3DWorld(model);
+	zTBBox3D box = LevitationBean::zCModelGetBBox3D(model);
+
+	//make rec a little bit bigger than box
+	zTBBox3D rec;
+	rec.bbox3D_maxs = zVEC3(100, 100, 100);//box.bbox3D_maxs;//zVEC3(100,100,100);
+										   //logStream << "Test:  box.bbox3D_maxs: " << box.bbox3D_maxs << std::endl;
+										   //util::logInfo(&logStream);
+	rec.bbox3D_mins = zVEC3(-100, -100, -100);// box.bbox3D_mins;//zVEC3(-100, -100, -100);
+											  //logStream << "Test:  box.bbox3D_mins: " << box.bbox3D_mins << std::endl;
+											  //util::logInfo(&logStream);
+	rec.bbox3D_maxs += pos;
+	rec.bbox3D_mins += pos;
+	box.bbox3D_maxs += pos;
+	box.bbox3D_mins += pos;
+
+	Levitation::zCBspBaseCollectPolysInBBox3D(pointer, rec, polys, third);
+	if (polys != nullptr) {
+		//writeToConsole("Collision detected: ", third);
+		//logStream << "Test: Collision detected: " << third << std::endl;
+		//util::logInfo(&logStream);
+		if (third)
+		{
+			//create plane from intersecting poly
+			Plane plane;
+			zVEC3 look = zVEC3(mat.m[0][2], mat.m[1][2], mat.m[2][2]);
+			zVEC3Normalize(&look);
+			zVEC3 oldPos = zVEC3(heroLevitationBean->oldXPos, heroLevitationBean->oldYPos, heroLevitationBean->oldZPos);
+			zVEC3 dir = pos - oldPos;
+			zVEC3Normalize(&dir);
+
+			Plane::initPlaneByVectors(plane, pos, look);
+			plane.convertToHNF();
+			Line motionLine(oldPos, look);
+
+			float globalLambda = 0;
+
+			for (int i = 0; i < third; ++i)
+			{
+				zCPolygon* poly = polys[i];
+
+				//if (poly->CheckBBoxPolyIntersection(rec))
+				//{
+					if (poly->CheckBBoxPolyIntersection(box))
+					{
+						if (!intersected) {
+							intersected = true;
+
+							//we have found what we wanted -> a collision!
+							break;
+						}
+					}
+					/*for (int j = 0; j < poly->GetNumPolyVertices(); ++j) {
+					zCVertex* vertex = poly->getVertices()[j];
+					zVEC3 vertPos = zVEC3(vertex->Position[0], vertex->Position[1], vertex->Position[2]);
+
+					Plane vertPlane;
+					Plane::initPlaneByVectors(vertPlane, vertPos, look);
+					vertPlane.convertToHNF();
+					// should always be true(?)
+					if (vertPlane.isLineIntersecting(motionLine))
+					{
+					float lambda = vertPlane.getLambdaIntersectionValueForLine(motionLine);
+					zVEC3 intersectPoint = motionLine.getPointByLambda(lambda);
+					float distanceToIntersect = getDistanceOfVectors(oldPos, intersectPoint);
+					float distanceToPos = getDistanceOfVectors(oldPos, pos);
+					if (distanceToIntersect < distanceToPos || Float::areEqual(distanceToIntersect, distanceToPos))
+					{
+					if (globalLambda > lambda) {
+					globalLambda = lambda;
+					}
+					}
+					}
+					}*/
+				//}
+			}
+
+			// update position of the npc
+			/*if (globalLambda != 0) {
+			logStream << "Test: globalLambda = " << globalLambda << std::endl;
+			util::logInfo(&logStream);
+			pos = motionLine.getPointByLambda(globalLambda);
+			hero->SetPositionWorld(pos);
+			} else */
+
+
+		}
+	}
+
+	return intersected;
+}
+
+
 void Test(oCNpc* hero) {
+
 	std::stringstream logStream;
+	logStream << "Test: called!" << std::endl;
+	util::logInfo(&logStream);
 	//Motion collideDown = getCollideYDir(hero, 98, false);
 	zTBBox3D bBox = LevitationBean::zCModelGetBBox3D(hero->GetModel());// ->GetBBox3D();
 	zVEC3 pos = hero->GetPosition();
@@ -603,7 +804,7 @@ void Test(oCNpc* hero) {
 			//hero->SetPositionWorld(zVEC3(pos.x, iSect.y + abs(yDownExt) - 5, pos.z));
 			//}	
 		}
-		hero->SetPosition(pos.x, iSect.y + hoverDistance, pos.z);
+		//hero->SetPosition(pos.x, iSect.y + hoverDistance, pos.z); TODO!!!!!
 
 		//hero->SetPositionWorld(zVEC3(pos.x, iSect.y + 80, pos.z));
 	}
@@ -620,15 +821,22 @@ void Test(oCNpc* hero) {
 	zCModelCalcModelBBox3DWorld(model);
 	zTBBox3D box = LevitationBean::zCModelGetBBox3D(model);
 
+	//make rec a little bit bigger than box
 	zTBBox3D rec; 
 	rec.bbox3D_maxs = box.bbox3D_maxs;//zVEC3(100,100,100);
+	box.bbox3D_maxs.x = 20;
+	box.bbox3D_maxs.z *= 0.5;
 	//logStream << "Test:  box.bbox3D_maxs: " << box.bbox3D_maxs << std::endl;
 	//util::logInfo(&logStream);
 	rec.bbox3D_mins = box.bbox3D_mins;//zVEC3(-100, -100, -100);
+	box.bbox3D_mins.x = 20;
+	box.bbox3D_mins.z *= 0.5;
 	//logStream << "Test:  box.bbox3D_mins: " << box.bbox3D_mins << std::endl;
 	//util::logInfo(&logStream);
 	rec.bbox3D_maxs += pos;
 	rec.bbox3D_mins += pos;
+	box.bbox3D_maxs += pos;
+	box.bbox3D_mins += pos;
 
 	Levitation::zCBspBaseCollectPolysInBBox3D(pointer, rec, polys, third);
 	if (polys != nullptr) {
@@ -644,18 +852,31 @@ void Test(oCNpc* hero) {
 			zVEC3 pos = zVEC3(mat->m[0][3], mat->m[1][3], mat->m[2][3]);
 			zVEC3 oldPos = zVEC3(heroLevitationBean->oldXPos, heroLevitationBean->oldYPos, heroLevitationBean->oldZPos);
 			zVEC3 dir = pos - oldPos;
+			zVEC3Normalize(&dir);
 
 			Plane::initPlaneByVectors(plane, pos, look);
 			plane.convertToHNF();
 			Line motionLine(oldPos, look);
+			bool intersected = false;
+
+			float globalLambda = 0;
 
 			for (int i = 0; i < third; ++i)
 			{
 				zCPolygon* poly = polys[i];
 
-				if (int intersected = poly->CheckBBoxPolyIntersection(rec))
-				{
-					for (int j = 0; j < poly->GetNumPolyVertices(); ++j) {
+				//if (poly->CheckBBoxPolyIntersection(rec))
+				//{
+					if (poly->CheckBBoxPolyIntersection(box))
+					{
+						if (!intersected) {
+							intersected = true;
+
+							//we have found what we wanted -> a collision!
+							break;
+						}
+					}
+					/*for (int j = 0; j < poly->GetNumPolyVertices(); ++j) {
 						zCVertex* vertex = poly->getVertices()[j];
 						zVEC3 vertPos = zVEC3(vertex->Position[0], vertex->Position[1], vertex->Position[2]);
 
@@ -665,22 +886,58 @@ void Test(oCNpc* hero) {
 						// should always be true(?)
 						if (vertPlane.isLineIntersecting(motionLine))
 						{
-							zVEC3 intersectPoint = vertPlane.getIntersectionPointToLine(motionLine);
+							float lambda = vertPlane.getLambdaIntersectionValueForLine(motionLine);
+							zVEC3 intersectPoint = motionLine.getPointByLambda(lambda);
 							float distanceToIntersect = getDistanceOfVectors(oldPos, intersectPoint);
 							float distanceToPos = getDistanceOfVectors(oldPos, pos);
 							if (distanceToIntersect < distanceToPos || Float::areEqual(distanceToIntersect, distanceToPos))
 							{
-								logStream << "Test: distanceToIntersect = " << distanceToIntersect << std::endl;
-								util::logInfo(&logStream);
+								if (globalLambda > lambda) {
+									globalLambda = lambda;
+								}
 							}
 						}
-					}
-				}
+					}*/
+				//}
+			}
+
+			// update position of the npc
+			/*if (globalLambda != 0) {
+				logStream << "Test: globalLambda = " << globalLambda << std::endl;
+				util::logInfo(&logStream);
+				pos = motionLine.getPointByLambda(globalLambda);
+				hero->SetPositionWorld(pos);
+			} else */
+			if (intersected)
+			{
+				//oCNpcResetPos(hero, oldPos);
+				//hero->SetPositionWorld(oldPos);
+				pos = zVEC3(mat->m[0][3], mat->m[1][3], mat->m[2][3]);
+				hero->SetPositionWorld(oldPos);
+				//hero->Move(newPos.x, newPos.y, newPos.z);
+				pos = hero->GetPosition();
+				heroLevitationBean->oldXPos = pos.x;
+				heroLevitationBean->oldYPos = pos.y;
+				heroLevitationBean->oldZPos = pos.z;
+
+				if (checkCollision(hero, *mat))
+				{
+					logStream << "Test: stuck detected!" << std::endl;
+					util::logInfo(&logStream);
+					zVEC3 normal = getCollidingPolyNormal(hero, *mat);
+					//hero->SetPositionWorld(oldPos + normal*20);
+				} 
+				pos = hero->GetPosition();
+				heroLevitationBean->oldXPos = pos.x;
+				heroLevitationBean->oldYPos = pos.y;
+				heroLevitationBean->oldZPos = pos.z;
+				// recursive test for avoiding wall sticking
+				//Test(hero);
 			}
 		}
 	}
 
-	zVEC3 headPos = hero->GetPositionWorld();
+	/*zVEC3 headPos = hero->GetPositionWorld();
 	zVEC3 testDir = headPos;
 	testDir.y += 100000000;
 
@@ -696,7 +953,7 @@ void Test(oCNpc* hero) {
 		util::debug(&logStream);
 		zVEC3 dir = zVEC3(mat->m[0][2], mat->m[1][2], mat->m[2][2]);
 		hero->SetPositionWorld(zVEC3(pos.x - dir.x * 20, pos.y - dir.y * 20, pos.z - dir.z * 20));
-	}
+	}*/ //TODO!!!!!
 
 	// update old position and old distance to ground of the heroLevitationBean
 	heroLevitationBean->setOldPosition(hero->GetPosition());

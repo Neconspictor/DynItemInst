@@ -44,12 +44,31 @@ namespace LevitationUtil
 	typedef int(__thiscall* ZVEC3Normalize)(zVEC3*); 
 	extern ZVEC3Normalize zVEC3Normalize;
 
+	//.text:006824D0 public: virtual void __thiscall oCNpc::ResetPos(class zVEC3 &) proc near
+	typedef void(__thiscall* OCNpcResetPos)(oCNpc*, zVEC3 &);
+	extern OCNpcResetPos oCNpcResetPos;
+
+	//.text:0061E0D0 public: virtual void __thiscall zCVob::EndMovement(int) proc near
+	typedef void(__thiscall* ZCVobEndMovement)(zCVob*, int);
+	extern ZCVobEndMovement zCVobEndMovement;
+
 	inline float getDistanceOfVectors(const zVEC3 & vec1, const zVEC3 & vec2) {
 		float distance = abs(vec2.x - vec1.x + vec2.y - vec1.y + vec2.z - vec1.z);
 		if (Float::areEqual(distance, 0)) {
 			return 0;
 		}
 		return distance;
+	}
+
+	inline bool zVEC3IsNull(const zVEC3 & vec)
+	{
+		if (Float::areEqual(vec.x, 0)
+			&& Float::areEqual(vec.y, 0)
+			&& Float::areEqual(vec.z, 0))
+		{
+			return true;
+		}
+		return false;
 	}
 
 };
@@ -364,6 +383,8 @@ public:
 	static int __thiscall zCVobIsColliding(void* pThis);
 	static int __fastcall zCBspBaseCollectPolysInBBox3D(void*, zTBBox3D const &, zCPolygon** &, int&);
 
+	//.text:00511320 public: int __thiscall zCAIPlayer::CheckEnoughSpaceMoveDir(class zVEC3 const &, int) proc near
+	static int __thiscall zCAIPlayerCheckEnoughSpaceMoveDirHook(void* pThis, zVEC3 const &, int);
 };
 
 struct Motion

@@ -1,0 +1,400 @@
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// HUMAN OVERLAY	Zaphod´s fliegender Drache
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+Model ("HuS")
+{
+	
+	
+	meshAndTree ("Hum_Body_Naked0.ASC" DONT_USE_MESH)
+	
+	aniEnum
+	{
+		modelTag	("DEF_HIT_LIMB"		"zs_RightHand")
+		
+		
+		AniDisable	("s_FallDn")
+		AniDisable	("s_Fall")
+		AniDisable	("s_FallB")
+		AniDisable	("s_Fallen")
+		AniDisable	("s_FallenB")
+		AniDisable	("s_Jump")
+		AniDisable	("s_Dive")
+		AniDisable	("s_DiveF")		
+		AniDisable	("s_Slide")			
+		AniDisable	("s_SlideB")	
+		AniDisable	("T_Castfail")			
+		
+		
+		// ---------------------------------------------------------------------------------------------------------------
+		//	RUN-Mode
+		ani			("s_Run"				1	"s_Run"			0.1	0.1	M	"HUM_LEVITATE_BASE.ASC"	F	0	50)
+		{
+			*eventMMStartAni (0		"S_READY"	"ZS_BOW")
+			*eventSFX	(1	"DEM_AMBIENT"	EMPTY_SLOT	)
+			//*eventPFX		(25 	1 	"DRAGON_BREATH_SMOKE"	"ZS_RIGHTHAND"	ATTACH)
+			//*eventPFXStop	(30		1)	
+		}
+		
+		ani			("t_Run_2_RunL"			1	"s_RunL"		0.0	0.0	M.	"HUM_LEVITATE_BASE.ASC"		F	0	0)
+		ani			("s_RunL"				1	"s_RunL"		0.0	0.1	M.	"HUM_LEVITATE_BASE.ASC"		F	0	50)
+		
+		{
+			*eventMMStartAni (0		"S_NORMAL"	"ZS_BOW")
+			*eventSFX	(1	"DEM_AMBIENT"	EMPTY_SLOT	)
+			//*eventPFX		(25 	1 	"DRAGON_BREATH_SMOKE"	"ZS_RIGHTHAND"	ATTACH)
+			//*eventPFXStop	(35		1)	
+		}
+		
+		
+		
+		ani			("t_RunL_2_Run"			1	"s_Run"			0.0	0.0	M.	"HUM_LEVITATE_BASE.ASC"		F	0	0)
+		
+		ani			("t_JumpB"				1	"s_Run"			0.0	0.2	M.	"HUM_LEVITATE_BASE.ASC"			R	0	0)
+		{
+			
+		}
+		
+		
+		// ---------------------------------------------------------------------------------------------------------------
+		//	WALK-Mode
+		ani			("s_Walk"				1	"s_Walk"		0.1	0.1	M	"HUM_LEVITATE_BASE.ASC"	F	0	50 )
+		//aniAlias	("s_Walk"				1	"s_Walk"		0.1	0.1	MI	"s_Run"		F)
+		
+		ani			("t_Walk_2_WalkL"		1	"s_WalkL"		0.0	0.0	M.	"HUM_LEVITATE_BASE.ASC"		F	0	0)
+		ani			("s_WalkL"				1	"s_WalkL"		0.0	0.1	M.	"HUM_LEVITATE_BASE.ASC"		F	0	50)
+		{
+			*eventSFXGrnd	(10	"Run")
+			*eventSFXGrnd	(22	"Run")
+		}
+		
+		ani			("t_WalkL_2_Walk"		1	"s_Walk"		0.0	0.0	M.	"HUM_LEVITATE_BASE.ASC"		F	0	0)
+		ani			("t_WalkR_2_Walk"		1	"s_Walk"		0.1	0.1	M.	"HUM_LEVITATE_BASE.ASC"	F	0	0)
+		
+		aniAlias	("t_Walk_2_WalkBL"		1	"s_WalkBL"		0.1	0.1	M.	"t_walkL_2_Walk"			R)
+		
+		aniAlias	("s_WalkBL"				1	"s_WalkBL"		0.0	0.0	M.	"s_WalkL"					R)
+		ani			("t_WalkBL_2_Walk"		1	"s_Walk"		0.1	0.1	M.	"HUM_LEVITATE_BASE.ASC"	R	0	0)
+		aniAlias	("t_WalkBR_2_Walk"		1	"s_Walk"		0.1	0.1	M.	"t_WalkL_2_Walk"			R)
+		
+		
+		// ---------------------------------------------------------------------------------------------------------------
+		//	TURNING
+		
+		ani			("t_RunTurnL"			20	"t_RunTurnL"	0.2	0.2	M.	"HUM_LEVITATE_BASE.ASC"			F	0	0)
+		{
+			*eventSFXGrnd	(10	"Turn")
+			*eventSFXGrnd	(20	"Turn")
+		}
+		
+		
+		ani			("t_RunTurnR"			20	"t_RunTurnR"	0.2	0.2	M.	"HUM_LEVITATE_BASE.ASC"			F	0	0)
+		//			//ani			("t_RunTurnR"			20	"t_RunTurnR"	0.2	0.2	M.	"Hum_TurnR_A01.asc"			R	0	19)
+		{
+			*eventSFXGrnd	(10	"Turn")
+			*eventSFXGrnd	(20	"Turn")
+			//				*eventSFXGrnd	(18	"Turn")
+		}
+		
+		aniAlias	("t_WalkTurnL"			20	"t_WalkTurnL"	0.2	0.2	M.	"t_RunTurnL"				F)
+		aniAlias	("t_WalkTurnR"			20	"t_WalkTurnR"	0.2	0.2	M.	"t_RunTurnR"				F)
+		
+		ani			("t_SneakTurnL"			20	"t_SneakTurnL"	0.2	0.2	M.	"HUM_LEVITATE_BASE.ASC"	F	0	0)
+		ani			("t_SneakTurnR"			20	"t_SneakTurnR"	0.2	0.2	M.	"HUM_LEVITATE_BASE.ASC"	F	0	0)
+		
+		
+		
+		
+		// ---------------------------------------------------------------------------------------------------------------
+		// JUMP
+		
+		ani			("t_Stand_2_Jump"		1	"s_Jump"		0.1 0.2	M.	"HUM_LEVITATE_BASE.asc"		F	0 50)
+		{
+			*eventMMStartAni (0		"S_SHOOT"	"ZS_BOW")	
+		}
+		
+
+		ani			("t_MagRunR_2_Jump"		1	"s_Jump"		0.1 0.2	M.	"HUM_LEVITATE_BASE.asc"		F	0 50)
+		{
+			*eventMMStartAni (0		"S_SHOOT"	"ZS_BOW")	
+		}
+
+
+
+		ani			("t_Jump_2_Stand"		1	""				0.1 0.2	M.	"HUM_LEVITATE_BASE.ASC"			F	0	0)
+		
+		
+		//	aus dem Rennen direkt Springen
+		ani			("t_RunL_2_Jump"		1	"s_Jump"		0.1	0.1	MF	"HUM_LEVITATE_BASE.ASC"		F	0	50)
+		
+		aniAlias	("t_RunR_2_Jump"		1	"s_Jump"		0.1	0.1	MF	"t_RunL_2_Jump"		F)
+		
+		
+		//	nach dem Sprung direkt weiterrennen, wenn CursorUp weiterhin gedrückt
+		aniBlend	("t_Jump_2_RunL"			"s_RunL"		0.2	0.2)
+		
+		
+		
+		// ---------------------------------------------------------------------------------------------------------------
+		// JUMP UP, CLIMB
+		
+		//	JumpUpLow       (Ohne Benutzung der Hände, rechter Fuß setzt zuerst auf. Höhe: 50-100cm)
+		//  ani1: Schwung holen, ani2: Flugphase, ani3: Kontakt mit Kante
+		ani		("t_Stand_2_JumpUpLow"		1   "s_JumpUpLow"				0.0 0.0 M.  "HUM_LEVITATE_BASE.ASC" F   0	0)
+		ani		("s_JumpUpLow"              1   "t_JumpUpLow_2_Stand"		0.0 0.0 MF	"HUM_LEVITATE_BASE.ASC" F   0	0)
+		{
+			//	*eventPFX		(10 "ZMODELLANDDUST" "BIP01 L Foot")
+			//	*eventSFXGrnd	(10	"Run")
+		}
+		
+		ani     ("t_JumpUpLow_2_Stand"  	1   ""							0.0 0.1 MF	"HUM_LEVITATE_BASE.ASC" F   0	0)
+		{
+			//	*eventSFXGrnd	(16	"Run")
+		}
+		
+		//	aus dem Rennen direkt Springen
+		aniAlias	("t_RunL_2_JumpUpLow"	1	"t_JumpUpLow_2_Stand"		0.2	0.1	MF	"s_JumpUpLow"			F)
+		aniAlias	("t_RunR_2_JumpUpLow"	1	"t_JumpUpLow_2_Stand"		0.2	0.1	MF	"s_JumpUpLow"			F)
+		
+		//	JumpUpMid       (Auf den Händen abgestützt in einem Satz nach oben. Höhe: 100-200cm)
+		//  ani1: Schwung holen, ani2: Flugphase, ani3: Kontakt mit Kante
+		ani		("t_Stand_2_JumpUpMid"		1   "s_JumpUpMid"				0.1 0.0 M.	"HUM_LEVITATE_BASE.ASC" F   0	0)
+		ani		("s_JumpUpMid"              1   "t_JumpUpMid_2_Stand"		0.0 0.0 MF	"HUM_LEVITATE_BASE.ASC" F   0	0)
+		{
+			//	*eventSFXGrnd	(13	"Run")
+		}
+		
+		ani		("t_JumpUpMid_2_Stand"  	1   ""							0.0 0.1 MF	"HUM_LEVITATE_BASE.ASC" F   0	0)
+		{
+			//	*eventSFXGrnd	(21	"Run")
+			//	*eventSFXGrnd	(26	"Run")
+		}
+		
+		//	aus dem Rennen direkt Springen
+		aniAlias	("t_RunL_2_JumpUpMid"	1	"t_JumpUpMid_2_Stand"		0.2	0.1	MF	"s_JumpUpMid"			F)
+		aniAlias	("t_RunR_2_JumpUpMid"	1	"t_JumpUpMid_2_Stand"		0.2	0.1	MF	"s_JumpUpMid"			F)
+		
+		
+		//	Während Sprung nach vorn Festhalten an Kante
+		ani			("t_Jump_2_Hang"		1	"s_Hang"		0.1	0.0	MF	"HUM_LEVITATE_BASE.ASC" 	F	0	0)
+		
+		//	Während Runterfallen Festhalten an Kante
+		aniAlias	("t_FallDn_2_Hang"		1	"s_Hang"		0.3	0.0	MF	"t_Jump_2_Hang" 			F)
+		
+		//	JumpUp, Hang	(An Kante springen, und dann hochziehen. Höhe: 200-350cm)
+		//	aus dem Rennen direkt Springen
+		//			aniAlias	("t_RunL_2_JumpUp"		1	"s_JumpUp"		0.2	0.1	MF	"t_Stand_2_JumpUp"			F)
+		//			aniAlias	("t_RunR_2_JumpUp"		1	"s_JumpUp"		0.2	0.1	MF	"t_Stand_2_JumpUp"			F)
+		
+		ani			("t_Stand_2_JumpUp"		1	"s_JumpUp"			0.0	0.0	M.	"HUM_LEVITATE_BASE.ASC"	F	0	0)
+		
+		ani			("s_JumpUp"				1	"s_JumpUp"		0.0	0.0	MF	"HUM_LEVITATE_BASE.ASC"		F	0	0)
+		
+		aniBlend	("t_JumpUp_2_Hang"			"s_Hang"		0.0	0.1)
+		ani			("s_Hang"				1	"s_Hang"		0.1	0.0	MF	"HUM_LEVITATE_BASE.ASC" 	F	0	0)
+		
+		//	Climb up
+		ani			("t_Hang_2_Stand"		1	""				0.0	0.3	MF	"HUM_LEVITATE_BASE.ASC" 	F	0	0)
+		{
+			//	*eventSFXGrnd	(32	"Run")
+			//	*eventSFXGrnd	(44	"Run")
+		}
+		
+		//	Climb Down
+		aniAlias	("t_Stand_2_Hang"		1	"s_Hang"		0.0	0.0	MF	"t_Hang_2_Stand"			R)
+		
+		
+		// ---------------------------------------------------------------------------------------------------------------
+		// FALL
+		
+		
+		// Landen und stehenbleiben
+		ani			("t_FallDn_2_Stand"		1	""				0.0	0.2	M.	"HUM_LEVITATE_BASE.ASC"	F	0	0)
+		{
+			//	*eventSFX	(26	"M_FALL_SMALL"	EMPTY_SLOT	)
+		}
+		
+		// Landen und direkt weiterrennen
+		aniBlend	("t_FallDn_2_RunL"			"s_RunL"		0.2	0.2)
+		
+		//	wenn Falltiefe zu tief um unbeschadet auf den Füßen zu landen
+		//			aniBlend	("t_FallDn_2_Fall"			"s_Fall"		0.5	0.5)
+		//			aniBlend	("t_FallDn_2_FallB"			"s_FallB"		0.5	0.5)
+		
+		//	Bei s-Fall und s_FallB "fliegt" die Figur durch die Luft.
+		//	Bei s_Fallen + s_FallenB liegt der Spieler flach.
+		//			ani			("s_Fall"				1	"s_Fall"		0.2 0.1 MF	"HUM_LEVITATE_BASE.ASC"		F	 0	0 )
+		//			ani			("t_Fall_2_Fallen"		1	"s_Fallen"		0.0 0.0 MF	"HUM_LEVITATE_BASE.ASC"			F	0	0)
+		{
+			//			//	*eventSFX	(11	"Fallen")
+			//	*eventSFX	(12	"M_FALL_SMALL"	EMPTY_SLOT	)
+			//	*eventPFX	(12	 "ZMODELLANDDUST"	"Bip01"	)
+			//	*eventMMStartAni (14	"T_HURT")
+			//	*eventMMStartAni (20	"S_NEUTRAL")
+		}
+		
+		//			ani			("s_Fallen"				1	"s_Fallen"		0.0 0.0 M.	"HUM_LEVITATE_BASE.ASC"	F	 0	0)
+		//			ani			("t_Fallen_2_Stand"		1	""				0.0 0.2 M.	"HUM_LEVITATE_BASE.ASC"			F	 0	0)
+		{
+			//	*eventSFXGrnd	(33	"Run")
+			//	*eventSFXGrnd	(38	"Run")
+		}
+		
+		//			ani			("s_FallB"				1	"s_FallB"		0.1 0.0 MF	"HUM_LEVITATE_BASE.ASC"		F	 0	0)
+		//			ani			("t_FallB_2_FallenB"	1	"s_FallenB"		0.0 0.0 MF	"HUM_LEVITATE_BASE.ASC"			F	 0	0)
+		{
+			//			//	*eventSFX	(8	"Fallen")
+			//	*eventMMStartAni (10	"T_HURT")
+			//	*eventMMStartAni (20	"S_NEUTRAL")
+		}
+		
+		//			ani			("s_FallenB"			1	"s_FallenB"		0.0 0.0 M.	"HUM_LEVITATE_BASE.ASC"	F	0	0)
+		//			ani			("t_FallenB_2_Stand"	1	""				0.0 0.2 M.	"HUM_LEVITATE_BASE.ASC"			F	 0	0)
+		{
+			//	*eventSFXGrnd	(30	"Run")
+			//	*eventSFXGrnd	(37	"Run")
+		}
+		
+		
+		// FIST
+		ani			("t_Run_2_Fist"			1	"s_Fist"		0.0 0.0 M.	"HUM_LEVITATE_BASE.ASC"		F	0	0)
+		ani			("s_Fist"				1	"s_Fist"		0.0 0.0 M.	"HUM_LEVITATE_BASE.ASC"		F  	0	0)
+		ani			("t_Fist_2_FistRun"		1	"s_FistRun"		0.0 0.0 M.	"HUM_LEVITATE_BASE.ASC"		F  	0	0)
+		//	{
+			//		*eventTag		(5 "DEF_FIGHTMODE"	"FIST")
+		//	}
+		
+		ani			("t_FistRun_2_Fist"		1	"s_Fist"		0.0 0.0 M.	"HUM_LEVITATE_BASE.ASC"		R	0	0)
+		{
+			//	*eventTag		(5 "DEF_FIGHTMODE"	"")
+		}
+		aniAlias	("t_Fist_2_Run"			1	""				0.0 0.0 M.	"t_Run_2_Fist"			R)
+		
+		// Fist beim Rennen ziehen
+		ani			("t_Move_2_FistMove"	2	""				0.2	0.2	M.	"HUM_LEVITATE_BASE.ASC"	F	 0	0)
+		//	{
+			//		*eventTag		(5 "DEF_FIGHTMODE"	"FIST")
+		//	}
+		ani			("t_FistMove_2_Move"	2	""				0.2	0.2	M.	"HUM_LEVITATE_BASE.ASC"	F	0	0)
+		///	{
+			*eventTag		(5 "DEF_FIGHTMODE"	"")
+		//	}
+		
+		
+		// Kraulen
+		ani			("s_Swim"				1	"s_Swim"		0.0	0.1	MI	"HUM_LEVITATE_BASE.ASC"		F	0	0 )
+		
+		aniBlend	("t_Swim_2_SwimF"			"s_SwimF"		0.3	0.3)
+		ani			("s_SwimF"				1	"s_SwimF"		0.0	0.1	M.	"HUM_LEVITATE_BASE.ASC"		F	0	50)
+		
+		aniBlend	("t_SwimF_2_Swim"			"s_Swim"		0.4	0.5)
+		
+		
+		
+		
+		// MAGIC
+		ani			("t_Run_2_Mag"			1	"s_Mags"		0.0 0.0 M.	"HUM_LEVITATE_BASE.asc"		F	0	 0)
+		ani			("s_Mag"				1	"s_Mag"			0.0 0.0 M.	"HUM_LEVITATE_BASE.asc"		F	0	0)
+		ani			("t_Mag_2_MagRun"		1	"s_MagRun"		0.0 0.0 M.	"HUM_LEVITATE_BASE.asc"		F	0	0)
+		{
+			*eventTag		(8 "DEF_FIGHTMODE"	"MAG")
+		}
+		
+		ani			("t_MagRun_2_Mag"		1	"s_Mag"			0.0 0.0 M.	"HUM_LEVITATE_BASE.asc"		F	0	0)
+		{
+			*eventTag		(8 "DEF_FIGHTMODE"	"")
+		}
+		aniAlias	("t_Mag_2_Run"			1	""				0.0 0.0 M.	"t_Run_2_Mag"				F)
+		
+		// Magie beim Rennen ziehen
+		ani			("t_Move_2_MagMove"		2	""				0.2	0.2	M.	"HUM_LEVITATE_BASE.asc"	F	0	0)
+		{
+			*eventTag		(14 "DEF_FIGHTMODE"	"MAG")
+		}
+		ani			("t_MagMove_2_Move"		2	""				0.2	0.2	M.	"HUM_LEVITATE_BASE.asc"	F	0	0)
+		{
+			*eventTag		(14 "DEF_FIGHTMODE"	"")
+		}
+		
+		
+		
+		/////////////////////////
+		// MAGIC MOVEMENT
+		//////////////////////////
+		
+		//	Mag-RUN
+		ani			("s_MagRun"					1	"s_MagRun"		0.1 0.1 MI	"HUM_LEVITATE_BASE.asc"	F	0	50	)
+		{
+			
+			*eventSFX	(1	"DEM_AMBIENT"	EMPTY_SLOT	)
+			*eventMMStartAni (0		"S_READY"	"ZS_BOW")
+			//*eventPFX		(25 	1 	"DRAGON_BREATH_SMOKE"	"ZS_RIGHTHAND"	ATTACH)
+			//*eventPFXStop	(30		1)			
+			
+		}
+		
+		
+		
+		ani			("t_MagRun_2_MagRunL"		1	"s_MagRunL"		0.0	0.0	M.	"HUM_LEVITATE_BASE.asc"	F	0	0)
+		
+		//	Mag-Run-Loop
+		ani			("s_MagRunL"				1	"s_MagRunL"		0.0	0.0	M.	"HUM_LEVITATE_BASE.asc"		F	0	50)
+		{
+			
+			*eventSFX	(1	"DEM_AMBIENT"	EMPTY_SLOT	)
+			*eventMMStartAni (0		"S_NORMAL"	"ZS_BOW")
+			//*eventPFX		(25 	1 	"DRAGON_BREATH_SMOKE"	"ZS_RIGHTHAND"	ATTACH)
+			//*eventPFXStop	(35		1)			
+			
+		}		
+		ani			("t_MagRunL_2_MagRun"		1	"s_MagRun"		0.0	0.1	M.	"HUM_LEVITATE_BASE.asc"		F	0	0)
+		aniBlend	("t_MagRunR_2_MagRun"			"s_MagRun"		0.3	0.3)
+		
+		//	Mag-Run Backwards Movement
+		ani			("t_MagJumpB"				1	"s_MagRun"			0.0	0.2	M.	"HUM_LEVITATE_BASE.asc"	F	0	0)
+		
+		/////////////////////
+		//	MAGIC TURNING
+		/////////////////////
+		
+		ani			("t_MagRunTurnL"			20	"t_MagRunTurnL"	0.1	0.1	M.	"HUM_LEVITATE_BASE.asc"		F	0	0)
+		ani			("t_MagRunTurnR"			20	"t_MagRunTurnR"	0.1	0.1	M.	"HUM_LEVITATE_BASE.asc"		R	0	0)
+		
+		//	Firebolt (Magic Missile), Thunderbolt,...
+		aniAlias	("t_MagRun_2_FBTShoot"		1	"s_FBTShoot"	0.1 0.0 M.	"t_FiBCast_2_FiBShoot"		F)
+		aniAlias	("s_FBTShoot"				1	"s_FBTShoot"	0.0 0.0 M.	"s_FiBShoot"				F)
+		aniAlias	("t_FBTShoot_2_Stand"		1	""				0.0 0.1 M.	"t_FiBShoot_2_Stand"		F)
+		
+		//	Fireball, Thunderball, 
+		ani			("t_MagRun_2_FiBCast"		1	"s_FiBCast"		0.1 0.0 M.	"HUM_LEVITATE_BASE.asc"	F	1	4)
+		ani			("s_FiBCast"				1	"s_FiBCast"		0.0 0.0 M.	"HUM_LEVITATE_BASE.asc"	F	5	49)
+		
+		{
+			*eventMMStartAni (5		"S_SHOOT"	"ZS_BOW")
+			*eventSFX	(6	"DEM_AMBIENT"	EMPTY_SLOT	)
+		}
+		
+		aniBlend	("t_FibCast_2_Stand"			""				0.1	0.2)
+		
+		ani			("t_FiBCast_2_FiBShoot"		1	"s_FiBShoot"	0.0 0.0 M.	"HUM_LEVITATE_BASE.asc"	F	49	50)
+		ani			("s_FiBShoot"				1	"s_FiBShoot"	0.0 0.0 M.	"HUM_LEVITATE_BASE.asc"	F	50	50)
+		
+		
+		
+		ani			("t_FiBShoot_2_Stand"		1	""				0.0 0.1 M.	"HUM_LEVITATE_BASE.asc"	F	50	50)
+		
+		
+		// Pyrokinesis
+		ani			("t_MagRun_2_PyrShoot"		1	"s_PyrShoot"	0.1	0.0	M.	"HUM_LEVITATE_BASE.asc"		F	0	21)
+		ani			("s_PyrShoot"				1	"s_PyrShoot"	0.0	0.0	M.	"HUM_LEVITATE_BASE.asc"		F	22	32)
+		ani			("t_PyrShoot_2_Stand"		1	""				0.0	0.1	M.	"HUM_LEVITATE_BASE.asc"		F	33	39)
+		
+		
+		
+		
+		// ************************
+	}
+}
+
+
