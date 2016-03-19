@@ -21,6 +21,8 @@ public:
 	float oldYPos;
 	float oldZPos;
 
+	zVEC3 oldLook;
+
 	LevitationBean(oCNpc* npc);
 
 	zVEC3 getOldPosition();

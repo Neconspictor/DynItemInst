@@ -52,6 +52,11 @@ namespace LevitationUtil
 	typedef void(__thiscall* ZCVobEndMovement)(zCVob*, int);
 	extern ZCVobEndMovement zCVobEndMovement;
 
+	//0061B720
+	typedef void(__thiscall* RotateLocalY)(void*, float);
+	extern RotateLocalY rotateLocalY;
+
+
 	inline float getDistanceOfVectors(const zVEC3 & vec1, const zVEC3 & vec2) {
 		float distance = abs(vec2.x - vec1.x + vec2.y - vec1.y + vec2.z - vec1.z);
 		if (Float::areEqual(distance, 0)) {
