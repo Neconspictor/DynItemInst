@@ -29,6 +29,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #ifndef __LOGGER_H__
 #define __LOGGER_H__
 #include <string>
+#include <sstream>
 
 /**
  * Provides basic logging functionality to different streams. Currently supported:
@@ -99,15 +100,25 @@ public:
 	 */
 	void writeTozSpy(LogLevel level, std::string message);
 
+	void writeToConsole(LogLevel level, std::string message);
+
+	bool isLogLevelActive(LogLevel level);
+	std::string createOutputWithLogLevel(LogLevel level, std::string message);
 	/**
-	 * Logs the content of the specified stringstream 'stream' with an log level 'level'. 
-	 * \param level The logging level for this log
-	 * \param stream The stream to extract the log message from
-	 * \param toFile Should the log message be written to file?
-	 * \param tozSpy Should the log message be written to zSpy?
-	 * \param toConsole Should the log message be written to console (std::cout)?
-	 */
-	void log(LogLevel level, std::stringstream* stream, bool toFile = false, bool tozSpy = true, bool toConsole = false);
+		 * Logs the content of the specified stringstream 'stream' with an log level 'level'. 
+		 * \param level The logging level for this log
+		 * \param stream The stream to extract the log message from
+		 * \param toFile Should the log message be written to file?
+		 * \param tozSpy Should the log message be written to zSpy?
+		 * \param toConsole Should the log message be written to console (std::cout)?
+		 */
+	void log(LogLevel level, std::stringstream* stream);
+
+	void logAlways(std::stringstream* stream);
+
+	std::string logLevelToString(LogLevel level);
+
+	std::string getTimeStamp();
 
 public:
 
@@ -119,7 +130,15 @@ public:
 private:
 	static Logger* instance;
 
-	int logLevel;
+	bool logInfos;
+	bool logWarnings;
+	bool logErrors;
+	bool logFatals;
+	bool toFile; 
+	bool tozSpy; 
+	bool toConsole;
+
+	std::stringstream util;
 
 	/**
 	 * The address of the gothic 2 function zERROR::Report(int, int, zSTRING const &, signed char, UINT, int, char*, char*)

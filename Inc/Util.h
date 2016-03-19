@@ -32,6 +32,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 
 #include <vector>
 #include <Windows.h>
+#include "Logger.h"
 
 /**
 * Contains functions that are useful for several classes.
@@ -125,16 +126,23 @@ public:
 	 */
 	static HMODULE getModuleHandle();
 
+	static std::string getGothicSystemDirectory();
+
 	static void assertDIIRequirements(bool expression, std::string errorMessage);
 
-	static void debug(std::stringstream* ss);
+	static void debug(std::stringstream* ss, Logger::LogLevel level = Logger::Info);
 
-	static void setDebug(bool enable);
+	static void logInfo(std::stringstream* ss);
+	static void logWarning(std::stringstream* ss);
+	static void logFault(std::stringstream* ss);
+	static void logFatal(std::stringstream* ss);
+
+	static void logAlways(std::stringstream* ss);
+
 private:
 	util() {};
 	~util() {};
 
-	static bool debugEnabled;
 	static HMODULE hModule;
 	static std::stringstream logStream;
 

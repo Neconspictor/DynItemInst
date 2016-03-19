@@ -94,7 +94,7 @@ enum zTStaticWorldLightMode
 /** Insert description. */
 class zCWorld : public zCObject
 {
-private:
+public:
 	zCTree<zCVob>			globalVobTree;
 
 	int						foundHit;

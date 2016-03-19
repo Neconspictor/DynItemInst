@@ -145,7 +145,17 @@ public:
 	int HasFlag(int) 
 	{
 		XCALL(0x007126D0);
+	}
+
+	void InsertEffect()
+	{
+		XCALL(0x00712C40);
 	};
+
+	/*typedef void(__thiscall* OCItemInsertEffect)(oCItem*);
+	OCItemInsertEffect oCItemInsertEffect = (OCItemInsertEffect)0x00712C40;
+	typedef void(__thiscall* OCItemRemoveEffect)(oCItem*);
+	OCItemRemoveEffect oCItemRemoveEffect = (OCItemRemoveEffect)0x00712C00;*/
 
 
 	//.text:00712360 ; public: void __thiscall oCItem::CopyDamage(class oCItem *)
@@ -336,6 +346,18 @@ public:
 	{
 		XCALL(0x00711970);
 	};
+
+	//.text:00711970 ; public: virtual void __thiscall oCItem::InitByScript(int, int)
+	/** Insert description.
+	* @usable Ingame only
+	*/
+	void InitByScript(int, int)
+	{
+		XCALL(0x00711BD0);
+	};
+
+	//typedef void(__thiscall* OCItemInitByScript)(void* pThis, int, int);
+	//OCItemInitByScript oCItemInitByScript = (OCItemInitByScript)0x00711BD0;
 
 	//.text:00712550 ; public: zINT __thiscall oCItem::IsDeadly(void)
 	/** Insert description. 
@@ -958,7 +980,6 @@ public:
 	{
 		XCALL(0x00704D00);
 	};
-
 };
 
 #undef __G2EXT_API_HEADER

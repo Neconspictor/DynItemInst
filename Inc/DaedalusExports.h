@@ -32,7 +32,6 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #define __DaedalusExportsH__
 
 #include "Module.h"
-#include "DynInstance.h"
 
 class oCItem;
 class zCParser;
@@ -89,6 +88,8 @@ public:
 	 */
 	static int DII_IsDynamic(oCItem* item);
 
+	static int DII_IsInstanceDynamic(int instanceId);
+
 	/**
 	 * An external for getting additional memory of the instance of the given c_item.
 	 * Only for dynamic instances such a memory will be created. If the provided c_item
@@ -97,7 +98,7 @@ public:
 	 * \param instanceId The instance id to get the DII_UserData from
 	 * \return The user data of the provided instance id
 	 */
-	static DII_UserData::Data* DII_GetUserData(int instanceId);
+	static BYTE* DII_GetUserData(int instanceId);
 
 	/**
 	 * Provides the version of the library.
@@ -108,7 +109,18 @@ public:
 
 	static void DII_UpdateInstance(oCItem* item);
 
+	//TODO: is this function used?
 	static void DII_AssignInstanceId(oCItem* item, int instanceId);
+
+	static void DII_MarkAsReusable(int instanceId, int previousId);
+	static int DII_AreChangesPerformed();
+
+	static void DII_GetItemByInstanceId(int index, int instanceId);
+
+	//Asiigns all items with instance id targetId the new id newId
+	static void DII_ChangeItemsInstanceId(int targetId, int newId);
+
+	static void DII_ToggleLevitation();
 
 public:
 

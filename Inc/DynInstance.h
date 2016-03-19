@@ -30,10 +30,23 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #define __DYN_INSTANCE_H__
 
 #include "ISerialization.h"
+#include <boost/serialization/array.hpp>
 #include "oCItemExtended.h"
+#include "Util.h"
+#include <sstream>
 
 
 class zCParser;
+
+/*Serialized zSTRING version*/
+struct zSTRINGSerialized
+{
+	int _vtbl; //immer 0
+	int _allocater; //immer 0
+	char* ptr; //pointer zu den Daten
+	int len; //Länge des Strings
+	int res; //Anzahl allozierter Bytes
+};
 
 /**
  * Stores additional memory the user can use to give a dynamic instance additional attributes.
@@ -42,7 +55,7 @@ class zCParser;
 class DII_UserData : public ISerialization {
 public:
 	DII_UserData();
-	DII_UserData(zCParser* parser, int instance);
+	//DII_UserData(zCParser* parser, int instance);
 	~DII_UserData();
 
 	/*! @copydoc ISerialization::myser(boost::archive::text_iarchive &ia)
@@ -62,15 +75,40 @@ public:
 	 */
 	static const int MAX_USER_DATA = 100;
 
+	static const int MAX_STRING_DATA = 1;
+
 	/**
 	 * Stores the user data.
 	 */
-	struct Data
+/*	struct Data
 	{
 		int data[MAX_USER_DATA];
+		zSTRINGSerialized stringData[MAX_STRING_DATA];
+	};*/
+
+	struct MemoryData
+	{
+		int intAmount;
+		int strAmount;
+		BYTE* pMemory;
+
+		int* getIntBegin()
+		{
+			return (int*)pMemory;
+		}
+
+		zSTRINGSerialized* getStr(int index)
+		{
+			return (zSTRINGSerialized*)pMemory[intAmount * sizeof(int) + index * sizeof(zSTRINGSerialized)];
+		}
 	} userData;
+
+
 private:
 	friend class boost::serialization::access;
+
+	void createMemory(int intAmount, int strAmount);
+
 
 	/*! @copydoc ISerialization::serialize(Archive & ar, const unsigned int version)
 	 */
@@ -78,7 +116,95 @@ private:
     {
 	    // serialize base class information
         ar & boost::serialization::base_object<ISerialization>(*this);
-		ar & userData.data;
+		ar & userData.intAmount;
+		ar & userData.strAmount;
+
+		if (Archive::is_loading::value)
+		{
+			//assert(userData.pMemory == nullptr);
+			//int byteSize = userData.intAmount * sizeof(int) + userData.strAmount * sizeof(zSTRINGSerialized);
+			//userData.pMemory = new BYTE[byteSize];
+		}
+
+		//save int array
+		for (int i = 0; i < userData.intAmount; ++i)
+		{
+			ar & userData.getIntBegin()[i];
+		}
+
+		std::stringstream ss; 
+		ss << "strAmount: " << userData.strAmount << std::endl;
+		util::debug(&ss);
+
+		//save bytestream
+		int indexBegin = userData.intAmount * sizeof(int);
+		/*for (int i = 0; i < byteAmount; ++i)
+		{
+			ar & userData.pMemory[indexBegin + i];
+		}*/
+
+		//save the first string
+		zSTRINGSerialized* ptr;  
+		
+		for (int i = 0; i < userData.strAmount; ++i)
+		{
+			ptr = (zSTRINGSerialized*)((userData.pMemory) + indexBegin + i*sizeof(zSTRINGSerialized));
+			ar & ptr->_vtbl;
+			ar & ptr->_allocater;
+
+			if (Archive::is_loading::value)
+			{
+				//assert(userData.getStr(i)->ptr == nullptr);
+				std::string data;
+				ar & data;
+				//&userData.pMemory[indexBegin] = new char[userData.getStr(i)->len];
+				ptr->len = data.size();
+				ptr->ptr = new char[ptr->len];
+				strcpy(ptr->ptr, data.c_str());
+
+				ss << "string loaded: " << std::string(ptr->ptr) << std::endl;
+				util::debug(&ss);
+			}
+			else
+			{
+				std::string data;
+				if (ptr->ptr == nullptr)
+				{
+					data = "";
+				}
+				else
+				{
+					data = std::string(ptr->ptr);
+				}
+				ss << "string to write: " << data << std::endl;
+				util::debug(&ss);
+
+				ss << ": ptr->_vtbl: " << ptr->_vtbl << std::endl;
+				util::debug(&ss);
+
+				ss << "ptr->_allocater " << ptr->_allocater << std::endl;
+				util::debug(&ss);
+
+				if (ptr->ptr)
+				{
+					ss << "ptr->ptr: " << ptr->ptr << std::endl;
+					util::debug(&ss);
+				} else
+				{
+					ss << "ptr->ptr: null" << std::endl;
+					util::debug(&ss);
+				}
+
+				ss << "ptr->len: " << ptr->len << std::endl;
+				util::debug(&ss);
+
+				ss << "ptr->res: " << ptr->res << std::endl;
+				util::debug(&ss);
+				ar & data;
+			}
+
+			ar & ptr->res;
+		}
     }
 };
 
@@ -189,6 +315,9 @@ public:
 	int next;							//138
 	DII_UserData dii_userData;
 
+	//specifies whether this instance can be reassigned
+	bool notUsed;
+
 	/**
 	 * Provides the Item's instance id.
 	 */
@@ -266,19 +395,19 @@ public:
 	 * \param index The index for the user data
 	 * \param data The value to be set
 	 */
-	void setUserData(int index, int data);
+	//void setUserData(int index, int data);
 
 	/**
 	 * Provides the user data of a certain index.
 	 * \param index The index of the user data.
 	 */
-	int getUserData(int index);
+	//int getUserData(int index);
 
 	/**
 	 * Provides access to the user data member of this class.
 	 * \return The user data of this class.
 	 */
-	DII_UserData::Data* getUserData();
+	BYTE* getUserData();
 
 	/**
 	 * Makes the user data of this class to a copy of the content of the user data a given dynamic instance has.
@@ -296,6 +425,7 @@ private:
     {
 		// serialize base class information
         ar & boost::serialization::base_object<ISerialization>(*this);
+		ar & notUsed;
 		ar & zCPar_Symbol_name;
 		ar & zCPar_Symbol_Bitfield;
         ar & parentInstanceId;

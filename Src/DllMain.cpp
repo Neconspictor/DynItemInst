@@ -31,7 +31,6 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <HookManager.h>
 #include <Logger.h>
 #include <Util.h>
-#include <Configuration.h>
 
 std::stringstream logStream;
 
@@ -64,15 +63,12 @@ BOOL APIENTRY DllMain( HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpRese
     {
     case DLL_PROCESS_ATTACH: 
 		util::setModuleHandle(hModule);
-
-		// only for debug builds
-		util::setDebug(true);
 		logStream<< "DLL_Process_Attach called."<< std::endl;
-		Logger::getLogger()->log(Logger::Info, &logStream, true, false);
+		Logger::getLogger()->logAlways(&logStream);
 		break;
 	case DLL_PROCESS_DETACH:
 		logStream<< "DLL_Process_Detach called."<< std::endl;
-		Logger::getLogger()->log(Logger::Info, &logStream, true, false);
+		Logger::getLogger()->logAlways(&logStream);
 		Unhook();
 		Logger::release();
 		break;

@@ -40,6 +40,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <sstream>
 #include <Logger.h>
 #include <Configuration.h>
+#include <Levitation.h>
 
 HookManager* HookManager::instance = nullptr;
 std::stringstream HookManager::logStream = std::stringstream();
@@ -80,7 +81,7 @@ void HookManager::registerHook(LPVOID original, LPVOID hook)
 	{
 		logStream << "HookManager::registerHook: Warning: Address was previously hooked! Hook count = " 
 			<< originalToHookAddress.count(original) + 1 << std::endl;
-		Logger::getLogger()->log(Logger::Warning, &logStream, true, false);
+		util::logWarning(&logStream);
 	}
 	originalToHookAddress.insert(std::pair<LPVOID,LPVOID>(original, hook));
 	hookToOriginalAddress.insert(std::pair<LPVOID,LPVOID>(hook, original));
@@ -139,7 +140,7 @@ void HookManager::addFunctionHook(LPVOID* source, LPVOID destination, std::strin
 		logStream << "HookManager::addFunctionHook: Error: Couldn't hook function at address 0x"<< address
 			<< " for module " << description<< std::endl;
 		logStream.unsetf(std::ios::hex);
-		Logger::getLogger()->log(Logger::Fault, &logStream, true, false);
+		util::logFatal(&logStream);
 		return;
 	}
 
@@ -149,7 +150,7 @@ void HookManager::addFunctionHook(LPVOID* source, LPVOID destination, std::strin
 	logStream << "HookManager::addFunctionHook: " << "Function at address 0x"<< address 
 		<< " for module "<< description <<" was successfully hooked."<< std::endl;
 	logStream.unsetf(std::ios::hex);
-	Logger::getLogger()->log(Logger::Info, &logStream, true, false);
+	util::logAlways(&logStream);
 
 	registerHook(address, destination);
 }
@@ -163,7 +164,7 @@ void HookManager::removeFunctionHook(LPVOID* source, LPVOID destination, std::st
 		logStream << "HookManager::removeFunctionHook: Error: Couldn't find original function for function hook 0x"<< destination
 			<< " for module " << description<< std::endl;
 		logStream.unsetf(std::ios::hex);
-		Logger::getLogger()->log(Logger::Fault, &logStream, true, false);
+		util::logFatal(&logStream);
 		return;
 	}
 
@@ -180,7 +181,7 @@ void HookManager::removeFunctionHook(LPVOID* source, LPVOID destination, std::st
 		logStream << "HookManager::removeFunctionHook: Fault: Couldn't remove hook function at address 0x"<< destination 
 			<<" for module " << description<< std::endl;
 		logStream.unsetf(std::ios::hex);
-		Logger::getLogger()->log(Logger::Fault, &logStream, true, false);
+		util::logFatal(&logStream);
 		return;
 	}
 
@@ -189,7 +190,7 @@ void HookManager::removeFunctionHook(LPVOID* source, LPVOID destination, std::st
 	logStream.setf(std::ios::hex, std::ios::basefield);
 	logStream << "HookManager::removeFunctionHook: Function hook at address 0x"<< original <<" for module " << description
 		<< " was successfully removed."<< std::endl;
-	Logger::getLogger()->log(Logger::Info, &logStream, true, false);
+	util::logAlways(&logStream);
 	logStream.unsetf(std::ios::hex);
 
 	unregisterHook(original, destination);
@@ -208,32 +209,57 @@ HookManager::HookManager()
 
 void HookManager::hook()
 {
-	HookManager* manager = HookManager::getHookManager();
+	HookManager* manager = getHookManager();
 	if (instance->called) return;
 	instance->called = true;
-	logStream << "HookManager::hook: Try to hook target functions..."<< std::endl;
-	Logger::getLogger()->log(Logger::Info, &logStream, true);
+
+	// init Logger since Configuration file is initialized there
+	Logger::getLogger();
+
+	logStream << "HookManager::hook: read Configuration: " << std::endl;
+	logStream << "debugEnabled = " << Configuration::debugEnabled() << std::endl;
+	logStream << "logToFile = " << Configuration::getLogToFile() << std::endl;
+	logStream << "logTozSpy = " << Configuration::getLogTozSpy() << std::endl;
+	logStream << "logToConsole = " << Configuration::getLogToConsole() << std::endl;
+	logStream << "logInfos = " << Configuration::getLogInfos()<< std::endl;
+	logStream << "logWarnings = " << Configuration::getLogWarnings() << std::endl;
+	logStream << "logErrors = " << Configuration::getLogErrors() << std::endl;
+	logStream << "logFatals = " << Configuration::getLogFatals() << std::endl;
+
+	util::logAlways(&logStream);
+
+
+	Configuration::loadLoAIni();
+
+	logStream << "HookManager::hook: Hook target functions..."<< std::endl;
+	util::logAlways(&logStream);
 
 	if (MH_Initialize() != MH_OK) {
 		logStream << "HookManager::hook: Couldn't initialize hook engine!"<< std::endl;
-		Logger::getLogger()->log(Logger::Fault, &logStream, true);
+		util::logFatal(&logStream);
 		unhook();
 		return;
 	}
 
 	Module* dynItemInstModule = new DynItemInst();
 	Module* externals = new DaedalusExports();
+	Module* levitation = new Levitation();
 	manager->addModule(dynItemInstModule);
 	manager->addModule(externals);
+	manager->addModule(levitation);
 	manager->hookModules();
+
+	logStream << "HookManager::hook: done." << std::endl;
+	Logger::getLogger()->logAlways(&logStream);
 };
 
 
 void HookManager::unhook()
 {
 	if (instance == nullptr) return;
+	logStream << "HookManager::unHook: Unhook functions..." << std::endl;
 	instance->unHookModules();
 	release();
-	logStream << "HookManager::unHook: Unhooking done."<< std::endl;
-	Logger::getLogger()->log(Logger::Info, &logStream, true);
+	logStream << "HookManager::unHook: Unhook done."<< std::endl;
+	util::logInfo(&logStream);
 }

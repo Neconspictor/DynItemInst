@@ -19,6 +19,8 @@
     <ClInclude Include="Inc\HookManager.h" />
     <ClInclude Include="Inc\ISerialization.h" />
     <ClInclude Include="Inc\DynInstance.h" />
+    <ClInclude Include="Inc\Levitation.h" />
+    <ClInclude Include="Inc\LevitationBean.h" />
     <ClInclude Include="Inc\Logger.h" />
     <ClInclude Include="Inc\Module.h" />
     <ClInclude Include="Inc\ObjectManager.h" />
@@ -38,6 +40,8 @@
     </ClCompile>
     <ClCompile Include="Src\HookManager.cpp" />
     <ClCompile Include="Src\DynInstance.cpp" />
+    <ClCompile Include="Src\Levitation.cpp" />
+    <ClCompile Include="Src\LevitationBean.cpp" />
     <ClCompile Include="Src\Logger.cpp" />
     <ClCompile Include="Src\Module.cpp" />
     <ClCompile Include="Src\ObjectManager.cpp" />

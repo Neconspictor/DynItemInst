@@ -42,15 +42,25 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <Logger.h>
 #include <set>
 #include <zCPar_SymbolTable.h>
+#include <api/g2/oCObjectFactory.h>
+#include <oCItemExtended.h>
 using namespace std;
 
 ObjectManager* ObjectManager::instanz = nullptr;
 
+//.text:0073ABE0 public: class oCVob * __thiscall oCNpc::GetLeftHand(void) proc near
+typedef oCVob* (__thiscall* OCNpcGetLeftHand)(oCNpc*);
+OCNpcGetLeftHand oCNpcGetLeftHand = (OCNpcGetLeftHand) 0x0073ABE0;
+
+//.text:0073AB50 public: class oCVob * __thiscall oCNpc::GetRightHand(void) proc near
+typedef oCVob* (__thiscall* OCNpcGetRightHand)(oCNpc*);
+OCNpcGetRightHand oCNpcGetRightHand = (OCNpcGetRightHand)0x0073ABE0;
+
 
 ObjectManager::ObjectManager()
 {
-	this->instanceMap = std::map<int, DynInstance*>();
-	this->nextInstances = std::queue<int>();
+	this->instanceMap = map<int, DynInstance*>();
+	this->nextInstances = queue<int>();
 };
 
 g2ext_extended::zCPar_SymbolTable* zCParserGetSymbolTable(void* parser)
@@ -87,6 +97,8 @@ int ObjectManager::createNewInstanceId(oCItem* item) {
 
 	if (old == nullptr) return 0;
 
+
+
 	int* indexCount = getParserInstanceCount();
 	int key = *indexCount;
 
@@ -94,50 +106,16 @@ int ObjectManager::createNewInstanceId(oCItem* item) {
 	{
 		instanceBegin = key;
 	}
-	/*
-	changeKeyIfFreeIdAvailable(&key, *indexCount);
-	logStream << "Tried to change key." << endl;
-	Logger::getLogger()->log(Logger::Info, &logStream, false, true, true);
-	*/
 
-
-	zCPar_Symbol* symbol = createNewSymbol(key, old);
-
-	if (!addSymbolToSymbolTable(symbol))
+	if (reusableInstances.size() > 0)
 	{
-		if (*indexCount < key) *indexCount = key;
-		if (*indexCount == key) *indexCount += 1;
-	};
-
-	DynInstance* instanceItem = createNewInstanceItem(key);
-	if (IsModified(item))
+		key = reusableInstances.front();
+		reusableInstances.pop_front();
+		createNewInstanceForExistingId(item, key);
+	} else
 	{
-		DynInstance* oldStoreItem = getInstanceItem(parentId);
-		instanceItem->copyUserData(*oldStoreItem);
-		if (instanceBegin > parentId)
-		{
-			instanceBegin = parentId;
-		}
+		createNewInstanceWithoutExistingId(item, key);
 	}
-	instanceItem->store(*item);
-
-	setParentInstanceId(key, parentId);
-
-	instanceItem->setParserSymbolBitfield(symbol->bitfield);
-	instanceItem->setZCPar_SymbolName(symbol->name.ToChar());
-	instanceItem->setInstanceID(key);
-
-	newInstanceToSymbolMap.insert(pair<int, zCPar_Symbol*>(key, symbol));
-
-	string symbolName = symbol->name.ToChar();
-	//transform(symbolName.begin(), symbolName.end(), symbolName.begin(), ::toupper);
-	nameToSymbolMap.insert(pair<string, zCPar_Symbol*>(symbolName, symbol));
-	nameToIndexMap.insert(pair<string, int>(symbolName, key));
-
-	logStream << "ObjectManager::createNewInstanceId(): indexCount = " << *indexCount << endl;
-	Logger::getLogger()->log(Logger::Info, &logStream, false, true, true);
-	logStream << "ObjectManager::createNewInstanceId(): key = " << key << endl;
-	Logger::getLogger()->log(Logger::Info, &logStream, false, true, true);
 
 	return key;
 };
@@ -148,8 +126,8 @@ void ObjectManager::createInstanceById(int id, DynInstance* item) {
 	it = instanceMap.find(id);
 	if (it != instanceMap.end())
 	{
-		logStream << "Warning: instance id already exists! Nothing will be created." << endl;
-		Logger::getLogger()->log(Logger::Info, &logStream, true, true, true);
+		logStream << "Instance id already exists! Nothing will be created." << endl;
+		util::debug(&logStream, Logger::Warning);
 		return;
 	}
 
@@ -159,21 +137,26 @@ void ObjectManager::createInstanceById(int id, DynInstance* item) {
 	{
 		instanceBegin = id;
 	}
+
+	if (item->notUsed)
+	{
+		reusableInstances.push_back(id);
+		logStream << "added DynInstance to reusableInstances" << std::endl;
+		util::debug(&logStream);
+	}
 }
 
 void ObjectManager::releaseInstances() {
 	instanceBegin = -1;
 
 	//release all allocated parser symbols and update parser symbol table
-	zCParser* parser = zCParser::GetParser();
-	g2ext_extended::zCPar_SymbolTable* currSymbolTable = zCParserGetSymbolTable(parser);
 	int allocatedSize = instanceMap.size();
 	int* symTableSize = getParserInstanceCount();
 	*symTableSize = *symTableSize - allocatedSize;
 	logStream << "ObjectManager::releaseInstances(): allocatedSize = " << allocatedSize << endl;
-	Logger::getLogger()->log(Logger::Info, &logStream, false, true, true);
+	util::debug(&logStream);
 	logStream << "ObjectManager::releaseInstances(): symTableSize = " << *symTableSize << endl;
-	Logger::getLogger()->log(Logger::Info, &logStream, false, true, true);
+	util::debug(&logStream);
 
 	// Release all allocated memory referenced by the instance map
 	map<int, DynInstance*>::iterator it;
@@ -190,6 +173,7 @@ void ObjectManager::releaseInstances() {
 	newInstanceToSymbolMap.clear();
 	nameToIndexMap.clear();
 	nameToSymbolMap.clear();
+	reusableInstances.clear();
 };
 
 bool ObjectManager::assignInstanceId(oCItem* item, int id){
@@ -197,8 +181,8 @@ bool ObjectManager::assignInstanceId(oCItem* item, int id){
 	it = instanceMap.find(id);
 	if (it == instanceMap.end())
 	{
-		logStream<< "Warning: instance id wasn't found: " << id << std::endl;
-		Logger::getLogger()->log(Logger::Warning, &logStream, false, true, true);
+		logStream<< "ObjectManager::assignInstanceId: instance id wasn't found: " << id << std::endl;
+		util::debug(&logStream, Logger::Warning);
 		return false;
 	}
 	
@@ -206,10 +190,155 @@ bool ObjectManager::assignInstanceId(oCItem* item, int id){
 
 	if(!initByNewInstanceId(item))
 	{
-		logStream << "Warning: Item Initialisation failed!" << std::endl;
-		Logger::getLogger()->log(Logger::Warning, &logStream, false, true, true);
+		logStream << "ObjectManager::assignInstanceId: Item Initialisation failed!" << std::endl;
+		util::debug(&logStream, Logger::Warning);
 		return false;
 	};
+	return true;
+}
+
+void oCItemOperatorDelete(oCItem* item)
+{
+	XCALL(0x007144A0);
+}
+
+bool ObjectManager::assignInstanceId2(oCItem* item, int id)
+{
+	//TODO: get rid of the copy item!!!
+	oCItem* copy = oCObjectFactory::GetFactory()->CreateItem(id);
+
+	if (!copy) return false;
+	
+	item->idx = copy->idx;
+	item->name = copy->name;
+	item->nameID = copy->nameID;
+	item->hp = copy->hp;
+	item->hp_max = copy->hp_max;
+	item->mainflags = copy->mainflags;
+	item->flags = copy->flags;
+	item->weight = copy->weight;
+	item->value = copy->value;
+
+	// -- weapons		
+	item->damageType = copy->damageType;
+	item->damageTotal = copy->damageTotal;
+
+	item->damage[0] = copy->damage[0];
+	item->damage[1] = copy->damage[1];
+	item->damage[2] = copy->damage[2];
+	item->damage[3] = copy->damage[3];
+	item->damage[4] = copy->damage[4];
+	item->damage[5] = copy->damage[5];
+	item->damage[6] = copy->damage[6];
+	item->damage[7] = copy->damage[7];
+
+	// -- armor 
+	item->wear = copy->wear;
+	item->protection[0] = copy->protection[0];
+	item->protection[1] = copy->protection[1];
+	item->protection[2] = copy->protection[2];
+	item->protection[3] = copy->protection[3];
+	item->protection[4] = copy->protection[4];
+	item->protection[5] = copy->protection[5];
+	item->protection[6] = copy->protection[6];
+	item->protection[7] = copy->protection[7];
+
+	// -- food
+	item->nutrition = copy->nutrition;
+
+	// -- use attributes
+	item->cond_atr[0] = copy->cond_atr[0];
+	item->cond_atr[1] = copy->cond_atr[1];
+	item->cond_atr[2] = copy->cond_atr[2];
+
+	item->cond_value[0] = copy->cond_value[0];
+	item->cond_value[1] = copy->cond_value[1];
+	item->cond_value[2] = copy->cond_value[2];
+
+	// -- attributes that will be changed on equip
+	item->change_atr[0] = copy->change_atr[0];
+	item->change_atr[1] = copy->change_atr[1];
+	item->change_atr[2] = copy->change_atr[2];
+
+	item->change_value[0] = copy->change_value[0];
+	item->change_value[1] = copy->change_value[1];
+	item->change_value[2] = copy->change_value[2];
+
+	// -- parser functions
+	item->magic = copy->magic;
+	item->on_equip = copy->on_equip;
+	item->on_unequip = copy->on_unequip;
+
+	item->on_state[0] = copy->on_state[0];
+	item->on_state[1] = copy->on_state[1];
+	item->on_state[2] = copy->on_state[2];
+	item->on_state[3] = copy->on_state[3];
+
+	// -- owner									
+	item->owner = copy->owner;			//	owner: npc instance
+	item->ownerGuild = copy->ownerGuild;		//	owner: guild
+	item->disguiseGuild = copy->disguiseGuild;
+
+	// -- visual
+	item->visual = copy->visual;
+
+	// -- change of mesh on equip
+	item->visual_change = copy->visual_change;	//	ASC file
+	item->effect = copy->effect;			//  Effect instance
+
+	item->visual_skin = copy->visual_skin;
+
+	item->scemeName = copy->scemeName;
+	item->material = copy->material;
+	item->munition = copy->munition;		//	Instance of ammunition
+
+	item->spell = copy->spell;
+	item->range = copy->range;
+
+	item->mag_circle = copy->mag_circle;
+
+	item->description = copy->description;
+	item->text[0] = copy->text[0];
+	item->text[1] = copy->text[1];
+	item->text[2] = copy->text[2];
+	item->text[3] = copy->text[3];
+	item->text[4] = copy->text[4];
+	item->text[5] = copy->text[5];
+
+	item->count[0] = copy->count[0];
+	item->count[1] = copy->count[1];
+	item->count[2] = copy->count[2];
+	item->count[3] = copy->count[3];
+	item->count[4] = copy->count[4];
+	item->count[5] = copy->count[5];
+
+	// -- inventory presentation
+	item->inv_zbias = copy->inv_zbias;								//  far plane (how far the item goes into the room by the z-axis)
+	item->inv_rotx = copy->inv_rotx;								//  rotation around x-axis (in degrees)
+	item->inv_roty = copy->inv_roty;								//  rotation around y-axis (in degrees)
+	item->inv_rotz = copy->inv_rotz;								//  rotation around z-axis (in degrees)
+	item->inv_animate = copy->inv_animate;							//  rotate the item
+																// Skip instanz field!!!
+																//item->instanz=instanz;						//int Symbolindex
+	item->c_manipulation = copy->c_manipulation;					//int ?
+	item->last_manipulation = copy->last_manipulation;				//zREAL ?
+	item->magic_value = copy->magic_value;					//int ?
+	//item->effectVob = effectVob;						//oCVisualFX*
+	item->next = copy->next;
+	int address = reinterpret_cast<int>(item);
+	address += 0x330;
+	int* instance = reinterpret_cast<int*>(address);
+
+	//Get current symbol index and set it as the item's instance id
+	*instance = id;
+
+	//insert effect finally
+	oCItemSaveRemoveEffect(item);
+	oCItemSaveInsertEffect(item);
+
+	//remove copy item
+	//oCItemOperatorDelete(copy);
+	//copy = nullptr;
 	return true;
 };
 
@@ -243,8 +372,8 @@ void ObjectManager::setDynInstanceId(oCItem* item, int id){
 		setInstanceId(item, id);
 	} else
 	{
-		logStream << "ObjectManager::setInstanceId: Warning: parameter id has no assigned index. Nothing will be done." << std::endl;
-		Logger::getLogger()->log(Logger::Warning, &logStream, false, true, true);
+		logStream << "ObjectManager::setInstanceId: parameter id has no assigned index. Nothing will be done." << endl;
+		util::debug(&logStream, Logger::Warning);
 	}
 };
 
@@ -267,7 +396,7 @@ void ObjectManager::saveNewInstances(char* directoryPath, char* filename) {
 		}
 	}
 
-	std::string fullpath = dir + std::string("\\") + std::string(filename);
+	string fullpath = dir + string("\\") + string(filename);
 	ofstream fs(const_cast<char*>(fullpath.c_str()));
 	 boost::archive::text_oarchive oa(fs);
 
@@ -324,8 +453,8 @@ void ObjectManager::oCItemInitByScript(oCItem* item, int inst, int second)
 	XCALL(0x00711BD0);
 }
 
-std::list<oCMobContainer*>* ObjectManager::getMobContainers() {
-	std::list<oCMobContainer*>* containerList = new std::list<oCMobContainer*>();
+list<oCMobContainer*>* ObjectManager::getMobContainers() {
+	list<oCMobContainer*>* containerList = new list<oCMobContainer*>();
 	zCWorld* world = oCGame::GetGame()->GetWorld();
 	zCListSort<zCVob>* vobList = world->GetVobList();
 	oCMobContainer* dummy = new oCMobContainer();
@@ -363,7 +492,7 @@ void ObjectManager::changeKeyIfFreeIdAvailable(int* key, int indexCount)
 	for (auto it = usedIds.begin(); it != usedIds.end(); ++it)
 	{
 		logStream << "usedId: " << *it << endl;
-		Logger::getLogger()->log(Logger::Info, &logStream, false, true, true);
+		util::debug(&logStream);
 	}
 
 	auto first = usedIds.begin();
@@ -375,11 +504,11 @@ void ObjectManager::changeKeyIfFreeIdAvailable(int* key, int indexCount)
 		diff = *second - *first;
 		logStream << "first: " << *first << endl;
 		logStream << "second: " << *second << endl;
-		Logger::getLogger()->log(Logger::Info, &logStream, false, true, true);
+		util::debug(&logStream);
 		if (diff <= 0)
 		{
 			logStream << "ObjectManager::createNewInstanceId: strange diff: " << diff << endl;
-			Logger::getLogger()->log(Logger::Info, &logStream, false, true, true);
+			util::debug(&logStream);
 		}
 		else if (diff > 1)
 		{
@@ -397,12 +526,77 @@ void ObjectManager::changeKeyIfFreeIdAvailable(int* key, int indexCount)
 		int lastIndex = indexCount - 1;
 		logStream << "lastUsedId: " << lastUsedId << endl;
 		logStream << "lastIndex: " << lastIndex << endl;
-		Logger::getLogger()->log(Logger::Info, &logStream, false, true, true);
+		util::debug(&logStream);
 		if (lastIndex - lastUsedId >= 1)
 		{
 			*key = lastUsedId + 1;
 		}
 	}
+}
+
+void ObjectManager::createNewInstanceWithoutExistingId(oCItem* item, int key)
+{
+	zCParser* parser = zCParser::GetParser();
+	int parentId = getInstanceId(*item);
+	zCPar_Symbol* old = parser->GetSymbol(parentId);
+
+	if (old == nullptr) return;
+
+	int* indexCount = getParserInstanceCount();
+	zCPar_Symbol* symbol = createNewSymbol(key, old);
+
+	if (!addSymbolToSymbolTable(symbol))
+	{
+		if (*indexCount < key) *indexCount = key;
+		if (*indexCount == key) *indexCount += 1;
+	};
+
+	DynInstance* instanceItem = createNewInstanceItem(key);
+	if (IsModified(item))
+	{
+		/*DynInstance* oldStoreItem = getInstanceItem(parentId);
+		instanceItem->copyUserData(*oldStoreItem);
+		if (instanceBegin > parentId)
+		{
+			instanceBegin = parentId;
+		}*/
+	}
+	instanceItem->store(*item);
+
+	setParentInstanceId(key, parentId);
+
+	instanceItem->setParserSymbolBitfield(symbol->bitfield);
+	instanceItem->setZCPar_SymbolName(symbol->name.ToChar());
+	instanceItem->setInstanceID(key);
+
+	newInstanceToSymbolMap.insert(pair<int, zCPar_Symbol*>(key, symbol));
+
+	string symbolName = symbol->name.ToChar();
+	nameToSymbolMap.insert(pair<string, zCPar_Symbol*>(symbolName, symbol));
+	nameToIndexMap.insert(pair<string, int>(symbolName, key));
+
+	logStream << "ObjectManager::createNewInstanceWithoutExistingId(): indexCount = " << *indexCount << endl;
+	util::debug(&logStream);
+	logStream << "ObjectManager::createNewInstanceWithoutExistingId(): key = " << key << endl;
+	util::debug(&logStream);
+}
+
+void ObjectManager::createNewInstanceForExistingId(oCItem* item, int instanceId)
+{
+	DynInstance* instanceItem = getInstanceItem(instanceId);
+	int parentId = getInstanceId(*item);
+	if (IsModified(item))
+	{
+		DynInstance* oldStoreItem = getInstanceItem(parentId);
+		instanceItem->copyUserData(*oldStoreItem);
+		if (instanceBegin > parentId)
+		{
+			instanceBegin = parentId;
+		}
+	}
+
+	instanceItem->store(*item);
+	instanceItem->setInstanceID(instanceId);
 };
 
 
@@ -445,7 +639,7 @@ bool ObjectManager::addSymbolToSymbolTable(zCPar_Symbol* symbol)
 	logStream << "ObjectManager::addSymbolToSymbolTable(): Index = " << parser->GetIndex(symbol->name) << endl;
 	logStream << "ObjectManager::addSymbolToSymbolTable(): countBefore = " << countBefore << endl;
 	logStream << "ObjectManager::addSymbolToSymbolTable(): index count = " << *indexCount << endl;
-	Logger::getLogger()->log(Logger::Info, &logStream, false, true, true);
+	util::debug(&logStream);
 
 	// Some Ikarus functions need the correct length of the current symbol table.
 	updateIkarusSymbols();
@@ -466,36 +660,41 @@ DynInstance* ObjectManager::createNewInstanceItem(int instanceId)
 	return result;
 };
 
-void updateContainerItem(ObjectManager::ParserInfo* info)
+void ObjectManager::updateContainerItem(ObjectManager::ParserInfo* info)
 {
 	DynInstance* item = info->container;
 	item->setInstanceID(info->newInstanceId);
 	item->setZCPar_SymbolName(info->name);
 	item->setParserSymbolBitfield(info->bitfield);
+
+	if (item->notUsed)
+	{
+		reusableInstances.push_back(item->getInstanceID());
+	}
 };
 
 void ObjectManager::logSymbolData(zCPar_Symbol* sym)
 {
-	logStream << sym->name.ToChar() << std::endl;
-	Logger::getLogger()->log(Logger::Info, &logStream, false, true, true);
-	logStream << sym->parent->name.ToChar() << std::endl;
-	Logger::getLogger()->log(Logger::Info, &logStream, false, true, true);
-	logStream<< sym->bitfield << std::endl;
-	Logger::getLogger()->log(Logger::Info, &logStream, false, true, true);
-	logStream << sym->filenr << std::endl;
-	Logger::getLogger()->log(Logger::Info, &logStream, false, true, true);
-	logStream << sym->line << std::endl;
-	Logger::getLogger()->log(Logger::Info, &logStream, false, true, true);
-	logStream << sym->line_anz << std::endl;
-	Logger::getLogger()->log(Logger::Info, &logStream, false, true, true);
-	logStream << sym->next << std::endl;
-	Logger::getLogger()->log(Logger::Info, &logStream, false, true, true);
-	logStream << sym->offset << std::endl;
-	Logger::getLogger()->log(Logger::Info, &logStream, false, true, true);
-	logStream << sym->pos_beg << std::endl;
-	Logger::getLogger()->log(Logger::Info, &logStream, false, true, true);
-	logStream << sym->pos_anz << std::endl;
-	Logger::getLogger()->log(Logger::Info, &logStream, false, true, true);
+	logStream << sym->name.ToChar() << endl;
+	util::logInfo(&logStream);
+	logStream << sym->parent->name.ToChar() << endl;
+	util::logInfo(&logStream);
+	logStream<< sym->bitfield << endl;
+	util::logInfo(&logStream);
+	logStream << sym->filenr << endl;
+	util::logInfo(&logStream);
+	logStream << sym->line << endl;
+	util::logInfo(&logStream);
+	logStream << sym->line_anz << endl;
+	util::logInfo(&logStream);
+	logStream << sym->next << endl;
+	util::logInfo(&logStream);
+	logStream << sym->offset << endl;
+	util::logInfo(&logStream);
+	logStream << sym->pos_beg << endl;
+	util::logInfo(&logStream);
+	logStream << sym->pos_anz << endl;
+	util::logInfo(&logStream);
 };
 
 void ObjectManager::createParserSymbols()
@@ -508,20 +707,19 @@ void ObjectManager::createParserSymbols()
 		zCParser* parser = zCParser::GetParser();
 		if (!addSymbolToSymbolTable(symbol))
 		{
-			logStream << "adding wasn't successful: " << symbol->name.ToChar() << endl;
-			Logger::getLogger()->log(Logger::Warning, &logStream, false, true, true);
+			logStream << "ObjectManager::createParserSymbols: Adding wasn't successful: " << symbol->name.ToChar() << endl;
 			g2ext_extended::zCPar_SymbolTable* currSymbolTable = zCParserGetSymbolTable(parser);
 			int index = currSymbolTable->GetIndex(info.name.c_str());
 			int* symTableSize = getParserInstanceCount();
 			logStream << "index: " << index << endl;
 			logStream << "symTableSize: " << *symTableSize << endl;
-			Logger::getLogger()->log(Logger::Info, &logStream, false, true, true);
+			util::debug(&logStream, Logger::Warning);
 			if (index >= *symTableSize)
 			{
 				*symTableSize = index + 1;
 				updateIkarusSymbols();
-				logStream << "ObjectManager::createParserSymbols(): symTableSize = " << *symTableSize << endl;
-				Logger::getLogger()->log(Logger::Info, &logStream, false, true, true);
+				logStream << "ObjectManager::createParserSymbols(): resized symbol table. symTableSize = " << *symTableSize << endl;
+				util::logInfo(&logStream);
 			}
 		}
 
@@ -531,7 +729,7 @@ void ObjectManager::createParserSymbols()
 		{
 			logStream << "ObjectManager::createParserSymbols(): index and newInstanceId don't match!" << endl;
 			logStream << "index: " << index << ", newInstanceId: " << info.newInstanceId << endl;
-			Logger::getLogger()->log(Logger::Warning, &logStream, false, true, true);
+			util::logFatal(&logStream);
 		}
 
 		int newInstanceId = info.newInstanceId;
@@ -661,8 +859,8 @@ bool ObjectManager::InitItemWithDynInstance(oCItem* item, int index)
 	// only init item if an instance id exists
 	if (index == NULL)
 	{
-		logStream << "Warning: instanceId wasn't found!" << std::endl;
-		Logger::getLogger()->log(Logger::Info, &logStream, false, true, true);
+		logStream << "ObjectManager::InitItemWithDynInstance: instanceId wasn't found!" << std::endl;
+		util::logWarning(&logStream);
 		return false;
 	}
 	return assignInstanceId(item, index);
@@ -671,8 +869,7 @@ bool ObjectManager::InitItemWithDynInstance(oCItem* item, int index)
 bool ObjectManager::IsModified(oCItem* item)
 {
 	int index = getDynInstanceId(item);
-	std::map<int,DynInstance*>::iterator it;
-	it = instanceMap.find(index);
+	auto it = instanceMap.find(index);
 	if (it == instanceMap.end())
 	{
 		return false;
@@ -682,8 +879,7 @@ bool ObjectManager::IsModified(oCItem* item)
 
 bool ObjectManager::IsModified(int instanceId)
 {
-	std::map<int,DynInstance*>::iterator it;
-	it = instanceMap.find(instanceId);
+	auto it = instanceMap.find(instanceId);
 	if (it == instanceMap.end())
 	{
 		return false;
@@ -693,29 +889,26 @@ bool ObjectManager::IsModified(int instanceId)
 
 zCPar_Symbol* ObjectManager::getSymbolByIndex(int index)
 {
-	std::map<int, zCPar_Symbol*>::iterator it;
-	it = newInstanceToSymbolMap.find(index);
-	if (it == newInstanceToSymbolMap.end()) { return NULL; }
+	auto it = newInstanceToSymbolMap.find(index);
+	if (it == newInstanceToSymbolMap.end()) { return nullptr; }
 	return it->second;
 }
 
 zCPar_Symbol* ObjectManager::getSymbolByName(zSTRING symbolName)
 {
-	std::string name = symbolName.ToChar();
-	std::transform(name.begin(), name.end(),name.begin(), ::toupper);
-	std::map<std::string, zCPar_Symbol*>::iterator it;
-	it = nameToSymbolMap.find(name);
-	if (it == nameToSymbolMap.end()) { return NULL; }
+	string name = symbolName.ToChar();
+	transform(name.begin(), name.end(),name.begin(), ::toupper);
+	auto it = nameToSymbolMap.find(name);
+	if (it == nameToSymbolMap.end()) { return nullptr; }
 	return it->second;
 }
 
 
 int ObjectManager::getIndexByName(zSTRING symbolName)
 {
-	std::string name = symbolName.ToChar();
-	std::transform(name.begin(), name.end(),name.begin(), ::toupper);
-	std::map<std::string, int>::iterator it;
-	it = nameToIndexMap.find(name);
+	string name = symbolName.ToChar();
+	transform(name.begin(), name.end(),name.begin(), ::toupper);
+	auto it = nameToIndexMap.find(name);
 	if (it == nameToIndexMap.end()) { return NULL; }
 	return it->second;
 }
@@ -723,7 +916,8 @@ int ObjectManager::getIndexByName(zSTRING symbolName)
 void ObjectManager::createAdditionalMemory(oCItem* item, int id, bool isHeroItem, bool activeSpellItem, int spellKey){
 	if (item->instanz <= 0)
 	{
-		std::cout << "Warning: item->instanz <= 0!" << std::endl;
+		logStream << "ObjectManager::createAdditionalMemory: item->instanz <= 0!" << endl;
+		util::logWarning(&logStream);
 		return;
 	}
 
@@ -742,8 +936,7 @@ void ObjectManager::createAdditionalMemory(oCItem* item, int id, bool isHeroItem
 
 void ObjectManager::removeAdditionalMemory(int additId){
 	bool isHeroItem = additId > HERO_ADDIT_BEGIN;
-	map<int, AdditMemory*>::iterator it;
-	it = keyToAdditMap.find(additId);
+	auto it = keyToAdditMap.find(additId);
 	if (it == keyToAdditMap.end()) return;
 	AdditMemory* addit = it->second;
 	keyToAdditMap.erase(it);
@@ -756,8 +949,8 @@ void ObjectManager::removeAdditionalMemory(int additId){
 }
 
 void ObjectManager::removeAllAdditionalMemory(){
-	map<int, AdditMemory*>::iterator itBegin = keyToAdditMap.begin();
-	map<int, AdditMemory*>::iterator itEnd = keyToAdditMap.end();
+	auto itBegin = keyToAdditMap.begin();
+	auto itEnd = keyToAdditMap.end();
 	
 	while(itBegin != itEnd) {
 		removeAdditionalMemory(itBegin->first);
@@ -781,8 +974,7 @@ int ObjectManager::getAdditId(oCItem& item) {
 
 // Provides additional Memory for a specific additional memory id
 AdditMemory* ObjectManager::getAddit(int additId) {
-	map<int,AdditMemory*>::iterator it;
-	it = keyToAdditMap.find(additId);
+	auto it = keyToAdditMap.find(additId);
 	if (it == keyToAdditMap.end()) return nullptr;
 	return it->second;
 }
@@ -810,9 +1002,9 @@ int ObjectManager::calcAdditKey(bool isHeroItem){
 void ObjectManager::loadWorldObjects(char* filename) {
 	ifstream ifs(filename);
 	if (ifs.fail()) {
-		logStream << "ObjectManager::loadWorldObjects: Warning: File was not found!" << std::endl;
-		logStream << "ObjectManager::loadWorldObjects: File name : " << filename << std::endl;
-		Logger::getLogger()->log(Logger::Warning, &logStream, false, true, true);
+		logStream << "ObjectManager::loadWorldObjects: File was not found!" << std::endl;
+		logStream << "File name : " << filename << std::endl;
+		util::logWarning(&logStream);
 		return;
 	}
 
@@ -831,9 +1023,13 @@ void ObjectManager::loadWorldObjects(char* filename) {
 };
 
 void ObjectManager::loadHeroData(char* filename) {
+	logStream << "ObjectManager::loadHeroData: load hero data..." << std::endl;
+	util::logInfo(&logStream);
+
 	ifstream ifs(filename);
 	if (ifs.fail()) {
-		//writeToConsole("ERROR loadHeroData: file was not found!");
+		logStream << "ObjectManager::loadHeroData: File wasn't found!" << endl;
+		util::logWarning(&logStream);
 		return;
 	}
 
@@ -845,45 +1041,63 @@ void ObjectManager::loadHeroData(char* filename) {
 	for (size_t i = 0; i != size; ++i) {
 		AdditMemory* addit;
 		ia >> addit;
-		//writeToConsole("addit: ", i);
 		addit->referenceCount = 0;
 		keyToAdditMap.insert(pair<int,AdditMemory*>(addit->additId, addit));
 	}
+
+	logStream << "ObjectManager::loadHeroData: done." << endl;
+	util::logInfo(&logStream);
 };
 
 
 void ObjectManager::saveHeroData(std::list<AdditMemory*> heroItemList, char* directoryPath, char* filename) {
-	std::string dir (directoryPath);
+	logStream << "ObjectManager::saveHeroData: save hero data..." << endl;
+	util::logInfo(&logStream);
+
+	string dir (directoryPath);
 	if (!util::existsDir(dir)) {
 		if(!util::makePath(dir)) {
-			//writeToConsole("ERROR ObjectManager::saveHeroData : Couldn't access directory!");
+			logStream << "ObjectManager::saveHeroData: Couldn't access directory: " << directoryPath << endl;
+			util::logFault(&logStream);
 			return;
 		}
 	}
 
-	std::string fullpath = dir + std::string("\\") + std::string(filename);
+	string fullpath = dir + string("\\") + string(filename);
 	ofstream fs(const_cast<char*>(fullpath.c_str()));
 	 boost::archive::text_oarchive oa(fs);
+
 	// Save additional memory
 	int size = heroItemList.size();
-	//writeToConsole("size of additional memory: ", size);
-	std::list<AdditMemory*>::iterator additIt;
+
+	logStream << "ObjectManager::saveHeroData: size of additional memory : " << size << endl;
+	util::logInfo(&logStream);
+
+	list<AdditMemory*>::iterator additIt;
 	oa << size;
 	for (additIt = heroItemList.begin(); additIt != heroItemList.end(); ++additIt) {
 		AdditMemory* addit = *additIt;
 		oa << addit;
 	}
+
+	logStream << "ObjectManager::saveHeroData: done." << endl;
+	util::logInfo(&logStream);
 };
 
 void ObjectManager::saveWorldObjects(int heroItemSize, char* directoryPath, char* filename) {
-	std::string dir (directoryPath);
+	logStream << "ObjectManager::saveWorldObjects: save dii world objects..." << endl;
+	util::logInfo(&logStream);
+	
+	string dir (directoryPath);
 	if (!util::existsDir(dir)) {
 		if(!util::makePath(dir)) {
+			logStream << "ObjectManager::saveWorldObjects: folder doesn't exists: " << directoryPath << endl;
+			util::logFault(&logStream);
 			return;
 		}
 	}
 
-	std::string fullpath = dir + std::string("\\") + std::string(filename);
+	string fullpath = dir + string("\\") + string(filename);
 	ofstream fs(const_cast<char*>(fullpath.c_str()));
 	 boost::archive::text_oarchive oa(fs);
 	// Save additional memory
@@ -897,10 +1111,13 @@ void ObjectManager::saveWorldObjects(int heroItemSize, char* directoryPath, char
 			oa << addit;
 		}
 	}
+
+	logStream << "ObjectManager::saveWorldObjects: done." << endl;
+	util::logInfo(&logStream);
 };
 
 void ObjectManager::getHeroAddits(std::list<AdditMemory*>& list) {
-	std::map<int, AdditMemory*>::iterator it = keyToAdditMap.begin();
+	map<int, AdditMemory*>::iterator it = keyToAdditMap.begin();
 	for (; it != keyToAdditMap.end(); ++it) {
 		if (it->first > HERO_ADDIT_BEGIN) {
 			list.push_back(it->second);
@@ -911,26 +1128,50 @@ void ObjectManager::getHeroAddits(std::list<AdditMemory*>& list) {
 
 void ObjectManager::updateIkarusSymbols()
 {
+	logStream << "ObjectManager::updateIkarusSymbols: update Ikarus symbols..." << endl;
+	util::logInfo(&logStream);
+
 	// Some Ikarus functions need the correct length of the current symbol table.
 	// MEM_Reinit_Parser() updates all involved references.
 		zSTRING arg("MEM_ReinitParser");
 
-		//CallFunc needs uppercase string
-		zCParser::GetParser()->CallFunc(arg.Upper());
+	//CallFunc needs uppercase string
+	zCParser::GetParser()->CallFunc(arg.Upper());
 }
 
-void ObjectManager::callForAllItems(function<void(oCItem*)> func)
+void ObjectManager::callForAllItems(function<void(oCItem*)> func, oCItem** stopIfNotNullItem)
 {
 	zCWorld* world = oCGame::GetGame()->GetWorld();
 	zCListSort<oCNpc>* npcList = world->GetNpcList();
-	std::list<oCItem*> tempList;
-	std::list<oCItem*>::iterator it;
+	list<oCItem*> tempList;
+	list<oCItem*>::iterator it;
 
 	while (npcList != nullptr) {
 		oCNpc* npc = npcList->GetData();
 		if (npc == nullptr) {
 			npcList = npcList->GetNext();
 			continue;
+		}
+
+		oCVob* leftHandVob = oCNpcGetLeftHand(npc);
+		if (oCItem* leftHandItem = dynamic_cast<oCItem*>(leftHandVob))
+		{
+			func(leftHandItem);
+			if (stopIfNotNullItem && *stopIfNotNullItem) {
+				logStream << "ObjectManager::callForAllItems: leftHandItem!" << endl;
+				util::debug(&logStream);
+				return;
+			}
+		}
+
+		if (oCItem* rightHandItem = dynamic_cast<oCItem*>(oCNpcGetRightHand(npc)))
+		{
+			func(rightHandItem);
+			if (stopIfNotNullItem && *stopIfNotNullItem) {
+				logStream << "ObjectManager::callForAllItems: rightHandItem!" << endl;
+				util::debug(&logStream);
+				return;
+			}
 		}
 
 		oCNpcInventory* inventory = npc->GetInventory();
@@ -952,26 +1193,15 @@ void ObjectManager::callForAllItems(function<void(oCItem*)> func)
 		for (it = tempList.begin(); it != tempList.end(); ++it)
 		{
 			func(*it);
+			if (stopIfNotNullItem && *stopIfNotNullItem) {
+				logStream << "ObjectManager::callForAllItems: found item in npc's inventory!" << endl;
+				util::debug(&logStream);
+				return;
+			}
 		}
 		tempList.clear();
 	}
 
-	tempList.clear();
-	zCListSort<oCItem>* itemList = world->GetItemList();
-	while (itemList != nullptr) {
-		oCItem* item = itemList->GetData();
-		if (item != nullptr)
-		{
-			tempList.push_back(item);
-		}
-		itemList = itemList->GetNext();
-	}
-
-	it = tempList.begin();
-	for (; it != tempList.end(); ++it)
-	{
-		func(*it);
-	}
 	tempList.clear();
 
 	list<oCMobContainer*>* containerList = getMobContainers();
@@ -995,9 +1225,44 @@ void ObjectManager::callForAllItems(function<void(oCItem*)> func)
 		for (; it != tempList.end(); ++it)
 		{
 			func(*it);
+			if (stopIfNotNullItem && *stopIfNotNullItem) {
+				// containerList has to be deleted manually.
+				containerList->clear();
+				delete containerList;
+				if (stopIfNotNullItem && *stopIfNotNullItem) {
+					logStream << "ObjectManager::callForAllItems: found item in container!" << endl;
+					util::debug(&logStream);
+					return;
+				}
+				return;
+			}
 		}
 		tempList.clear();
 	}
+
+	tempList.clear();
+
+	zCListSort<oCItem>* itemList = world->GetItemList();
+	while (itemList != nullptr) {
+		oCItem* item = itemList->GetData();
+		if (item != nullptr)
+		{
+			tempList.push_back(item);
+		}
+		itemList = itemList->GetNext();
+	}
+
+	it = tempList.begin();
+	for (; it != tempList.end(); ++it)
+	{
+		func(*it);
+		if (stopIfNotNullItem && *stopIfNotNullItem) {
+			logStream << "ObjectManager::callForAllItems: found item in world!" << endl;
+			util::debug(&logStream);
+			return;
+		}
+	}
+	tempList.clear();
 
 	// containerList has to be deleted manually.
 	containerList->clear();
@@ -1019,3 +1284,97 @@ int ObjectManager::getIdForSpecialPurposes()
 {
 	return SPECIAL_ADDIT_BEGIN;
 }
+
+void ObjectManager::markAsReusable(int instanceId, int previousId)
+{
+	DynInstance* instance = getInstanceItem(instanceId);
+	if (!instance) return;
+
+	auto func = [&](oCItem* item)->void {
+		if (item && (item->GetInstance() == instanceId))
+		{
+			logStream << "item has instanceId marked as reusable: " << item->description.ToChar() << endl;
+			util::debug(& logStream);
+			initByNewInstanceId(item);
+			setInstanceId(item, previousId);
+		}
+	};
+
+	callForAllItems(func);
+
+	instance->notUsed = true;
+	reusableInstances.push_back(instanceId);
+}
+
+bool ObjectManager::isItemInWorld(oCItem* item)
+{
+	zCWorld* world = oCGame::GetGame()->GetWorld();
+	zCListSort<oCItem>* list = world->GetItemList();
+	return list->IsInList(item);
+}
+
+oCItem* ObjectManager::getItemByInstanceId(int instanceId)
+{
+	oCItem* result = nullptr;
+	auto func = [&](oCItem* itm) ->void {
+		if (itm == nullptr) return;
+		if (result != nullptr) return;
+		
+		if (itm->GetInstance() == instanceId)
+		{
+			result = itm;
+			logStream << "ObjectManager::getItemByInstanceId: result found" << endl;
+			util::debug(&logStream);
+		}
+	};
+
+	callForAllItems(func, &result);
+	return result;
+}
+
+void ObjectManager::oCItemSaveInsertEffect(oCItem* item)
+{
+	if (item == nullptr)
+	{
+		return;
+	}
+
+	int* ptr = ((int*)item) + 0x340;
+
+	//Has the item already an effect active?
+	if (ptr != nullptr)
+	{
+		return;
+	}
+
+	item->InsertEffect();
+}
+
+void ObjectManager::oCItemSaveRemoveEffect(oCItem* item)
+{
+	if (item == nullptr)
+	{
+		return;
+	}
+
+	int* ptr = ((int*)item) + 0x340;
+
+	//Has the item no effect to remove?
+	if (ptr == nullptr)
+	{
+		return;
+	}
+
+	item->RemoveEffect();
+}
+
+bool ObjectManager::isDynamicInstance(int instanceId)
+{
+	map<int, DynInstance*>::iterator it;
+	it = instanceMap.find(instanceId);
+	if (it == instanceMap.end())
+	{
+		return false;
+	}
+	return true;
+};

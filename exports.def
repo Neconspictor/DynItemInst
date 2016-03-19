@@ -5,8 +5,14 @@ EXPORTS
 	DII_CreateNewItem
 	DII_CreateNewInstance
 	DII_IsDynamic
+	DII_IsInstanceDynamic
 	DII_GetUserData
 	DII_GetLibVersion
 	DII_UpdateInstance
 	DII_AssignInstanceId
 	DII_EquipItem
+	DII_AreChangesPerformed
+	DII_MarkAsReusable
+	DII_GetItemByInstanceId
+	DII_ChangeItemsInstanceId
+	DII_ToggleLevitation

@@ -41,6 +41,9 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <api/g2/ocnpcinventory.h>
 #include <api/g2/oCObjectFactory.h>
 #include <unordered_map>
+#include <Configuration.h>
+#include <thread>
+#include <mutex>
 
 const std::string DynItemInst::SAVE_ITEM_FILE_EXT = ".SAV";
 const std::string DynItemInst::SAVE_ITEM_INSTANCES  = "DII_INSTANCES";
@@ -50,11 +53,13 @@ const std::string DynItemInst::FILE_PATERN = "\\DII_*";
 bool DynItemInst::denyMultiSlot = false;
 bool DynItemInst::levelChange = false;
 bool DynItemInst::saveGameIsLoading = false;
+bool DynItemInst::saveGameWriting = false;
 
 DynItemInst::InstanceNames DynItemInst::instanceNames = { "DII_DUMMY_ITEM", "_NF_","_FF_" , "_RUNE_", "_OTHER_", 1, 1, 1, 1 };
 
 std::vector<zCPar_Symbol*>* DynItemInst::symbols = new std::vector<zCPar_Symbol*>();
 bool DynItemInst::showExtendedDebugInfo = false;
+
 
 typedef void ( __thiscall* LoadSavegame )(void*, int, int); 
 LoadSavegame loadSavegame;
@@ -82,6 +87,12 @@ typedef int ( __thiscall* OCItemMulitSlot )(void*);
 OCItemMulitSlot oCItemMulitSlot;
 typedef void ( __thiscall* OCMobContainerOpen )(void*, oCNpc*); 
 OCMobContainerOpen oCMobContainerOpen;
+
+
+typedef void(__thiscall* ZCCameraSetFarClipZ)(void*, float);
+ZCCameraSetFarClipZ zCCameraSetFarClipZ;
+typedef int (__fastcall* ZCCameraScreenProjectionTouchesPortalRough)(void*,void*);
+ZCCameraScreenProjectionTouchesPortalRough zCCameraScreenProjectionTouchesPortalRough;
 
 
 typedef void(__thiscall* OCItemInitByScript)(void* pThis, int, int);
@@ -146,6 +157,15 @@ typedef void(__thiscall* OCMag_BookKillSelectedSpell)(oCMag_Book*);
 OCMag_BookKillSelectedSpell oCMag_BookKillSelectedSpell = (OCMag_BookKillSelectedSpell)0x00477A90;
 typedef void(__thiscall* OCItemInsertEffect)(oCItem*);
 OCItemInsertEffect oCItemInsertEffect = (OCItemInsertEffect)0x00712C40;
+typedef void(__thiscall* OCItemRemoveEffect)(oCItem*);
+OCItemRemoveEffect oCItemRemoveEffect = (OCItemRemoveEffect)0x00712C00;
+
+typedef void(__thiscall* ZCVobUpdatePhysics)(void*);
+ZCVobUpdatePhysics zCVobUpdatePhysics = (ZCVobUpdatePhysics)0x0061D2D0;
+typedef void(__thiscall* OCAniCtrl_HumanCheckFallStates)(void*);
+OCAniCtrl_HumanCheckFallStates oCAniCtrl_HumanCheckFallStates = (OCAniCtrl_HumanCheckFallStates)0x006B5810;
+
+
 void DynItemInst::hookModule()
 {
 	loadSavegame = (LoadSavegame) (LOAD_SAVEGAME_ADDRESS);
@@ -157,6 +177,11 @@ void DynItemInst::hookModule()
 	oCGameChangeLevel = reinterpret_cast<OCGameChangeLevel>(OCGAME_CHANGE_LEVEL_ADDRESS);
 	oCItemMulitSlot = (OCItemMulitSlot) OCITEM_MULTI_SLOT;
 	oCMobContainerOpen = (OCMobContainerOpen) OCMOB_CONTAINER_OPEN;
+
+	zCCameraSetFarClipZ = (ZCCameraSetFarClipZ) 0x0054B200;
+	zCCameraScreenProjectionTouchesPortalRough = (ZCCameraScreenProjectionTouchesPortalRough)0x0054C100;//0x0054BE80;
+
+		//0x006521E0
 
 	HookManager* hookManager = HookManager::getHookManager();
 	hookManager->addFunctionHook((LPVOID*)&loadSavegame, loadSavegameHookNaked, moduleDesc);
@@ -170,6 +195,13 @@ void DynItemInst::hookModule()
 	hookManager->addFunctionHook((LPVOID*)&oCMobContainerOpen, oCMobContainerOpenHookNaked, moduleDesc);
 
 	hookManager->addFunctionHook((LPVOID*)&oCMag_BookSetFrontSpell, oCMag_BookSetFrontSpellHook, moduleDesc);
+
+	hookManager->addFunctionHook((LPVOID*)&zCCameraSetFarClipZ, zCCameraSetFarClipZHook, moduleDesc);
+
+	hookManager->addFunctionHook((LPVOID*)&zCVobUpdatePhysics, zCVobUpdatePhysicsHook, moduleDesc);
+	hookManager->addFunctionHook((LPVOID*)&oCAniCtrl_HumanCheckFallStates, oCAniCtrl_HumanCheckFallStatesHook, moduleDesc);
+	//hookManager->addFunctionHook((LPVOID*)&zCCameraScreenProjectionTouchesPortalRough, zCCameraScreenProjectionTouchesPortalHookNaked, moduleDesc);
+
 
 	denyMultiSlot = true;
 	loadDynamicInstances();
@@ -189,6 +221,9 @@ void DynItemInst::unHookModule()
 	hookManager->removeFunctionHook((LPVOID*)&oCGameChangeLevel, oCGameChangeLevelHookNaked, moduleDesc);
 	hookManager->removeFunctionHook((LPVOID*)&oCItemMulitSlot, oCItemMulitSlotHookNaked, moduleDesc);
 	hookManager->removeFunctionHook((LPVOID*)&oCMobContainerOpen, oCMobContainerOpenHookNaked, moduleDesc);
+
+	hookManager->removeFunctionHook((LPVOID*)&zCCameraSetFarClipZ, zCCameraSetFarClipZHook, moduleDesc);
+	//hookManager->removeFunctionHook((LPVOID*)&zCCameraScreenProjectionTouchesPortalRough, zCCameraScreenProjectionTouchesPortalHookNaked, moduleDesc);
 };
 
 
@@ -360,6 +395,8 @@ DynItemInst::~DynItemInst()
 
  void DynItemInst::loadSavegameHook(void* pThis,int saveGameSlotNumber, int b)
 {   
+	logStream << "DynItemInst::loadSavegameHook: load savegame..." << std::endl;
+	util::logInfo(&logStream);
 	saveGameIsLoading = true;
 	denyMultiSlot = true;
 	ObjectManager::getObjectManager()->releaseInstances();
@@ -368,11 +405,18 @@ DynItemInst::~DynItemInst()
 	initAdditMemory();
 	denyMultiSlot = false;
 	saveGameIsLoading = false;
+
+	logStream << "DynItemInst::loadSavegameHook: done." << std::endl;
+	util::logInfo(&logStream);
 };
 
 
  void DynItemInst::writeSavegameHook(void* pThis,int saveGameSlotNumber, int b)
 {   
+	logStream << "DynItemInst::writeSavegameHook: save game..." << std::endl;
+	util::logInfo(&logStream);
+
+	saveGameWriting = true;
 	// reset instance name counters
 	instanceNames.nearFightCounter = 1;
 	instanceNames.distanceFightCounter = 1;
@@ -386,7 +430,7 @@ DynItemInst::~DynItemInst()
 	
 	zCListSort<oCNpc>* npcList = world->GetNpcList();
 
-	DynItemInst::denyMultiSlot = true;
+	denyMultiSlot = true;
 
 	oCNpc* hero = oCNpc::GetHero();
 	while(npcList != nullptr) {
@@ -419,11 +463,11 @@ DynItemInst::~DynItemInst()
 
 			}
 			logStream << "DynItemInst::writeSavegameHook: selectedSpellKey=" << selectedSpellKey<< std::endl;
-			Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
+			util::debug(&logStream);
 		} else
 		{
 			logStream << "DynItemInst::writeSavegameHook: magBook is null!" << std::endl;
-			Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
+			util::debug(&logStream, Logger::Warning);
 		}
 
 		resetInstanceNameStruct();
@@ -448,11 +492,12 @@ DynItemInst::~DynItemInst()
 			// selected spell key begins at 0, but spell key strangely at 1 
 			bool activeSpellItem = (selectedSpellKey  == (item->spell));
 			logStream << "DynItemInst::writeSavegameHook: create addit memory= " << (id > 0) << std::endl;
-			Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
+			util::debug(&logStream);
 			if (id) manager->createAdditionalMemory(item, id, isHero, activeSpellItem, spellKey);
 			if (equiped)
 			{
-				Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
+				logStream << "DynItemInst:: Item is equipped! " << std::endl;
+				util::debug(&logStream);
 				//Deny invocation of equip function
 				int unEquipFunction = item->on_unequip;
 				item->on_unequip = 0;
@@ -524,6 +569,11 @@ DynItemInst::~DynItemInst()
 
 	restoreDynamicInstances(game);
 	manager->removeAllAdditionalMemory();	
+
+	saveGameWriting = false;
+
+	logStream << "DynItemInst::writeSavegameHook: done." << std::endl;
+	util::logInfo(&logStream);
 };
 
  void DynItemInst::restoreItem(oCItem* item,  oCNpcInventory* inventory, std::unordered_map<int, oCItem*>* equippedSpells, oCItem** activeSpellItem) {
@@ -534,9 +584,9 @@ DynItemInst::~DynItemInst()
 		AdditMemory* addit = manager->getAddit(additId);
 		//mark additKey as visited
 		if (addit == nullptr || addit->visited) {
-			logStream << "DynItemInst::restoreItem: Addit is null!!!" << std::endl;
+			logStream << "DynItemInst::restoreItem: Addit is null or was already visited!!!" << std::endl;
 			logStream << item->name.ToChar() << " : " << additId << std::endl;
-			Logger::getLogger()->log(Logger::Warning, &logStream, false, true, true);
+			util::logFault(&logStream);
 			return;
 		}
 
@@ -560,10 +610,10 @@ DynItemInst::~DynItemInst()
 		// is item located in the world?
 		if (inventory == nullptr)
 		{
-			manager->setInstanceId(item, instanceId);
-			manager->assignInstanceId(item, instanceId);
-			item->SetVisual(zCVisualLoadVisual(item->visual));
-			oCItemInsertEffect(item);
+			oCItem* copy = oCObjectFactory::GetFactory()->CreateItem(instanceId);
+			world->AddVob(copy);
+			copy->SetPositionWorld(item->GetVobPosition());
+			world->RemoveVob(item);
 			return;
 		}
 
@@ -577,7 +627,7 @@ DynItemInst::~DynItemInst()
 		{
 
 			logStream << "DynItemInst::restoreItem: Restore equipped item..." << std::endl;
-			Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
+			util::debug(&logStream);
 
 			oCNpc* owner = inventory->GetOwner();
 			int weaponMode = oCNpcGetWeaponMode(owner);
@@ -585,7 +635,7 @@ DynItemInst::~DynItemInst()
 			if (isReadiedWeapon(weaponMode, item) && !item->HasFlag(512))
 			{
 				logStream << "DynItemInst::restoreItem: Force to remove weapon..." << std::endl;
-				Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
+				util::debug(&logStream);
 				oCNpcEV_ForceRemoveWeapon(owner, item);
 			}
 
@@ -593,7 +643,7 @@ DynItemInst::~DynItemInst()
 			if (amount != 1)
 			{
 				logStream << "DynItemInst::restoreItem: amount > 1!";
-				Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
+				util::logFault(&logStream);
 			}
 		
 			zCListSort<oCItem>* list = getInvItemByInstanceId(inventory, instanceId);
@@ -636,7 +686,7 @@ DynItemInst::~DynItemInst()
 
 				logStream << "DynItemInst::restoreItem: item is now equipped!" << std::endl;
 				logStream << "DynItemInst::restoreItem: Weapon mode: " << weaponMode << std::endl;
-				Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
+				util::debug(&logStream);
 				copy = getInvItemByInstanceId(inventory, instanceId)->GetData();
 				copy->on_equip = equipFunction;
 				oCNpcSetWeaponMode2(owner, weaponMode);  //3 for one hand weapons
@@ -650,7 +700,7 @@ DynItemInst::~DynItemInst()
 			if (munitionAvailable)
 			{
 				logStream << "DynItemInst::restoreItem: Munition is available." << std::endl;
-				Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
+				util::debug(&logStream);
 			}
 
 			// Is readied weapon a bow?
@@ -658,7 +708,7 @@ DynItemInst::~DynItemInst()
 			{
 				logStream << "DynItemInst::restoreItem: Bow is readied!" << std::endl;
 				logStream << "DynItemInst::restoreItem: Weapon mode: " << weaponMode << std::endl;
-				Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
+				util::debug(&logStream);
 
 				updateRangedWeapon(copy, inventory, true);
 			}
@@ -666,16 +716,15 @@ DynItemInst::~DynItemInst()
 			{
 				logStream << "DynItemInst::restoreItem: Crossbow is readied!" << std::endl;
 				logStream << "DynItemInst::restoreItem: Weapon mode: " << weaponMode << std::endl;
-				Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
+				util::debug(&logStream);
 
 				updateRangedWeapon(copy, inventory, false);
 			}
 			else if (item && item->HasFlag(512)) // Magic 
 			{
 				logStream << "DynItemInst::restoreItem: Readied weapon is a magic thing!" << std::endl;
-				Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
+				util::debug(&logStream);
 				oCMag_Book* magBook = oCNpcGetSpellBook(owner);
-				//oCNpcEV_ForceRemoveWeapon(owner, item);
 				magBook = oCNpcGetSpellBook(owner);
 				int itemSpellKey = oCMag_BookGetKeyByItem(magBook, item);
 				if (itemSpellKey <= 7)
@@ -688,7 +737,7 @@ DynItemInst::~DynItemInst()
 					if (!equippedSpells)
 					{
 						logStream << "DynItemInst::restoreItem: equippedSpells is null!" << std::endl;
-						Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
+						util::debug(&logStream, Logger::Warning);
 					} else
 					{
 						equippedSpells->insert(std::pair<int, oCItem*>(addit->spellKey, item));
@@ -702,22 +751,22 @@ DynItemInst::~DynItemInst()
 					{
 						*activeSpellItem = item;
 					}
-					//oCNpcSetWeaponMode2(owner, weaponMode);
 					
 					logStream << "DynItemInst::restoreItem: selectedSpellKey = " << oCMag_BookGetSelectedSpellNr(magBook) << std::endl;
-					Logger::getLogger()->log(Logger::Info, &logStream, true, true, true);
+					util::debug(&logStream);
 					logStream << "DynItemInst::restoreItem: An Spell is active" << std::endl;
-					Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
+					util::debug(&logStream);
 				}
 			}
 
 			logStream << "DynItemInst::restoreItem: Restored equipped item!" << std::endl;
-			Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
+			util::debug(&logStream);
 			denyMultiSlot = originalMultiSlotSetting;
 			return;
 		}
 		
 		oCItemInitByScript(item, instanceId, item->instanz);
+		item->ClearFlag(OCITEM_FLAG_EQUIPPED);
 		inventory->Remove(item, item->instanz);
 		inventory->Insert(item);
 		denyMultiSlot = originalMultiSlotSetting;
@@ -737,6 +786,8 @@ DynItemInst::~DynItemInst()
 	}
 
 	if (id == NULL) return NULL;
+
+	manager->oCItemSaveRemoveEffect(item);
 	
 	zCParser* parser = zCParser::GetParser();
 	int saveId; 
@@ -744,7 +795,7 @@ DynItemInst::~DynItemInst()
 	if (item->HasFlag(OCITEM_FLAG_EQUIPPED))
 	{
 		logStream << "DynItemInst::modifyItemForSaving: item->description: " << item->description.ToChar() << std::endl;
-		Logger::getLogger()->log(Logger::Info, &logStream, true, true, true);
+		util::debug(&logStream);
 		std::stringstream ss;
 		if (item->HasFlag(2)) //near fight
 		{
@@ -771,7 +822,7 @@ DynItemInst::~DynItemInst()
 		if (saveId <= 0)
 		{
 			logStream << "instance name not found: " << name << std::endl;
-			Logger::getLogger()->log(Logger::Fatal, &logStream, true, true, true);
+			util::logFatal(&logStream);
 			//throw new DynItemInst::DII_InstanceNameNotFoundException(ss.str().c_str());
 		}
 		
@@ -795,7 +846,7 @@ DynItemInst::~DynItemInst()
 	 if (addit == nullptr) {
 		 logStream << "DynItemInst::makeEquippedCopy: Warning: Addit is null!!!" << std::endl;
 		 logStream << item->name.ToChar() << " : " << additId << std::endl;
-		 Logger::getLogger()->log(Logger::Warning, &logStream, false, true, true);
+		 util::debug(&logStream, Logger::Fault);
 		 return nullptr;
 	 }
 
@@ -826,7 +877,45 @@ DynItemInst::~DynItemInst()
 	 return copy;
  }
 
+bool DynItemInst::itemsAreModified()
+{
+	return isSaveGameLoading() || levelChange || saveGameWriting;
+}
+
+void DynItemInst::zCCameraSetFarClipZHook(void* pThis, float value)
+{
+	int targetValue = 60000.0f;
+	int newValue = 100000.0f;
+	int secondValue = 20000.0f;
+	if (value != targetValue)
+	{
+		value *= Configuration::getFarClipZMultiplicator();
+	}
+
+	zCCameraSetFarClipZ(pThis, value);
+}
+
+void DynItemInst::zCVobUpdatePhysicsHook(void * pThis)
+{
+	if (oCNpc::GetHero() != pThis)
+	{
+		//zCVobUpdatePhysics(pThis);
+	}
+	zCVobUpdatePhysics(pThis);
+}
+
+void DynItemInst::oCAniCtrl_HumanCheckFallStatesHook(void * oCAniCtrl_Human)
+{
+	if (oCNpc::GetHero() != (zCVob*)((BYTE*)oCAniCtrl_Human + 0x64))
+	{
+		
+	}
+	oCAniCtrl_HumanCheckFallStates(oCAniCtrl_Human);
+}
+
 void DynItemInst::restoreDynamicInstances(oCGame* game) {
+	logStream << "DynItemInst::restoreDynamicInstances: restore... "  << std::endl;
+	util::logInfo(&logStream);
 	denyMultiSlot = true;
 	zCWorld* world = game->GetWorld();
 	zCListSort<oCNpc>* npcList = world->GetNpcList();
@@ -911,6 +1000,7 @@ void DynItemInst::restoreDynamicInstances(oCGame* game) {
 		if (*selectedSpellItem)
 		{
 			logStream << "DynItemInst::restoreDynamicInstances: SET SELECTED SPELL KEY!!!!" << std::endl;
+			util::debug(&logStream);
 			oCMag_Book* magBook = npc->GetSpellBook();
 			int itemSpellKey = oCMag_BookGetKeyByItem(magBook, *selectedSpellItem);
 			int noOfSpellKey = oCMag_GetNoOfSpellByKey(magBook, itemSpellKey);
@@ -918,8 +1008,9 @@ void DynItemInst::restoreDynamicInstances(oCGame* game) {
 			
 
 			logStream << "DynItemInst::restoreDynamicInstances: itemSpellKey = " << itemSpellKey << std::endl;
+			util::debug(&logStream);
 			logStream << "DynItemInst::restoreDynamicInstances: itemSpellKey = " << spell << std::endl;
-			Logger::getLogger()->log(Logger::Info, &logStream, true, true, true);
+			util::debug(&logStream);
 			int weaponMode = oCNpcGetWeaponMode(npc);
 			if (weaponMode == 7)
 			{
@@ -950,10 +1041,10 @@ void DynItemInst::restoreDynamicInstances(oCGame* game) {
 	}
 	tempList.clear();
 
-	DynItemInst::denyMultiSlot = false;
+	denyMultiSlot = false;
 
-	logStream << "DynItemInst::restoreDynamicInstances: FINISHED RESTORING" << std::endl;
-	util::debug(&logStream);
+	logStream << "DynItemInst::restoreDynamicInstances: done." << std::endl;
+	util::logInfo(&logStream);
 }
 
 bool DynItemInst::isSaveGameLoading()
@@ -968,7 +1059,7 @@ bool DynItemInst::isSaveGameLoading()
 	if (symbol == nullptr)
 	{
 		logStream << "DynItemInst::createInstanceHook: symbol is null! InstanceId: " << instanceId << std::endl;
-		Logger::getLogger()->log(Logger::Info, &logStream, false, true, true);
+		util::debug(&logStream, Logger::Warning);
 	}
 
 	int result = createInstance(pThis, instanceId, source);;
@@ -988,15 +1079,21 @@ bool DynItemInst::isSaveGameLoading()
 
 void DynItemInst::oCGameLoadGameHook(void* pThis, int second, zSTRING const& worldName)
 {
-	logStream << "DynItemInst::oCGameLoadGameHook: release new instances..."<< std::endl;
-	Logger::getLogger()->log(Logger::Info, &logStream, true, true, true);
+	logStream << "DynItemInst::oCGameLoadGameHook: load..."<< std::endl;
+	util::logInfo(&logStream);
 	ObjectManager* manager = ObjectManager::getObjectManager();
 	manager->releaseInstances();
 	oCGameLoadGame(pThis, second, worldName);
+
+	logStream << "DynItemInst::oCGameLoadGameHook: done." << std::endl;
+	util::logInfo(&logStream);
 }
 
 void __thiscall DynItemInst::oCGameChangeLevelHook(void* pThis, zSTRING const & first, zSTRING const & second) {
-	DynItemInst::levelChange = true;
+	logStream << "DynItemInst::oCGameChangeLevelHook: change level..." << std::endl;
+	util::logInfo(&logStream);
+
+	levelChange = true;
 	ObjectManager* manager = ObjectManager::getObjectManager();
 	oCNpcInventory* inv = oCNpc::GetHero()->GetInventory();
 	inv->UnpackAllItems();
@@ -1035,13 +1132,16 @@ void __thiscall DynItemInst::oCGameChangeLevelHook(void* pThis, zSTRING const & 
 		oCNpc::GetHero()->Equip(item);
 	}
 	idList.clear();
-	DynItemInst::levelChange = false;
+	levelChange = false;
 	initAdditMemory();
+
+	logStream << "DynItemInst::oCGameChangeLevelHook: done." << std::endl;
+	util::logInfo(&logStream);
 }
 
 int DynItemInst::oCItemMulitSlotHook(void* pThis)
 {
-	if (DynItemInst::denyMultiSlot)
+	if (denyMultiSlot)
 	{
 		return 0;
 	}
@@ -1084,7 +1184,7 @@ void DynItemInst::oCMobContainerOpenHook(void* pThis, oCNpc* npc)
 void DynItemInst::oCMag_BookSetFrontSpellHook(void* pThis, int number)
 {
 	logStream << "DynItemInst::oCMag_BookSetFrontSpellHook: number: " << number << std::endl;
-	Logger::getLogger()->log(Logger::Info, &logStream, true, true, true);
+	util::debug(&logStream);
 	oCMag_BookSetFrontSpell((oCMag_Book*)pThis, number);
 }
 
@@ -1124,7 +1224,9 @@ oCItem* DynItemInst::getInvItemByInstanceId2(oCNpcInventory* inventory, int inst
 	}
 
 	return nullptr;
-};
+}
+
+
 
 std::string DynItemInst::getClearedWorldName(zSTRING const & worldName) {
 	std::string text (const_cast<char*>(const_cast<zSTRING &>(worldName).ToChar()));
@@ -1143,16 +1245,23 @@ std::string DynItemInst::getClearedWorldName(zSTRING const & worldName) {
 
 void DynItemInst::loadDynamicInstances()
 {
+	logStream << "DynItemInst::loadDynamicInstances: load dii instances..." << std::endl;
+	util::logInfo(&logStream);
 	ObjectManager* manager = ObjectManager::getObjectManager();
 	manager->releaseInstances();
 	std::string instances = SAVE_ITEM_INSTANCES + SAVE_ITEM_FILE_EXT;
 	std::string saveGameDir = manager->getCurrentDirectoryPath();//manager->getSaveGameDirectoryPath(saveGameSlotNumber);
 	std::string fileName = saveGameDir + std::string("\\") + instances;
 	manager->loadNewInstances((char*)fileName.c_str());
+	logStream << "DynItemInst::loadDynamicInstances: done." << std::endl;
+	util::logInfo(&logStream);
 }
 
 void DynItemInst::initAdditMemory()
 {
+	logStream << "DynItemInst::initAdditMemory: init..." << std::endl;
+	util::logInfo(&logStream);
+
 	ObjectManager* manager = ObjectManager::getObjectManager();
 	std::string saveGameDir = manager->getCurrentDirectoryPath();
 
@@ -1171,8 +1280,8 @@ void DynItemInst::initAdditMemory()
 
 	//zCParser* parser = zCParser::GetParser();
 	//parser->CallFunc(parser->GetIndex("DII_AFTER_LOADING_FINISHED_CALLBACK"));
-	logStream << "loadSavegameHook finished." << std::endl;
-	Logger::getLogger()->log(Logger::Info, &logStream, false, true, true);
+	logStream << "DynItemInst::initAdditMemory: done." << std::endl;
+	util::logInfo(&logStream);
 }
 
 bool DynItemInst::isReadiedWeapon(int weaponMode, oCItem* item)
@@ -1229,7 +1338,7 @@ void DynItemInst::updateRangedWeapon(oCItem* item, oCNpcInventory* inventory, bo
 	if (munition2 && munition2->instanz > 1)
 	{
 		logStream << "DynItemInst::updateRangedWeapon: munition2->instanz > 1!";
-		Logger::getLogger()->log(Logger::Warning, &logStream, true, true, true);
+		util::logFault(&logStream);
 	}
 
 	int amount = munition->instanz;

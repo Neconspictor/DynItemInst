@@ -42,6 +42,8 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #endif
 
 #include "common/osheader.h"
+#include <string>
+#include <sstream>
 
 #define NULL 0
 #define zNEW(x) (new x)
@@ -261,7 +263,20 @@ struct zVEC3
 	/** Insert description. 
 	*/
 	bool operator != ( const zVEC3& v ) const;
+
+	 friend std::ostream & operator<<(std::ostream &os, const zVEC3& v);
+	/*std::ostream & operator<< (zVEC3 const &v) {
+		std::stringstream out;
+		out << "(" << std::to_string(v.x) << ", " << std::to_string(v.y) << ", " << std::to_string(v.z) << ")";
+		return out;
+	}*/
 };
+
+inline std::ostream & operator<<(std::ostream &os, const zVEC3& v)
+{
+	os << "(" << std::to_string(v.x) << ", " << std::to_string(v.y) << ", " << std::to_string(v.z) << ")";
+    return os;
+}
 
 /** 4D Vector */
 struct zVEC4

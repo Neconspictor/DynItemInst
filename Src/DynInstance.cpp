@@ -30,6 +30,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include "api/g2/zcparser.h"
 #include <Logger.h>
 #include <sstream>
+#include <Util.h>
 
 std::stringstream DynInstance::logStream;
 
@@ -331,41 +332,88 @@ bool outOfRange(int index)
 	return false;
 };
 
-void DynInstance::setUserData(int index, int data)
+/*void DynInstance::setUserData(int index, int data)
 {
-	dii_userData.userData.data[index] = data;
+	dii_userData.userData.pData->data[index] = data;
 }
 
 int DynInstance::getUserData(int index)
 {
-	return dii_userData.userData.data[index];
-}
+	return dii_userData.userData.pData->data[index];
+}*/
 
-DII_UserData::Data* DynInstance::getUserData()
+BYTE* DynInstance::getUserData()
 {
-	return &dii_userData.userData;
+	return dii_userData.userData.pMemory;
 }
 
 void DynInstance::copyUserData(DynInstance& source)
 {
-	for (int i = 0; i < DII_UserData::MAX_USER_DATA; ++i)
+	/*for (int i = 0; i < dii_userData.userData.intAmount; ++i)
 	{
-		dii_userData.userData.data[i] = source.dii_userData.userData.data[i];		
-	}
+		dii_userData.userData.getIntBegin()[i] = source.dii_userData.userData.getIntBegin()[i];
+
+		//TODO strings!!!
+	}*/
 };
 
 
 DII_UserData::DII_UserData()
 {
-	ZeroMemory(userData.data, sizeof(int) * MAX_USER_DATA);
+	//get intAmount and strAmount from the parser
+	zCParser* parser; parser = zCParser::GetParser();
+	int intAmountIndex = parser->GetIndex("DII_USER_DATA_INTEGER_AMOUNT");
+	int strAmountIndex = parser->GetIndex("DII_USER_DATA_STRING_AMOUNT");
+	zCPar_Symbol* intAmountSymbol = parser->GetSymbol(intAmountIndex);
+	zCPar_Symbol* strAmountSymbol = parser->GetSymbol(strAmountIndex);
+	
+	createMemory(intAmountSymbol->content.data_int, strAmountSymbol->content.data_int);
+	//ZeroMemory(userData.pData, sizeof(Data));
+	//ZeroMemory(userData.pData->data, sizeof(int) * MAX_USER_DATA);
 }
 
-DII_UserData::DII_UserData(zCParser* parser, int instance)
+/*DII_UserData::DII_UserData(zCParser* parser, int instance)
 {
-	ZeroMemory(userData.data, sizeof(int) * MAX_USER_DATA);
+	ZeroMemory(userData.pData->data, sizeof(int) * MAX_USER_DATA);
+	for (int i = 0; i < MAX_STRING_DATA; ++i)
+	{
+		//zSTRINGSerialized str = userData.stringData[i];
+		//if (str.len != 0)
+		//{
+		//	delete str.ptr;
+		//	str.len = 0;
+		//}
+	}
 	parser->CreateInstance(instance, &userData);
-}
+}*/
 
 DII_UserData::~DII_UserData()
 {
+
+	std::stringstream ss; ss <<"Called ~DII_UserData()" << std::endl;
+	util::debug(&ss);
+	//release allocated memory
+	int indexBegin = userData.intAmount * sizeof(int);
+	zSTRINGSerialized* ptr = (zSTRINGSerialized*)((userData.pMemory) + indexBegin);
+
+	delete ptr->ptr;
+	ptr->ptr = nullptr;
+
+	//if (userData.pMemory)
+	//{
+	delete userData.pMemory;
+	userData.pMemory = nullptr;
+	//}
+}
+
+
+void DII_UserData::createMemory(int intAmount, int strAmount)
+{
+	std::stringstream ss; ss << "strAmount: " << strAmount << std::endl;
+	util::debug(&ss);
+	int byteSize = intAmount * sizeof(int) + strAmount * sizeof(zSTRINGSerialized);
+	BYTE* memory = new BYTE[byteSize];
+	userData.intAmount = intAmount;
+	userData.strAmount = strAmount;
+	userData.pMemory = memory;
 }

@@ -43,6 +43,14 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 class oCMobContainer;
 class oCNpcInventory;
 
+struct zTBBox2D
+{
+	float p1x;
+	float p1y;
+	float p2x;
+	float p2y;
+};
+
 /**
  * A module for generating gothic 2 item instances at runtime. 
  */
@@ -60,7 +68,6 @@ public:
 	 * Default virtual destructor.
 	 */
 	virtual ~DynItemInst();
-
 	static void oCItemGetValueHookNaked();
 	static void loadSavegameHookNaked();
 	static void writeSavegameHookNaked();
@@ -69,6 +76,7 @@ public:
 	static void oCGameChangeLevelHookNaked();
 	static void oCItemMulitSlotHookNaked();
 	static void oCMobContainerOpenHookNaked();
+	static void zCCameraScreenProjectionTouchesPortalHookNaked();
 
 	/**
 	 * Extends functionality of oCItem::GetValue().
@@ -209,14 +217,13 @@ public:
 	static zCListSort<oCItem>* getInvItemByInstanceId(oCNpcInventory* inventory, int instanceId);
 
 	static oCItem* getInvItemByInstanceId2(oCNpcInventory* inventory, int instanceId);
-
 	/**
-				 * Restores a given oCItem from savegame if it was previously modified by modifyItemForSaving(oCItem* item, bool isHeroItem).
-				 * If the provided item isn't modified nothing will be done.
-				 * \param item The item which should be restored.
-				 * \param inventory The inventory the provided item is contained. If this field is NULL, it is expected
-				 * that the item is located in the current world.
-				 */
+					 * Restores a given oCItem from savegame if it was previously modified by modifyItemForSaving(oCItem* item, bool isHeroItem).
+					 * If the provided item isn't modified nothing will be done.
+					 * \param item The item which should be restored.
+					 * \param inventory The inventory the provided item is contained. If this field is NULL, it is expected
+					 * that the item is located in the current world.
+					 */
 	static void restoreItem(oCItem* item, oCNpcInventory* inventory = nullptr, std::unordered_map<int, oCItem*>* equippedSpells = nullptr, oCItem** activeSpellItem = nullptr);
 
 	/**
@@ -238,6 +245,15 @@ public:
 	static bool isSaveGameLoading();
 
 	static oCItem* makeEquippedCopy(oCItem* item, oCNpcInventory* inventory);
+
+	static bool itemsAreModified();
+
+	static void __thiscall zCCameraSetFarClipZHook(void* pThis, float value);
+
+	static void __thiscall zCVobUpdatePhysicsHook(void* pThis);
+
+	//.text:006B5810 protected: void __thiscall oCAniCtrl_Human::CheckFallStates(void) proc near
+	static void __thiscall oCAniCtrl_HumanCheckFallStatesHook(void* oCAniCtrl_Human);
 
     /*! @copydoc Module::hookModule()
 	 */
@@ -265,7 +281,6 @@ public:
 	static const std::string SAVE_ITEM_HERO_DATA;
 
 	static const std::string FILE_PATERN;
-
 private:
 
 	 struct InstanceNames
@@ -313,6 +328,7 @@ private:
 	static bool denyMultiSlot;
 	static bool levelChange;
 	static bool saveGameIsLoading;
+	static bool saveGameWriting;
 
 
 	class DII_InstanceNameNotFoundException : protected std::exception {

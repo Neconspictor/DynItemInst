@@ -98,11 +98,14 @@ public:
 	 */
 	std::list<oCMobContainer*>* getMobContainers();
 	void changeKeyIfFreeIdAvailable(int* key, int indexCount);
+	void createNewInstanceWithoutExistingId(oCItem* item, int key);
+
+	void createNewInstanceForExistingId(oCItem* item, int instanceId);
 	/**
-	 * Creates a new oCItem instance which will be initialized with the members of the provided oCItem.
-	 * \param item The item to use for instance creation.
-	 * \return The instance id respectively the index of the new created zCPar_Symbol.
-	 */
+			 * Creates a new oCItem instance which will be initialized with the members of the provided oCItem.
+			 * \param item The item to use for instance creation.
+			 * \return The instance id respectively the index of the new created zCPar_Symbol.
+			 */
 	int createNewInstanceId(oCItem* item);
 
 	/**
@@ -119,6 +122,8 @@ public:
 	 * \return Was the assignment successful?
 	 */
 	bool assignInstanceId(oCItem* item, int id);
+
+	bool assignInstanceId2(oCItem* item, int id);
 
 	/**
 	 * Provides the instance id of a given oCItem.
@@ -359,7 +364,7 @@ public:
 
 	void updateIkarusSymbols();
 
-	void callForAllItems(std::function<void(oCItem*)> func);
+	void callForAllItems(std::function<void(oCItem*)> func, oCItem** stopIfNotNullItem = nullptr);
 
 	int getInstanceBegin();
 
@@ -367,6 +372,25 @@ public:
 
 	int getIdForSpecialPurposes();
 
+	void markAsReusable(int instanceId, int previousId);
+
+	/**
+	* Checks whether the specified oCItem is in the game world's list registered
+	* \param item The oCItem to check
+	* \return true if the item is added into the world
+	*/
+	bool isItemInWorld(oCItem* item);
+
+	/**
+	 * Searches an oCItem by its instance id in the world, in all containers and all inventories.
+	 * \param instanceId the instance id for searching the oCItem
+	 * \return The first oCItem found
+	 */
+	oCItem* getItemByInstanceId(int instanceId);
+
+	void oCItemSaveInsertEffect(oCItem* item);
+	void oCItemSaveRemoveEffect(oCItem* item);
+	bool isDynamicInstance(int instanceId);
 private:
 
 	/**
@@ -390,6 +414,7 @@ private:
 	std::map<int, zCPar_Symbol*> newInstanceToSymbolMap;
 	std::map<std::string, zCPar_Symbol*> nameToSymbolMap;
 	std::map<std::string, int> nameToIndexMap;
+	std::list<int> reusableInstances;
 
 	// <int additMemoryId, AdditMemory* additMemory>
 	std::map<int, AdditMemory*> keyToAdditMap;
@@ -417,7 +442,7 @@ private:
 	zCPar_Symbol* createNewSymbol(ParserInfo* old);
 	bool addSymbolToSymbolTable(zCPar_Symbol* symbol);
 	DynInstance * createNewInstanceItem(int instanceId);
-
+	void updateContainerItem(ObjectManager::ParserInfo* info);
 	/**
 	 * Logs the current status of the provided zCPar_Symbol pointer.
 	 * \param sym The symbol to log.

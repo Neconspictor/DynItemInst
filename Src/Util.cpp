@@ -38,10 +38,10 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <direct.h>   // _mkdir
 #endif
 #include <sstream>
+#include <Configuration.h>
 
 
 HMODULE util::hModule = 0;
-bool util::debugEnabled = false;
 std::stringstream util::logStream;
 
 void util::safeDelete(void** pointer)
@@ -89,27 +89,59 @@ HMODULE util::getModuleHandle()
 	return hModule;
 }
 
+std::string util::getGothicSystemDirectory()
+{
+	return getCurrentWorkingDir();
+}
+
 void util::assertDIIRequirements(bool expression, std::string errorMessage)
 {
 	if (!expression)
 	{
 		logStream << "DII-Assertion failed: " << errorMessage << std::endl;
-		Logger::getLogger()->log(Logger::Fatal, &logStream, true, true, true);
+		Logger::getLogger()->log(Logger::Fatal, &logStream);
 	}
 }
 
-void util::debug(std::stringstream* ss)
+void util::debug(std::stringstream* ss, Logger::LogLevel level)
 {
-	if (debugEnabled)
+	if (Configuration::debugEnabled())
 	{
-		Logger::getLogger()->log(Logger::Info, ss, true, true, true);
+		Logger::getLogger()->log(level, ss);
+	} else
+	{
+		//flush strin stream
+		ss->clear();
+		ss->str("");
 	}
 }
 
-void util::setDebug(bool enable)
+void util::logAlways(std::stringstream* ss)
 {
-	debugEnabled = enable;
+	Logger::getLogger()->logAlways(ss);
 }
+
+void util::logInfo(std::stringstream* ss)
+{
+	Logger::getLogger()->log(Logger::Info, ss);
+}
+
+void util::logWarning(std::stringstream* ss)
+{
+	Logger::getLogger()->log(Logger::Warning, ss);
+}
+
+void util::logFault(std::stringstream* ss)
+{
+	Logger::getLogger()->log(Logger::Fault, ss);
+}
+
+void util::logFatal(std::stringstream* ss)
+{
+	Logger::getLogger()->log(Logger::Fatal, ss);
+}
+
+
 
 bool util::existsDir(const std::string& path)
 {
