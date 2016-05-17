@@ -44,6 +44,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <Configuration.h>
 #include <thread>
 #include <mutex>
+#include <Levitation.h>
 
 const std::string DynItemInst::SAVE_ITEM_FILE_EXT = ".SAV";
 const std::string DynItemInst::SAVE_ITEM_INSTANCES  = "DII_INSTANCES";
@@ -91,7 +92,10 @@ OCMobContainerOpen oCMobContainerOpen;
 
 typedef void(__thiscall* ZCCameraSetFarClipZ)(void*, float);
 ZCCameraSetFarClipZ zCCameraSetFarClipZ;
-typedef int (__fastcall* ZCCameraScreenProjectionTouchesPortalRough)(void*,void*);
+typedef int (__fastcall* ZCCameraScreenProjectionTouchesPortal)(void* pThis, zTBBox3D const & second, zTBBox2D const & third);
+ZCCameraScreenProjectionTouchesPortal zCCameraScreenProjectionTouchesPortal;
+
+typedef int(__fastcall* ZCCameraScreenProjectionTouchesPortalRough)(void* pThis, zTBBox3D const & second, zTBBox2D const & third);
 ZCCameraScreenProjectionTouchesPortalRough zCCameraScreenProjectionTouchesPortalRough;
 
 
@@ -162,9 +166,35 @@ OCItemRemoveEffect oCItemRemoveEffect = (OCItemRemoveEffect)0x00712C00;
 
 typedef void(__thiscall* ZCVobUpdatePhysics)(void*);
 ZCVobUpdatePhysics zCVobUpdatePhysics = (ZCVobUpdatePhysics)0x0061D2D0;
+
+
+////.text:0064B260 public: virtual void __thiscall zCRnd_D3D::DrawPoly(class zCPolygon *) proc near
+typedef void(__thiscall* ZCRnd_D3DDrawPoly)(void* pThis, void*);
+ZCRnd_D3DDrawPoly zCRnd_D3DDrawPoly = (ZCRnd_D3DDrawPoly)0x0064B260;
+
+//.text:0064AC30 public: virtual void __thiscall zCRnd_D3D::DrawPolySimple(class zCTexture *, struct zTRndSimpleVertex *, int) proc near
+typedef void(__thiscall* ZCRnd_D3DDrawPolySimple)(void* pThis, void* second, void* third, int fourth);
+ZCRnd_D3DDrawPolySimple zCRnd_D3DDrawPolySimple = (ZCRnd_D3DDrawPolySimple)0x0064AC30;
+
+//.text:00650CF0 public: virtual void __thiscall zD3D_alphaPoly::Draw(int) proc near
+typedef void(__thiscall* ZCRnd_alphaPolyDraw)(void* pThis, int second);
+ZCRnd_alphaPolyDraw zCRnd_alphaPolyDraw = (ZCRnd_alphaPolyDraw)0x00650CF0;
+
+
 typedef void(__thiscall* OCAniCtrl_HumanCheckFallStates)(void*);
 OCAniCtrl_HumanCheckFallStates oCAniCtrl_HumanCheckFallStates = (OCAniCtrl_HumanCheckFallStates)0x006B5810;
 
+//.text:00529DD0 public: int __thiscall zCPolygon::RenderPoly(int) proc near
+typedef int(__thiscall* ZCPolygonRenderPoly)(void*, int);
+ZCPolygonRenderPoly zCPolygonRenderPoly = (ZCPolygonRenderPoly)0x00529DD0;
+
+//.text:005B7B20 public: int __fastcall zCPolygon::ClipToFrustum(int) proc near
+typedef int(__fastcall* ZCPolygonClipToFrustum)(void*, int);
+ZCPolygonClipToFrustum zCPolygonClipToFrustum = (ZCPolygonClipToFrustum)0x005B7B20;
+
+//.text:00534B70 private: void __thiscall zCBspSector::ActivateSectorRecIndoor(struct zTBBox2D const &, class zCBspSector *, int) proc near
+typedef void(__thiscall* ZCBspSectorActivateSectorRecIndoor)(void*, zTBBox2D const &, void*, int);
+ZCBspSectorActivateSectorRecIndoor zCBspSectorActivateSectorRecIndoor = (ZCBspSectorActivateSectorRecIndoor)0x00534B70;
 
 void DynItemInst::hookModule()
 {
@@ -179,7 +209,8 @@ void DynItemInst::hookModule()
 	oCMobContainerOpen = (OCMobContainerOpen) OCMOB_CONTAINER_OPEN;
 
 	zCCameraSetFarClipZ = (ZCCameraSetFarClipZ) 0x0054B200;
-	zCCameraScreenProjectionTouchesPortalRough = (ZCCameraScreenProjectionTouchesPortalRough)0x0054C100;//0x0054BE80;
+	zCCameraScreenProjectionTouchesPortal = (ZCCameraScreenProjectionTouchesPortal)0x0054C100;//0x0054BE80;
+	zCCameraScreenProjectionTouchesPortalRough = (ZCCameraScreenProjectionTouchesPortalRough)0x0054BE80;//0x0054BE80;
 
 		//0x006521E0
 
@@ -197,11 +228,18 @@ void DynItemInst::hookModule()
 	hookManager->addFunctionHook((LPVOID*)&oCMag_BookSetFrontSpell, oCMag_BookSetFrontSpellHook, moduleDesc);
 
 	hookManager->addFunctionHook((LPVOID*)&zCCameraSetFarClipZ, zCCameraSetFarClipZHook, moduleDesc);
+	hookManager->addFunctionHook((LPVOID*)&zCRnd_D3DDrawPoly, zCRnd_D3DDrawPolyHook, moduleDesc);
 
 	hookManager->addFunctionHook((LPVOID*)&zCVobUpdatePhysics, zCVobUpdatePhysicsHook, moduleDesc);
 	hookManager->addFunctionHook((LPVOID*)&oCAniCtrl_HumanCheckFallStates, oCAniCtrl_HumanCheckFallStatesHook, moduleDesc);
-	//hookManager->addFunctionHook((LPVOID*)&zCCameraScreenProjectionTouchesPortalRough, zCCameraScreenProjectionTouchesPortalHookNaked, moduleDesc);
+	hookManager->addFunctionHook((LPVOID*)&zCCameraScreenProjectionTouchesPortal, zCCameraScreenProjectionTouchesPortalHookNaked, moduleDesc);
+	hookManager->addFunctionHook((LPVOID*)&zCCameraScreenProjectionTouchesPortalRough, zCCameraScreenProjectionTouchesPortalHookNaked, moduleDesc);
 
+	hookManager->addFunctionHook((LPVOID*)&zCRnd_D3DDrawPolySimple, zCRnd_D3DDrawPolySimpleHook, moduleDesc);
+	hookManager->addFunctionHook((LPVOID*)&zCRnd_alphaPolyDraw, zCRnd_alphaPolyDrawHook, moduleDesc);
+	hookManager->addFunctionHook((LPVOID*)&zCPolygonRenderPoly, zCPolygonRenderPolyHook, moduleDesc);
+	hookManager->addFunctionHook((LPVOID*)&zCPolygonClipToFrustum, zCPolygonClipToFrustumHook, moduleDesc);
+	hookManager->addFunctionHook((LPVOID*)&zCBspSectorActivateSectorRecIndoor, zCBspSectorActivateSectorRecIndoorHook, moduleDesc);
 
 	denyMultiSlot = true;
 	loadDynamicInstances();
@@ -223,7 +261,17 @@ void DynItemInst::unHookModule()
 	hookManager->removeFunctionHook((LPVOID*)&oCMobContainerOpen, oCMobContainerOpenHookNaked, moduleDesc);
 
 	hookManager->removeFunctionHook((LPVOID*)&zCCameraSetFarClipZ, zCCameraSetFarClipZHook, moduleDesc);
-	//hookManager->removeFunctionHook((LPVOID*)&zCCameraScreenProjectionTouchesPortalRough, zCCameraScreenProjectionTouchesPortalHookNaked, moduleDesc);
+	hookManager->removeFunctionHook((LPVOID*)&zCRnd_D3DDrawPoly, zCRnd_D3DDrawPolyHook, moduleDesc);
+	hookManager->removeFunctionHook((LPVOID*)&zCCameraScreenProjectionTouchesPortal, zCCameraScreenProjectionTouchesPortalHookNaked, moduleDesc);
+	hookManager->removeFunctionHook((LPVOID*)&zCCameraScreenProjectionTouchesPortalRough, zCCameraScreenProjectionTouchesPortalHookNaked, moduleDesc);
+	
+	hookManager->removeFunctionHook((LPVOID*)&zCRnd_D3DDrawPolySimple, zCRnd_D3DDrawPolySimpleHook, moduleDesc);
+	hookManager->removeFunctionHook((LPVOID*)&zCRnd_alphaPolyDraw, zCRnd_alphaPolyDrawHook, moduleDesc);
+	hookManager->removeFunctionHook((LPVOID*)&zCPolygonRenderPoly, zCPolygonRenderPolyHook, moduleDesc);
+	hookManager->removeFunctionHook((LPVOID*)&zCPolygonClipToFrustum, zCPolygonClipToFrustumHook, moduleDesc);
+	hookManager->removeFunctionHook((LPVOID*)&zCBspSectorActivateSectorRecIndoor, zCBspSectorActivateSectorRecIndoorHook, moduleDesc);
+
+
 };
 
 
@@ -327,6 +375,13 @@ _declspec(naked) void DynItemInst::oCMobContainerOpenHookNaked()
 	}
 }
 
+int DynItemInst::zCCameraScreenProjectionTouchesPortalHookNaked(void* pThis, zTBBox3D const & second, zTBBox2D const & third)
+{
+	return zCCameraScreenProjectionTouchesPortalRough(pThis, second, third);
+	//logStream << "DynItemInst::zCCameraScreenProjectionTouchesPortalHookNaked: result = " << result << std::endl;
+	//util::debug(&logStream);
+	//return 1;
+}
 
 
 int DynItemInst::oCItemGetValueHook(void* pThis) {
@@ -895,6 +950,22 @@ void DynItemInst::zCCameraSetFarClipZHook(void* pThis, float value)
 	zCCameraSetFarClipZ(pThis, value);
 }
 
+void DynItemInst::zCRnd_D3DDrawPolyHook(void* pThis, void* poly)
+{
+
+	zCRnd_D3DDrawPoly(pThis, poly);
+}
+
+void DynItemInst::zCRnd_D3DDrawPolySimpleHook(void* pThis, void* second, void* third, int fourth)
+{
+	zCRnd_D3DDrawPolySimple(pThis, second, third, fourth);
+}
+
+void DynItemInst::zCRnd_alphaPolyDrawHook(void* pThis, int second)
+{
+	//zCRnd_alphaPolyDraw(pThis, second);
+}
+
 void DynItemInst::zCVobUpdatePhysicsHook(void * pThis)
 {
 	if (oCNpc::GetHero() != pThis)
@@ -911,6 +982,34 @@ void DynItemInst::oCAniCtrl_HumanCheckFallStatesHook(void * oCAniCtrl_Human)
 		
 	}
 	oCAniCtrl_HumanCheckFallStates(oCAniCtrl_Human);
+}
+
+int DynItemInst::zCPolygonRenderPolyHook(void* pThis, int second)
+{
+	//return zCPolygonRenderPoly(pThis, second);
+	zCPolygon* poly = (zCPolygon*)pThis;
+	if (poly && zCMaterial::IsPortalMaterial(poly->GetMaterial())) {
+		return 0;
+	}
+	return zCPolygonRenderPoly(pThis, second);
+}
+
+bool change = false;
+
+int DynItemInst::zCPolygonClipToFrustumHook(void* pThis, int second)
+{
+	//.text:005B7B20 public: int __fastcall zCPolygon::ClipToFrustum(int) proc near
+	if (change) {
+		return 1;
+	}
+	return zCPolygonClipToFrustum(pThis, second);;
+}
+
+void DynItemInst::zCBspSectorActivateSectorRecIndoorHook(void* pThis, zTBBox2D const& second, void* third, int fourth)
+{
+	change = true;
+	zCBspSectorActivateSectorRecIndoor(pThis, second, third, fourth);
+	change = false;
 }
 
 void DynItemInst::restoreDynamicInstances(oCGame* game) {

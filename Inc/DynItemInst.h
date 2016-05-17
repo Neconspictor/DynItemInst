@@ -76,7 +76,7 @@ public:
 	static void oCGameChangeLevelHookNaked();
 	static void oCItemMulitSlotHookNaked();
 	static void oCMobContainerOpenHookNaked();
-	static void zCCameraScreenProjectionTouchesPortalHookNaked();
+	static int __fastcall zCCameraScreenProjectionTouchesPortalHookNaked(void* pThis, zTBBox3D const &, zTBBox2D const &);
 
 	/**
 	 * Extends functionality of oCItem::GetValue().
@@ -252,8 +252,26 @@ public:
 
 	static void __thiscall zCVobUpdatePhysicsHook(void* pThis);
 
+	//.text:0064B260 public: virtual void __thiscall zCRnd_D3D::DrawPoly(class zCPolygon *) proc near
+	static void __thiscall zCRnd_D3DDrawPolyHook(void* pThis, void* poly);
+
+	//.text:0064AC30 public: virtual void __thiscall zCRnd_D3D::DrawPolySimple(class zCTexture *, struct zTRndSimpleVertex *, int) proc near
+	static void __thiscall zCRnd_D3DDrawPolySimpleHook(void* pThis, void* second, void* third, int fourth);
+
+	//.text:00650CF0 public: virtual void __thiscall zD3D_alphaPoly::Draw(int) proc near
+	static void __thiscall zCRnd_alphaPolyDrawHook(void* pThis, int second);
+
 	//.text:006B5810 protected: void __thiscall oCAniCtrl_Human::CheckFallStates(void) proc near
 	static void __thiscall oCAniCtrl_HumanCheckFallStatesHook(void* oCAniCtrl_Human);
+
+	//.text:00529DD0 public: int __thiscall zCPolygon::RenderPoly(int) proc near
+	static int __thiscall zCPolygonRenderPolyHook(void* pThis, int second);
+
+	//.text:005B7B20 public: int __fastcall zCPolygon::ClipToFrustum(int) proc near
+	static int __fastcall zCPolygonClipToFrustumHook(void* pThis, int second);
+
+	//.text:00534B70 private: void __thiscall zCBspSector::ActivateSectorRecIndoor(struct zTBBox2D const &, class zCBspSector *, int) proc near
+	static void __thiscall zCBspSectorActivateSectorRecIndoorHook(void* pThis, zTBBox2D const & second, void* third, int fourth);
 
     /*! @copydoc Module::hookModule()
 	 */
