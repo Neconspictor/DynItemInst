@@ -5,6 +5,7 @@
 #include <api/g2/zcparser.h>
 #include "DynItemInst.h"
 #include <Logger.h>
+#include "Util.h"
 
 //.text:006BEA80 public: static void __cdecl oCNpcFocus::InitFocusModes(void) proc near
 typedef void(__cdecl* OCNpcFocusInitFocusModes)();

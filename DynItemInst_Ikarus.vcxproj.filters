@@ -15,6 +15,12 @@
     <Filter Include="Source Files\CustomNpcFocus">
       <UniqueIdentifier>{ec7ef82e-4226-408e-9822-e8fd13a18508}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\MoreViewDistance">
+      <UniqueIdentifier>{49056bff-20dc-47ac-8602-33a550ebf473}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\MoreViewDistance">
+      <UniqueIdentifier>{120ef30e-2bb3-46ec-ac29-5a198a38e21c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Inc\DynItemInst.h">
@@ -77,6 +83,9 @@
     <ClInclude Include="Inc\CustomNpcFocus.h">
       <Filter>Header Files\CustomNpcFocuses</Filter>
     </ClInclude>
+    <ClInclude Include="Inc\MoreViewDistance.h">
+      <Filter>Header Files\MoreViewDistance</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\DynItemInst.cpp">
@@ -117,6 +126,9 @@
     </ClCompile>
     <ClCompile Include="Src\CustomNpcFocus.cpp">
       <Filter>Source Files\CustomNpcFocus</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\MoreViewDistance.cpp">
+      <Filter>Source Files\MoreViewDistance</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

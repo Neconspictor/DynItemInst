@@ -24,6 +24,7 @@
     <ClInclude Include="Inc\LevitationBean.h" />
     <ClInclude Include="Inc\Logger.h" />
     <ClInclude Include="Inc\Module.h" />
+    <ClInclude Include="Inc\MoreViewDistance.h" />
     <ClInclude Include="Inc\ObjectManager.h" />
     <ClInclude Include="Inc\ocgameExtended.h" />
     <ClInclude Include="Inc\oCItemExtended.h" />
@@ -46,6 +47,7 @@
     <ClCompile Include="Src\LevitationBean.cpp" />
     <ClCompile Include="Src\Logger.cpp" />
     <ClCompile Include="Src\Module.cpp" />
+    <ClCompile Include="Src\MoreViewDistance.cpp" />
     <ClCompile Include="Src\ObjectManager.cpp" />
     <ClCompile Include="Src\Util.cpp" />
   </ItemGroup>

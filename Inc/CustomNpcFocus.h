@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Module.h"
-#include <list>
 #include <vector>
 
 class CustomNpcFocus : public Module

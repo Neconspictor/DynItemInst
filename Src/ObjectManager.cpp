@@ -87,7 +87,11 @@ void ObjectManager::release() {
 };
 
 int ObjectManager::createNewInstanceId(oCItem* item) {
-	if (item == nullptr) return 0;
+	if (item == nullptr) {
+		logStream << "ObjectManager::createNewInstanceId: item is null!" << std::endl;
+		util::logWarning(&logStream);
+		return 0;
+	}
 
 	//Create new zCPar_Symbol for the newly created instance and register it to gothic.
 	zCParser* parser = zCParser::GetParser();
@@ -95,7 +99,12 @@ int ObjectManager::createNewInstanceId(oCItem* item) {
 	int parentId = getInstanceId(*item);
 	zCPar_Symbol* old = parser->GetSymbol(parentId);
 
-	if (old == nullptr) return 0;
+
+	if (old == nullptr) {
+		logStream << "ObjectManager::createNewInstanceId: item parser symbol is null!" << std::endl;
+		util::logWarning(&logStream);
+		return 0;
+	}
 
 
 
@@ -585,18 +594,23 @@ void ObjectManager::createNewInstanceForExistingId(oCItem* item, int instanceId)
 {
 	DynInstance* instanceItem = getInstanceItem(instanceId);
 	int parentId = getInstanceId(*item);
-	if (IsModified(item))
+/*	if (IsModified(item))
 	{
-		DynInstance* oldStoreItem = getInstanceItem(parentId);
-		instanceItem->copyUserData(*oldStoreItem);
+		//DynInstance* oldStoreItem = getInstanceItem(parentId);
+		//instanceItem->copyUserData(*oldStoreItem);
 		if (instanceBegin > parentId)
 		{
 			instanceBegin = parentId;
 		}
-	}
+	}*/
 
 	instanceItem->store(*item);
 	instanceItem->setInstanceID(instanceId);
+
+	//this instance id is now used again!
+	instanceItem->notUsed = false;
+
+	setParentInstanceId(instanceId, parentId);
 };
 
 
@@ -932,6 +946,9 @@ void ObjectManager::createAdditionalMemory(oCItem* item, int id, bool isHeroItem
 	addit->spellKey = spellKey;
 	item->instanz = -additKey;
 	keyToAdditMap.insert(pair<int,AdditMemory*>(addit->additId, addit));
+	logStream << "ObjectManager::createAdditionalMemory: created addit memory: "<< item->name.ToChar() << endl;
+	logStream << "ObjectManager::createAdditionalMemory: addit-key: " << additKey << endl;
+	util::debug(&logStream);
 }
 
 void ObjectManager::removeAdditionalMemory(int additId){
@@ -946,6 +963,8 @@ void ObjectManager::removeAdditionalMemory(int additId){
 	//writeToConsole("Deleted additional memory", 0);
 	//writeToConsole("additId: ", addit->additId);
 	delete addit;
+	logStream << "ObjectManager::removeAdditionalMemory: addit-key removed: " << additId << endl;
+	util::debug(&logStream);
 }
 
 void ObjectManager::removeAllAdditionalMemory(){

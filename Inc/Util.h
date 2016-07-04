@@ -34,11 +34,131 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <Windows.h>
 #include "Logger.h"
 
+#define LEGO_HOOKENGINE_PREAMBLE __asm      \
+/* Port output */         \
+{                         \
+/*96 Bytes for hook engine stuff*/\
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+						  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+						  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+						  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+						  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+						  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+						  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+						  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+						  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+						  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+						  \
+/*5 Bytes for jump instruction*/\
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+}
+
+
 /**
 * Contains functions that are useful for several classes.
 */
 class util {
 public:
+
 
 	/**
 	 * Checks if the specified path is an directory and exists.

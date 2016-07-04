@@ -98,8 +98,11 @@ void __cdecl DaedalusExports::DII_CreateNewItem(int index, int instanceId) // Fu
 	{*/
 	if (item != nullptr)
 	{
+		// never remove vob from the game world! It could be referenced by something else and would
+		// cause troubles ('assert ref counter >= -1')
+
 		//oCGame::GetGame()->GetGameWorld()->RemoveVob(item);
-		oCGame::GetGame()->GetWorld()->RemoveVob(item);
+		//oCGame::GetGame()->GetWorld()->RemoveVob(item);
 	};
 		item = oCObjectFactory::GetFactory()->CreateItem(instanceId);
 		//oCGame::GetGame()->GetWorld()->AddVob(item);
@@ -290,6 +293,8 @@ void DaedalusExports::DII_MarkAsReusable(int instanceId, int previousId)
 	util::debug(&logStream);
 	ObjectManager* manager = ObjectManager::getObjectManager();
 	manager->markAsReusable(instanceId, previousId);
+	logStream << "DaedalusExports::DII_MarkAsReusable: function is enabled!" << std::endl;
+	util::debug(&logStream);
 	//manager->assignInstanceId2(item, instanceId);
 	logStream << "DaedalusExports::DII_MarkAsReusable: called" << std::endl;
 	util::debug(&logStream);

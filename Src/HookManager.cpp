@@ -42,6 +42,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <Configuration.h>
 #include <Levitation.h>
 #include <CustomNpcFocus.h>
+#include <MoreViewDistance.h>
 
 HookManager* HookManager::instance = nullptr;
 std::stringstream HookManager::logStream = std::stringstream();
@@ -243,12 +244,23 @@ void HookManager::hook()
 		return;
 	}
 
+
+	bool addMoreDistanceViewModul = Configuration::getFarClipZMultiplicator() > 1;
+
 	Module* dynItemInstModule = new DynItemInst();
 	Module* externals = new DaedalusExports();
+	Module* moreViewDistance = nullptr;
+	if (addMoreDistanceViewModul)
+		moreViewDistance = new MoreViewDistance();
+
 	//Module* levitation = new Levitation();
 	//Module* customFocuses = new CustomNpcFocus();
 	manager->addModule(dynItemInstModule);
 	manager->addModule(externals);
+
+	if (moreViewDistance)
+		manager->addModule(moreViewDistance);
+
 	//manager->addModule(levitation);
 	//manager->addModule(customFocuses);
 	manager->hookModules();
