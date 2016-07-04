@@ -41,6 +41,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <Logger.h>
 #include <Configuration.h>
 #include <Levitation.h>
+#include <CustomNpcFocus.h>
 
 HookManager* HookManager::instance = nullptr;
 std::stringstream HookManager::logStream = std::stringstream();
@@ -225,6 +226,7 @@ void HookManager::hook()
 	logStream << "logWarnings = " << Configuration::getLogWarnings() << std::endl;
 	logStream << "logErrors = " << Configuration::getLogErrors() << std::endl;
 	logStream << "logFatals = " << Configuration::getLogFatals() << std::endl;
+	logStream << "HookManager::hook: finished read." << std::endl;
 
 	util::logAlways(&logStream);
 
@@ -243,10 +245,12 @@ void HookManager::hook()
 
 	Module* dynItemInstModule = new DynItemInst();
 	Module* externals = new DaedalusExports();
-	Module* levitation = new Levitation();
+	//Module* levitation = new Levitation();
+	//Module* customFocuses = new CustomNpcFocus();
 	manager->addModule(dynItemInstModule);
 	manager->addModule(externals);
-	manager->addModule(levitation);
+	//manager->addModule(levitation);
+	//manager->addModule(customFocuses);
 	manager->hookModules();
 
 	logStream << "HookManager::hook: done." << std::endl;

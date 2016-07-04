@@ -122,6 +122,8 @@ public:
 
 	static void DII_ToggleLevitation();
 
+	static void DII_SetHeroFocusMode(int mode);
+
 public:
 
 	/**

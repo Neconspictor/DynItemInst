@@ -16,3 +16,4 @@ EXPORTS
 	DII_GetItemByInstanceId
 	DII_ChangeItemsInstanceId
 	DII_ToggleLevitation
+	DII_SetHeroFocusMode

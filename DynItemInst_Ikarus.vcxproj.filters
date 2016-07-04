@@ -9,6 +9,12 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
+    <Filter Include="Header Files\CustomNpcFocuses">
+      <UniqueIdentifier>{922bb644-97d6-4b6e-a2be-1879a109da90}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\CustomNpcFocus">
+      <UniqueIdentifier>{ec7ef82e-4226-408e-9822-e8fd13a18508}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Inc\DynItemInst.h">
@@ -68,6 +74,9 @@
     <ClInclude Include="Inc\LevitationBean.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Inc\CustomNpcFocus.h">
+      <Filter>Header Files\CustomNpcFocuses</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\DynItemInst.cpp">
@@ -105,6 +114,9 @@
     </ClCompile>
     <ClCompile Include="Src\LevitationBean.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\CustomNpcFocus.cpp">
+      <Filter>Source Files\CustomNpcFocus</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

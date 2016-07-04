@@ -13,6 +13,7 @@
   <ItemGroup>
     <ClInclude Include="Inc\AdditMemory.h" />
     <ClInclude Include="Inc\Configuration.h" />
+    <ClInclude Include="Inc\CustomNpcFocus.h" />
     <ClInclude Include="Inc\DllMain.h" />
     <ClInclude Include="Inc\DynItemInst.h" />
     <ClInclude Include="Inc\DaedalusExports.h" />
@@ -33,6 +34,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Configuration.cpp" />
+    <ClCompile Include="Src\CustomNpcFocus.cpp" />
     <ClCompile Include="Src\DllMain.cpp" />
     <ClCompile Include="Src\DynItemInst.cpp" />
     <ClCompile Include="Src\DaedalusExports.cpp">

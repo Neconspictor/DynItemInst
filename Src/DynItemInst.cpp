@@ -225,9 +225,9 @@ void DynItemInst::hookModule()
 	hookManager->addFunctionHook((LPVOID*)&oCItemMulitSlot, oCItemMulitSlotHookNaked, moduleDesc);
 	hookManager->addFunctionHook((LPVOID*)&oCMobContainerOpen, oCMobContainerOpenHookNaked, moduleDesc);
 
-	hookManager->addFunctionHook((LPVOID*)&oCMag_BookSetFrontSpell, oCMag_BookSetFrontSpellHook, moduleDesc);
+	//hookManager->addFunctionHook((LPVOID*)&oCMag_BookSetFrontSpell, oCMag_BookSetFrontSpellHook, moduleDesc);
 
-	hookManager->addFunctionHook((LPVOID*)&zCCameraSetFarClipZ, zCCameraSetFarClipZHook, moduleDesc);
+	/*hookManager->addFunctionHook((LPVOID*)&zCCameraSetFarClipZ, zCCameraSetFarClipZHook, moduleDesc);
 	hookManager->addFunctionHook((LPVOID*)&zCRnd_D3DDrawPoly, zCRnd_D3DDrawPolyHook, moduleDesc);
 
 	hookManager->addFunctionHook((LPVOID*)&zCVobUpdatePhysics, zCVobUpdatePhysicsHook, moduleDesc);
@@ -239,7 +239,7 @@ void DynItemInst::hookModule()
 	hookManager->addFunctionHook((LPVOID*)&zCRnd_alphaPolyDraw, zCRnd_alphaPolyDrawHook, moduleDesc);
 	hookManager->addFunctionHook((LPVOID*)&zCPolygonRenderPoly, zCPolygonRenderPolyHook, moduleDesc);
 	hookManager->addFunctionHook((LPVOID*)&zCPolygonClipToFrustum, zCPolygonClipToFrustumHook, moduleDesc);
-	hookManager->addFunctionHook((LPVOID*)&zCBspSectorActivateSectorRecIndoor, zCBspSectorActivateSectorRecIndoorHook, moduleDesc);
+	hookManager->addFunctionHook((LPVOID*)&zCBspSectorActivateSectorRecIndoor, zCBspSectorActivateSectorRecIndoorHook, moduleDesc);*/
 
 	denyMultiSlot = true;
 	loadDynamicInstances();
@@ -260,7 +260,7 @@ void DynItemInst::unHookModule()
 	hookManager->removeFunctionHook((LPVOID*)&oCItemMulitSlot, oCItemMulitSlotHookNaked, moduleDesc);
 	hookManager->removeFunctionHook((LPVOID*)&oCMobContainerOpen, oCMobContainerOpenHookNaked, moduleDesc);
 
-	hookManager->removeFunctionHook((LPVOID*)&zCCameraSetFarClipZ, zCCameraSetFarClipZHook, moduleDesc);
+	/*hookManager->removeFunctionHook((LPVOID*)&zCCameraSetFarClipZ, zCCameraSetFarClipZHook, moduleDesc);
 	hookManager->removeFunctionHook((LPVOID*)&zCRnd_D3DDrawPoly, zCRnd_D3DDrawPolyHook, moduleDesc);
 	hookManager->removeFunctionHook((LPVOID*)&zCCameraScreenProjectionTouchesPortal, zCCameraScreenProjectionTouchesPortalHookNaked, moduleDesc);
 	hookManager->removeFunctionHook((LPVOID*)&zCCameraScreenProjectionTouchesPortalRough, zCCameraScreenProjectionTouchesPortalHookNaked, moduleDesc);
@@ -270,7 +270,7 @@ void DynItemInst::unHookModule()
 	hookManager->removeFunctionHook((LPVOID*)&zCPolygonRenderPoly, zCPolygonRenderPolyHook, moduleDesc);
 	hookManager->removeFunctionHook((LPVOID*)&zCPolygonClipToFrustum, zCPolygonClipToFrustumHook, moduleDesc);
 	hookManager->removeFunctionHook((LPVOID*)&zCBspSectorActivateSectorRecIndoor, zCBspSectorActivateSectorRecIndoorHook, moduleDesc);
-
+	*/
 
 };
 
