@@ -31,6 +31,8 @@
     <ClInclude Include="Inc\oCItemExtended.h" />
     <ClInclude Include="Inc\oCMobContainer.h" />
     <ClInclude Include="Inc\PortalDrawDistance.h" />
+    <ClInclude Include="Inc\stdafx.h" />
+    <ClInclude Include="Inc\targetver.h" />
     <ClInclude Include="Inc\Util.h" />
     <ClInclude Include="Inc\zCOptionExtended.h" />
     <ClInclude Include="Inc\zCPar_SymbolTable.h" />
@@ -53,6 +55,7 @@
     <ClCompile Include="Src\MoreViewDistance.cpp" />
     <ClCompile Include="Src\ObjectManager.cpp" />
     <ClCompile Include="Src\PortalDrawDistance.cpp" />
+    <ClCompile Include="Src\stdafx.cpp" />
     <ClCompile Include="Src\Util.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -78,7 +81,7 @@
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140_xp</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -130,6 +133,8 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;DYNITEMINST_EXPORTS;DETOURS_X86;DETOURS_32BIT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalOptions>/Zc:threadSafeInit %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -138,10 +143,9 @@
       <OptimizeReferences>
       </OptimizeReferences>
       <AdditionalLibraryDirectories>.\boost_1_59_0\bin\release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libboost_serialization-vc140-mt-1_59.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libboost_serialization-vc140-mt-s-1_59.lib;libcmt.lib;libvcruntime.lib;libucrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>exports.def</ModuleDefinitionFile>
-      <SubSystem>
-      </SubSystem>
+      <SubSystem>Windows</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

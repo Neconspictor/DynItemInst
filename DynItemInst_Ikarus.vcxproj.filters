@@ -104,6 +104,12 @@
     <ClInclude Include="Inc\PortalDrawDistance.h">
       <Filter>Header Files\PortalDrawDistance</Filter>
     </ClInclude>
+    <ClInclude Include="Inc\stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\targetver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\DynItemInst.cpp">
@@ -153,6 +159,9 @@
     </ClCompile>
     <ClCompile Include="Src\PortalDrawDistance.cpp">
       <Filter>Source Files\PortalDrawDistance</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\stdafx.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

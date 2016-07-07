@@ -26,7 +26,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 
 /////////////////////////////////////////////////////////////////////////////*/
 
-
+#include "stdafx.h"
 #include <DllMain.h>
 #include <HookManager.h>
 #include <Logger.h>
