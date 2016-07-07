@@ -16,6 +16,7 @@ bool Configuration::logToZSpy;
 bool Configuration::logToFile;
 bool Configuration::debugisEnabled;
 float Configuration::farClipZMultiplicator;
+bool Configuration::loaDebug;
 
 void Configuration::load(const string &filename)
 {
@@ -35,6 +36,7 @@ void Configuration::load(const string &filename)
 		logToFile = pt.get("LOGGING.logToFile", false);
 		logToConsole = pt.get("LOGGING.logToConsole", false);
 		debugisEnabled = pt.get("LOGGING.debugEnabled", false);
+		loaDebug = pt.get("DEBUG.loaDebug", false);
 
 	} catch (boost::exception &e)
 	{
@@ -45,6 +47,7 @@ void Configuration::load(const string &filename)
 		logErrors = false;
 		logFatals = true;
 		debugisEnabled = false;
+		loaDebug = false;
 	}
 
 }
@@ -95,6 +98,7 @@ void Configuration::save(const string &filename)
 	pt.put("LOGGING.logToFile", logToFile);
 	pt.put("LOGGING.logToConsole", logToConsole);
 	pt.put("LOGGING.debugEnabled", debugisEnabled);
+	pt.put("DEBUG.loaDebug", loaDebug);
 	write_ini(ss.str(), pt);
 }
 
@@ -127,6 +131,11 @@ bool Configuration::getLogTozSpy()
 bool Configuration::getLogToConsole()
 {
 	return logToConsole;
+}
+
+bool Configuration::getLoADebug()
+{
+	return loaDebug;
 }
 
 bool Configuration::getLogInfos()

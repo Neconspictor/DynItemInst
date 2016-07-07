@@ -43,6 +43,8 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <Levitation.h>
 #include <CustomNpcFocus.h>
 #include <MoreViewDistance.h>
+#include <LoaDebug.h>
+#include <PortalDrawDistance.h>
 
 HookManager* HookManager::instance = nullptr;
 std::stringstream HookManager::logStream = std::stringstream();
@@ -227,6 +229,7 @@ void HookManager::hook()
 	logStream << "logWarnings = " << Configuration::getLogWarnings() << std::endl;
 	logStream << "logErrors = " << Configuration::getLogErrors() << std::endl;
 	logStream << "logFatals = " << Configuration::getLogFatals() << std::endl;
+	logStream << "loaDebug = " << Configuration::getLoADebug() << std::endl;
 	logStream << "HookManager::hook: finished read." << std::endl;
 
 	util::logAlways(&logStream);
@@ -246,12 +249,19 @@ void HookManager::hook()
 
 
 	bool addMoreDistanceViewModul = Configuration::getFarClipZMultiplicator() > 1;
+	bool addLoaDebug = Configuration::getLoADebug();
 
 	Module* dynItemInstModule = new DynItemInst();
 	Module* externals = new DaedalusExports();
 	Module* moreViewDistance = nullptr;
 	if (addMoreDistanceViewModul)
 		moreViewDistance = new MoreViewDistance();
+
+	Module* loaDebug = nullptr;
+	if (addLoaDebug)
+		loaDebug = new LoADebug();
+
+	//Module* portalDistanceMultiplier = new PortalDrawDistance();
 
 	//Module* levitation = new Levitation();
 	//Module* customFocuses = new CustomNpcFocus();
@@ -261,6 +271,10 @@ void HookManager::hook()
 	if (moreViewDistance)
 		manager->addModule(moreViewDistance);
 
+	if (loaDebug)
+		manager->addModule(loaDebug);
+
+	//manager->addModule(portalDistanceMultiplier);
 	//manager->addModule(levitation);
 	//manager->addModule(customFocuses);
 	manager->hookModules();

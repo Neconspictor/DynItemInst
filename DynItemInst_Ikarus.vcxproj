@@ -22,6 +22,7 @@
     <ClInclude Include="Inc\DynInstance.h" />
     <ClInclude Include="Inc\Levitation.h" />
     <ClInclude Include="Inc\LevitationBean.h" />
+    <ClInclude Include="Inc\LoaDebug.h" />
     <ClInclude Include="Inc\Logger.h" />
     <ClInclude Include="Inc\Module.h" />
     <ClInclude Include="Inc\MoreViewDistance.h" />
@@ -29,6 +30,7 @@
     <ClInclude Include="Inc\ocgameExtended.h" />
     <ClInclude Include="Inc\oCItemExtended.h" />
     <ClInclude Include="Inc\oCMobContainer.h" />
+    <ClInclude Include="Inc\PortalDrawDistance.h" />
     <ClInclude Include="Inc\Util.h" />
     <ClInclude Include="Inc\zCOptionExtended.h" />
     <ClInclude Include="Inc\zCPar_SymbolTable.h" />
@@ -45,10 +47,12 @@
     <ClCompile Include="Src\DynInstance.cpp" />
     <ClCompile Include="Src\Levitation.cpp" />
     <ClCompile Include="Src\LevitationBean.cpp" />
+    <ClCompile Include="Src\LoADebug.cpp" />
     <ClCompile Include="Src\Logger.cpp" />
     <ClCompile Include="Src\Module.cpp" />
     <ClCompile Include="Src\MoreViewDistance.cpp" />
     <ClCompile Include="Src\ObjectManager.cpp" />
+    <ClCompile Include="Src\PortalDrawDistance.cpp" />
     <ClCompile Include="Src\Util.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -67,13 +71,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v140_xp</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v140_xp</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -136,6 +140,8 @@
       <AdditionalLibraryDirectories>.\boost_1_59_0\bin\release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>libboost_serialization-vc140-mt-1_59.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>exports.def</ModuleDefinitionFile>
+      <SubSystem>
+      </SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -18,6 +18,7 @@ public:
 	static bool getLogToFile();
 	static bool getLogTozSpy();
 	static bool getLogToConsole();
+	static bool getLoADebug();
 private:
 	static std::string logFile;
 	static bool logInfos;
@@ -29,4 +30,5 @@ private:
 	static bool logToFile;
 	static bool debugisEnabled;
 	static float farClipZMultiplicator;
+	static bool loaDebug;
 };

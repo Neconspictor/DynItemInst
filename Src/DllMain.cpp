@@ -31,6 +31,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <HookManager.h>
 #include <Logger.h>
 #include <Util.h>
+#include <iostream>
 
 std::stringstream logStream;
 
@@ -62,6 +63,7 @@ BOOL APIENTRY DllMain( HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpRese
     switch(ul_reason_for_call)
     {
     case DLL_PROCESS_ATTACH: 
+		std::cout << "You should always see me!" << std::endl;
 		util::setModuleHandle(hModule);
 		logStream<< "DLL_Process_Attach called."<< std::endl;
 		Logger::getLogger()->logAlways(&logStream);

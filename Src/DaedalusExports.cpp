@@ -493,6 +493,8 @@ void DaedalusExports::DII_ToggleLevitation()
 
 void DaedalusExports::DII_SetHeroFocusMode(int mode)
 {
+	//for now ignore!
+	return;
 	typedef void(__cdecl* OCNpcFocusSetFocusMode)(int mode);
 	OCNpcFocusSetFocusMode oCNpcFocusSetFocusMode = (OCNpcFocusSetFocusMode)0x006BEC20;
 	oCNpcFocusSetFocusMode(mode);

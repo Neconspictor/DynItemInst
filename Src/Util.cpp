@@ -64,7 +64,7 @@ std::string util::getCurrentWorkingDir()
 std::string util::getModuleName(HMODULE handle)
 {
 	char buffer[MAX_PATH];
-	GetModuleFileName(handle, buffer, sizeof(buffer)/sizeof(buffer[0])); 
+	GetModuleFileName(handle, buffer, sizeof(buffer)/sizeof(buffer[0]));
 	std::string::size_type pos = std::string( buffer ).find_last_of( "\\/" );
 	std::string result = std::string( buffer ).substr(pos +1);
 	pos = result.find_last_of( "." );
@@ -74,7 +74,7 @@ std::string util::getModuleName(HMODULE handle)
 std::string util::getModuleDirectory(HMODULE handle)
 {
 	char buffer[MAX_PATH];
-	GetModuleFileName(handle, buffer, sizeof(buffer)/sizeof(buffer[0])); 
+	GetModuleFileName(handle, buffer, sizeof(buffer)/sizeof(buffer[0]));
 	std::string::size_type pos = std::string( buffer ).find_last_of( "\\/" );
     return std::string( buffer ).substr( 0, pos);
 }
