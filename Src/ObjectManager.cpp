@@ -63,7 +63,7 @@ ObjectManager::ObjectManager()
 	this->nextInstances = queue<int>();
 };
 
-g2ext_extended::zCPar_SymbolTable* zCParserGetSymbolTable(void* parser)
+g2ext_extended::zCPar_SymbolTable* ObjectManager::zCParserGetSymbolTable(void* parser)
 {
 	BYTE* pointer = ((BYTE*)parser) + 0x10;
 	return (g2ext_extended::zCPar_SymbolTable*)pointer;

@@ -17,3 +17,5 @@ EXPORTS
 	DII_ChangeItemsInstanceId
 	DII_ToggleLevitation
 	DII_SetHeroFocusMode
+	DII_Test
+	DII_TransformationTest

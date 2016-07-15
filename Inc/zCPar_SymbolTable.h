@@ -45,5 +45,11 @@ namespace g2ext_extended
 			XCALL(0x007A4430);
 		};
 
+		//.text:007A3EE0 public: class zCPar_Symbol * __thiscall zCPar_SymbolTable::GetSymbol(int) proc near
+		zCPar_Symbol* GetSymbol(int)
+		{
+			XCALL(0x007A3EE0);
+		}
+
 	} zCPar_SymbolTable;
 }

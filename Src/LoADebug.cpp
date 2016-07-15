@@ -4,6 +4,7 @@
 #include <api/g2/ocnpc.h>
 #include <api/g2/zcparser.h>
 #include "api/g2/zcview.h"
+#include <TestModule.h>
 
 //.text:006C86A0 public: virtual void __thiscall oCGame::Render(void) proc near
 typedef void(__thiscall* OCGameRender)(void* pThis);
@@ -66,6 +67,9 @@ void LoADebug::oCGameRenderHook()
 		static std::stringstream builder;
 		builder << "Held ist sichtbar: ";
 		bool unvisible = hero->aiscripts[4];
+
+		builder << "index: " << zCParser::GetParser()->GetIndex("TEST") << " ";
+
 		if (unvisible)
 		{
 			builder << "Nein" << std::endl;
@@ -86,4 +90,5 @@ void LoADebug::oCGameRenderHook()
 	}
 
 	zCTimerFrameUpdate();
+	TestModule::Test();
 }

@@ -45,6 +45,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <MoreViewDistance.h>
 #include <LoaDebug.h>
 #include <PortalDrawDistance.h>
+#include <TestModule.h>
 
 HookManager* HookManager::instance = nullptr;
 std::stringstream HookManager::logStream = std::stringstream();
@@ -273,6 +274,10 @@ void HookManager::hook()
 
 	if (loaDebug)
 		manager->addModule(loaDebug);
+
+	Module* testModule = new TestModule();
+
+	manager->addModule(testModule);
 
 	//manager->addModule(portalDistanceMultiplier);
 	//manager->addModule(levitation);

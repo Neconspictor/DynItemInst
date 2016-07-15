@@ -35,6 +35,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <queue>
 #include "oCMobContainer.h"
 #include "AdditMemory.h"
+#include "zCPar_SymbolTable.h"
 
 /**
  * This class is responsible for managing DynInstance and AdditMemory objects.
@@ -391,6 +392,9 @@ public:
 	void oCItemSaveInsertEffect(oCItem* item);
 	void oCItemSaveRemoveEffect(oCItem* item);
 	bool isDynamicInstance(int instanceId);
+
+	static g2ext_extended::zCPar_SymbolTable* zCParserGetSymbolTable(void* parser);
+
 private:
 
 	/**
@@ -429,7 +433,6 @@ private:
 	 * Creates a new object manager.
 	 */
 	ObjectManager();
-
 	/**
 	 * Inits an oCItem by its (previously) assigned (new) instance id. The return value indicates
 	 * if the initialization was successful. E.g. if no registered instance id was found, this method

@@ -33,6 +33,7 @@
     <ClInclude Include="Inc\PortalDrawDistance.h" />
     <ClInclude Include="Inc\stdafx.h" />
     <ClInclude Include="Inc\targetver.h" />
+    <ClInclude Include="Inc\TestModule.h" />
     <ClInclude Include="Inc\Util.h" />
     <ClInclude Include="Inc\zCOptionExtended.h" />
     <ClInclude Include="Inc\zCPar_SymbolTable.h" />
@@ -56,6 +57,7 @@
     <ClCompile Include="Src\ObjectManager.cpp" />
     <ClCompile Include="Src\PortalDrawDistance.cpp" />
     <ClCompile Include="Src\stdafx.cpp" />
+    <ClCompile Include="Src\TestModule.cpp" />
     <ClCompile Include="Src\Util.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -105,6 +107,7 @@
     <IncludePath>.\MinHook\include;.\G2ExtSDK;.\boost_1_59_0;.\Inc;$(IncludePath)</IncludePath>
     <LibraryPath>.\MinHook\lib;$(LibraryPath)</LibraryPath>
     <TargetName>LoA-DII</TargetName>
+    <OutDir>..\..\..\Program Files\JoWood\Gothic II Gold\System\LOA-DII</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

@@ -124,6 +124,10 @@ public:
 
 	static void DII_SetHeroFocusMode(int mode);
 
+	static void DII_Test(oCItem* item, int mode);
+
+	static void DII_TransformationTest(zCVob* vob);
+
 public:
 
 	/**

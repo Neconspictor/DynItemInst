@@ -38,6 +38,8 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <DynItemInst.h>
 #include <Util.h>
 #include <Levitation.h>
+#include <TestModule.h>
+#include <zCPar_SymbolTable.h>
 
 
 const float DaedalusExports::LIB_VERSION = 1.02f;
@@ -498,4 +500,186 @@ void DaedalusExports::DII_SetHeroFocusMode(int mode)
 	typedef void(__cdecl* OCNpcFocusSetFocusMode)(int mode);
 	OCNpcFocusSetFocusMode oCNpcFocusSetFocusMode = (OCNpcFocusSetFocusMode)0x006BEC20;
 	oCNpcFocusSetFocusMode(mode);
+}
+
+//.text:006C9030 void __cdecl Game_DeleteAllPfx(class zCTree<class zCVob> *) proc near
+typedef void(__cdecl* Game_DeleteAllPfx)(void*);
+Game_DeleteAllPfx game_DeleteAllPfx = (Game_DeleteAllPfx)0x006C9030;
+
+//.text:00601C60 public: void __thiscall zCVob::RemoveVobSubtreeFromWorld(void) proc near
+typedef void(__thiscall* ZCVobRemoveVobSubtreeFromWorld)(void*);
+ZCVobRemoveVobSubtreeFromWorld zCVobRemoveVobSubtreeFromWorld = (ZCVobRemoveVobSubtreeFromWorld)0x00601C60;
+
+//.text:00711930 public: void __thiscall oCItem::CreateVisual(void) proc near
+typedef void(__thiscall* OCItemCreateVisual)(void*);
+OCItemCreateVisual oCItemCreateVisual = (OCItemCreateVisual)0x00711930;
+
+
+void DaedalusExports::DII_Test(oCItem* item, int mode)
+{
+	typedef void(__thiscall* OCItemInitByScript)(void* pThis, int, int);
+	OCItemInitByScript oCItemInitByScript = (OCItemInitByScript)0x00711BD0;
+	zVEC3 pos = item->GetVobPosition();
+	void* pfxs = ((BYTE*)item) + 0xB8;
+
+	// remove sub tree if visual is not valid!
+	if (item->globalVobTreeNode)
+	{
+		logStream << "DaedalusExports::DII_Test(oCItem*): pfxs isn't null!" << std::endl;
+		util::debug(&logStream, Logger::Warning);
+		//game_DeleteAllPfx(item->globalVobTreeNode); //0x24
+		oCItemCreateVisual(item);
+		zCVobRemoveVobSubtreeFromWorld(item);
+		item->InitByScript(item->GetInstance(), mode);
+		item->SetPositionWorld(pos);
+		oCGame::GetGame()->GetWorld()->AddVob(item);
+		
+	} else
+	{
+		logStream << "DaedalusExports::DII_Test(oCItem*): pfxs is null!"  << std::endl;
+		util::debug(&logStream, Logger::Warning);
+		item->InitByScript(item->GetInstance(), mode);
+		item->SetPositionWorld(pos);
+		oCGame::GetGame()->GetWorld()->AddVob(item);
+	}
+
+	logStream << "DII_Test(oCItem*) Called for item: " << item->name.ToChar() << ", " << item->GetSchemeName().ToChar() << std::endl;
+	util::debug(&logStream, Logger::Warning);
+}
+
+//.text:007929F0 public: void * __cdecl zCParser::CallFunc(int, ...) proc near
+typedef void* (__cdecl* ZCParserCallFunc)(int, ...);
+ZCParserCallFunc zCParserCallFunc = (ZCParserCallFunc)0x007929F0;
+
+//.text:007A4BB0 public: void __thiscall zCPar_Stack::PushString(class zSTRING &) proc near
+typedef void(__thiscall* ZCPar_StackPushString)(void* pThis, zSTRING &);
+ZCPar_StackPushString zCPar_StackPushString = (ZCPar_StackPushString)0x007A4BB0;
+
+//.text:006E2BA0 ; int __cdecl sub_006E2BA0()
+typedef int(__cdecl* PrintExternal)();
+PrintExternal printExternal = (PrintExternal)0x006E2BA0;
+
+//.text:007A4B90 public: void __thiscall zCPar_Stack::PushInt(int) proc near
+typedef void(__thiscall* ZCPar_StackPushInt)(void* pThis, int);
+ZCPar_StackPushInt zCPar_StackPushInt = (ZCPar_StackPushInt)0x007A4B90;
+
+//.text:007A5180 public: void __thiscall zCPar_DataStack::Clear(void) proc near
+typedef void(__thiscall* ZCPar_StackClear)(void* pThis);
+ZCPar_StackClear zCPar_StackClear = (ZCPar_StackClear)0x007A5180;
+
+//.text:007A4F80 public: void __thiscall zCPar_DataStack::Push(int) proc near
+typedef void(__thiscall* ZCPar_StackPush)(void* pThis, int);
+ZCPar_StackPush zCPar_StackPush = (ZCPar_StackPush)0x007A4F80;
+
+//.text:007A5070 public: int __thiscall zCPar_DataStack::Pop(void) proc near
+typedef int(__thiscall* ZCPar_DataStackPop)(void* pThis);
+ZCPar_DataStackPop zCPar_DataStackPop = (ZCPar_DataStackPop)0x007A5070;
+
+//.text:007A1E10 public: void __thiscall zCPar_Symbol::GetStackPos(int &, int) proc near
+typedef void(__thiscall* ZCPar_SymbolGetStackPos)(void* pThis, int&, int);
+ZCPar_SymbolGetStackPos zCPar_SymbolGetStackPos = (ZCPar_SymbolGetStackPos)0x007A1E10;
+
+//.text:00791960 private: void __thiscall zCParser::DoStack(int) proc near
+typedef void(__thiscall* ZCParserDoStack)(void* pThis, int);
+ZCParserDoStack zCParserDoStack = (ZCParserDoStack)0x00791960;
+
+zSTRING* msg = new zSTRING("DaedalusExport Test!");
+
+void DaedalusExports::DII_TransformationTest(zCVob* vob)
+{
+	//TestModule::Test(vob);
+	for (auto it = TestModule::vobList.begin(); it != TestModule::vobList.end();)
+	{
+		if (*it == vob)
+		{
+			it = TestModule::vobList.erase(it);
+		} else
+		{
+			++it;
+		}
+	}
+	TestModule::vobList.push_back(vob);
+
+	zCParser* parser = zCParser::GetParser();
+	int index = parser->GetIndex(zSTRING("PRINT_TEST3")); 
+	logStream << "index: " << index << std::endl;
+	Logger::getLogger()->log(Logger::Warning, &logStream);
+	bool isExternal = false;
+	bool hasReturn = true;
+	void* dataStack = (BYTE*)parser + 0x58;
+	
+	g2ext_extended::zCPar_SymbolTable* currSymbolTable = ObjectManager::zCParserGetSymbolTable(parser);
+
+	zCPar_Symbol* symbol = currSymbolTable->GetSymbol(index);
+	int stackPosition = 0; 
+	*(int*)((BYTE*)parser + 0x219C) = index;
+	zCPar_SymbolGetStackPos(symbol, stackPosition, 0);
+
+	logStream << "stackPosition: " << stackPosition << std::endl;
+	logStream << "symbol->name.ToChar(): " << symbol->name.ToChar() << std::endl;
+	logStream << "symbol->bitfield: " << symbol->bitfield << std::endl;
+	logStream << "symbol->filenr: " << symbol->filenr << std::endl;
+	logStream << "symbol->line: " << symbol->line << std::endl;
+	logStream << "symbol->line_anz: " << symbol->line_anz << std::endl;
+	logStream << "symbol->offset: " << symbol->offset << std::endl;
+	logStream << "symbol->next: " << symbol->next << std::endl;
+	logStream << "symbol->parent: " << symbol->parent << std::endl;
+	logStream << "symbol->pos_beg: " << symbol->pos_beg << std::endl;
+	logStream << "symbol->pos_anz: " << symbol->pos_anz << std::endl;
+	logStream << "symbol->content.data_int: " << symbol->content.data_int << std::endl;
+	Logger::getLogger()->log(Logger::Warning, &logStream);
+
+	zCPar_StackClear(dataStack);
+
+	//zCPar_StackPush(dataStack,(int)msg);
+	//zCPar_StackPush(dataStack, 3);
+	
+	if (isExternal)
+	{
+		typedef int(__cdecl* External)();
+		External external = (External)stackPosition;
+		external();
+	} else
+	{
+		zCParserDoStack(parser, stackPosition);
+	}
+	
+	if (!hasReturn)
+	{
+		return;
+	}
+
+	// pop return value
+	int result = zCPar_DataStackPop(dataStack);
+	for (int i = 0; i < 1; ++i)
+	{
+		result = zCPar_DataStackPop(dataStack);
+	}
+	
+	*(int*)((BYTE*)parser + 0x219C) = -1;
+	//result = *((int*)zCParserCallFunc((int)parser, index));
+
+
+	logStream << "result: " << result << std::endl;
+	//logStream << "[result]: " << *(int*)result << std::endl;
+	Logger::getLogger()->log(Logger::Warning, &logStream);
+	//zCPar_Symbol symbol;
+	//symbol.content.data_pstring = msg;
+
+	//zCParserCallFunc((int)parser, index, msg);
+	
+	//zCPar_StackClear(dataStack);
+
+	//zCPar_Symbol symbol;
+	//symbol.content.data_pstring = msg;
+
+	//parser->CallFunc(zSTRING("PRINT"));
+	//parser->CallFunc(index, msg, msg, msg);
+	//zCPar_StackPushString(dataStack, *msg);
+	//zSTRING test;
+	
+	//parser->GetParameter(test);
+	//logStream << "test: " << test.ToChar() << std::endl;
+	//Logger::getLogger()->log(Logger::Warning, &logStream);
+	//printExternal();
 }

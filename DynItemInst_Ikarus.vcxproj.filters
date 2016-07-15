@@ -33,6 +33,12 @@
     <Filter Include="Header Files\PortalDrawDistance">
       <UniqueIdentifier>{bd4065e0-93b9-4f10-a0de-0f4a149f6da4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Test">
+      <UniqueIdentifier>{dae65c06-0952-4a9e-8fb4-eae2a6cece63}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Test">
+      <UniqueIdentifier>{fe417a7b-4701-46a9-b290-49299015f35a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Inc\DynItemInst.h">
@@ -110,6 +116,9 @@
     <ClInclude Include="Inc\targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Inc\TestModule.h">
+      <Filter>Header Files\Test</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\DynItemInst.cpp">
@@ -162,6 +171,9 @@
     </ClCompile>
     <ClCompile Include="Src\stdafx.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\TestModule.cpp">
+      <Filter>Source Files\Test</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
