@@ -626,7 +626,9 @@ DynItemInst::~DynItemInst()
 			int amount = item->instanz;
 			if (amount != 1)
 			{
-				logStream << "DynItemInst::restoreItem: amount > 1!";
+				logStream << "DynItemInst::restoreItem: amount > 1!" << std::endl;
+				logStream << "item instance id: " << item->GetInstance() << std::endl;
+				logStream << "item->name: " << item->name.ToChar() << std::endl;
 				util::logFault(&logStream);
 			}
 		
@@ -639,10 +641,12 @@ DynItemInst::~DynItemInst()
 				int slotNumber = getSlotNumber(inventory, item);
 				util::assertDIIRequirements(slotNumber >= 0, "slotNumber >= 0");
 				logStream << "DynItemInst::restoreItem: slotnumber= " << slotNumber << std::endl;
-				logStream << "DynItemInst::restoreItem: item->description= " << item->description.ToChar() << std::endl;
-				logStream << "DynItemInst::restoreItem: item->GetInstance()= " << item->GetInstance() << std::endl;
-				logStream << "DynItemInst::restoreItem: copy->description= " << copy->description.ToChar() << std::endl;
-				logStream << "DynItemInst::restoreItem: copy->GetInstance()= " << copy->GetInstance() << std::endl;
+				logStream << "item->description= " << item->description.ToChar() << std::endl;
+				logStream << "item->GetInstance()= " << item->GetInstance() << std::endl;
+				logStream << "item->instanz= " << item->instanz << std::endl;
+				logStream << "copy->description= " << copy->description.ToChar() << std::endl;
+				logStream << "copy->GetInstance()= " << copy->GetInstance() << std::endl;
+				logStream << "copy->instanz= " << copy->instanz << std::endl;
 				util::debug(&logStream);
 
 				inventory->Remove(item);
@@ -766,6 +770,8 @@ DynItemInst::~DynItemInst()
 
 	// make exception for runes
 	if ((id == NULL) && item->HasFlag(OCITEM_FLAG_ITEM_KAT_RUNE) && item->HasFlag(OCITEM_FLAG_EQUIPPED)) {
+		logStream << "DynItemInst::modifyItemForSaving: modified item for special cases: " << item->GetInstance()  << std::endl;
+		util::debug(&logStream);
 		return manager->getIdForSpecialPurposes();
 	}
 
@@ -778,7 +784,8 @@ DynItemInst::~DynItemInst()
 	
 	if (item->HasFlag(OCITEM_FLAG_EQUIPPED))
 	{
-		logStream << "DynItemInst::modifyItemForSaving: item->description: " << item->description.ToChar() << std::endl;
+		logStream << "DynItemInst::modifyItemForSaving: Equipped item will be processed: " << std::endl;
+		logStream << "item->description: " << item->description.ToChar() << std::endl;
 		util::debug(&logStream);
 		std::stringstream ss;
 		if (item->HasFlag(2)) //near fight
@@ -1054,10 +1061,7 @@ void __thiscall DynItemInst::oCGameChangeLevelHook(void* pThis, zSTRING const & 
 	ObjectManager* manager = ObjectManager::getObjectManager();
 	oCNpcInventory* inv = oCNpc::GetHero()->GetInventory();
 	inv->UnpackAllItems();
-	std::list<oCItem*> tempList;
-	std::list<int> idList;
-	std::list<oCItem*>::iterator it;
-	std::list<int>::iterator idIt;
+	std::list<LevelChangeBean*> tempList;
 	zCListSort<oCItem>* list = reinterpret_cast<zCListSort<oCItem>*>(inv->inventory_data);
 	while(list != nullptr)
 	{
@@ -1066,29 +1070,59 @@ void __thiscall DynItemInst::oCGameChangeLevelHook(void* pThis, zSTRING const & 
 		{
 			if (item->HasFlag(OCITEM_FLAG_EQUIPPED))
 			{
-				tempList.push_back(item);
-				idList.push_back(manager->getInstanceId(*item));
+				LevelChangeBean* bean = new LevelChangeBean();
+				bean->item = item;
+				bean->dynamicInstanceId = manager->getInstanceId(*item);
+				bean->original_on_equip = item->on_equip;
+				bean->original_on_unequip = item->on_unequip;
+				item->on_equip = 0;
+				item->on_unequip = 0;
+				tempList.push_back(bean);
 			}
 		}
 		list = list->GetNext();
 	}
 
-	for (it = tempList.begin(); it != tempList.end(); ++it)
+	for (auto it = tempList.begin(); it != tempList.end(); ++it)
 	{
-		oCNpc::GetHero()->Equip(*it);
+		oCNpc::GetHero()->Equip((*it)->item);
+		// set bean->item to nullptr because item pointer will be invalid after level change!
+		(*it)->item = nullptr;
 	}
-	tempList.clear();
 
 	oCGameChangeLevel(pThis, first, second);
 	inv = oCNpc::GetHero()->GetInventory();
 	inv->UnpackAllItems();
 	
-	for (idIt = idList.begin(); idIt != idList.end(); ++idIt)
+	for (auto it = tempList.begin(); it != tempList.end(); ++it)
 	{
-		oCItem* item = getInvItemByInstanceId(inv, *idIt)->GetData();
+		LevelChangeBean* bean = *it;
+		oCItem* item = getInvItemByInstanceId(inv, bean->dynamicInstanceId)->GetData();
+		if (!item)
+		{
+			logStream << "DynItemInst::oCGameChangeLevelHook: inevntory-item to be equipped is null!" << std::endl;
+			util::logFault(&logStream);
+		}
+
+		logStream << "DynItemInst::oCGameChangeLevelHook: item to equip: " << std::endl;
+		logStream << "item instance id: " << item->GetInstance() << std::endl;
+		logStream << "item->name.ToChar(): " << item->name.ToChar() << std::endl;
+		logStream << "item->instanz: " << item->instanz << std::endl;
+		util::logInfo(&logStream);
+
+		item->on_equip = 0;
+		item->on_unequip = 0;
 		oCNpc::GetHero()->Equip(item);
+
+		//update equip functions
+		item->on_equip = bean->original_on_equip;
+		item->on_unequip = bean->original_on_unequip;
+
+		//finally delete gracely
+		SAFE_DELETE(bean);
 	}
-	idList.clear();
+
+	tempList.clear();
 	levelChange = false;
 	initAdditMemory();
 

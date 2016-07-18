@@ -275,9 +275,9 @@ void HookManager::hook()
 	if (loaDebug)
 		manager->addModule(loaDebug);
 
-	Module* testModule = new TestModule();
+	//Module* testModule = new TestModule();
 
-	manager->addModule(testModule);
+	//manager->addModule(testModule);
 
 	//manager->addModule(portalDistanceMultiplier);
 	//manager->addModule(levitation);

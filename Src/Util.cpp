@@ -116,6 +116,7 @@ void util::debug(std::stringstream* ss, Logger::LogLevel level)
 	}
 }
 
+
 void util::logAlways(std::stringstream* ss)
 {
 	Logger::getLogger()->logAlways(ss);

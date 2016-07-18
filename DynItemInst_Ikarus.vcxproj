@@ -31,8 +31,6 @@
     <ClInclude Include="Inc\oCItemExtended.h" />
     <ClInclude Include="Inc\oCMobContainer.h" />
     <ClInclude Include="Inc\PortalDrawDistance.h" />
-    <ClInclude Include="Inc\stdafx.h" />
-    <ClInclude Include="Inc\targetver.h" />
     <ClInclude Include="Inc\TestModule.h" />
     <ClInclude Include="Inc\Util.h" />
     <ClInclude Include="Inc\zCOptionExtended.h" />
@@ -56,7 +54,6 @@
     <ClCompile Include="Src\MoreViewDistance.cpp" />
     <ClCompile Include="Src\ObjectManager.cpp" />
     <ClCompile Include="Src\PortalDrawDistance.cpp" />
-    <ClCompile Include="Src\stdafx.cpp" />
     <ClCompile Include="Src\TestModule.cpp" />
     <ClCompile Include="Src\Util.cpp" />
   </ItemGroup>

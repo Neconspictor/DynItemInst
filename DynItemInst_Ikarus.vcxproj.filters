@@ -39,63 +39,33 @@
     <Filter Include="Source Files\Test">
       <UniqueIdentifier>{fe417a7b-4701-46a9-b290-49299015f35a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\DynItemInst">
+      <UniqueIdentifier>{380edbd3-57c6-403b-834b-0f82a42271fa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Levitation">
+      <UniqueIdentifier>{597c60ab-008b-47c6-aa98-4107804efb8f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\DynItemInst">
+      <UniqueIdentifier>{91540903-ba78-421f-8c57-05bae08ffa88}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Levitation">
+      <UniqueIdentifier>{59817085-0e31-4499-9577-db210a56779a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\DaedalusExports">
+      <UniqueIdentifier>{f247ea7f-5fd0-4c99-b807-d68e1b4c9510}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\DaedalusExports">
+      <UniqueIdentifier>{1ea2cab2-50c1-47a9-89c9-b68d8c8782c0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Util">
+      <UniqueIdentifier>{acf21ede-2547-427e-90dc-81c6b36c6e49}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Util">
+      <UniqueIdentifier>{113b1f85-0b92-4858-8ac4-09386733677e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Inc\DynItemInst.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Inc\HookManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Inc\ISerialization.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Inc\Module.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Inc\ObjectManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Inc\oCMobContainer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Inc\Util.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Inc\Logger.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Inc\AdditMemory.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Inc\DaedalusExports.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Inc\DynInstance.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Inc\DllMain.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Inc\oCItemExtended.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Inc\ocgameExtended.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Inc\zCOptionExtended.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Inc\zCPar_SymbolTable.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Inc\Configuration.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Inc\Levitation.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Inc\LevitationBean.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Inc\CustomNpcFocus.h">
@@ -110,51 +80,66 @@
     <ClInclude Include="Inc\PortalDrawDistance.h">
       <Filter>Header Files\PortalDrawDistance</Filter>
     </ClInclude>
-    <ClInclude Include="Inc\stdafx.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Inc\targetver.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Inc\TestModule.h">
       <Filter>Header Files\Test</Filter>
     </ClInclude>
+    <ClInclude Include="Inc\AdditMemory.h">
+      <Filter>Header Files\DynItemInst</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\Configuration.h">
+      <Filter>Header Files\DynItemInst</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\oCMobContainer.h">
+      <Filter>Header Files\DynItemInst</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\zCOptionExtended.h">
+      <Filter>Header Files\DynItemInst</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\zCPar_SymbolTable.h">
+      <Filter>Header Files\DynItemInst</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\oCItemExtended.h">
+      <Filter>Header Files\DynItemInst</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\ocgameExtended.h">
+      <Filter>Header Files\DynItemInst</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\ObjectManager.h">
+      <Filter>Header Files\DynItemInst</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\DynItemInst.h">
+      <Filter>Header Files\DynItemInst</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\DynInstance.h">
+      <Filter>Header Files\DynItemInst</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\Levitation.h">
+      <Filter>Header Files\Levitation</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\LevitationBean.h">
+      <Filter>Header Files\Levitation</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\DaedalusExports.h">
+      <Filter>Header Files\DaedalusExports</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\Util.h">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\Module.h">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\Logger.h">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\ISerialization.h">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HookManager.h">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Src\DynItemInst.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\ObjectManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\HookManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Util.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Logger.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Module.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\DaedalusExports.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\DynInstance.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Src\DllMain.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Configuration.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Levitation.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\LevitationBean.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Src\CustomNpcFocus.cpp">
@@ -169,11 +154,41 @@
     <ClCompile Include="Src\PortalDrawDistance.cpp">
       <Filter>Source Files\PortalDrawDistance</Filter>
     </ClCompile>
-    <ClCompile Include="Src\stdafx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Src\TestModule.cpp">
       <Filter>Source Files\Test</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\DynInstance.cpp">
+      <Filter>Source Files\DynItemInst</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\DynItemInst.cpp">
+      <Filter>Source Files\DynItemInst</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\ObjectManager.cpp">
+      <Filter>Source Files\DynItemInst</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Levitation.cpp">
+      <Filter>Source Files\Levitation</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\LevitationBean.cpp">
+      <Filter>Source Files\Levitation</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\DaedalusExports.cpp">
+      <Filter>Source Files\DaedalusExports</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Configuration.cpp">
+      <Filter>Source Files\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\HookManager.cpp">
+      <Filter>Source Files\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Logger.cpp">
+      <Filter>Source Files\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Module.cpp">
+      <Filter>Source Files\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Util.cpp">
+      <Filter>Source Files\Util</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

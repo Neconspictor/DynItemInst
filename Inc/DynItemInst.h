@@ -315,6 +315,14 @@ private:
 		int otherCounter;
 	};
 
+	struct LevelChangeBean
+	{
+		oCItem* item;
+		int dynamicInstanceId;
+		int original_on_equip;
+		int original_on_unequip;
+	};
+
 	 static InstanceNames instanceNames;
 
 	static const int LOAD_SAVEGAME_ADDRESS = 0x006C67D0;
