@@ -29,14 +29,11 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <zCOptionExtended.h>
 #include "ObjectManager.h"
 #include <fstream> 
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
 #include "api/g2/zcoption.h"
 #include "api/g2/zcworld.h"
 #include "HookManager.h"
 #include "oCMobContainer.h"
 #include "Util.h"
-#include <DynItemInst.h>
 #include "api/g2/zcparser.h"
 #include <ocgameExtended.h>
 #include <Logger.h>
@@ -406,21 +403,22 @@ void ObjectManager::saveNewInstances(char* directoryPath, char* filename) {
 	}
 
 	string fullpath = dir + string("\\") + string(filename);
-	ofstream fs(const_cast<char*>(fullpath.c_str()));
-	 boost::archive::text_oarchive oa(fs);
+	ofstream ofs(const_cast<char*>(fullpath.c_str()));
 
     	// archive and stream closed when destructors are called
 	map<int, DynInstance*>::iterator it = instanceMap.begin();
 	size_t size = instanceMap.size();
 	// Save instance items
-	oa << size;
-	for ( ; it != instanceMap.end(); ++it) {
-		oa << it->first;
+	ofs << size << '\n';
+	for (; it != instanceMap.end(); ++it) {
+		ofs << it->first;
+		ofs << ' ';
 		DynInstance* storeItem = it->second;
-		oa << storeItem;
+		storeItem->serialize(ofs);
+		//oa << storeItem;
+		ofs << '\n';
 	}
-
-};
+}
 
 
 void ObjectManager::loadNewInstances(char* filename) {
@@ -431,25 +429,35 @@ void ObjectManager::loadNewInstances(char* filename) {
 
 	indexZCParSymbolNameMap.clear();
 	
-	// create and open an archive for input
-    boost::archive::text_iarchive ia(ifs);
 	// archive and stream closed when destructors are called
-	size_t size;
-	ia >> size;
+	size_t size = 0;
+	std::stringstream ss;
+	std::string line, token;
+	getline(ifs, line);
+	ss << line;
+	getline(ss, token);
+	size = atoi(token.c_str());
+
 	for (size_t i = 0; i != size; ++i) {
+		ss.str("");
+		ss.clear();
+		getline(ifs, line);
+		ss << line;
 		int id;
-		ia >> id;
-		DynInstance* storeItem;
-		ia >> storeItem;
-		DynInstance* item = new DynInstance(*storeItem);
-		createInstanceById(id, item);
+		getline(ss, token, ' ');
+		id = atoi(token.c_str());
+		DynInstance* instance = new DynInstance();
+		//ifs >> storeItem;
+		instance->deserialize(&ss);
+		//DynInstance* item = new DynInstance(*storeItem);
+		createInstanceById(id, instance);
 
 		ParserInfo info;
-		info.name = storeItem->getZCPar_SymbolName();
-		info.bitfield = storeItem->getParserSymbolBitfield();
+		info.name = instance->getZCPar_SymbolName();
+		info.bitfield = instance->getParserSymbolBitfield();
 		info.newInstanceId = id;
-		info.oldInstanceId = storeItem->getParentInstanceId();
-		info.container = item;
+		info.oldInstanceId = instance->getParentInstanceId();
+		info.container = instance;
 		indexZCParSymbolNameMap.push_back(info);
 	}
 
@@ -948,6 +956,7 @@ void ObjectManager::createAdditionalMemory(oCItem* item, int id, bool isHeroItem
 	keyToAdditMap.insert(pair<int,AdditMemory*>(addit->additId, addit));
 	logStream << "ObjectManager::createAdditionalMemory: created addit memory: "<< item->name.ToChar() << endl;
 	logStream << "ObjectManager::createAdditionalMemory: addit-key: " << additKey << endl;
+	logStream << "ObjectManager::createAdditionalMemory: object ptr: " << (int)item << endl;
 	util::debug(&logStream);
 }
 
@@ -1027,15 +1036,20 @@ void ObjectManager::loadWorldObjects(char* filename) {
 		return;
 	}
 
-	// create and open an archive for input
-    boost::archive::text_iarchive ia(ifs);
-
+	std::stringstream ss;
+	std::string line;
 	// Load additional memory informations
 	int size;
-	ia >> size;
+	getline(ifs, line);
+	size = atoi(line.c_str());
 	for (size_t i = 0; i != size; ++i) {
-		AdditMemory* addit;
-		ia >> addit;
+		AdditMemory* addit = new AdditMemory();
+		//ia >> addit;
+		ss.str();
+		ss.clear();
+		getline(ifs, line);
+		ss << line;
+		addit->deserialize(&ss);
 		addit->referenceCount = 0;
 		keyToAdditMap.insert(pair<int,AdditMemory*>(addit->additId, addit));
 	}
@@ -1052,14 +1066,20 @@ void ObjectManager::loadHeroData(char* filename) {
 		return;
 	}
 
-	// create and open an archive for input
-    boost::archive::text_iarchive ia(ifs);
+	std::stringstream ss;
+	std::string line;
 	// Load additional memory informations
 	int size;
-	ia >> size;
+	getline(ifs, line);
+	size = atoi(line.c_str());
 	for (size_t i = 0; i != size; ++i) {
-		AdditMemory* addit;
-		ia >> addit;
+		AdditMemory* addit = new AdditMemory();
+		//ia >> addit;
+		ss.str();
+		ss.clear();
+		getline(ifs, line);
+		ss << line;
+		addit->deserialize(&ss);
 		addit->referenceCount = 0;
 		keyToAdditMap.insert(pair<int,AdditMemory*>(addit->additId, addit));
 	}
@@ -1083,8 +1103,7 @@ void ObjectManager::saveHeroData(std::list<AdditMemory*> heroItemList, char* dir
 	}
 
 	string fullpath = dir + string("\\") + string(filename);
-	ofstream fs(const_cast<char*>(fullpath.c_str()));
-	 boost::archive::text_oarchive oa(fs);
+	ofstream ofs(const_cast<char*>(fullpath.c_str()));
 
 	// Save additional memory
 	int size = heroItemList.size();
@@ -1093,10 +1112,12 @@ void ObjectManager::saveHeroData(std::list<AdditMemory*> heroItemList, char* dir
 	util::logInfo(&logStream);
 
 	list<AdditMemory*>::iterator additIt;
-	oa << size;
+	ofs << size << '\n';
 	for (additIt = heroItemList.begin(); additIt != heroItemList.end(); ++additIt) {
 		AdditMemory* addit = *additIt;
-		oa << addit;
+		//ofs << addit;
+		addit->serialize(ofs);
+		ofs << '\n';
 	}
 
 	logStream << "ObjectManager::saveHeroData: done." << endl;
@@ -1117,17 +1138,19 @@ void ObjectManager::saveWorldObjects(int heroItemSize, char* directoryPath, char
 	}
 
 	string fullpath = dir + string("\\") + string(filename);
-	ofstream fs(const_cast<char*>(fullpath.c_str()));
-	 boost::archive::text_oarchive oa(fs);
+	ofstream ofs(const_cast<char*>(fullpath.c_str()));
+
 	// Save additional memory
 	int size = keyToAdditMap.size() - heroItemSize;
 	//writeToConsole("size of additional memory: ", size);
 	map<int,AdditMemory*>::iterator additIt;
-	oa << size;
+	ofs << size << '\n';
 	for (additIt = keyToAdditMap.begin(); additIt != keyToAdditMap.end(); ++additIt) {
 		AdditMemory* addit = additIt->second;
 		if (addit->additId < HERO_ADDIT_BEGIN) {
-			oa << addit;
+			//oa << addit;
+			addit->serialize(ofs);
+			ofs << '\n';
 		}
 	}
 

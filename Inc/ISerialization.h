@@ -28,9 +28,9 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 
 #ifndef __ISERILIZATION_H__
 #define __ISERILIZATION_H__
+#include <istream>
+#include <sstream>
 
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
 
 /**
  * ISerialization is an interface for objects that have to be serialized 
@@ -40,28 +40,66 @@ class ISerialization {
 public:
 
 	/**
-	 * Initializes this object with a given serialized text_iarchive.
+	 * Initializes this object with a given input stream.
 	 */
-	virtual void myser(boost::archive::text_iarchive &ia) {ia & *this;}
+	virtual void deserialize(std::stringstream*) = 0;
 
 	/**
-	 * Serializes and stores this object in a given text_oarchive.
+	 * Serializes and stores this object in a given output stream.
 	 */
-	virtual void myser(boost::archive::text_oarchive &oa) {oa & *this;}
+	virtual void serialize(std::ostream&) const = 0;
 
 	virtual ~ISerialization() {};
 
-private:
-	// friend modifier needed by the boost library!
-	friend class boost::serialization::access;
+	void readString(std::stringstream* is, std::string& data)
+	{
+		while (is->peek() == ' ')
+		{
+			is->get();
+		}
 
-	/**
-	 * Serializes an object of type Archive.
-     * When the class Archive corresponds to an output archive, the
-     * & operator is defined similar to <<.  Likewise, when the class Archive
-     * is a type of input archive the & operator is defined similar to >>.
-	 */
-    template<class Archive> void serialize(Archive & ar, const unsigned int version) {}
+		int size = 0;
+		getInt(*is, size);
+		if (size)
+		{
+		data.resize(size + 1, '\0');
+		is->get(&data[0], size + 1);
+		
+		} else
+		{
+			data = "";
+		}
+		//*is >> data;
+	}
+
+	static inline void writeString(std::ostream& os, const std::string& data)
+	{
+		os << data.size() << ' ';
+		os << data.c_str();
+	}
+
+	void getInt(std::stringstream& ss, int& param)
+	{
+		while (ss.peek() == ' ')
+		{
+			ss.get();
+		}
+
+		std::string token;
+		getline(ss, token, ' ');
+		param = atoi(token.c_str());
+	};
+
+	void getBool(std::stringstream& ss, bool& param)
+	{
+		while (ss.peek() == ' ')
+		{
+			ss.get();
+		}
+		std::string token;
+		getline(ss, token, ' ');
+		param = atoi(token.c_str());
+	};
 };
 
 #endif __ISERILIZATION_H__

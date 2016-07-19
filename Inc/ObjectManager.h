@@ -36,6 +36,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include "oCMobContainer.h"
 #include "AdditMemory.h"
 #include "zCPar_SymbolTable.h"
+#include <functional>
 
 /**
  * This class is responsible for managing DynInstance and AdditMemory objects.

@@ -39,6 +39,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <ocgameExtended.h>
 #include <unordered_map>
 
+typedef void(__thiscall* OCItemInsertEffect)(oCItem*);
 
 class oCMobContainer;
 class oCNpcInventory;
@@ -76,6 +77,10 @@ public:
 	static void oCGameChangeLevelHookNaked();
 	static void oCItemMulitSlotHookNaked();
 	static void oCMobContainerOpenHookNaked();
+
+
+	static OCItemInsertEffect oCItemInsertEffect;
+
 	static int __fastcall zCCameraScreenProjectionTouchesPortalHookNaked(void* pThis, zTBBox3D const &, zTBBox2D const &);
 
 	/**

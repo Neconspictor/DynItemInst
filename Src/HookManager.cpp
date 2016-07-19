@@ -29,11 +29,11 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include "HookManager.h"
 #include "Util.h"
 #include <MinHook.h>
-#ifdef _DEBUG
+/*#ifdef _DEBUG
 	#pragma comment (lib, "libMinHook-x86-v140-mtd.lib")
 #else
 	#pragma comment (lib, "libMinHook-x86-v140_xp-mt.lib")
-#endif
+#endif*/
 #include <string>
 #include <DynItemInst.h>
 #include <DaedalusExports.h>

@@ -30,9 +30,6 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #ifndef __AdditMemory_H__
 #define __AdditMemory_H__
 
-#include <boost/serialization/access.hpp>
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/archive/text_oarchive.hpp>
 #include "ISerialization.h"
 
 /**
@@ -42,23 +39,6 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
  * a key to its additional memory. So additional memory is needed.
  */
 class AdditMemory : public ISerialization {
-
-private:
-	 friend class boost::serialization::access;
-
-    /*! @copydoc ISerialization::serialize(Archive & ar, const unsigned int version)
-	 */
-    template<class Archive> void serialize(Archive & ar, const unsigned int version)
-    {
-		// serialize base class information
-        ar & boost::serialization::base_object<ISerialization>(*this);    
-		ar & additId;
-		ar & instanceId;
-		ar & instanz;
-		ar & flags;
-		ar & activeSpellItem;
-		ar & spellKey;
-    }
 public:
 
 	/**
@@ -85,15 +65,23 @@ public:
 	int referenceCount;	//don't serialize it!
 	bool visited;
 
-	/*! @copydoc ISerialization::myser(boost::archive::text_iarchive &ia)
-	 */
-	virtual void myser(boost::archive::text_iarchive &ia) override
-	{ia & *this;}
 
-	/*! @copydoc ISerialization::myser(boost::archive::text_oarchive &oa)
-	 */
-	virtual void myser(boost::archive::text_oarchive &oa) override
-	{oa & *this;}
+	virtual void deserialize(std::stringstream*) override;
+	virtual void serialize(std::ostream&) const override;
 };
 
+inline void AdditMemory::deserialize(std::stringstream* is)
+{
+	getInt(*is, additId);
+	getInt(*is, instanceId);
+	getInt(*is, instanz);
+	getInt(*is, flags);
+	getBool(*is, activeSpellItem);
+	getInt(*is, spellKey);
+}
+
+inline void AdditMemory::serialize(std::ostream& os) const
+{
+	os << additId << ' ' << instanceId << ' ' << instanz << ' ' << flags << ' ' << activeSpellItem << ' ' << spellKey;
+}
 #endif __AdditMemory_H__

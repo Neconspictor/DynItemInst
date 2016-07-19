@@ -28,9 +28,10 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 
 #include "DynInstance.h"
 #include "api/g2/zcparser.h"
-#include <Logger.h>
 #include <sstream>
 #include <Util.h>
+
+using namespace std;
 
 std::stringstream DynInstance::logStream;
 
@@ -316,6 +317,269 @@ void DynInstance::setZCPar_SymbolName(std::string name)
 	zCPar_Symbol_name = name;
 }
 
+void DynInstance::serialize(std::ostream& os) const
+{
+	os << notUsed << ' ';
+	writeString(os, zCPar_Symbol_name);
+	os << ' ';
+	os << zCPar_Symbol_Bitfield << ' ';
+	os << parentInstanceId << ' ';
+	os << instanceID << ' ';
+	os << idx << ' ';
+	writeString(os, name);
+	os << ' ';
+	writeString(os, nameID);
+	os << ' ';
+	os << hp << ' ';
+	os << hp_max << ' ';
+	os << mainflags << ' ';
+	os << flags << ' ';
+	os << weight << ' ';
+	os << value << ' ';
+
+	// -- weapons		
+	os << damageType << ' ';
+	os << damageTotal << ' ';
+
+	for (int i = 0; i < 8; ++i)
+	{
+		os << damage[i] << ' ';
+	}
+
+	// -- armor 
+	os << wear << ' ';
+	
+	for (int i = 0; i < 8; ++i)
+	{
+		os << protection[i] << ' ';
+	}
+
+	// -- food
+	os << nutrition << ' ';
+
+	// -- use attributes
+	for (int i = 0; i < 3; ++i)
+	{
+		os << cond_atr[i] << ' ';
+	}
+
+	for (int i = 0; i < 3; ++i)
+	{
+		os << cond_value[i] << ' ';
+	}
+
+	// -- attributes that will be changed on equip
+	for (int i = 0; i < 3; ++i)
+	{
+		os << change_atr[i] << ' ';
+	}
+
+	for (int i = 0; i < 3; ++i)
+	{
+		os << change_value[i] << ' ';
+	}
+
+	// -- parser functions
+	os << magic << ' ';
+	os << on_equip << ' ';
+	os << on_unequip << ' ';
+
+	for (int i = 0; i < 4; ++i)
+	{
+		os << on_state[i] << ' ';
+	}
+
+	// -- owner									
+	os << owner << ' ';			//	owner: npc instance
+	os << ownerGuild << ' ';		//	owner: guild
+	os << disguiseGuild << ' ';
+
+	// -- visual
+	writeString(os, visual);
+	os << ' ';
+
+	// -- change of mesh on equip
+	writeString(os, visual_change);
+	os << ' ';
+	writeString(os, effect);
+	os << ' ';
+
+	os << visual_skin << ' ';
+
+	writeString(os, scemeName);
+	os << ' ';
+	os << material << ' ';
+	os << munition << ' ';		//	Instance of ammunition
+
+	os << spell << ' ';
+	os << range << ' ';
+
+	os << mag_circle << ' ';
+
+	writeString(os, description);
+	os << ' ';
+
+	for (int i = 0; i < 6; ++i)
+	{
+		writeString(os, text[i]);
+		os << ' ';
+	}
+
+	for (int i = 0; i < 6; ++i)
+	{
+		os << count[i] << ' ';
+	}
+
+	// -- inventory presentation
+	os << inv_zbias << ' ';								//  far plane (how far the item goes into the room by the z-axis)
+	os << inv_rotx << ' ';								//  rotation around x-axis (in degrees)
+	os << inv_roty << ' ';								//  rotation around y-axis (in degrees)
+	os << inv_rotz << ' ';								//  rotation around z-axis (in degrees)
+	os << inv_animate << ' ';							//  rotate the item
+	os << instanz << ' ';						//    ar & Symbolindex
+	os << c_manipulation << ' ';					//int ?
+	os << last_manipulation << ' ';				//zREAL ?
+	os << magic_value << ' ';					//int ?
+	os << effectVob << ' ';						//oCVisualFX*
+	os << next << ' ';
+
+	dii_userData.serialize(os);
+}
+
+
+void DynInstance::deserialize(std::stringstream* is)
+{
+	/*
+		os << notUsed << ' ';
+	writeString(os, zCPar_Symbol_name);
+	os << ' ';
+	os << zCPar_Symbol_Bitfield << ' ';
+	os << parentInstanceId << ' ';
+	os << instanceID << ' ';
+	os << idx << ' ';
+	writeString(os, name);
+	os << ' ';
+	writeString(os, nameID);
+	
+	*/
+	getBool(*is, notUsed);
+	readString(is, zCPar_Symbol_name);
+	getInt(*is, zCPar_Symbol_Bitfield);
+	getInt(*is, parentInstanceId);
+	getInt(*is, instanceID);
+	getInt(*is, idx);
+	readString(is, name);
+	readString(is, nameID);
+	getInt(*is, hp);
+	getInt(*is, hp_max);
+	getInt(*is, mainflags);
+	getInt(*is, flags);
+	getInt(*is, weight);
+	getInt(*is, value);
+
+	// -- weapons		
+	getInt(*is, damageType);
+	getInt(*is, damageTotal);
+
+	for (int i = 0; i < 8; ++i)
+	{
+		getInt(*is, damage[i]);
+	}
+
+	// -- armor 
+	*is >> wear;
+
+	for (int i = 0; i < 8; ++i)
+	{
+		getInt(*is, protection[i]);
+	}
+
+	// -- food
+	getInt(*is, nutrition);
+
+	// -- use attributes
+	for (int i = 0; i < 3; ++i)
+	{
+		getInt(*is, cond_atr[i]);
+	}
+
+	for (int i = 0; i < 3; ++i)
+	{
+		getInt(*is, cond_value[i]);
+	}
+
+	// -- attributes that will be changed on equip
+	for (int i = 0; i < 3; ++i)
+	{
+		getInt(*is, change_atr[i]);
+	}
+
+	for (int i = 0; i < 3; ++i)
+	{
+		getInt(*is, change_value[i]);
+	}
+
+	// -- parser functions
+	getInt(*is, magic);
+	getInt(*is, on_equip);
+	getInt(*is, on_unequip);
+
+	for (int i = 0; i < 4; ++i)
+	{
+		getInt(*is, on_state[i]);
+	}
+
+	// -- owner						
+	getInt(*is, owner);
+	getInt(*is, ownerGuild);
+	getInt(*is, disguiseGuild);
+
+	// -- visual
+	readString(is, visual);
+
+	// -- change of mesh on equip
+	readString(is, visual_change);
+	readString(is, effect);
+
+	getInt(*is, visual_skin);
+
+	readString(is, scemeName);
+	getInt(*is, material);
+	getInt(*is, munition);
+
+	getInt(*is, spell);
+	getInt(*is, range);
+
+	getInt(*is, mag_circle);
+
+	readString(is, description);
+
+	for (int i = 0; i < 6; ++i)
+	{
+		readString(is, text[i]);
+	}
+
+	for (int i = 0; i < 6; ++i)
+	{
+		getInt(*is, count[i]);
+	}
+
+	// -- inventory presentation
+	getInt(*is, inv_zbias);
+	getInt(*is, inv_rotx);
+	getInt(*is, inv_roty);
+	getInt(*is, inv_rotz);
+	getInt(*is, inv_animate);
+	getInt(*is, instanz);
+	getInt(*is, c_manipulation);
+	getInt(*is, last_manipulation);
+	getInt(*is, magic_value);
+	getInt(*is, effectVob);
+	getInt(*is, next);
+
+	dii_userData.deserialize(is);
+}
+
 int DynInstance::getParserSymbolBitfield()
 {
 	return zCPar_Symbol_Bitfield;
@@ -406,6 +670,109 @@ DII_UserData::~DII_UserData()
 	//}
 }
 
+void DII_UserData::serialize(std::ostream& os) const
+{
+	os << userData.intAmount << ' ' << userData.strAmount << ' ';
+
+	//save int array
+	for (int i = 0; i < userData.intAmount; ++i)
+	{
+		os << userData.getIntBegin()[i] << ' ';
+	}
+
+	std::stringstream ss;
+	ss << "strAmount: " << userData.strAmount << std::endl;
+	util::debug(&ss);
+
+	//save bytestream
+	int indexBegin = userData.intAmount * sizeof(int);
+
+	//save the first string
+	zSTRINGSerialized* ptr;
+
+	for (int i = 0; i < userData.strAmount; ++i)
+	{
+		ptr = (zSTRINGSerialized*)((userData.pMemory) + indexBegin + i*sizeof(zSTRINGSerialized));
+		os << ptr->_vtbl << ' ';
+		os << ptr->_allocater << ' ';
+
+		std::string data;
+		if (ptr->ptr == nullptr)
+		{
+			data = "";
+		}
+		else
+		{
+			data = std::string(ptr->ptr);
+		}
+		ss << "string to write: " << data << std::endl;
+		util::debug(&ss);
+
+		ss << ": ptr->_vtbl: " << ptr->_vtbl << std::endl;
+		util::debug(&ss);
+
+		ss << "ptr->_allocater " << ptr->_allocater << std::endl;
+		util::debug(&ss);
+
+		if (ptr->ptr)
+		{
+			ss << "ptr->ptr: " << ptr->ptr << std::endl;
+			util::debug(&ss);
+		}
+		else
+		{
+			ss << "ptr->ptr: null" << std::endl;
+			util::debug(&ss);
+		}
+
+		ss << "ptr->len: " << ptr->len << std::endl;
+		util::debug(&ss);
+
+		ss << "ptr->res: " << ptr->res << std::endl;
+		util::debug(&ss);
+
+		writeString(os, data);
+		os << ' ';
+	}
+
+	//os << ptr->res;
+}
+
+void DII_UserData::deserialize(std::stringstream* is)
+{
+	getInt(*is, userData.intAmount);
+	getInt(*is, userData.strAmount);
+
+	//init int array
+	for (int i = 0; i < userData.intAmount; ++i)
+	{
+		getInt(*is, userData.getIntBegin()[i]);
+	}
+
+	// init string array
+	zSTRINGSerialized* ptr;
+	int indexBegin = userData.intAmount * sizeof(int);
+	std::stringstream ss;
+
+	for (int i = 0; i < userData.strAmount; ++i)
+	{
+		ptr = (zSTRINGSerialized*)((userData.pMemory) + indexBegin + i*sizeof(zSTRINGSerialized));
+		getInt(*is, ptr->_vtbl);
+		getInt(*is, ptr->_allocater);
+
+		//assert(userData.getStr(i)->ptr == nullptr);
+		std::string data;
+		readString(is, data);
+		//&userData.pMemory[indexBegin] = new char[userData.getStr(i)->len];
+		ptr->len = data.size();
+		ptr->ptr = new char[ptr->len];
+		strcpy(ptr->ptr, data.c_str());
+
+		ss << "string loaded: " << std::string(ptr->ptr) << std::endl;
+		util::debug(&ss);
+
+	}
+}
 
 void DII_UserData::createMemory(int intAmount, int strAmount)
 {

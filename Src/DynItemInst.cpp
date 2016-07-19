@@ -150,11 +150,12 @@ typedef void(__thiscall* OCMag_BookStopSelectedSpell)(oCMag_Book*);
 OCMag_BookStopSelectedSpell oCMag_BookStopSelectedSpell = (OCMag_BookStopSelectedSpell)0x00477910;
 typedef void(__thiscall* OCMag_BookKillSelectedSpell)(oCMag_Book*);
 OCMag_BookKillSelectedSpell oCMag_BookKillSelectedSpell = (OCMag_BookKillSelectedSpell)0x00477A90;
-typedef void(__thiscall* OCItemInsertEffect)(oCItem*);
-OCItemInsertEffect oCItemInsertEffect = (OCItemInsertEffect)0x00712C40;
+
 typedef void(__thiscall* OCItemRemoveEffect)(oCItem*);
 OCItemRemoveEffect oCItemRemoveEffect = (OCItemRemoveEffect)0x00712C00;
 
+
+OCItemInsertEffect DynItemInst::oCItemInsertEffect = (OCItemInsertEffect)0x00712C40;
 
 void DynItemInst::hookModule()
 {
@@ -590,12 +591,19 @@ DynItemInst::~DynItemInst()
 			zVEC3 pos;
 			item->GetPositionWorld(pos.x, pos.y, pos.z);
 			copy->SetPositionWorld(pos);
+			//world->AddVob(copy);
+			//oCItemRemoveEffect(copy);
 			world->AddVob(copy);
+			oCItemInsertEffect(copy);
+			
 
 			world->RemoveVob(item);
+			//world->AddVob(item);
+			//oCGame::GetGame()->GetGameWorld()->RemoveVob(item);
 			//manager->setInstanceId(item, instanceId);
 			//manager->assignInstanceId(item, instanceId);
 			//item->SetVisual(zCVisualLoadVisual(item->visual));
+			//world->AddVob(item);
 			logStream << "DynItemInst::restoreItem: Restored world item: " << instanceId << std::endl;
 			util::debug(&logStream);
 			return;
@@ -764,6 +772,13 @@ DynItemInst::~DynItemInst()
 
  int DynItemInst::modifyItemForSaving(oCItem* item, bool isHeroItem) {
 	if (item == nullptr) return NULL;
+
+	if (item->instanz < 0)
+	{
+		// item was already processed
+		return 0;
+	}
+
 	ObjectManager* manager = ObjectManager::getObjectManager();
 
 	int id = manager->getDynInstanceId(item);
@@ -919,8 +934,11 @@ void DynItemInst::restoreDynamicInstances(oCGame* game) {
 			if (item->instanz < 0) {
 				int additId = -item->instanz;
 				AdditMemory* addit = manager->getAddit(additId);
-				util::assertDIIRequirements(addit, "DynItemInst::restoreDynamicInstances: addit != nullptr");
-				equiped = addit->flags & OCITEM_FLAG_EQUIPPED;
+				if (addit)
+				{
+					util::assertDIIRequirements(addit, "DynItemInst::restoreDynamicInstances: addit != nullptr");
+					equiped = addit->flags & OCITEM_FLAG_EQUIPPED;
+				}
 			}
 			if (equiped)
 			{

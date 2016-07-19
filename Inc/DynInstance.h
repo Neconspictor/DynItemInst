@@ -30,9 +30,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #define __DYN_INSTANCE_H__
 
 #include "ISerialization.h"
-#include <boost/serialization/array.hpp>
 #include "oCItemExtended.h"
-#include "Util.h"
 #include <sstream>
 
 
@@ -58,15 +56,9 @@ public:
 	//DII_UserData(zCParser* parser, int instance);
 	~DII_UserData();
 
-	/*! @copydoc ISerialization::myser(boost::archive::text_iarchive &ia)
-	 */
-	virtual void myser(boost::archive::text_iarchive &ia) override
-	{ia & *this;}
+	virtual void serialize(std::ostream&) const override;
 
-	/*! @copydoc ISerialization::myser(boost::archive::text_oarchive &oa)
-	 */
-	virtual void myser(boost::archive::text_oarchive &oa) override
-	{oa & *this;}
+	virtual void deserialize(std::stringstream*) override;
 
 public:
 
@@ -92,7 +84,7 @@ public:
 		int strAmount;
 		BYTE* pMemory;
 
-		int* getIntBegin()
+		int* getIntBegin() const
 		{
 			return (int*)pMemory;
 		}
@@ -105,107 +97,8 @@ public:
 
 
 private:
-	friend class boost::serialization::access;
 
 	void createMemory(int intAmount, int strAmount);
-
-
-	/*! @copydoc ISerialization::serialize(Archive & ar, const unsigned int version)
-	 */
-    template<class Archive> void serialize(Archive & ar, const unsigned int version)
-    {
-	    // serialize base class information
-        ar & boost::serialization::base_object<ISerialization>(*this);
-		ar & userData.intAmount;
-		ar & userData.strAmount;
-
-		if (Archive::is_loading::value)
-		{
-			//assert(userData.pMemory == nullptr);
-			//int byteSize = userData.intAmount * sizeof(int) + userData.strAmount * sizeof(zSTRINGSerialized);
-			//userData.pMemory = new BYTE[byteSize];
-		}
-
-		//save int array
-		for (int i = 0; i < userData.intAmount; ++i)
-		{
-			ar & userData.getIntBegin()[i];
-		}
-
-		std::stringstream ss; 
-		ss << "strAmount: " << userData.strAmount << std::endl;
-		util::debug(&ss);
-
-		//save bytestream
-		int indexBegin = userData.intAmount * sizeof(int);
-		/*for (int i = 0; i < byteAmount; ++i)
-		{
-			ar & userData.pMemory[indexBegin + i];
-		}*/
-
-		//save the first string
-		zSTRINGSerialized* ptr;  
-		
-		for (int i = 0; i < userData.strAmount; ++i)
-		{
-			ptr = (zSTRINGSerialized*)((userData.pMemory) + indexBegin + i*sizeof(zSTRINGSerialized));
-			ar & ptr->_vtbl;
-			ar & ptr->_allocater;
-
-			if (Archive::is_loading::value)
-			{
-				//assert(userData.getStr(i)->ptr == nullptr);
-				std::string data;
-				ar & data;
-				//&userData.pMemory[indexBegin] = new char[userData.getStr(i)->len];
-				ptr->len = data.size();
-				ptr->ptr = new char[ptr->len];
-				strcpy(ptr->ptr, data.c_str());
-
-				ss << "string loaded: " << std::string(ptr->ptr) << std::endl;
-				util::debug(&ss);
-			}
-			else
-			{
-				std::string data;
-				if (ptr->ptr == nullptr)
-				{
-					data = "";
-				}
-				else
-				{
-					data = std::string(ptr->ptr);
-				}
-				ss << "string to write: " << data << std::endl;
-				util::debug(&ss);
-
-				ss << ": ptr->_vtbl: " << ptr->_vtbl << std::endl;
-				util::debug(&ss);
-
-				ss << "ptr->_allocater " << ptr->_allocater << std::endl;
-				util::debug(&ss);
-
-				if (ptr->ptr)
-				{
-					ss << "ptr->ptr: " << ptr->ptr << std::endl;
-					util::debug(&ss);
-				} else
-				{
-					ss << "ptr->ptr: null" << std::endl;
-					util::debug(&ss);
-				}
-
-				ss << "ptr->len: " << ptr->len << std::endl;
-				util::debug(&ss);
-
-				ss << "ptr->res: " << ptr->res << std::endl;
-				util::debug(&ss);
-				ar & data;
-			}
-
-			ar & ptr->res;
-		}
-    }
 };
 
 
@@ -321,7 +214,7 @@ public:
 	/**
 	 * Provides the Item's instance id.
 	 */
-	int getInstanceID() {
+	int getInstanceID() const {
 		return instanceID;	
 	}
 
@@ -369,15 +262,9 @@ public:
 	 */
 	void setZCPar_SymbolName(std::string name);
 
-	/*! @copydoc ISerialization::myser(boost::archive::text_iarchive &ia)
-	 */
-	virtual void myser(boost::archive::text_iarchive &ia) override
-	{ia & *this;}
+	virtual void serialize(std::ostream&) const override;
 
-	/*! @copydoc ISerialization::myser(boost::archive::text_oarchive &oa)
-	 */
-	virtual void myser(boost::archive::text_oarchive &oa) override
-	{oa & *this;}
+	virtual void deserialize(std::stringstream*) override;
 
 	/**
 	 * \return The content of the bitfield member of the parser symbol associated with this class. 
@@ -416,101 +303,7 @@ public:
 	void copyUserData(DynInstance& source);
 
 private:
-	// friend modifier needed by the boost library!
-	friend class boost::serialization::access;
-
-	/*! @copydoc ISerialization::serialize(Archive & ar, const unsigned int version)
-	 */
-    template<class Archive> void serialize(Archive & ar, const unsigned int version)
-    {
-		// serialize base class information
-        ar & boost::serialization::base_object<ISerialization>(*this);
-		ar & notUsed;
-		ar & zCPar_Symbol_name;
-		ar & zCPar_Symbol_Bitfield;
-        ar & parentInstanceId;
-		ar & instanceID;
-		ar &		idx;
-		ar & name;
-		ar & nameID;
-	    ar &		hp;
-	    ar &		hp_max;
-	    ar &     mainflags;
-	    ar &		flags;
-	    ar &		weight;
-	    ar &     value;
-
-	// -- weapons		
-	    ar &     damageType;
-	    ar &     damageTotal;
-	    ar &     damage;
-
-	// -- armor 
-	    ar &     wear;
-	    ar &     protection;
-
-	// -- food
-	    ar &     nutrition;
-
-	// -- use attributes
-	    ar &     cond_atr;
-	    ar &     cond_value;
-
-	// -- attributes that will be changed on equip
-	    ar &     change_atr;
-	    ar &     change_value;
-
-	// -- parser functions
-	    ar &     magic;
-	    ar &     on_equip;
-	    ar &     on_unequip;	
-	    ar &     on_state;			
-
-	// -- owner									
-	    ar &		owner;			//	owner: npc instance
-	    ar &		ownerGuild;		//	owner: guild
-	    ar &		disguiseGuild;
-
-	// -- visual
-		ar &	visual;
-
-	// -- change of mesh on equip
-		ar & visual_change;	//	ASC file
-		ar & effect;			//  Effect instance
-
-	    ar &		visual_skin;
-
-		ar &	scemeName;
-	    ar &		material;	
-	    ar &		munition;		//	Instance of ammunition
-
-	    ar & 	spell;			
-	    ar &		range;			
-
-	    ar &		mag_circle;
-
-		ar &	description;
-		ar &	text;
-	    ar &	count;
-
-	// -- inventory presentation
-	    ar &	    inv_zbias;								//  far plane (how far the item goes into the room by the z-axis)
-	    ar &		inv_rotx;								//  rotation around x-axis (in degrees)
-	    ar & 	inv_roty;								//  rotation around y-axis (in degrees)
-	    ar & 	inv_rotz;								//  rotation around z-axis (in degrees)
-	    ar & 	inv_animate;							//  rotate the item
-	    ar & instanz;						//    ar & Symbolindex
-	    ar & c_manipulation;					//int ?
-	    ar & last_manipulation;				//zREAL ?
-	    ar & magic_value;					//int ?
-	    ar & effectVob;						//oCVisualFX*
-	    ar & next;	
-
-		ar & dii_userData;
-    }
-
 	static std::stringstream logStream;
-
 };
 
 #endif __DYN_INSTANCE_H__
