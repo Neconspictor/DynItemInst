@@ -69,6 +69,7 @@ public:
 	 */
 	static void __cdecl  DII_CreateNewItem(int index, int instanceId);
 
+	static void __cdecl DII_ReleaseItem(int index);
 	/**
 	 * An external for creating a new instance id from a given c_item.
 	 * Daedalus syntax: Func int DII_CreateNewInstance(C_Item item)

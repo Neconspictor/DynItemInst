@@ -367,6 +367,8 @@ public:
 	void updateIkarusSymbols();
 
 	void callForAllItems(std::function<void(oCItem*)> func, oCItem** stopIfNotNullItem = nullptr);
+	void callForInventoryItems(std::function<void(oCItem*)> func, oCNpc * npc);
+	void callForAllWorldItems(std::function<void(oCItem*)> func);
 
 	int getInstanceBegin();
 
@@ -393,7 +395,7 @@ public:
 	void oCItemSaveInsertEffect(oCItem* item);
 	void oCItemSaveRemoveEffect(oCItem* item);
 	bool isDynamicInstance(int instanceId);
-
+	int* getRefCounter(oCItem* item);
 	static g2ext_extended::zCPar_SymbolTable* zCParserGetSymbolTable(void* parser);
 
 private:

@@ -122,6 +122,70 @@ void util::logAlways(std::stringstream* ss)
 	Logger::getLogger()->logAlways(ss);
 }
 
+std::string util::trimFromRight(const std::string& str)
+{
+	// trim trailing spaces
+	size_t endpos = str.find_last_not_of(" ");
+	if (str[endpos] == ' ')
+	{
+		return str.substr(0, endpos);
+	}
+	return str.substr(0, endpos + 1);
+}
+
+void util::readString(std::stringstream* is, std::string& data)
+{
+	while (is->peek() == ' ')
+	{
+		is->get();
+	}
+
+	int size = 0;
+	getInt(*is, size);
+	if (size)
+	{
+		data.resize(size + 1, '\0');
+		is->get(&data[0], size + 1);
+
+	}
+	else
+	{
+		data = "";
+	}
+	data = trimFromRight(data);
+}
+
+void util::writeString(std::ostream& os, const std::string& data)
+{
+	// c-strings avoid Nullbytes to be written
+	char const* content = data.c_str();
+	os << std::strlen(content) << ' ';
+	os << content;
+}
+
+void util::getInt(std::stringstream& ss, int& param)
+{
+	while (ss.peek() == ' ')
+	{
+		ss.get();
+	}
+
+	std::string token;
+	getline(ss, token, ' ');
+	param = atoi(token.c_str());
+};
+
+void util::getBool(std::stringstream& ss, bool& param)
+{
+	while (ss.peek() == ' ')
+	{
+		ss.get();
+	}
+	std::string token;
+	getline(ss, token, ' ');
+	param = atoi(token.c_str());
+};
+
 void util::logInfo(std::stringstream* ss)
 {
 	Logger::getLogger()->log(Logger::Info, ss);
@@ -146,6 +210,21 @@ void util::logFatal(std::stringstream* ss)
 
 bool util::existsDir(const std::string& path)
 {
+	DWORD attributes = GetFileAttributes(path.c_str());
+	if (attributes == INVALID_FILE_ATTRIBUTES)
+	{
+		return false;
+	}
+
+	if (!(attributes & FILE_ATTRIBUTE_DIRECTORY))
+	{
+		logStream << "util::existsDir: " << path << " exists but isn't a directory!" << std::endl;
+		logFault(&logStream);
+	}
+
+	return true;
+
+
 #if defined(_WIN32)
     struct _stat info;
     if (_stat(path.c_str(), &info) != 0)
@@ -224,12 +303,26 @@ void util::copyContentTo(std::string source, std::string dest, std::string patte
 	std::string destFinal = dest;// + std::string(1,'\0');
 	destFinal.append(1,'\0');
 
-	SHFILEOPSTRUCTA s = { 0 };
+	SHFILEOPSTRUCT s = { 0 };
 	s.wFunc = FO_COPY;
-	s.fFlags = FOF_NOCONFIRMATION | FOF_NOCONFIRMMKDIR | FOF_SILENT;;
+	s.fFlags = FOF_NOCONFIRMATION | FOF_NOCONFIRMMKDIR | FOF_SILENT | FOF_NOERRORUI;
 	s.pTo = destFinal.c_str();//(LPWSTR)(destFinal.c_str());
 	s.pFrom = sourceFinal.c_str();//(LPWSTR)(sourceFinal.c_str());
-	SHFileOperationA(&s);
+	int error = SHFileOperation(&s);
+
+	if (error)
+	{
+		logStream << "util::copyContentTo: Couldn't copy files from " << source << " to "
+			<< dest << std::endl;
+		logFault(&logStream);
+	}
+
+	if (s.fAnyOperationsAborted)
+	{
+		logStream << "util::copyContentTo: Any operation was aborted while copying " << source << " to "
+			<< dest << std::endl;
+		logFault(&logStream);
+	}
 }
 
 void util::deleteAllFiles(std::string folder, std::string pattern)
@@ -237,13 +330,71 @@ void util::deleteAllFiles(std::string folder, std::string pattern)
 	std::string sourceFinal = folder + pattern;
 	sourceFinal.append(1,'\0');
 
-	SHFILEOPSTRUCTA s = { 0 };
+	SHFILEOPSTRUCT s = { 0 };
 	s.wFunc = FO_DELETE;
-	s.fFlags = FOF_NOCONFIRMATION | FOF_NOCONFIRMMKDIR | FOF_SILENT;;
+	s.fFlags = FOF_NOCONFIRMATION | FOF_NOCONFIRMMKDIR | FOF_SILENT | FOF_NOERRORUI;
 	s.pFrom = sourceFinal.c_str();//(LPWSTR)(sourceFinal.c_str());
-	SHFileOperationA(&s);
+	int error = SHFileOperation(&s);
+
+	if (error)
+	{
+		logStream << "util::deleteAllFiles: Couldn't delete files from " << folder << " with pattern "
+			<< pattern << std::endl;
+		logFault(&logStream);
+	}
+
+	if (s.fAnyOperationsAborted)
+	{
+		logStream << "util::deleteAllFiles: Any operation was aborted while deleting files from " << folder << " with pattern "
+			<< pattern << std::endl;
+		logFault(&logStream);
+	}
 };
 
 void util::copyFileTo(std::string from, std::string to){
-	CopyFileA( from.c_str(), to.c_str(), FALSE );	
+
+	//do not copy if source and destination are equal
+	if (from.compare(to) == 0)
+	{
+		logStream << "util::copyFileTo: No copying is done, as source and destination are equal:" << std::endl;
+		logStream << "\tsource: " << from << std::endl;
+		logStream << "\tdestination: " << to << std::endl;
+		logWarning(&logStream);
+		return;
+	}
+
+	BOOL success = CopyFile( from.c_str(), to.c_str(), FALSE );
+
+	if (!success)
+	{
+		DWORD errorCode = GetLastError();
+
+		LPTSTR errorText = NULL;
+
+		FormatMessage(
+			// use system message tables to retrieve error text
+			FORMAT_MESSAGE_FROM_SYSTEM
+			// allocate buffer on local heap for error text
+			| FORMAT_MESSAGE_ALLOCATE_BUFFER
+			// Important! will fail otherwise, since we're not 
+			// (and CANNOT) pass insertion parameters
+			| FORMAT_MESSAGE_IGNORE_INSERTS,
+			NULL,    // unused with FORMAT_MESSAGE_FROM_SYSTEM
+			errorCode,
+			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+			(LPTSTR)&errorText,  // output 
+			0, // minimum size for output buffer
+			NULL);   // arguments - see note 
+
+		if (NULL != errorText)
+		{
+			logStream << "util::copyFileTo: While copying from " << from << " to " << to << 
+				" an error occured: " << errorText << std::endl;
+			logFault(&logStream);
+
+			// release memory allocated by FormatMessage()
+			LocalFree(errorText);
+			errorText = NULL;
+		}
+	}
 };

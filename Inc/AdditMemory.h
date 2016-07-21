@@ -31,6 +31,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #define __AdditMemory_H__
 
 #include "ISerialization.h"
+#include "Util.h"
 
 /**
  * A class for storing additional information for oCItems. This class is used 
@@ -72,12 +73,12 @@ public:
 
 inline void AdditMemory::deserialize(std::stringstream* is)
 {
-	getInt(*is, additId);
-	getInt(*is, instanceId);
-	getInt(*is, instanz);
-	getInt(*is, flags);
-	getBool(*is, activeSpellItem);
-	getInt(*is, spellKey);
+	util::getInt(*is, additId);
+	util::getInt(*is, instanceId);
+	util::getInt(*is, instanz);
+	util::getInt(*is, flags);
+	util::getBool(*is, activeSpellItem);
+	util::getInt(*is, spellKey);
 }
 
 inline void AdditMemory::serialize(std::ostream& os) const

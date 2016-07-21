@@ -3,6 +3,7 @@ EXPORTS
 	Hook
 	Unhook
 	DII_CreateNewItem
+	DII_ReleaseItem
 	DII_CreateNewInstance
 	DII_IsDynamic
 	DII_IsInstanceDynamic

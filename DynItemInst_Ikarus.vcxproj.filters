@@ -63,6 +63,12 @@
     <Filter Include="Source Files\Util">
       <UniqueIdentifier>{113b1f85-0b92-4858-8ac4-09386733677e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\DynamicParsing">
+      <UniqueIdentifier>{b01001b9-fd2b-459a-b27e-ff4e742cadfa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\DynamicParsing">
+      <UniqueIdentifier>{39f368a2-84aa-4f37-9fc0-a05d7aff7e9a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Inc\DllMain.h">
@@ -137,6 +143,9 @@
     <ClInclude Include="Inc\HookManager.h">
       <Filter>Header Files\Util</Filter>
     </ClInclude>
+    <ClInclude Include="Inc\DynamicParsing.h">
+      <Filter>Header Files\DynamicParsing</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\DllMain.cpp">
@@ -189,6 +198,9 @@
     </ClCompile>
     <ClCompile Include="Src\Util.cpp">
       <Filter>Source Files\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\DynamicParsing.cpp">
+      <Filter>Source Files\DynamicParsing</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

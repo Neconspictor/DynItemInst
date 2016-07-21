@@ -50,56 +50,6 @@ public:
 	virtual void serialize(std::ostream&) const = 0;
 
 	virtual ~ISerialization() {};
-
-	void readString(std::stringstream* is, std::string& data)
-	{
-		while (is->peek() == ' ')
-		{
-			is->get();
-		}
-
-		int size = 0;
-		getInt(*is, size);
-		if (size)
-		{
-		data.resize(size + 1, '\0');
-		is->get(&data[0], size + 1);
-		
-		} else
-		{
-			data = "";
-		}
-		//*is >> data;
-	}
-
-	static inline void writeString(std::ostream& os, const std::string& data)
-	{
-		os << data.size() << ' ';
-		os << data.c_str();
-	}
-
-	void getInt(std::stringstream& ss, int& param)
-	{
-		while (ss.peek() == ' ')
-		{
-			ss.get();
-		}
-
-		std::string token;
-		getline(ss, token, ' ');
-		param = atoi(token.c_str());
-	};
-
-	void getBool(std::stringstream& ss, bool& param)
-	{
-		while (ss.peek() == ' ')
-		{
-			ss.get();
-		}
-		std::string token;
-		getline(ss, token, ' ');
-		param = atoi(token.c_str());
-	};
 };
 
 #endif __ISERILIZATION_H__

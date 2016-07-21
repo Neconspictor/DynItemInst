@@ -46,6 +46,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <LoaDebug.h>
 #include <PortalDrawDistance.h>
 #include <TestModule.h>
+#include <DynamicParsing.h>
 
 HookManager* HookManager::instance = nullptr;
 std::stringstream HookManager::logStream = std::stringstream();
@@ -255,6 +256,7 @@ void HookManager::hook()
 	Module* dynItemInstModule = new DynItemInst();
 	Module* externals = new DaedalusExports();
 	Module* moreViewDistance = nullptr;
+	//Module* dynamicParsing = new DynamicParsing();
 	if (addMoreDistanceViewModul)
 		moreViewDistance = new MoreViewDistance();
 
@@ -274,6 +276,8 @@ void HookManager::hook()
 
 	if (loaDebug)
 		manager->addModule(loaDebug);
+
+	//manager->addModule(dynamicParsing);
 
 	//Module* testModule = new TestModule();
 

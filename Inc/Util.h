@@ -252,6 +252,11 @@ public:
 
 	static void debug(std::stringstream* ss, Logger::LogLevel level = Logger::Info);
 
+	static std::string trimFromRight(const std::string&);
+	static void readString(std::stringstream* is, std::string& data);
+	static void writeString(std::ostream& os, const std::string& data);
+	static void getInt(std::stringstream& ss, int& param);
+	static void getBool(std::stringstream& ss, bool& param);
 	static void logInfo(std::stringstream* ss);
 	static void logWarning(std::stringstream* ss);
 	static void logFault(std::stringstream* ss);

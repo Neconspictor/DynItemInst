@@ -329,6 +329,7 @@ bool ObjectManager::assignInstanceId2(oCItem* item, int id)
 	item->c_manipulation = copy->c_manipulation;					//int ?
 	item->last_manipulation = copy->last_manipulation;				//zREAL ?
 	item->magic_value = copy->magic_value;					//int ?
+	
 	//item->effectVob = effectVob;						//oCVisualFX*
 	item->next = copy->next;
 	int address = reinterpret_cast<int>(item);
@@ -339,8 +340,8 @@ bool ObjectManager::assignInstanceId2(oCItem* item, int id)
 	*instance = id;
 
 	//insert effect finally
-	oCItemSaveRemoveEffect(item);
-	oCItemSaveInsertEffect(item);
+	//oCItemSaveRemoveEffect(item);
+	//oCItemSaveInsertEffect(item);
 
 	//remove copy item
 	//oCItemOperatorDelete(copy);
@@ -402,7 +403,7 @@ void ObjectManager::saveNewInstances(char* directoryPath, char* filename) {
 		}
 	}
 
-	string fullpath = dir + string("\\") + string(filename);
+	string fullpath = dir + string(filename);
 	ofstream ofs(const_cast<char*>(fullpath.c_str()));
 
     	// archive and stream closed when destructors are called
@@ -589,6 +590,7 @@ void ObjectManager::createNewInstanceWithoutExistingId(oCItem* item, int key)
 	newInstanceToSymbolMap.insert(pair<int, zCPar_Symbol*>(key, symbol));
 
 	string symbolName = symbol->name.ToChar();
+	transform(symbolName.begin(), symbolName.end(), symbolName.begin(), ::toupper);
 	nameToSymbolMap.insert(pair<string, zCPar_Symbol*>(symbolName, symbol));
 	nameToIndexMap.insert(pair<string, int>(symbolName, key));
 
@@ -634,7 +636,7 @@ zCPar_Symbol* ObjectManager::createNewSymbol(ParserInfo* old)
 
 	zCPar_Symbol* parent = parser->GetSymbol("C_ITEM");
 
-	result = new zCPar_Symbol();
+	result = new zCPar_Symbol(); 
 	result->parent = ref->parent;
 	result->bitfield = ref->bitfield;
 	result->name = zSTRING(old->name.c_str());
@@ -781,8 +783,10 @@ zCPar_Symbol* ObjectManager::createNewSymbol(int instanceId, zCPar_Symbol* old)
 	symbol = new zCPar_Symbol();
 	ZeroMemory(symbol, sizeof(zCPar_Symbol));
 
-	stringstream name; name << "DII_" << instanceId;
-	symbol->name = zSTRING(name.str().c_str());
+	stringstream ss; ss << "DII_" << instanceId;
+	string name = ss.str();
+	transform(name.begin(), name.end(), name.begin(), ::toupper);
+	symbol->name = zSTRING(name.c_str());
 	symbol->parent = old->parent;
 	symbol->bitfield = old->bitfield;
 	symbol->offset = 0;
@@ -857,10 +861,10 @@ std::string ObjectManager::getSaveGameDirectoryPath(int saveGameSlotNumber) {
 	// write right save game folder 
 	if (saveGameSlotNumber == 0) //quicksave folder
 	{
-		ss << gothicDirPath.ToChar() << saveGamesDirName.ToChar() << "quicksave";
+		ss << gothicDirPath.ToChar() << saveGamesDirName.ToChar() << "quicksave\\";
 	} else
 	{
-		ss << gothicDirPath.ToChar() << saveGamesDirName.ToChar() << "savegame" << saveGameSlotNumber;
+		ss << gothicDirPath.ToChar() << saveGamesDirName.ToChar() << "savegame" << saveGameSlotNumber << "\\";
 	}
 	return ss.str();
 };
@@ -872,7 +876,7 @@ std::string ObjectManager::getCurrentDirectoryPath() {
 
 	std::stringstream ss;
 	//write full path to the savegame
-	ss << gothicDirPath.ToChar() << saveGamesDirName.ToChar() << "current";
+	ss << gothicDirPath.ToChar() << saveGamesDirName.ToChar() << "current\\";
 	return ss.str();
 };
 
@@ -1102,7 +1106,7 @@ void ObjectManager::saveHeroData(std::list<AdditMemory*> heroItemList, char* dir
 		}
 	}
 
-	string fullpath = dir + string("\\") + string(filename);
+	string fullpath = dir + string(filename);
 	ofstream ofs(const_cast<char*>(fullpath.c_str()));
 
 	// Save additional memory
@@ -1137,7 +1141,7 @@ void ObjectManager::saveWorldObjects(int heroItemSize, char* directoryPath, char
 		}
 	}
 
-	string fullpath = dir + string("\\") + string(filename);
+	string fullpath = dir + string(filename);
 	ofstream ofs(const_cast<char*>(fullpath.c_str()));
 
 	// Save additional memory
@@ -1311,6 +1315,49 @@ void ObjectManager::callForAllItems(function<void(oCItem*)> func, oCItem** stopI
 	delete containerList;
 }
 
+
+void ObjectManager::callForInventoryItems(function<void(oCItem*)> func, oCNpc* npc)
+{
+	list<oCItem*> tempList;
+	oCNpcInventory* inventory = npc->GetInventory();
+	if (inventory == nullptr) return;
+
+	inventory->UnpackAllItems();
+	zCListSort<oCItem>* list = reinterpret_cast<zCListSort<oCItem>*>(inventory->inventory_data);
+	while (list != nullptr) {
+		oCItem* item = list->GetData();
+		if (item != nullptr) tempList.push_back(item);
+
+		list = list->GetNext();
+	}
+
+	for (auto it = tempList.begin(); it != tempList.end(); ++it)
+	{
+		func(*it);
+	}
+	tempList.clear();
+}
+
+void ObjectManager::callForAllWorldItems(function<void(oCItem*)> func)
+{
+	zCWorld* world = oCGame::GetGame()->GetWorld();
+	list<oCItem*> tempList;
+	zCListSort<oCItem>* itemList = world->GetItemList();
+	while (itemList != nullptr) {
+		oCItem* item = itemList->GetData();
+		if (item != nullptr)
+		{
+			tempList.push_back(item);
+		}
+		itemList = itemList->GetNext();
+	}
+
+	for (auto it = tempList.begin(); it != tempList.end(); ++it)
+	{
+		func(*it);
+	}
+}
+
 int ObjectManager::getInstanceBegin()
 {
 	return instanceBegin;
@@ -1419,4 +1466,8 @@ bool ObjectManager::isDynamicInstance(int instanceId)
 		return false;
 	}
 	return true;
-};
+}
+int * ObjectManager::getRefCounter(oCItem * item)
+{
+	return (int*)((BYTE*)item + 0x4);
+}

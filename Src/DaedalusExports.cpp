@@ -81,34 +81,7 @@ void __cdecl DaedalusExports::DII_CreateNewItem(int index, int instanceId) // Fu
 		return;
 	}
 
-	// Create new item and store it in global variable 'ITEM'
-	/*if (item != nullptr)
-	{
-
-		int* refCtr = (int*)((BYTE*)item + 0x4);
-		//logStream << "refCtr: " << refCtr << std::endl;
-		//Logger::getLogger()->log(Logger::Warning, &logStream, false, true, true);
-		typedef void(__thiscall* OCItemInitByScript)(void* pThis, int, int);
-		OCItemInitByScript oCItemInitByScript = (OCItemInitByScript)0x00711BD0;
-		logStream << "Effect: " << item->effect.ToChar() << std::endl;
-		oCItemInitByScript(item, instanceId, 1);
-		logStream << "Effect: " << item->effect.ToChar() << std::endl;
-		//oCGame::GetGame()->GetWorld()->AddVob(item);
-		util::debug(&logStream);
-	}
-	else
-	{*/
-	if (item != nullptr)
-	{
-		// never remove vob from the game world! It could be referenced by something else and would
-		// cause troubles ('assert ref counter >= -1')
-
-		//oCGame::GetGame()->GetGameWorld()->RemoveVob(item);
-		//oCGame::GetGame()->GetWorld()->RemoveVob(item);
-	};
-		item = oCObjectFactory::GetFactory()->CreateItem(instanceId);
-		//oCGame::GetGame()->GetWorld()->AddVob(item);
-	//}
+	item = oCObjectFactory::GetFactory()->CreateItem(instanceId);
 
 	// update the c_item
 	symbol->offset = (int)item;
@@ -116,8 +89,25 @@ void __cdecl DaedalusExports::DII_CreateNewItem(int index, int instanceId) // Fu
 	util::debug(&logStream);
 }
 
+void __cdecl DaedalusExports::DII_ReleaseItem(int index) // Func void DII_ReleaseItem(var C_Item item, VAR INT instanceId)
+{
+	if (index <= 0) return;
+	zCParser* parser = zCParser::GetParser();
+	zCPar_Symbol* symbol = parser->GetSymbol(index);
+	oCItem* item = (oCItem*)symbol->offset;
 
-int DaedalusExports::DII_CreateNewInstance(oCItem* item) //Func int CreateNewItem(var C_Item item)
+	if (item != nullptr)
+	{
+		int* refCtr = (int*)((BYTE*)item + 0x4);
+		if (*refCtr >= 0)
+		{
+			oCGame::GetGame()->GetGameWorld()->RemoveVob(item);
+		}
+	}
+}
+
+
+int DaedalusExports::DII_CreateNewInstance(oCItem* item) //Func int DII_CreateNewInstance(var C_Item item)
 {
 	if (item == nullptr) {return NULL;}
 
@@ -171,14 +161,20 @@ int DaedalusExports::DII_IsInstanceDynamic(int instanceId)
 
 BYTE* DaedalusExports::DII_GetUserData(int instanceId) // Func DII_UserData DII_GetUserData(var int instanceId)
 {
+	logStream << "DaedalusExports::DII_GetUserData: called for: " << instanceId << std::endl;
+	util::debug(&logStream);
 	ObjectManager* manager = ObjectManager::getObjectManager();
 
 	if (!manager->IsModified(instanceId))
 	{
+		logStream << "DaedalusExports::DII_GetUserData: instanceId isn't dynamic" << std::endl;
+		util::debug(&logStream, Logger::Warning);
 		return nullptr;
 	}
 
 	DynInstance* storeItem = manager->getInstanceItem(instanceId);
+	logStream << "DaedalusExports::DII_GetUserData: Before return" << std::endl;
+	util::debug(&logStream);
 	return storeItem->getUserData();
 }
 
@@ -262,10 +258,11 @@ void DaedalusExports::DII_UpdateInstance(oCItem* item)
 				
 				bool isInWorld = manager->isItemInWorld(itm);
 				int flags = itm->flags;
-				itm->RemoveEffect();
+				manager->oCItemSaveRemoveEffect(itm);
 				itm->InitByScript(id, itm->instanz);
 				itm->flags = flags;
 
+				manager->oCItemSaveInsertEffect(itm);
 				//itm->InsertEffect();
 
 				if (isInWorld)
@@ -466,6 +463,8 @@ void DaedalusExports::DII_ChangeItemsInstanceId(int targetId, int newId)
 		item2->SetPositionWorld(pos);
 		//item2->Move(pos.x, pos.y, pos.z);
 		world->AddVob(item2);
+		manager->oCItemSaveRemoveEffect(item2);
+		manager->oCItemSaveInsertEffect(item2);
 		//item2->SetPositionWorld(pos);
 		//item2->SetPositionWorld(posForFloor);
 		//oCVobGetFloorPosition(item2, pos);
@@ -587,6 +586,7 @@ zSTRING* msg = new zSTRING("DaedalusExport Test!");
 
 void DaedalusExports::DII_TransformationTest(zCVob* vob)
 {
+	return;
 	//TestModule::Test(vob);
 	for (auto it = TestModule::vobList.begin(); it != TestModule::vobList.end();)
 	{

@@ -38,6 +38,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <oCItemExtended.h>
 #include <ocgameExtended.h>
 #include <unordered_map>
+#include <AdditMemory.h>
 
 typedef void(__thiscall* OCItemInsertEffect)(oCItem*);
 
@@ -77,7 +78,10 @@ public:
 	static void oCGameChangeLevelHookNaked();
 	static void oCItemMulitSlotHookNaked();
 	static void oCMobContainerOpenHookNaked();
-
+	static void zCParserGetIndexHookNaked();
+	static void zCPar_SymbolTableGetSymbolStringHookNaked();
+	static void zCPar_SymbolTableGetSymbolHookNaked();
+	static void zCPar_SymbolTableGetIndexHookNaked();
 
 	static OCItemInsertEffect oCItemInsertEffect;
 
@@ -168,15 +172,15 @@ public:
 	static void __thiscall oCGameLoadGameHook(void* pThis, int second, zSTRING const & worldName);
 
 	/**
-	 * Extends functionality of oCGame::ChangeLevel(int, zSTRING const &, zSTRING const &)
-	 * Because equipped items of hero won't properly restored after a level change, all 
-	 * equiped items will be unequipped and equipped again after the original level change.
-	 * Additionally will all items with a dynamic instance restored in the target world and in the
-	 * player's inventory.
-	 * \param pThis A pointer to a valid oCGame object.
-	 * \param sourceWorld The world to be leaved.
-	 * \param targetWorld The world to be went to.
-	 */
+		 * Extends functionality of oCGame::ChangeLevel(int, zSTRING const &, zSTRING const &)
+		 * Because equipped items of hero won't properly restored after a level change, all 
+		 * equiped items will be unequipped and equipped again after the original level change.
+		 * Additionally will all items with a dynamic instance restored in the target world and in the
+		 * player's inventory.
+		 * \param pThis A pointer to a valid oCGame object.
+		 * \param sourceWorld The world to be leaved.
+		 * \param targetWorld The world to be went to.
+		 */
 	static void __thiscall oCGameChangeLevelHook(void* pThis, zSTRING const & sourceWorld, zSTRING const & targetWorld);
 
 	/**
@@ -222,13 +226,14 @@ public:
 	static zCListSort<oCItem>* getInvItemByInstanceId(oCNpcInventory* inventory, int instanceId);
 
 	static oCItem* getInvItemByInstanceId2(oCNpcInventory* inventory, int instanceId);
+
 	/**
-					 * Restores a given oCItem from savegame if it was previously modified by modifyItemForSaving(oCItem* item, bool isHeroItem).
-					 * If the provided item isn't modified nothing will be done.
-					 * \param item The item which should be restored.
-					 * \param inventory The inventory the provided item is contained. If this field is NULL, it is expected
-					 * that the item is located in the current world.
-					 */
+							 * Restores a given oCItem from savegame if it was previously modified by modifyItemForSaving(oCItem* item, bool isHeroItem).
+							 * If the provided item isn't modified nothing will be done.
+							 * \param item The item which should be restored.
+							 * \param inventory The inventory the provided item is contained. If this field is NULL, it is expected
+							 * that the item is located in the current world.
+							 */
 	static void restoreItem(oCItem* item, oCNpcInventory* inventory = nullptr, std::unordered_map<int, oCItem*>* equippedSpells = nullptr, oCItem** activeSpellItem = nullptr);
 
 	/**
@@ -286,16 +291,6 @@ public:
 	 */
 	virtual void unHookModule() override;
 
-private:
-	static std::string getClearedWorldName(zSTRING const & worldName);
-	static void loadDynamicInstances();
-	static void initAdditMemory();
-	static bool isReadiedWeapon(int weaponMode, oCItem* item);
-	static void updateRangedWeapon(oCItem* item, oCNpcInventory* inventory, bool munitionUsesRightHand);
-	static void resetInstanceNameStruct();
-	static int getSlotNumber(oCNpcInventory* inventory, oCItem* item);
-	static oCItem* searchItemInInvbyInstanzValue(oCNpcInventory* inventory, int searchValue);
-
 public:
 	static const std::string SAVE_ITEM_FILE_EXT;
 	static const std::string SAVE_ITEM_INSTANCES;
@@ -304,9 +299,10 @@ public:
 	static const std::string SAVE_ITEM_HERO_DATA;
 
 	static const std::string FILE_PATERN;
+
 private:
 
-	 struct InstanceNames
+	struct InstanceNames
 	{
 		std::string base;
 		std::string nearFight;
@@ -326,16 +322,37 @@ private:
 		int dynamicInstanceId;
 		int original_on_equip;
 		int original_on_unequip;
+		int effectVob;
 	};
 
-	 static InstanceNames instanceNames;
+private:
+	static std::string getClearedWorldName(zSTRING const & worldName);
+	static void loadDynamicInstances();
+	static void initAdditMemory();
+	static bool isReadiedWeapon(int weaponMode, oCItem* item);
+	static void updateRangedWeapon(oCItem* item, oCNpcInventory* inventory, bool munitionUsesRightHand);
+	static void resetInstanceNameStruct();
+	static int getSlotNumber(oCNpcInventory* inventory, oCItem* item);
+	static oCItem* searchItemInInvbyInstanzValue(oCNpcInventory* inventory, int searchValue);
+
+	static void restoreSelectedSpell(oCNpc* npc, oCItem* selectedSpellItem);
+	static void restoreItemsOfNpc(oCNpc* npc);
+	static void restoreInventory(oCNpc* npc);
+	static void restoreItemAfterLevelChange(oCNpc* hero, LevelChangeBean* bean);
+	static void restoreEquippedItem(oCItem*, oCNpcInventory* inventory, AdditMemory* addit, int instanceId, 
+		std::unordered_map<int, oCItem*>* equippedSpells, oCItem** activeSpellItem);
+	static void restoreWorldItem(oCItem*, int instanceId);
+
+private:
+
+	static InstanceNames instanceNames;
 
 	static const int LOAD_SAVEGAME_ADDRESS = 0x006C67D0;
 	static const int WRITE_SAVEGAME_ADDRESS = 0x006C5250;
 	static const int OCITEM_GET_VALUE_ADDRESS = 0x00712650;
-	static const int ZCPAR_SYMBOL_TABLE_GETSYMBOLE = 0x007A3EE0;
-	static const int ZCPAR_SYMBOL_TABLE_GETSYMBOLE_STRING = 0x007A3E40;
-	static const int ZCPAR_SYMBOL_TABLE_GETINDEX = 0x007A3B60;
+	static const int ZCPAR_SYMBOL_TABLE_GETSYMBOL = 0x007A3EE0;
+	static const int ZCPAR_SYMBOL_TABLE_GETSYMBOL_STRING = 0x007A3E40;
+	static const int ZCPAR_SYMBOL_TABLE_GETINDEX = 0x007A3B60;    
 	static const int ZCPARSER_GETINDEX = 0x00793470;
 	static const int ZCPARSER_CREATE_INSTANCE = 0x00792FA0;
 	static const int OCGAME_LOAD_GAME_ADDRESS = 0x006C65A0;
@@ -373,6 +390,5 @@ private:
 	};
 
 };
-
 
 #endif __DYN_ITEM_INST_H

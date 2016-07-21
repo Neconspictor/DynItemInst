@@ -62,13 +62,12 @@ void LoADebug::oCGameRenderHook()
 {
 	// Print hero.aivar[4] each frame
 	oCNpc* hero = oCNpc::GetHero();
+
 	if (hero)
 	{
-		static std::stringstream builder;
+		std::stringstream builder;
 		builder << "Held ist sichtbar: ";
 		bool unvisible = hero->aiscripts[4];
-
-		builder << "index: " << zCParser::GetParser()->GetIndex("TEST") << " ";
 
 		if (unvisible)
 		{
@@ -86,9 +85,12 @@ void LoADebug::oCGameRenderHook()
 
 		// call PrintScreen externals
 		zCView* screen = zCView::GetScreen();
-		screen->Print(200,200, msg);
+
+		if (screen)
+		{
+			screen->Print(200, 200, msg);
+		}
 	}
 
 	zCTimerFrameUpdate();
-	TestModule::Test();
 }
