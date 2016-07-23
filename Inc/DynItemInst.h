@@ -172,15 +172,15 @@ public:
 	static void __thiscall oCGameLoadGameHook(void* pThis, int second, zSTRING const & worldName);
 
 	/**
-		 * Extends functionality of oCGame::ChangeLevel(int, zSTRING const &, zSTRING const &)
-		 * Because equipped items of hero won't properly restored after a level change, all 
-		 * equiped items will be unequipped and equipped again after the original level change.
-		 * Additionally will all items with a dynamic instance restored in the target world and in the
-		 * player's inventory.
-		 * \param pThis A pointer to a valid oCGame object.
-		 * \param sourceWorld The world to be leaved.
-		 * \param targetWorld The world to be went to.
-		 */
+			 * Extends functionality of oCGame::ChangeLevel(int, zSTRING const &, zSTRING const &)
+			 * Because equipped items of hero won't properly restored after a level change, all 
+			 * equiped items will be unequipped and equipped again after the original level change.
+			 * Additionally will all items with a dynamic instance restored in the target world and in the
+			 * player's inventory.
+			 * \param pThis A pointer to a valid oCGame object.
+			 * \param sourceWorld The world to be leaved.
+			 * \param targetWorld The world to be went to.
+			 */
 	static void __thiscall oCGameChangeLevelHook(void* pThis, zSTRING const & sourceWorld, zSTRING const & targetWorld);
 
 	/**
@@ -323,22 +323,21 @@ private:
 		int original_on_equip;
 		int original_on_unequip;
 		int effectVob;
+		int weaponMode;
+		AdditMemory* addit;
 	};
 
 private:
 	static std::string getClearedWorldName(zSTRING const & worldName);
 	static void loadDynamicInstances();
 	static void initAdditMemory();
-	static bool isReadiedWeapon(int weaponMode, oCItem* item);
-	static void updateRangedWeapon(oCItem* item, oCNpcInventory* inventory, bool munitionUsesRightHand);
+	static void equipRangedWeapon(oCItem* item, oCNpcInventory* inventory, bool munitionUsesRightHand);
 	static void resetInstanceNameStruct();
-	static int getSlotNumber(oCNpcInventory* inventory, oCItem* item);
-	static oCItem* searchItemInInvbyInstanzValue(oCNpcInventory* inventory, int searchValue);
 
 	static void restoreSelectedSpell(oCNpc* npc, oCItem* selectedSpellItem);
 	static void restoreItemsOfNpc(oCNpc* npc);
 	static void restoreInventory(oCNpc* npc);
-	static void restoreItemAfterLevelChange(oCNpc* hero, LevelChangeBean* bean);
+	static oCItem* restoreItemAfterLevelChange(oCNpc* hero, LevelChangeBean* bean);
 	static void restoreEquippedItem(oCItem*, oCNpcInventory* inventory, AdditMemory* addit, int instanceId, 
 		std::unordered_map<int, oCItem*>* equippedSpells, oCItem** activeSpellItem);
 	static void restoreWorldItem(oCItem*, int instanceId);
@@ -366,7 +365,6 @@ private:
 	static const int OCMOB_CONTAINER_OPEN = 0x00726500;
 	static const int ZCVISUAL_LOAD_VISUAL = 0x00606AD0;
 
-	static const int OCITEM_FLAG_EQUIPPED = 0x40000000;
 	static const int OCITEM_FLAG_ITEM_KAT_RUNE = 512;
 
 	static std::vector<zCPar_Symbol*>* symbols;

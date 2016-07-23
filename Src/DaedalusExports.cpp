@@ -85,8 +85,6 @@ void __cdecl DaedalusExports::DII_CreateNewItem(int index, int instanceId) // Fu
 
 	// update the c_item
 	symbol->offset = (int)item;
-	logStream << "DaedalusExports::DII_CreateNewItem: symbol->offset: " << symbol->offset << std::endl;
-	util::debug(&logStream);
 }
 
 void __cdecl DaedalusExports::DII_ReleaseItem(int index) // Func void DII_ReleaseItem(var C_Item item, VAR INT instanceId)
@@ -161,8 +159,6 @@ int DaedalusExports::DII_IsInstanceDynamic(int instanceId)
 
 BYTE* DaedalusExports::DII_GetUserData(int instanceId) // Func DII_UserData DII_GetUserData(var int instanceId)
 {
-	logStream << "DaedalusExports::DII_GetUserData: called for: " << instanceId << std::endl;
-	util::debug(&logStream);
 	ObjectManager* manager = ObjectManager::getObjectManager();
 
 	if (!manager->IsModified(instanceId))
@@ -173,8 +169,6 @@ BYTE* DaedalusExports::DII_GetUserData(int instanceId) // Func DII_UserData DII_
 	}
 
 	DynInstance* storeItem = manager->getInstanceItem(instanceId);
-	logStream << "DaedalusExports::DII_GetUserData: Before return" << std::endl;
-	util::debug(&logStream);
 	return storeItem->getUserData();
 }
 

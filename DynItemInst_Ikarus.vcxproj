@@ -13,6 +13,7 @@
   <ItemGroup>
     <ClInclude Include="Inc\AdditMemory.h" />
     <ClInclude Include="Inc\Configuration.h" />
+    <ClInclude Include="Inc\Constants.h" />
     <ClInclude Include="Inc\CustomNpcFocus.h" />
     <ClInclude Include="Inc\DllMain.h" />
     <ClInclude Include="Inc\DynamicParsing.h" />

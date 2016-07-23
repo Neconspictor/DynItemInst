@@ -37,6 +37,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include "AdditMemory.h"
 #include "zCPar_SymbolTable.h"
 #include <functional>
+#include "api/g2/ocnpcinventory.h"
 
 /**
  * This class is responsible for managing DynInstance and AdditMemory objects.
@@ -98,7 +99,7 @@ public:
 	/**
 	 * \return The list of all oCMobContainers the current oCGame contains.
 	 */
-	std::list<oCMobContainer*>* getMobContainers();
+	static std::list<oCMobContainer*>* getMobContainers();
 	void changeKeyIfFreeIdAvailable(int* key, int indexCount);
 	void createNewInstanceWithoutExistingId(oCItem* item, int key);
 
@@ -124,8 +125,8 @@ public:
 	 * \return Was the assignment successful?
 	 */
 	bool assignInstanceId(oCItem* item, int id);
-
-	bool assignInstanceId2(oCItem* item, int id);
+	
+	static bool assignInstanceId2(oCItem* item, int id);
 
 	/**
 	 * Provides the instance id of a given oCItem.
@@ -190,7 +191,7 @@ public:
 	 * \param item The item of which the instance id should be set.
 	 * \param instanceId The new instance id
 	 */
-	void setInstanceId(oCItem* item, int instanceId);
+	static void setInstanceId(oCItem* item, int instanceId);
 
 	/**
 	 * Provides the instance id for a given oCItem.
@@ -198,19 +199,19 @@ public:
 	 * \param item The item to get the instane id from.
 	 * \return The instance id of the given item
 	 */
-	int getInstanceId(oCItem& item);
+	static int getInstanceId(oCItem& item);
 
 	/**
 	 * Provides the directory path of a savegame folder with a given slot number.
 	 * \param saveGameSlotNumber The slot number to get the directory path from.
 	 * \return The directory path from the savegame directory having the provided slot number.
 	 */
-	std::string getSaveGameDirectoryPath(int saveGameSlotNumber);
+	static std::string getSaveGameDirectoryPath(int saveGameSlotNumber);
 
 	/**
 	 * \return The directory path of the savegame folder named 'current'. 
 	 */
-	std::string getCurrentDirectoryPath();
+	static std::string getCurrentDirectoryPath();
 
 	/**
 	 * Inits a given oCItem with a new instance id. The return value indicates if initialization
@@ -339,7 +340,7 @@ public:
 	 * \return The key to the additional memory. If no additional memory was
 	 * created for the item, NULL will be returned.
 	 */
-	int getAdditId(oCItem& item);
+	static int getAdditId(oCItem& item);
 
 	/**
 	 * Provides additional memory on the base of its key.
@@ -367,14 +368,14 @@ public:
 	void updateIkarusSymbols();
 
 	void callForAllItems(std::function<void(oCItem*)> func, oCItem** stopIfNotNullItem = nullptr);
-	void callForInventoryItems(std::function<void(oCItem*)> func, oCNpc * npc);
-	void callForAllWorldItems(std::function<void(oCItem*)> func);
+	static void callForInventoryItems(std::function<void(oCItem*)> func, oCNpc * npc);
+	static void callForAllWorldItems(std::function<void(oCItem*)> func);
 
-	int getInstanceBegin();
+	int getInstanceBegin() const;
 
-	int * getParserInstanceCount();
+	static int * getParserInstanceCount();
 
-	int getIdForSpecialPurposes();
+	static int getIdForSpecialPurposes();
 
 	void markAsReusable(int instanceId, int previousId);
 
@@ -383,7 +384,7 @@ public:
 	* \param item The oCItem to check
 	* \return true if the item is added into the world
 	*/
-	bool isItemInWorld(oCItem* item);
+	static bool isItemInWorld(oCItem* item);
 
 	/**
 	 * Searches an oCItem by its instance id in the world, in all containers and all inventories.
@@ -392,10 +393,43 @@ public:
 	 */
 	oCItem* getItemByInstanceId(int instanceId);
 
-	void oCItemSaveInsertEffect(oCItem* item);
-	void oCItemSaveRemoveEffect(oCItem* item);
+	static void oCItemSaveInsertEffect(oCItem* item);
+	static void oCItemSaveRemoveEffect(oCItem* item);
 	bool isDynamicInstance(int instanceId);
-	int* getRefCounter(oCItem* item);
+	static int* getRefCounter(oCItem* item);
+	
+	/**
+	 * Checks whether the given item is a ranged weapon.
+	 */
+	static bool isRangedWeapon(oCItem* item);
+
+	void equipRangedWeapon(oCItem * item, oCNpcInventory * inventory, bool munitionUsesRightHand);
+
+	
+	/**
+	 * Checks if the given item is valid for a specific weapon mode (1h weapon, 2h weapon, bow, crossbow, magic)
+	 */
+	static bool isValidWeapon(int weaponMode, oCItem* item);
+
+	/**
+	 * Checks if the munition of the specified item is supposed to be layed into the right hand.
+	 * If the given item isn't a ranged weapon, this function will return false.
+	 */
+	static bool munitionOfItemUsesRightHand(oCItem*);
+
+	static zCListSort<oCItem>* getInvItemByInstanceId(oCNpcInventory * inventory, int instanceId);
+	
+	int getSlotNumber(oCNpcInventory* inventory, oCItem* item);
+	
+	oCItem* searchItemInInvbyInstanzValue(oCNpcInventory* inventory, int searchValue);
+
+	void drawWeaponSilently(oCNpc* npc, int weaponMode, int readedWeaponId, 
+		int munitionId, bool munitionUsesRightHand, std::unordered_map<int, oCItem*>* equippedSpells, 
+		oCItem** activeSpellItem, AdditMemory* addit, bool createCopy = true);
+
+	int getSelectedSpellKey(oCNpc* npc);
+	int getEquippedSpellKeyByItem(oCNpc*, oCItem*);
+
 	static g2ext_extended::zCPar_SymbolTable* zCParserGetSymbolTable(void* parser);
 
 private:
@@ -445,7 +479,7 @@ private:
 	 */
 	bool initByNewInstanceId(oCItem* item);
 
-	zCPar_Symbol* createNewSymbol(ParserInfo* old);
+	static zCPar_Symbol* createNewSymbol(ParserInfo* old);
 	bool addSymbolToSymbolTable(zCPar_Symbol* symbol);
 	DynInstance * createNewInstanceItem(int instanceId);
 	void updateContainerItem(ObjectManager::ParserInfo* info);
@@ -460,7 +494,7 @@ private:
 	 */
 	void createParserSymbols();
 
-	zCPar_Symbol * createNewSymbol(int instanceId, zCPar_Symbol * old);
+	zCPar_Symbol * createNewSymbol(int instanceId, zCPar_Symbol * old) const;
 
 	/**
 	 * Calculates a new key for an AdditMemory object. The argument isHeroItem specifies whether
@@ -468,7 +502,7 @@ private:
 	 * \param isHeroItem Should the key be used for an item in the player's inventory?
 	 * \return The new created additional memory key. 
 	 */
-	int calcAdditKey(bool isHeroItem);
+	int calcAdditKey(bool isHeroItem) const;
 };
 
 #endif __ObjectManager_H__

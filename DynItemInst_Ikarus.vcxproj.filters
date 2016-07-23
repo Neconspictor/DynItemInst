@@ -146,6 +146,9 @@
     <ClInclude Include="Inc\DynamicParsing.h">
       <Filter>Header Files\DynamicParsing</Filter>
     </ClInclude>
+    <ClInclude Include="Inc\Constants.h">
+      <Filter>Header Files\DynItemInst</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\DllMain.cpp">

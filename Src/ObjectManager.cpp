@@ -41,7 +41,10 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <zCPar_SymbolTable.h>
 #include <api/g2/oCObjectFactory.h>
 #include <oCItemExtended.h>
+#include <Constants.h>
+
 using namespace std;
+using namespace constants;
 
 ObjectManager* ObjectManager::instanz = nullptr;
 
@@ -59,6 +62,292 @@ ObjectManager::ObjectManager()
 	this->instanceMap = map<int, DynInstance*>();
 	this->nextInstances = queue<int>();
 };
+
+bool ObjectManager::isValidWeapon(int weaponMode, oCItem * item)
+{
+	switch (weaponMode)
+	{
+
+	case 3:
+
+		//const int ITEM_KAT_NF = 2;
+		if (item->mainflags == 2)
+		{
+			return true;
+		}
+		break;
+	case 4:
+		//const int ITEM_KAT_NF = 2;
+		if (item->mainflags == 2)
+		{
+			return true;
+		}
+		break;
+	case 5:
+		//const int ITEM_BOW = 1 << 19;
+		if (item->HasFlag(1 << 19))
+		{
+			return true;
+		}
+		break;
+	case 6:
+		//const int ITEM_CROSSBOW = 1 << 20;
+		if (item->HasFlag(1 << 20))
+		{
+			return true;
+		}
+		break;
+	case 7:
+		// TODO why return always true???
+		//mainflag: ITEM_KAT_RUNE = 512
+		if (item->mainflags == 512)
+		{
+			return true;
+		}
+		break;
+	default: break;
+	}
+
+	return false;
+}
+
+bool ObjectManager::munitionOfItemUsesRightHand(oCItem* rangedWeapon)
+{
+	if (!isRangedWeapon(rangedWeapon))
+	{
+		return false;
+	}
+
+	//const int ITEM_BOW = 1<<19;
+	if (rangedWeapon->HasFlag(1<<19))
+	{
+		return true;
+	}
+	
+	//const int ITEM_CROSSBOW = 1 << 20;
+	return false;
+}
+
+
+zCListSort<oCItem>* ObjectManager::getInvItemByInstanceId(oCNpcInventory* inventory, int instanceId)
+{
+	inventory->UnpackCategory();
+	ObjectManager* manager = ObjectManager::getObjectManager();
+	zCListSort<oCItem>* list = reinterpret_cast<zCListSort<oCItem>*>(inventory->inventory_data);
+	while (list != nullptr) {
+		oCItem* item = list->GetData();
+		if (item != nullptr && manager->getInstanceId(*item) == instanceId)
+		{
+			return list;
+		}
+		list = list->GetNext();
+	}
+
+	return nullptr;
+}
+
+int ObjectManager::getSlotNumber(oCNpcInventory* inventory, oCItem* item)
+{
+	int itemNumber = inventory->GetNumItemsInCategory();
+	for (int i = 0; i < itemNumber; ++i)
+	{
+		oCItem* slotItem = inventory->GetItem(i);
+		if (slotItem == item)
+		{
+			return i;
+		}
+	}
+
+	//item isn't in the inventory
+	return -1;
+}
+
+oCItem* ObjectManager::searchItemInInvbyInstanzValue(oCNpcInventory* inventory, int searchValue)
+{
+	inventory->UnpackCategory();
+	int itemNumber = inventory->GetNumItemsInCategory();
+	for (int i = 0; i < itemNumber; ++i)
+	{
+		oCItem* slotItem = inventory->GetItem(i);
+		if (slotItem->instanz == searchValue)
+		{
+			return slotItem;
+		}
+	}
+
+	//no item was found
+	return nullptr;
+}
+
+void ObjectManager::drawWeaponSilently(oCNpc* npc, int weaponMode, int readedWeaponId, int munitionId, 
+	bool munitionUsesRightHand, unordered_map<int, oCItem*>* equippedSpells, 
+	oCItem** activeSpellItem, AdditMemory* addit, bool createCopy)
+{
+	oCNpcInventory* inventory = npc->GetInventory();
+	zCListSort<oCItem>* node = getInvItemByInstanceId(inventory, readedWeaponId);
+	if (!node)
+	{
+		logStream << "ObjectManager::drawWeaponSilently: node is null!" << std::endl;
+		util::logFault(&logStream);
+		return;
+	}
+
+	oCItem* item = node->GetData();
+
+	if (!item)
+	{
+		logStream << "ObjectManager::drawWeaponSilently: item is null!" << std::endl;
+		util::logFault(&logStream);
+		return;
+	}
+
+	oCItem* copy = item;
+	if (createCopy) copy = oCObjectFactory::GetFactory()->CreateItem(readedWeaponId);
+
+	if (!item->HasFlag(512)) //item isn't a rune
+	{
+		int slotNumber = getSlotNumber(inventory, item);
+		util::assertDIIRequirements(slotNumber >= 0, "slotNumber >= 0");
+		logStream << "ObjectManager::drawWeaponSilently: slotnumber= " << slotNumber << std::endl;
+		logStream << "item->description= " << item->description.ToChar() << std::endl;
+		logStream << "item->GetInstance()= " << item->GetInstance() << std::endl;
+		logStream << "item->instanz= " << item->instanz << std::endl;
+		logStream << "copy->description= " << copy->description.ToChar() << std::endl;
+		logStream << "copy->GetInstance()= " << copy->GetInstance() << std::endl;
+		logStream << "copy->instanz= " << copy->instanz << std::endl;
+		util::debug(&logStream);
+
+		//DynItemInst::denyMultiSlot = false;
+		if (createCopy)
+		{
+			inventory->Remove(item);
+
+			//store some attribute to search for the copy after it was inserted into the inventory
+			int copyStoreValue = copy->instanz;
+			//assign any value that will be unique
+			int searchValue = -6666666;
+			copy->instanz = searchValue;
+			inventory->Insert(copy);
+
+			// Since multi-slotting was denied, copy is now on a own slot (not merged) and can be accessed
+			copy = searchItemInInvbyInstanzValue(inventory, searchValue);
+			util::assertDIIRequirements(copy != nullptr, "item to insert shouldn't be null!");
+			copy->instanz = copyStoreValue;
+			//Deny invocation of equip function
+			int equipFunction = copy->on_equip;
+			copy->on_equip = 0;
+			copy->ClearFlag(OCITEM_FLAG_EQUIPPED);
+			npc->Equip(copy);
+		
+			//restore function
+
+			logStream << "DynItemInst::restoreItem: item is now equipped!" << std::endl;
+			logStream << "DynItemInst::restoreItem: Weapon mode: " << weaponMode << std::endl;
+			util::debug(&logStream);
+			copy = getInvItemByInstanceId(inventory, readedWeaponId)->GetData();
+			copy->on_equip = equipFunction;
+		}
+		oCNpcSetWeaponMode2(npc, weaponMode);  //3 for one hand weapons
+	}
+	else
+	{
+		//oCItemInitByScript(item, readedWeaponId, item->instanz);
+		//item->ClearFlag(OCITEM_FLAG_EQUIPPED);
+	}
+
+	// Is readied weapon a bow?
+	if (copy && copy->HasFlag(1 << 19) && weaponMode == 5)
+	{
+		logStream << "DynItemInst::restoreItem: Bow is readied!" << std::endl;
+		logStream << "DynItemInst::restoreItem: Weapon mode: " << weaponMode << std::endl;
+		util::debug(&logStream);
+
+		equipRangedWeapon(copy, inventory, true);
+	}
+
+	// Is readied weapon a crossbow?
+	else if (copy && copy->HasFlag(1 << 20) && weaponMode == 6)
+	{
+		logStream << "DynItemInst::restoreItem: Crossbow is readied!" << std::endl;
+		logStream << "DynItemInst::restoreItem: Weapon mode: " << weaponMode << std::endl;
+		util::debug(&logStream);
+
+		equipRangedWeapon(copy, inventory, false);
+	}
+	else if (item && item->HasFlag(512)) // Magic 
+	{
+		logStream << "DynItemInst::restoreItem: Readied weapon is a magic thing!" << std::endl;
+		util::debug(&logStream);
+		oCMag_Book* magBook = oCNpcGetSpellBook(npc);
+		magBook = oCNpcGetSpellBook(npc);
+		//int itemSpellKey = oCMag_BookGetKeyByItem(magBook, item);
+		if (addit->spellKey > 0)
+		{
+			oCMag_BookDeRegisterItem(magBook, item);
+			oCMag_BookNextRegisterAt(magBook, addit->spellKey);
+		}
+		if (addit && (addit->spellKey >= 0))
+		{
+			if (!equippedSpells)
+			{
+				logStream << "DynItemInst::restoreItem: equippedSpells is null!" << std::endl;
+				util::debug(&logStream, Logger::Warning);
+			}
+			else
+			{
+				equippedSpells->insert(std::pair<int, oCItem*>(addit->spellKey, item));
+			}
+		}
+
+		magBook = oCNpcGetSpellBook(npc);
+		if (magBook)
+		{
+			if (addit && (addit->activeSpellItem && activeSpellItem))
+			{
+				*activeSpellItem = item;
+			}
+
+			//logStream << "DynItemInst::restoreItem: selectedSpellKey = " << oCMag_BookGetSelectedSpellNr(magBook) << std::endl;
+			//util::debug(&logStream);
+			//logStream << "DynItemInst::restoreItem: An Spell is active" << std::endl;
+			//util::debug(&logStream);
+		}
+	}
+}
+
+int ObjectManager::getSelectedSpellKey(oCNpc* npc)
+{
+	oCNpcInventory* inventory = npc->GetInventory();
+	if (inventory == nullptr) {
+		return -1;
+	}
+	inventory->UnpackAllItems();
+	zCListSort<oCItem>* list = reinterpret_cast<zCListSort<oCItem>*>(inventory->inventory_data);
+	oCMag_Book* magBook = oCNpcGetSpellBook(npc);
+
+	if (magBook) {
+		oCSpell* selectedSpell = oCMag_BookGetSelectedSpell(magBook);
+		if (selectedSpell)
+		{
+			return oCSpellGetSpellID(selectedSpell);
+		}
+	}
+
+	return -1;
+}
+
+int ObjectManager::getEquippedSpellKeyByItem(oCNpc* npc, oCItem* item)
+{
+	int equipped = item->HasFlag(OCITEM_FLAG_EQUIPPED);
+	oCMag_Book* magBook = oCNpcGetSpellBook(npc);
+	int spellKey = -1;
+	if (magBook && equipped) {
+		spellKey = oCMag_BookGetKeyByItem(magBook, item);
+		logStream << "ObjectManager::getEquippedSpellKeyByItem: spellKey = " << spellKey << std::endl;
+		util::debug(&logStream);
+	}
+	return spellKey;
+}
 
 g2ext_extended::zCPar_SymbolTable* ObjectManager::zCParserGetSymbolTable(void* parser)
 {
@@ -768,7 +1057,7 @@ void ObjectManager::createParserSymbols()
 	}
 }
 
-zCPar_Symbol* ObjectManager::createNewSymbol(int instanceId, zCPar_Symbol* old)
+zCPar_Symbol* ObjectManager::createNewSymbol(int instanceId, zCPar_Symbol* old) const
 {
 
 	zCPar_Symbol* symbol;
@@ -1024,7 +1313,8 @@ void ObjectManager::removeAdditList(std::list<AdditMemory*>* list){
 	}
 };
 
-int ObjectManager::calcAdditKey(bool isHeroItem){
+int ObjectManager::calcAdditKey(bool isHeroItem) const
+{
 	if (isHeroItem) {
 		return HERO_ADDIT_BEGIN + (static_cast<int>(keyToAdditMap.size()) +1);
 	}
@@ -1358,7 +1648,7 @@ void ObjectManager::callForAllWorldItems(function<void(oCItem*)> func)
 	}
 }
 
-int ObjectManager::getInstanceBegin()
+int ObjectManager::getInstanceBegin() const
 {
 	return instanceBegin;
 }
@@ -1470,4 +1760,56 @@ bool ObjectManager::isDynamicInstance(int instanceId)
 int * ObjectManager::getRefCounter(oCItem * item)
 {
 	return (int*)((BYTE*)item + 0x4);
+}
+
+bool ObjectManager::isRangedWeapon(oCItem* item)
+{
+	//const int ITEM_KAT_FF = 4;
+	if (item->mainflags == 4)
+	{
+		return true;
+	}
+	return false;
+}
+
+void ObjectManager::equipRangedWeapon(oCItem* item, oCNpcInventory* inventory, bool munitionUsesRightHand)
+{
+	zCListSort<oCItem>* list = getInvItemByInstanceId(inventory, item->munition);
+	oCItem* munition = list->GetData();
+	int arrowId = ObjectManager::getObjectManager()->getInstanceId(*munition);
+	zCListSort<oCItem>* list2 = list->GetNext();
+	oCItem* munition2 = nullptr;
+	oCNpc* owner = inventory->GetOwner();
+
+	if (list2)
+	{
+		munition2 = list2->GetData();
+	}
+
+	if (munition2 && munition2->instanz > 1)
+	{
+		logStream << "DynItemInst::updateRangedWeapon: munition2->instanz > 1!";
+		util::logFault(&logStream);
+	}
+
+	int amount = munition->instanz;
+	inventory->Remove(munition, munition->instanz);
+	if (munition2)
+	{
+		inventory->Remove(munition2, munition2->instanz);
+		amount += munition2->instanz;
+	}
+	munition = oCObjectFactory::GetFactory()->CreateItem(munition->GetInstance());
+	munition->instanz = amount;
+	inventory->Insert(munition);
+	munition = getInvItemByInstanceId(inventory, arrowId)->GetData();
+
+	if (munitionUsesRightHand)
+	{
+		oCNpcSetRightHand(owner, munition->SplitItem(1));
+	}
+	else
+	{
+		oCNpcSetLeftHand(owner, munition->SplitItem(1));
+	}
 }
