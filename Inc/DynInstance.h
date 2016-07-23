@@ -32,6 +32,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include "ISerialization.h"
 #include "oCItemExtended.h"
 #include <sstream>
+#include <list>
 
 
 class zCParser;
@@ -207,6 +208,9 @@ public:
 	int effectVob;						//oCVisualFX*
 	int next;							//138
 	DII_UserData dii_userData;
+	
+	// list of world names this instance is used
+	std::list<std::string> activeWorlds;
 
 	//specifies whether this instance can be reassigned
 	bool notUsed;
@@ -301,6 +305,10 @@ public:
 	 * \param source The dynamic instance to copy the user data from.
 	 */
 	void copyUserData(DynInstance& source);
+
+	void addActiveWorld(std::string worldName);
+
+	void resetActiveWorlds();
 
 private:
 	static std::stringstream logStream;

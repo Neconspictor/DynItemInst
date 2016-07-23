@@ -337,7 +337,11 @@ private:
 	static void restoreSelectedSpell(oCNpc* npc, oCItem* selectedSpellItem);
 	static void restoreItemsOfNpc(oCNpc* npc);
 	static void restoreInventory(oCNpc* npc);
-	static oCItem* restoreItemAfterLevelChange(oCNpc* hero, LevelChangeBean* bean);
+	
+	static oCItem* restoreItemAfterLevelChange(oCNpc* npc, LevelChangeBean* bean, int weaponMode, int readiedWeaponId,
+		int munitionId, bool munitionUsesRightHand, std::unordered_map<int, oCItem*>* equippedSpells, 
+		oCItem** selectedSpellItem);
+
 	static void restoreEquippedItem(oCItem*, oCNpcInventory* inventory, AdditMemory* addit, int instanceId, 
 		std::unordered_map<int, oCItem*>* equippedSpells, oCItem** activeSpellItem);
 	static void restoreWorldItem(oCItem*, int instanceId);

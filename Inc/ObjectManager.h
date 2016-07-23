@@ -125,6 +125,8 @@ public:
 	 * \return Was the assignment successful?
 	 */
 	bool assignInstanceId(oCItem* item, int id);
+
+	void resetDynItemInstances();
 	
 	static bool assignInstanceId2(oCItem* item, int id);
 

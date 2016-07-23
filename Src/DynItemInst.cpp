@@ -412,6 +412,8 @@ DynItemInst::~DynItemInst()
 	
 	zCListSort<oCNpc>* npcList = world->GetNpcList();
 
+	manager->resetDynItemInstances();
+
 	denyMultiSlot = true;
 
 	oCNpc* hero = oCNpc::GetHero();
@@ -672,6 +674,15 @@ DynItemInst::~DynItemInst()
 		util::debug(&logStream, Logger::Info);
 	}
 	manager->setInstanceId(item, saveId);
+
+	//add active world name to dyn instance, but only if item is no hero item (important for level change!)
+	if (!isHeroItem)
+	{
+		zCWorld* world = oCGame::GetGame()->GetWorld();
+		std::string worldName = world->worldName.ToChar();
+		manager->getInstanceItem(id)->addActiveWorld(worldName);
+	}
+
 	return id;
 }
 
@@ -811,6 +822,10 @@ void __thiscall DynItemInst::oCGameChangeLevelHook(void* pThis, zSTRING const & 
 	oCNpc* hero = oCNpc::GetHero();
 	
 	std::list<LevelChangeBean*> tempList;
+	
+	// runes/scrolls should have weaponMode == 7, but 0 (== no weapon readied) is here returned. This 
+	// must have to do something thing the engine intern handling of the level change.
+	// TODO: Try to fix it!
 	int weaponMode = hero->GetWeaponMode();
 	
 	int readiedWeaponId = -1; 
@@ -893,33 +908,9 @@ void __thiscall DynItemInst::oCGameChangeLevelHook(void* pThis, zSTRING const & 
 
 	for (auto it = tempList.begin(); it != tempList.end(); ++it)
 	{
-		oCItem* item = restoreItemAfterLevelChange(hero, *it);
-		if (npcHasReadiedWeapon && ((*it)->dynamicInstanceId == readiedWeaponId))
-		{
-			manager->drawWeaponSilently(hero, weaponMode, readiedWeaponId, 
-				munitionId, munitionUsesRightHand, &equippedSpells, selectedSpellItem, (*it)->addit, false);
-			if (item && item->HasFlag(512))
-			{
-				hero->Equip(item);
-			}
-		} else if (item && item->HasFlag(512)) // is a rune/scroll
-		{
-			logStream << "DynItemInst::oCGameChangeLevelHook: selected weapon is a magic thing!" << std::endl;
-			util::debug(&logStream);
-			oCMag_Book* magBook = oCNpcGetSpellBook(hero);
-			if ((*it)->addit->spellKey > 0)
-			{
+		restoreItemAfterLevelChange(hero, *it, weaponMode, readiedWeaponId, munitionId, munitionUsesRightHand,
+			&equippedSpells, selectedSpellItem);
 
-				oCMag_BookDeRegisterItem(magBook, item);
-				oCMag_BookNextRegisterAt(magBook, (*it)->addit->spellKey);
-				hero->Equip(item);
-				//item->SetFlag(OCITEM_FLAG_EQUIPPED);
-			}
-			if (addit->spellKey >= 0)
-			{
-				equippedSpells.insert(std::pair<int, oCItem*>(addit->spellKey, item));
-			}
-		}
 		//finally delete gracely
 		SAFE_DELETE((*it)->addit);
 		SAFE_DELETE(*it);
@@ -928,7 +919,7 @@ void __thiscall DynItemInst::oCGameChangeLevelHook(void* pThis, zSTRING const & 
 	//TODO: 
 	// - Handle runes and scrolls!
 	equippedSpells.clear();
-	for (auto it = equippedSpells.begin(); it != equippedSpells.end(); ++it)
+	/*for (auto it = equippedSpells.begin(); it != equippedSpells.end(); ++it)
 	{
 		int key = it->first;
 		oCItem* item = it->second;
@@ -936,15 +927,17 @@ void __thiscall DynItemInst::oCGameChangeLevelHook(void* pThis, zSTRING const & 
 		oCMag_BookNextRegisterAt(magBook, key);
 		hero->Equip(item);
 	}
-	equippedSpells.clear();
+	equippedSpells.clear();*/
 
+	//After change level it doesn't work for spells to restore properly their weapon mode
+	// so this call will always be useful. <- But let it there for later! TODO
 	restoreSelectedSpell(hero, *selectedSpellItem);
 
 	tempList.clear();
 	levelChange = false;
 
 	//not needed?
-	initAdditMemory();
+	//initAdditMemory();
 
 	logStream << "DynItemInst::oCGameChangeLevelHook: done." << std::endl;
 	util::logInfo(&logStream);
@@ -1301,7 +1294,8 @@ void DynItemInst::restoreInventory(oCNpc* npc)
 	restoreSelectedSpell(npc, *selectedSpellItem);
 }
 
-oCItem* DynItemInst::restoreItemAfterLevelChange(oCNpc* npc, LevelChangeBean* bean)
+oCItem* DynItemInst::restoreItemAfterLevelChange(oCNpc* npc, LevelChangeBean* bean, int weaponMode, int readiedWeaponId,
+	int munitionId, bool munitionUsesRightHand, std::unordered_map<int, oCItem*>* equippedSpells, oCItem** selectedSpellItem)
 {
 	ObjectManager* manager = ObjectManager::getObjectManager();
 	oCNpcInventory* inv = npc->GetInventory();
@@ -1319,17 +1313,49 @@ oCItem* DynItemInst::restoreItemAfterLevelChange(oCNpc* npc, LevelChangeBean* be
 		logStream << "item->instanz: " << item->instanz << std::endl;
 		util::logInfo(&logStream);
 
+
+		bool npcHasReadiedWeapon = weaponMode > 0;
+
+		if (npcHasReadiedWeapon && (bean->dynamicInstanceId == readiedWeaponId))
+		{
+			// drawSilently handles on_equip functions properly, no need to unset it before!
+			manager->drawWeaponSilently(npc, weaponMode, readiedWeaponId,
+				munitionId, munitionUsesRightHand, equippedSpells, selectedSpellItem, bean->addit, false);
+			
+			// item is already equipped; so we can leave
+			return item;
+		}
+
 		item->on_equip = 0;
 		item->on_unequip = 0;
 
-/*		if (!item->HasFlag(OCITEM_FLAG_EQUIPPED)) {
+		if (item && item->HasFlag(512)) // is a rune/scroll
+		{
+			logStream << "DynItemInst::oCGameChangeLevelHook: selected weapon is a magic thing!" << std::endl;
+			util::debug(&logStream);
+			oCMag_Book* magBook = oCNpcGetSpellBook(npc);
+			if (bean->addit->spellKey > 0)
+			{
+
+				oCMag_BookDeRegisterItem(magBook, item);
+				oCMag_BookNextRegisterAt(magBook, bean->addit->spellKey);
+
+				//item->SetFlag(OCITEM_FLAG_EQUIPPED);
+			}
+			if (bean->addit->spellKey >= 0)
+			{
+				equippedSpells->insert(std::pair<int, oCItem*>(bean->addit->spellKey, item));
+			}
+		}
+
+		if (!item->HasFlag(OCITEM_FLAG_EQUIPPED)) {
 			npc->Equip(item);
 
 			//remove added item effects if item had before none.
 			if (!bean->effectVob)
 				manager->oCItemSaveRemoveEffect(item);
 		}
-*/
+
 		//update equip functions
 		item->on_equip = bean->original_on_equip;
 		item->on_unequip = bean->original_on_unequip;

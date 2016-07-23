@@ -233,26 +233,23 @@ void ObjectManager::drawWeaponSilently(oCNpc* npc, int weaponMode, int readedWea
 			copy = searchItemInInvbyInstanzValue(inventory, searchValue);
 			util::assertDIIRequirements(copy != nullptr, "item to insert shouldn't be null!");
 			copy->instanz = copyStoreValue;
-			//Deny invocation of equip function
-			int equipFunction = copy->on_equip;
-			copy->on_equip = 0;
-			copy->ClearFlag(OCITEM_FLAG_EQUIPPED);
-			npc->Equip(copy);
-		
-			//restore function
-
-			logStream << "DynItemInst::restoreItem: item is now equipped!" << std::endl;
-			logStream << "DynItemInst::restoreItem: Weapon mode: " << weaponMode << std::endl;
-			util::debug(&logStream);
-			copy = getInvItemByInstanceId(inventory, readedWeaponId)->GetData();
-			copy->on_equip = equipFunction;
 		}
+
+		//Deny invocation of equip function
+		int equipFunction = copy->on_equip;
+		copy->on_equip = 0;
+		copy->ClearFlag(OCITEM_FLAG_EQUIPPED);
+		npc->Equip(copy);
+
+		//restore function
+
+		logStream << "DynItemInst::restoreItem: item is now equipped!" << std::endl;
+		logStream << "DynItemInst::restoreItem: Weapon mode: " << weaponMode << std::endl;
+		util::debug(&logStream);
+		copy = getInvItemByInstanceId(inventory, readedWeaponId)->GetData();
+		copy->on_equip = equipFunction;
+
 		oCNpcSetWeaponMode2(npc, weaponMode);  //3 for one hand weapons
-	}
-	else
-	{
-		//oCItemInitByScript(item, readedWeaponId, item->instanz);
-		//item->ClearFlag(OCITEM_FLAG_EQUIPPED);
 	}
 
 	// Is readied weapon a bow?
@@ -490,6 +487,15 @@ bool ObjectManager::assignInstanceId(oCItem* item, int id){
 		return false;
 	};
 	return true;
+}
+
+void ObjectManager::resetDynItemInstances()
+{
+	for (auto it = instanceMap.begin(); it != instanceMap.end(); ++it)
+	{
+		DynInstance* instance = it->second;
+		instance->resetActiveWorlds();
+	}
 }
 
 void oCItemOperatorDelete(oCItem* item)

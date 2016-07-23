@@ -31,6 +31,8 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <sstream>
 #include <Util.h>
 #include <ObjectManager.h>
+#include <api/g2/ocgame.h>
+#include <api/g2/zcworld.h>
 
 using namespace std;
 std::stringstream DynInstance::logStream;
@@ -448,6 +450,14 @@ void DynInstance::serialize(std::ostream& os) const
 	os << next << ' ';
 
 	dii_userData.serialize(os);
+
+	os << activeWorlds.size() << ' ';
+
+	for (auto it = activeWorlds.begin(); it != activeWorlds.end(); ++it)
+	{
+		util::writeString(os, *it);
+		os << ' ';
+	}
 }
 
 
@@ -583,6 +593,17 @@ void DynInstance::deserialize(std::stringstream* is)
 	util::getInt(*is, next);
 
 	dii_userData.deserialize(is);
+
+	int activeWorldSize = 0;
+	util::getInt(*is, activeWorldSize);
+	for (int i = 0; i < activeWorldSize; ++i)
+	{
+		string data = "";
+		util::readString(is, data);
+
+		//avoid duplicate names!
+		addActiveWorld(data);
+	}
 }
 
 int DynInstance::getParserSymbolBitfield()
@@ -624,7 +645,30 @@ void DynInstance::copyUserData(DynInstance& source)
 
 		//TODO strings!!!
 	}*/
-};
+}
+
+void DynInstance::addActiveWorld(string worldName)
+{
+	for (auto it = activeWorlds.begin(); it != activeWorlds.end(); ++it)
+	{
+		std::string active = *it;
+		if (worldName.compare(active) == 0)
+		{
+			// worldName was already added. Nothing to do
+			return;
+		}
+	}
+	activeWorlds.push_back(worldName);
+}
+
+void DynInstance::resetActiveWorlds()
+{
+	zCWorld* world = oCGame::GetGame()->GetWorld();
+	string worldName = world->worldName.ToChar();
+
+	//remove current world of list
+	activeWorlds.remove(worldName);
+}
 
 
 DII_UserData::DII_UserData()
@@ -685,7 +729,7 @@ void DII_UserData::serialize(std::ostream& os) const
 		os << userData.getIntBegin()[i] << ' ';
 	}
 
-	std::stringstream ss;
+	stringstream ss;
 	ss << "strAmount: " << userData.strAmount << std::endl;
 	util::debug(&ss);
 
@@ -701,14 +745,14 @@ void DII_UserData::serialize(std::ostream& os) const
 		os << ptr->_vtbl << ' ';
 		os << ptr->_allocater << ' ';
 
-		std::string data;
+		string data;
 		if (ptr->ptr == nullptr)
 		{
 			data = "";
 		}
 		else
 		{
-			data = std::string(ptr->ptr);
+			data = string(ptr->ptr);
 		}
 		ss << "string to write: " << data << std::endl;
 		util::debug(&ss);
@@ -726,14 +770,14 @@ void DII_UserData::serialize(std::ostream& os) const
 		}
 		else
 		{
-			ss << "ptr->ptr: null" << std::endl;
+			ss << "ptr->ptr: null" << endl;
 			util::debug(&ss);
 		}
 
-		ss << "ptr->len: " << ptr->len << std::endl;
+		ss << "ptr->len: " << ptr->len << endl;
 		util::debug(&ss);
 
-		ss << "ptr->res: " << ptr->res << std::endl;
+		ss << "ptr->res: " << ptr->res << endl;
 		util::debug(&ss);
 
 		util::writeString(os, data);
