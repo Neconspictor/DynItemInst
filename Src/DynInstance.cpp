@@ -85,7 +85,8 @@ void DynInstance::checkNotUsed()
 
 			manager->setInstanceId(item, previousId);
 			manager->oCItemSaveRemoveEffect(item);
-			item->InitByScript(previousId, 0);
+			item->effect = "";
+			item->InitByScript(previousId, 1);
 			item->InsertEffect();
 		}
 	};

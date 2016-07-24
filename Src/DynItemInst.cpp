@@ -407,7 +407,6 @@ DynItemInst::~DynItemInst()
 	loadDynamicInstances();
 	initAdditMemory();
 
-	checkReusableInstances();
 	denyMultiSlot = false;
 	saveGameIsLoading = false;
 
@@ -447,10 +446,12 @@ DynItemInst::~DynItemInst()
 			continue;
 		}
 		bool isHero = npc == hero;
-		/*if (isHero && DynItemInst::levelChange) {
+		
+		if (isHero && DynItemInst::levelChange) {
 			npcList = npcList->GetNext();
 			continue;
-		}*/
+		}
+
 		oCNpcInventory* inventory = npc->GetInventory();
 		if (inventory == nullptr) {
 			npcList = npcList->GetNext();
@@ -761,6 +762,13 @@ bool DynItemInst::itemsAreModified()
 void DynItemInst::restoreDynamicInstances(oCGame* game) {
 	logStream << "DynItemInst::restoreDynamicInstances: restore... "  << std::endl;
 	util::logInfo(&logStream);
+
+	if (levelChange && saveGameWriting)
+	{
+		// no need of restoring
+		return;
+	}
+
 	denyMultiSlot = true;
 	zCWorld* world = game->GetWorld();
 	zCListSort<oCNpc>* npcList = world->GetNpcList();
@@ -773,7 +781,7 @@ void DynItemInst::restoreDynamicInstances(oCGame* game) {
 
 	while(npcList != nullptr) {
 		oCNpc* npc = npcList->GetData();
-		if (npc == nullptr || ((hero == npc) && levelChange)) {
+		if (npc == nullptr || levelChange && (npc == hero)) {
 			npcList = npcList->GetNext();
 			continue;
 		}
@@ -832,7 +840,6 @@ void DynItemInst::oCGameLoadGameHook(void* pThis, int second, zSTRING const& wor
 	manager->releaseInstances();
 	oCGameLoadGame(pThis, second, worldName);
 
-	checkReusableInstances();
 	logStream << "DynItemInst::oCGameLoadGameHook: done." << std::endl;
 	util::logInfo(&logStream);
 }
@@ -961,8 +968,8 @@ void __thiscall DynItemInst::oCGameChangeLevelHook(void* pThis, zSTRING const & 
 
 	//not needed? -> Yesm it is needed!
 	initAdditMemory();
-	levelChange = false;
 	checkReusableInstances();
+	levelChange = false;
 
 	logStream << "DynItemInst::oCGameChangeLevelHook: done." << std::endl;
 	util::logInfo(&logStream);
