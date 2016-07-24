@@ -127,6 +127,13 @@ public:
 	 */
 	~DynInstance();
 
+	void checkNotUsed();
+
+	void setPreviousId(int previousId);
+
+	bool isReusable();
+	void setReusable(bool reuse);
+
 public:
 	std::string zCPar_Symbol_name;
 	int zCPar_Symbol_Bitfield;
@@ -214,6 +221,12 @@ public:
 
 	//specifies whether this instance can be reassigned
 	bool notUsed;
+
+	// specifies an instance id items assigned to this dynamic instances will assigned to, if
+	// the dynamic instance is marked as reusable!
+	int previousId;
+
+	bool reusable;
 
 	/**
 	 * Provides the Item's instance id.

@@ -59,6 +59,7 @@ bool DynItemInst::denyMultiSlot = false;
 bool DynItemInst::levelChange = false;
 bool DynItemInst::saveGameIsLoading = false;
 bool DynItemInst::saveGameWriting = false;
+std::list<std::pair<int, int>> DynItemInst::reusableMarkList;
 
 DynItemInst::InstanceNames DynItemInst::instanceNames = { "DII_DUMMY_ITEM", "_NF_","_FF_" , "_RUNE_", "_OTHER_", 1, 1, 1, 1 };
 
@@ -96,6 +97,26 @@ OCMobContainerOpen oCMobContainerOpen;
 
 
 OCItemInsertEffect DynItemInst::oCItemInsertEffect = (OCItemInsertEffect)0x00712C40;
+
+void DynItemInst::checkReusableInstances()
+{
+	ObjectManager* manager = ObjectManager::getObjectManager();
+	for (auto it = reusableMarkList.begin(); it != reusableMarkList.end(); ++it)
+	{
+		logStream << "DynItemInst::checkReusableInstances: mark as reusable: " << it->first << ", " << it->second << std::endl;
+		util::debug(&logStream);
+		manager->markAsReusable(it->first, it->second);
+	}
+
+	manager->checkReusableInstances();
+
+	reusableMarkList.clear();
+}
+
+void DynItemInst::addToReusableLists(int instanceId, int previousId)
+{
+	reusableMarkList.push_back(std::pair<int, int>(instanceId, previousId));
+}
 
 void DynItemInst::hookModule()
 {
@@ -380,11 +401,13 @@ DynItemInst::~DynItemInst()
 	util::logInfo(&logStream);
 	saveGameIsLoading = true;
 	denyMultiSlot = true;
-	ObjectManager::getObjectManager()->releaseInstances();
+	ObjectManager* manager = ObjectManager::getObjectManager();
+	manager->releaseInstances();
 	loadSavegame(pThis, saveGameSlotNumber, b);
 	loadDynamicInstances();
 	initAdditMemory();
 
+	checkReusableInstances();
 	denyMultiSlot = false;
 	saveGameIsLoading = false;
 
@@ -809,6 +832,7 @@ void DynItemInst::oCGameLoadGameHook(void* pThis, int second, zSTRING const& wor
 	manager->releaseInstances();
 	oCGameLoadGame(pThis, second, worldName);
 
+	checkReusableInstances();
 	logStream << "DynItemInst::oCGameLoadGameHook: done." << std::endl;
 	util::logInfo(&logStream);
 }
@@ -934,10 +958,11 @@ void __thiscall DynItemInst::oCGameChangeLevelHook(void* pThis, zSTRING const & 
 	restoreSelectedSpell(hero, *selectedSpellItem);
 
 	tempList.clear();
-	levelChange = false;
 
-	//not needed?
-	//initAdditMemory();
+	//not needed? -> Yesm it is needed!
+	initAdditMemory();
+	levelChange = false;
+	checkReusableInstances();
 
 	logStream << "DynItemInst::oCGameChangeLevelHook: done." << std::endl;
 	util::logInfo(&logStream);

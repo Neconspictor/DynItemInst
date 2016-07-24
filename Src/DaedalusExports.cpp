@@ -285,7 +285,18 @@ void DaedalusExports::DII_MarkAsReusable(int instanceId, int previousId)
 	logStream << "DaedalusExports::DII_MarkAsReusable: before call!" << std::endl;
 	util::debug(&logStream);
 	ObjectManager* manager = ObjectManager::getObjectManager();
-	manager->markAsReusable(instanceId, previousId);
+	if (!DynItemInst::itemsAreModified())
+	{
+		manager->markAsReusable(instanceId, previousId);
+		logStream << "DaedalusExports::DII_MarkAsReusable: marked as reusable!" << std::endl;
+		util::debug(&logStream);
+	} else
+	{
+		//Marking isn'tinform DynItemInst that instanceId should be marked!
+		DynItemInst::addToReusableLists(instanceId, previousId);
+		logStream << "DaedalusExports::DII_MarkAsReusable: added to reusable list!" << std::endl;
+		util::debug(&logStream);
+	}
 	logStream << "DaedalusExports::DII_MarkAsReusable: function is enabled!" << std::endl;
 	util::debug(&logStream);
 	//manager->assignInstanceId2(item, instanceId);

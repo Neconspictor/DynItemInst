@@ -430,7 +430,7 @@ void ObjectManager::createInstanceById(int id, DynInstance* item) {
 		instanceBegin = id;
 	}
 
-	if (item->notUsed)
+	if (item->isReusable())
 	{
 		reusableInstances.push_back(id);
 		logStream << "added DynInstance to reusableInstances" << std::endl;
@@ -986,7 +986,7 @@ void ObjectManager::updateContainerItem(ObjectManager::ParserInfo* info)
 	item->setZCPar_SymbolName(info->name);
 	item->setParserSymbolBitfield(info->bitfield);
 
-	if (item->notUsed)
+	if (item->isReusable())
 	{
 		reusableInstances.push_back(item->getInstanceID());
 	}
@@ -1675,20 +1675,28 @@ void ObjectManager::markAsReusable(int instanceId, int previousId)
 	DynInstance* instance = getInstanceItem(instanceId);
 	if (!instance) return;
 
-	auto func = [&](oCItem* item)->void {
-		if (item && (item->GetInstance() == instanceId))
+	instance->setPreviousId(previousId);
+	instance->setReusable(true);
+	instance->checkNotUsed();
+
+	if (instance->isReusable())
+	{
+		reusableInstances.push_back(instanceId);
+	}
+}
+
+void ObjectManager::checkReusableInstances()
+{
+	for (auto it = instanceMap.begin(); it != instanceMap.end(); ++it)
+	{
+		DynInstance* instance = it->second;
+		instance->checkNotUsed();
+
+		if (instance->isReusable())
 		{
-			logStream << "item has instanceId marked as reusable: " << item->description.ToChar() << endl;
-			util::debug(& logStream);
-			initByNewInstanceId(item);
-			setInstanceId(item, previousId);
+			reusableInstances.push_back(instance->getInstanceID());
 		}
-	};
-
-	callForAllItems(func);
-
-	instance->notUsed = true;
-	reusableInstances.push_back(instanceId);
+	}
 }
 
 bool ObjectManager::isItemInWorld(oCItem* item)

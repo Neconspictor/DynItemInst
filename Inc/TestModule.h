@@ -1,6 +1,6 @@
 #pragma once
 #include "Module.h"
-#include "api/g2/zcvob.h";
+#include "api/g2/zcvob.h"
 #include <list>
 
 

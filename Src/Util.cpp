@@ -144,9 +144,8 @@ void util::readString(std::stringstream* is, std::string& data)
 	getInt(*is, size);
 	if (size)
 	{
-		data.resize(size + 1, '\0');
-		is->get(&data[0], size + 1);
-
+		data.resize(size);
+		is->get(&data[0], size +1);
 	}
 	else
 	{

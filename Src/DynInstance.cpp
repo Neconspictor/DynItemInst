@@ -39,15 +39,78 @@ std::stringstream DynInstance::logStream;
 
 DynInstance::DynInstance()
 {
+	previousId = -1;
+	reusable = false;
 }
 
 DynInstance::DynInstance(oCItem& item)
 {
 	store(item);
+	previousId = -1;
+	reusable = false;
 }
 
 DynInstance::~DynInstance()
 {
+}
+
+void DynInstance::checkNotUsed()
+{
+	if (!notUsed) return;
+
+	if (previousId < 0) return;
+
+	bool notUsedInOtherWorlds = false;
+	if (activeWorlds.size() == 0)
+	{
+		notUsedInOtherWorlds = true;
+	}
+
+	if (activeWorlds.size() == 1)
+	{
+		string worldName = oCGame::GetGame()->GetWorld()->worldName.ToChar();
+		if (activeWorlds.front().compare(worldName) == 0)
+		{
+			notUsedInOtherWorlds = true;
+		}
+	}
+
+	// Assign all connected items in the world the previous instance id
+	ObjectManager* manager = ObjectManager::getObjectManager();
+	auto func = [&](oCItem* item)->void {
+		if (item && (item->GetInstance() == instanceID))
+		{
+			logStream << "item has instanceId marked as reusable: " << item->description.ToChar() << endl;
+			util::debug(&logStream);
+
+			manager->setInstanceId(item, previousId);
+			manager->oCItemSaveRemoveEffect(item);
+			item->InitByScript(previousId, 0);
+			item->InsertEffect();
+		}
+	};
+
+	manager->callForAllItems(func);
+
+	if (notUsedInOtherWorlds)
+	{
+		previousId = -1;
+	}
+}
+
+void DynInstance::setPreviousId(int previousId)
+{
+	this->previousId = previousId;
+}
+
+bool DynInstance::isReusable()
+{
+	return notUsed;
+}
+
+void DynInstance::setReusable(bool reuse)
+{
+	notUsed = reuse;
 }
 
 void DynInstance::store(oCItem& item) {
@@ -174,6 +237,10 @@ void DynInstance::store(oCItem& item) {
 
 
 void DynInstance::init(oCItem* item, int index) {
+
+	ObjectManager*  manager = ObjectManager::getObjectManager();
+	manager->oCItemSaveRemoveEffect(item);
+
 	item->idx=idx;
 	item->name=zSTRING(name.c_str());
 	item->nameID=zSTRING(nameID.c_str());
@@ -297,8 +364,6 @@ void DynInstance::init(oCItem* item, int index) {
 	//Get current symbol index and set it as the item's instance id
 	*instance = index;
 
-	ObjectManager*  manager = ObjectManager::getObjectManager();
-	manager->oCItemSaveRemoveEffect(item);
 	manager->oCItemSaveInsertEffect(item);
 };
 
@@ -458,6 +523,8 @@ void DynInstance::serialize(std::ostream& os) const
 		util::writeString(os, *it);
 		os << ' ';
 	}
+
+	os << previousId << ' ';
 }
 
 
@@ -604,6 +671,8 @@ void DynInstance::deserialize(std::stringstream* is)
 		//avoid duplicate names!
 		addActiveWorld(data);
 	}
+
+	util::getInt(*is, previousId);
 }
 
 int DynInstance::getParserSymbolBitfield()
@@ -651,7 +720,7 @@ void DynInstance::addActiveWorld(string worldName)
 {
 	for (auto it = activeWorlds.begin(); it != activeWorlds.end(); ++it)
 	{
-		std::string active = *it;
+		string active((*it).c_str());
 		if (worldName.compare(active) == 0)
 		{
 			// worldName was already added. Nothing to do
@@ -664,7 +733,7 @@ void DynInstance::addActiveWorld(string worldName)
 void DynInstance::resetActiveWorlds()
 {
 	zCWorld* world = oCGame::GetGame()->GetWorld();
-	string worldName = world->worldName.ToChar();
+	string worldName (world->worldName.ToChar());
 
 	//remove current world of list
 	activeWorlds.remove(worldName);

@@ -70,6 +70,7 @@ public:
 	 * Default virtual destructor.
 	 */
 	virtual ~DynItemInst();
+
 	static void oCItemGetValueHookNaked();
 	static void loadSavegameHookNaked();
 	static void writeSavegameHookNaked();
@@ -84,7 +85,7 @@ public:
 	static void zCPar_SymbolTableGetIndexHookNaked();
 
 	static OCItemInsertEffect oCItemInsertEffect;
-
+	
 	static int __fastcall zCCameraScreenProjectionTouchesPortalHookNaked(void* pThis, zTBBox3D const &, zTBBox2D const &);
 
 	/**
@@ -283,6 +284,11 @@ public:
 	//.text:00534B70 private: void __thiscall zCBspSector::ActivateSectorRecIndoor(struct zTBBox2D const &, class zCBspSector *, int) proc near
 	static void __thiscall zCBspSectorActivateSectorRecIndoorHook(void* pThis, zTBBox2D const & second, void* third, int fourth);
 
+
+	static void checkReusableInstances();
+
+	static void addToReusableLists(int instanceId, int previousId);
+
     /*! @copydoc Module::hookModule()
 	 */
 	virtual void hookModule() override;
@@ -380,6 +386,7 @@ private:
 	static bool saveGameIsLoading;
 	static bool saveGameWriting;
 
+	static std::list<std::pair<int, int>>reusableMarkList;
 
 	class DII_InstanceNameNotFoundException : protected std::exception {
 	private:

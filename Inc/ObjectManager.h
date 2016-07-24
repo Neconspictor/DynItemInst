@@ -381,6 +381,8 @@ public:
 
 	void markAsReusable(int instanceId, int previousId);
 
+	void checkReusableInstances();
+
 	/**
 	* Checks whether the specified oCItem is in the game world's list registered
 	* \param item The oCItem to check
@@ -434,6 +436,15 @@ public:
 
 	static g2ext_extended::zCPar_SymbolTable* zCParserGetSymbolTable(void* parser);
 
+	/**
+	* Inits an oCItem by its (previously) assigned (new) instance id. The return value indicates
+	* if the initialization was successful. E.g. if no registered instance id was found, this method
+	* will return false.
+	* \param item The item to initialize
+	* \return Was the initialization successful?
+	*/
+	bool initByNewInstanceId(oCItem* item);
+
 private:
 
 	/**
@@ -472,14 +483,6 @@ private:
 	 * Creates a new object manager.
 	 */
 	ObjectManager();
-	/**
-	 * Inits an oCItem by its (previously) assigned (new) instance id. The return value indicates
-	 * if the initialization was successful. E.g. if no registered instance id was found, this method
-	 * will return false.
-	 * \param item The item to initialize
-	 * \return Was the initialization successful?
-	 */
-	bool initByNewInstanceId(oCItem* item);
 
 	static zCPar_Symbol* createNewSymbol(ParserInfo* old);
 	bool addSymbolToSymbolTable(zCPar_Symbol* symbol);
