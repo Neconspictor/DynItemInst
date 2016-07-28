@@ -264,6 +264,8 @@ public:
 
 	static void logAlways(std::stringstream* ss);
 
+	static void callDaedalusFunction_Int2(std::string functionName, int first, int second, bool isExternal);
+
 private:
 	util() {};
 	~util() {};

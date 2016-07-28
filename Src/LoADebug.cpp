@@ -35,16 +35,17 @@ LoADebug::~LoADebug()
 void LoADebug::hookModule()
 {
 	HookManager* manager = HookManager::getHookManager();
-	manager->addFunctionHook((LPVOID*)&zCTimerFrameUpdate, oCGameRenderHookNaked, moduleDesc);
+	manager->addFunctionHook((LPVOID*)&zCTimerFrameUpdate, zCTimerFrameUpdateHookNaked, moduleDesc);
 }
 
 void LoADebug::unHookModule()
 {
 	HookManager* manager = HookManager::getHookManager();
-	manager->removeFunctionHook((LPVOID*)&zCTimerFrameUpdate, oCGameRenderHookNaked, moduleDesc);
+	manager->removeFunctionHook((LPVOID*)&zCTimerFrameUpdate, zCTimerFrameUpdateHookNaked, moduleDesc);
 }
 
-void LoADebug::oCGameRenderHookNaked()
+
+void LoADebug::zCTimerFrameUpdateHookNaked()
 {
 	_asm
 	{
@@ -53,12 +54,12 @@ void LoADebug::oCGameRenderHookNaked()
 			nop
 			nop
 			/*finally hook function call*/
-			jmp LoADebug::oCGameRenderHook
+			jmp LoADebug::zCTimerFrameUpdateHook
 	}
 }
 
 
-void LoADebug::oCGameRenderHook()
+void LoADebug::zCTimerFrameUpdateHook()
 {
 	// Print hero.aivar[4] each frame
 	oCNpc* hero = oCNpc::GetHero();

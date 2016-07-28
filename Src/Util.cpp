@@ -39,6 +39,11 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #endif
 #include <sstream>
 #include <Configuration.h>
+#include "api/g2/ztypes.h"
+#include <zCPar_SymbolTable.h>
+#include <ObjectManager.h>
+#include <api/g2/zcparser.h>
+#include <Util_Constants.h>
 
 
 HMODULE util::hModule = 0;
@@ -120,6 +125,56 @@ void util::debug(std::stringstream* ss, Logger::LogLevel level)
 void util::logAlways(std::stringstream* ss)
 {
 	Logger::getLogger()->logAlways(ss);
+}
+
+void util::callDaedalusFunction_Int2(std::string functionName, int first, int second, bool isExternal)
+{
+	zCParser* parser = zCParser::GetParser();
+	int index = parser->GetIndex(zSTRING(functionName.c_str()).Upper());
+
+	bool hasReturn = false;
+	void* dataStack = (BYTE*)parser + 0x58;
+
+	g2ext_extended::zCPar_SymbolTable* currSymbolTable = ObjectManager::zCParserGetSymbolTable(parser);
+
+	zCPar_Symbol* symbol = currSymbolTable->GetSymbol(index);
+	int stackPosition = 0;
+	*(int*)((BYTE*)parser + 0x219C) = index;
+	constants::zCPar_SymbolGetStackPos(symbol, stackPosition, 0);
+
+	constants::zCPar_StackClear(dataStack);
+
+	// push arguments on data stack
+	constants::zCPar_StackPush(dataStack, first);
+	constants::zCPar_StackPush(dataStack, constants::ZCPAR_TOK_PUSHINT);
+
+	constants::zCPar_StackPush(dataStack, second);
+	constants::zCPar_StackPush(dataStack, constants::ZCPAR_TOK_PUSHINT);
+
+	if (isExternal)
+	{
+		typedef int(__cdecl* External)();
+		External external = (External)stackPosition;
+		external();
+	}
+	else
+	{
+		constants::zCParserDoStack(parser, stackPosition);
+	}
+
+	if (!hasReturn)
+	{
+		return;
+	}
+
+	// pop return value
+	int result = constants::zCPar_DataStackPop(dataStack);
+	for (int i = 0; i < 1; ++i)
+	{
+		result = constants::zCPar_DataStackPop(dataStack);
+	}
+
+	*(int*)((BYTE*)parser + 0x219C) = -1;
 }
 
 std::string util::trimFromRight(const std::string& str)

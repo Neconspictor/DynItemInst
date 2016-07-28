@@ -69,6 +69,12 @@
     <Filter Include="Source Files\DynamicParsing">
       <UniqueIdentifier>{39f368a2-84aa-4f37-9fc0-a05d7aff7e9a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\LoA">
+      <UniqueIdentifier>{5923ecc6-757a-4873-9f09-eb04ce1960ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\LoA">
+      <UniqueIdentifier>{9420ff78-5f41-4bc3-a7a4-5e70449543a1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Inc\DllMain.h">
@@ -149,6 +155,12 @@
     <ClInclude Include="Inc\Constants.h">
       <Filter>Header Files\DynItemInst</Filter>
     </ClInclude>
+    <ClInclude Include="Inc\Util_Constants.h">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\LoA.h">
+      <Filter>Header Files\LoA</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\DllMain.cpp">
@@ -204,6 +216,9 @@
     </ClCompile>
     <ClCompile Include="Src\DynamicParsing.cpp">
       <Filter>Source Files\DynamicParsing</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\LoA.cpp">
+      <Filter>Source Files\LoA</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

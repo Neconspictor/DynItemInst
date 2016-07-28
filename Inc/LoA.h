@@ -1,20 +1,21 @@
 #pragma once
-
 #include "Module.h"
+#include "oCItemExtended.h"
+#include <api/g2/ocnpc.h>
 
-class LoADebug : public Module
+class LoA : public Module
 {
 public:
 
 	/**
 	* Default constructor
 	*/
-	LoADebug();
+	LoA();
 
 	/**
 	* Default virtual destructor.
 	*/
-	virtual ~LoADebug();
+	virtual ~LoA();
 
 	/*! @copydoc Module::hookModule()
 	*/
@@ -24,9 +25,6 @@ public:
 	*/
 	virtual void unHookModule() override;
 
-	static void __cdecl zCTimerFrameUpdateHookNaked();
-	
-	static void __cdecl zCTimerFrameUpdateHook();
-
-
+	static void __cdecl oCNpcEquipWeaponHookNaked();
+	static void __thiscall oCNpcEquipWeaponHook(oCNpc*, oCItem*);
 };
