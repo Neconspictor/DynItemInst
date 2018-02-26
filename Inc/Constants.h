@@ -3,16 +3,16 @@ namespace constants
 {
 	static const int OCITEM_FLAG_EQUIPPED = 0x40000000;
 
-	using  OCNpcSetWeaponMode2 = int(__thiscall*)(oCNpc*, int);
+	typedef int(__thiscall* OCNpcSetWeaponMode2)(oCNpc*, int);
 	static const OCNpcSetWeaponMode2 oCNpcSetWeaponMode2 = (OCNpcSetWeaponMode2)0x00738E80;
 
-	using OCItemInitByScript = void(__thiscall*)(void* pThis, int, int);
+	typedef void(__thiscall* OCItemInitByScript)(void* pThis, int, int);
 	static const OCItemInitByScript oCItemInitByScript  = (OCItemInitByScript)0x00711BD0;
 
-	using OCNpcEV_ForceRemoveWeapon = int(__thiscall*)(oCNpc* pThis, void*);
+	typedef int(__thiscall* OCNpcEV_ForceRemoveWeapon)(oCNpc* pThis, void*);
 	static const OCNpcEV_ForceRemoveWeapon oCNpcEV_ForceRemoveWeapon = (OCNpcEV_ForceRemoveWeapon)0x0074EC40;
 	
-	using OCNpcGetWeapon = oCItem*(__thiscall*)(oCNpc* pThis);
+	typedef oCItem*(__thiscall* OCNpcGetWeapon)(oCNpc* pThis);
 	static const OCNpcGetWeapon oCNpcGetWeapon = (OCNpcGetWeapon)0x007377A0;
 	
 	static int(__thiscall* oCNpcSetRightHand)(oCNpc*, oCVob*) = (int(__thiscall*)(oCNpc*, oCVob*))0x0073B1C0;

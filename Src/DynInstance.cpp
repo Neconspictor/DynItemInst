@@ -54,9 +54,35 @@ DynInstance::~DynInstance()
 {
 }
 
+struct RESTORE_PREVIOUS_ID_PARAMS {
+	std::stringstream* logStream;
+	int instanceID;
+	int previousID;
+};
+
+static void restorePreviousId(void* obj, void* param, oCItem* itm) {
+
+	RESTORE_PREVIOUS_ID_PARAMS* params = (RESTORE_PREVIOUS_ID_PARAMS*)param;
+	int instanceID = params->instanceID;
+
+
+	if (itm && (itm->GetInstance() == instanceID))
+	{
+		*params->logStream << "item has instanceId marked as reusable: " << itm->description.ToChar() << endl;
+		util::debug(params->logStream);
+
+		ObjectManager* manager = ObjectManager::getObjectManager();
+		manager->setInstanceId(itm, params->previousID);
+		manager->oCItemSaveRemoveEffect(itm);
+		itm->effect = "";
+		itm->InitByScript(params->previousID, 1);
+		itm->InsertEffect();
+	}
+}
+
 void DynInstance::checkNotUsed()
 {
-	if (!notUsed) return;
+	if (reusable) return;
 
 	if (previousId < 0) return;
 
@@ -77,7 +103,7 @@ void DynInstance::checkNotUsed()
 
 	// Assign all connected items in the world the previous instance id
 	ObjectManager* manager = ObjectManager::getObjectManager();
-	auto func = [&](oCItem* item)->void {
+	/*auto func = [&](oCItem* item)->void {
 		if (item && (item->GetInstance() == instanceID))
 		{
 			logStream << "item has instanceId marked as reusable: " << item->description.ToChar() << endl;
@@ -89,9 +115,10 @@ void DynInstance::checkNotUsed()
 			item->InitByScript(previousId, 1);
 			item->InsertEffect();
 		}
-	};
+	};*/
 
-	manager->callForAllItems(func);
+	RESTORE_PREVIOUS_ID_PARAMS params = {&logStream, instanceID, previousId };
+	manager->callForAllItems(restorePreviousId, NULL, &params);
 
 	if (notUsedInOtherWorlds)
 	{
@@ -106,12 +133,12 @@ void DynInstance::setPreviousId(int previousId)
 
 bool DynInstance::isReusable()
 {
-	return notUsed;
+	return reusable;
 }
 
 void DynInstance::setReusable(bool reuse)
 {
-	notUsed = reuse;
+	reusable = reuse;
 }
 
 void DynInstance::store(oCItem& item) {
@@ -391,7 +418,7 @@ void DynInstance::setZCPar_SymbolName(std::string name)
 
 void DynInstance::serialize(std::ostream& os) const
 {
-	os << notUsed << ' ';
+	os << reusable << ' ';
 	util::writeString(os, zCPar_Symbol_name);
 	os << ' ';
 	os << zCPar_Symbol_Bitfield << ' ';
@@ -519,7 +546,7 @@ void DynInstance::serialize(std::ostream& os) const
 
 	os << activeWorlds.size() << ' ';
 
-	for (auto it = activeWorlds.begin(); it != activeWorlds.end(); ++it)
+	for (list<string>::const_iterator it = activeWorlds.begin(); it != activeWorlds.end(); ++it)
 	{
 		util::writeString(os, *it);
 		os << ' ';
@@ -544,7 +571,7 @@ void DynInstance::deserialize(std::stringstream* is)
 	writeString(os, nameID);
 	
 	*/
-	util::getBool(*is, notUsed);
+	util::getBool(*is, reusable);
 	util::readString(is, zCPar_Symbol_name);
 	zCPar_Symbol_name = util::trimFromRight(zCPar_Symbol_name);
 	util::getInt(*is, zCPar_Symbol_Bitfield);
@@ -719,7 +746,7 @@ void DynInstance::copyUserData(DynInstance& source)
 
 void DynInstance::addActiveWorld(string worldName)
 {
-	for (auto it = activeWorlds.begin(); it != activeWorlds.end(); ++it)
+	for (std::list<std::string>::iterator it = activeWorlds.begin(); it != activeWorlds.end(); ++it)
 	{
 		string active((*it).c_str());
 		if (worldName.compare(active) == 0)
@@ -779,14 +806,10 @@ DII_UserData::~DII_UserData()
 	int indexBegin = userData.intAmount * sizeof(int);
 	zSTRINGSerialized* ptr = (zSTRINGSerialized*)((userData.pMemory) + indexBegin);
 
-	delete ptr->ptr;
-	ptr->ptr = nullptr;
-
-	//if (userData.pMemory)
-	//{
-	delete userData.pMemory;
-	userData.pMemory = nullptr;
-	//}
+	//delete ptr->ptr;
+	//ptr->ptr = NULL;
+	//delete userData.pMemory;
+	//userData.pMemory = NULL;
 }
 
 void DII_UserData::serialize(std::ostream& os) const
@@ -812,11 +835,11 @@ void DII_UserData::serialize(std::ostream& os) const
 	for (int i = 0; i < userData.strAmount; ++i)
 	{
 		ptr = (zSTRINGSerialized*)((userData.pMemory) + indexBegin + i*sizeof(zSTRINGSerialized));
-		os << ptr->_vtbl << ' ';
-		os << ptr->_allocater << ' ';
+		//os << ptr->_vtbl << ' ';
+		//os << ptr->_allocater << ' ';
 
 		string data;
-		if (ptr->ptr == nullptr)
+		if (ptr->ptr == NULL)
 		{
 			data = "";
 		}
@@ -876,21 +899,37 @@ void DII_UserData::deserialize(std::stringstream* is)
 	for (int i = 0; i < userData.strAmount; ++i)
 	{
 		ptr = (zSTRINGSerialized*)((userData.pMemory) + indexBegin + i*sizeof(zSTRINGSerialized));
-		util::getInt(*is, ptr->_vtbl);
-		util::getInt(*is, ptr->_allocater);
+		//util::getInt(*is, ptr->_vtbl);
+		//util::getInt(*is, ptr->_allocater);
 
-		//assert(userData.getStr(i)->ptr == nullptr);
+		//assert(userData.getStr(i)->ptr == NULL);
 		std::string data;
 		util::readString(is, data);
-		//&userData.pMemory[indexBegin] = new char[userData.getStr(i)->len];
-		ptr->len = data.size();
-		ptr->ptr = new char[ptr->len];
-		strcpy(ptr->ptr, data.c_str());
 
-		ss << "string loaded: " << std::string(ptr->ptr) << std::endl;
+
+		const char* content = data.c_str();
+		if (content == NULL) {
+			content = "";
+		}
+
+		zSTRING dataZ(content);
+
+		memcpy(ptr, &dataZ, sizeof(zSTRING));
+		//&userData.pMemory[indexBegin] = new char[userData.getStr(i)->len];
+		int size = ptr->len;
+		int res = ptr->res;
+
+		zSTRING* test = (zSTRING*)ptr;
+
+		ss << "string loaded: " << std::string(test->ToChar()) << std::endl;
 		util::debug(&ss);
 
 	}
+}
+
+void * DII_UserData::gothic2OperatorNew(size_t size)
+{
+	XCALL(0x00565F50);
 }
 
 void DII_UserData::createMemory(int intAmount, int strAmount)
@@ -898,7 +937,8 @@ void DII_UserData::createMemory(int intAmount, int strAmount)
 	std::stringstream ss; ss << "DII_UserData::createMemory: strAmount: " << strAmount << std::endl;
 	util::debug(&ss);
 	int byteSize = intAmount * sizeof(int) + strAmount * sizeof(zSTRINGSerialized);
-	BYTE* memory = new BYTE[byteSize]{0};
+	BYTE* memory = (BYTE*)gothic2OperatorNew(byteSize);
+	memset(memory, 0, byteSize);
 
 	userData.intAmount = intAmount;
 	userData.strAmount = strAmount;

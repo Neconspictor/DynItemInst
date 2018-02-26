@@ -4,6 +4,7 @@
 #include <Module.h>
 #include <api/g2/ztypes.h>
 #include "api/g2/ocnpc.h"
+#include <math.h>
 
 #define ZCVOB_DO_FRAME_ACTIVITY_ADDRESS 0x00602C60
 #define ZCVOB_SET_PHYSICS_ENABLED_ADDRESS 0x0061D190
@@ -153,7 +154,7 @@ struct PolyFlags {
 	unsigned SectorIndex : 16;
 };
 
-struct zCVertex
+class zCVertex
 {
 public:
 	/*#ifdef BUILD_GOTHIC_1_08k

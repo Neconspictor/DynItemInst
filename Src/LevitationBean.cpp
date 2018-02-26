@@ -5,6 +5,7 @@
 #include <api/g2/zcworld.h>
 #include "LevitationBean.h"
 #include <iostream>
+#include <math.h>
 
 
 const float LevitationBean::TRACE_RAY_DISTANCE = 1000000000;
@@ -75,7 +76,7 @@ float LevitationBean::getMiddlePointDistance()
 {
 	zTBBox3D bBox = zCModelGetBBox3D(npc->GetModel()); //->GetBBox3D();
 	float yDownExt = bBox.bbox3D_mins.y;
-	return abs(5 * yDownExt / 6);
+	return fabs(5 * yDownExt / 6.0f);
 }
 
 void LevitationBean::adaptHoverDistance(zVEC3& newPosition, float newDistanceToGround)

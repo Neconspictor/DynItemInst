@@ -4,7 +4,7 @@
 #include "Util.h"
 
 //.text:0073A030 public: void __thiscall oCNpc::EquipWeapon(class oCItem *) proc near
-using OCNpcEquipWeapon = void(__thiscall*)(oCNpc*, oCItem*);
+typedef void(__thiscall* OCNpcEquipWeapon)(oCNpc*, oCItem*);
 OCNpcEquipWeapon oCNpcEquipWeapon = (OCNpcEquipWeapon)0x0073A030;
 
 LoA::LoA()

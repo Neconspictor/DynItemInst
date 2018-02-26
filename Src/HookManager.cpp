@@ -45,16 +45,15 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <MoreViewDistance.h>
 #include <LoaDebug.h>
 #include <PortalDrawDistance.h>
-#include <TestModule.h>
 #include <DynamicParsing.h>
 #include <LoA.h>
 
-HookManager* HookManager::instance = nullptr;
-std::stringstream HookManager::logStream = std::stringstream();
+HookManager* HookManager::instance = NULL;
+std::stringstream HookManager::logStream;
 
 HookManager* HookManager::getHookManager()
 {
-	if (instance == nullptr)
+	if (instance == NULL)
 	{
 		instance = new HookManager();
 	}
@@ -63,7 +62,7 @@ HookManager* HookManager::getHookManager()
 
 void HookManager::release()
 {
-	if (instance == nullptr) return;
+	if (instance == NULL) return;
 
 	std::list<Module*>::iterator it;
 	it = instance->modules.begin();
@@ -103,14 +102,14 @@ void HookManager::unregisterHook(LPVOID original, LPVOID hook)
 LPVOID HookManager::getOriginalAddress(LPVOID hook)
 {
 	std::map<LPVOID,LPVOID>::iterator it = hookToOriginalAddress.find(hook);
-	if (it == hookToOriginalAddress.end()) {return nullptr;}
+	if (it == hookToOriginalAddress.end()) {return NULL;}
 	return it->second;
 }
 
 LPVOID HookManager::getHookAddress(LPVOID original)
 {
 	std::multimap<LPVOID,LPVOID>::iterator it = originalToHookAddress.find(original);
-	if (it == originalToHookAddress.end()) {return nullptr;}
+	if (it == originalToHookAddress.end()) {return NULL;}
 	return it->second;
 };
 
@@ -165,7 +164,7 @@ void HookManager::addFunctionHook(LPVOID* source, LPVOID destination, std::strin
 void HookManager::removeFunctionHook(LPVOID* source, LPVOID destination, std::string description)
 {
 	LPVOID original = getOriginalAddress(destination);
-	if (original == nullptr)
+	if (original == NULL)
 	{
 		logStream.setf(std::ios::hex, std::ios::basefield);
 		logStream << "HookManager::removeFunctionHook: Error: Couldn't find original function for function hook 0x"<< destination
@@ -211,7 +210,7 @@ HookManager::~HookManager()
 HookManager::HookManager()
 {
 	called = false;
-	this->instance = nullptr;
+	this->instance = NULL;
 };
 
 void HookManager::hook()
@@ -237,9 +236,6 @@ void HookManager::hook()
 
 	util::logAlways(&logStream);
 
-
-	Configuration::loadLoAIni();
-
 	logStream << "HookManager::hook: Hook target functions..."<< std::endl;
 	util::logAlways(&logStream);
 
@@ -256,15 +252,15 @@ void HookManager::hook()
 
 	Module* dynItemInstModule = new DynItemInst();
 	Module* externals = new DaedalusExports();
-	Module* loaModule = new LoA();
-	Module* moreViewDistance = nullptr;
+	//Module* loaModule = new LoA();
+	Module* moreViewDistance = NULL;
 	//Module* dynamicParsing = new DynamicParsing();
-	if (addMoreDistanceViewModul)
-		moreViewDistance = new MoreViewDistance();
+	//if (addMoreDistanceViewModul)
+	//	moreViewDistance = new MoreViewDistance();
 
-	Module* loaDebug = nullptr;
-	if (addLoaDebug)
-		loaDebug = new LoADebug();
+	//Module* loaDebug = NULL;
+	//if (addLoaDebug)
+		//loaDebug = new LoADebug();
 
 	//Module* portalDistanceMultiplier = new PortalDrawDistance();
 
@@ -272,13 +268,13 @@ void HookManager::hook()
 	//Module* customFocuses = new CustomNpcFocus();
 	manager->addModule(dynItemInstModule);
 	manager->addModule(externals);
-	manager->addModule(loaModule);
+	//manager->addModule(loaModule);
 
-	if (moreViewDistance)
-		manager->addModule(moreViewDistance);
+	//if (moreViewDistance)
+	//	manager->addModule(moreViewDistance);
 
-	if (loaDebug)
-		manager->addModule(loaDebug);
+	//if (loaDebug)
+	//	manager->addModule(loaDebug);
 
 
 	//manager->addModule(dynamicParsing);
@@ -299,7 +295,7 @@ void HookManager::hook()
 
 void HookManager::unhook()
 {
-	if (instance == nullptr) return;
+	if (instance == NULL) return;
 	logStream << "HookManager::unHook: Unhook functions..." << std::endl;
 	instance->unHookModules();
 	release();

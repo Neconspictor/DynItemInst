@@ -46,7 +46,7 @@ _declspec(naked) void MoreViewDistance::zCCameraSetFarClipZHookNaked()
 
 void MoreViewDistance::zCCameraSetFarClipZHook(void* pThis, float value)
 {
-	int targetValue = 60000.0f;
+	float targetValue = 60000.0f;
 	if (value != targetValue)
 	{
 		value *= Configuration::getFarClipZMultiplicator();

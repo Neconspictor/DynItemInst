@@ -42,6 +42,10 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 /**
  * This class is responsible for managing DynInstance and AdditMemory objects.
  */
+
+typedef DWORD (__thiscall* ZCPAR_SYMBOL_CONSTRUCTOR)(void* thizz);
+static ZCPAR_SYMBOL_CONSTRUCTOR zCPar_SymbolConstructor = (ZCPAR_SYMBOL_CONSTRUCTOR)0x007A1690;
+
 class ObjectManager {
 public:
 	/**
@@ -369,9 +373,12 @@ public:
 
 	void updateIkarusSymbols();
 
-	void callForAllItems(std::function<void(oCItem*)> func, oCItem** stopIfNotNullItem = nullptr);
-	static void callForInventoryItems(std::function<void(oCItem*)> func, oCNpc * npc);
-	static void callForAllWorldItems(std::function<void(oCItem*)> func);
+	bool updateItemAndAddit(oCItem* item);
+
+	void callForAllItems(void(*func)(void* obj, void* param, oCItem*), void* obj, void* param, oCItem** stopIfNotNullItem = NULL);
+	static void callForInventoryItems(void(*func)(void* obj, void* param, oCItem*), void* obj, void* param, oCNpc * npc);
+	static void callForAllContainerItems(void(*func)(void* obj, void* param, oCItem*), void* obj, void* param, oCMobContainer* container);
+	static void callForAllWorldItems(void(*func)(void* obj, void* param, oCItem*), void* obj, void* param);
 
 	int getInstanceBegin() const;
 
@@ -428,7 +435,7 @@ public:
 	oCItem* searchItemInInvbyInstanzValue(oCNpcInventory* inventory, int searchValue);
 
 	void drawWeaponSilently(oCNpc* npc, int weaponMode, int readedWeaponId, 
-		int munitionId, bool munitionUsesRightHand, std::unordered_map<int, oCItem*>* equippedSpells, 
+		int munitionId, bool munitionUsesRightHand, std::map<int, oCItem*>* equippedSpells, 
 		oCItem** activeSpellItem, AdditMemory* addit, bool createCopy = true);
 
 	int getSelectedSpellKey(oCNpc* npc);
@@ -475,7 +482,7 @@ private:
 	std::queue<int> nextAdditKeys;
 
 	std::stringstream logStream;
-	int ObjectManager::instanceBegin = -1;
+	int ObjectManager::instanceBegin;
 
 private:
 
@@ -508,6 +515,8 @@ private:
 	 * \return The new created additional memory key. 
 	 */
 	int calcAdditKey(bool isHeroItem) const;
+
+	static void* __cdecl gothic2OperatorNew(size_t size);
 };
 
 #endif __ObjectManager_H__

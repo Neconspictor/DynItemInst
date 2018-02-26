@@ -1,4 +1,4 @@
-﻿#include <Levitation.h>
+#include <Levitation.h>
 #include <HookManager.h>
 #include <api/g2/zcworld.h>
 #include <api/g2/zcinput.h>
@@ -201,7 +201,7 @@ void Levitation::oCGameUnpauseHook(void* pThis)
 void Levitation::zCVobSetCollDetHook(void* pThis, int second)
 {
 	oCNpc* hero = oCNpc::GetHero();
-	if (hero != nullptr && (pThis == hero) && adjustHeroPosition) {
+	if (hero != NULL && (pThis == hero) && adjustHeroPosition) {
 		return zCVobSetCollDet(pThis, 0);
 	}
 	zCVobSetCollDet(pThis, second);
@@ -275,7 +275,7 @@ int Levitation::zCAIPlayerCheckEnoughSpaceMoveDirHook(void* pThis, zVEC3 const& 
 {
 	int result = zCAIPlayerCheckEnoughSpaceMoveDir(pThis, vec, second);
 	oCNpc* hero = oCNpc::GetHero();
-	if (result && hero != nullptr && (pThis == hero) && adjustHeroPosition) {
+	if (result && hero != NULL && (pThis == hero) && adjustHeroPosition) {
 		logStream << "zCAIPlayerCheckEnoughSpaceMoveDirHook: called!"  << std::endl;
 		util::logInfo(&logStream);
 		return 0;
@@ -405,7 +405,7 @@ Motion getCollideYDir(zVEC3 pos, float middlePointDist, bool up) {
 	}
 	zCWorld* world = oCGame::GetGame()->GetWorld();
 	int flags = (1 << 0) | (1 << 7) | (1 << 8) | (1 << 9) | (1 << 10) | (1 << 11) | (1 << 14);
-	LevitationBean::zCWorldTraceRayNearestHit(world, pos, dir, nullptr, flags);
+	LevitationBean::zCWorldTraceRayNearestHit(world, pos, dir, NULL, flags);
 	zVEC3* intersection = &(world->foundIntersection);
 
 	Motion motion;
@@ -436,7 +436,7 @@ Motion getCollideForwardDir(oCNpc* npc, float middlepointDistance, bool backward
 
 	zCWorld* world = oCGame::GetGame()->GetWorld();
 	int flags = (1 << 0) | (1 << 7) | (1 << 8) | (1 << 9) | (1 << 10) | (1 << 11) | (1 << 14);
-	LevitationBean::zCWorldTraceRayNearestHit(world, pos, posOutside, nullptr, flags);
+	LevitationBean::zCWorldTraceRayNearestHit(world, pos, posOutside, NULL, flags);
 	zVEC3* intersection = &(world->foundIntersection);
 
 	Motion motion;
@@ -483,7 +483,7 @@ zVEC3 getCollidingPolyNormal(oCNpc* hero, const zMAT4& mat)
 	box.bbox3D_mins += pos;
 
 	Levitation::zCBspBaseCollectPolysInBBox3D(pointer, rec, polys, third);
-	if (polys != nullptr) {
+	if (polys != NULL) {
 		//writeToConsole("Collision detected: ", third);
 		//logStream << "Test: Collision detected: " << third << std::endl;
 		//util::logInfo(&logStream);
@@ -553,7 +553,7 @@ bool checkCollision(oCNpc* hero, const zMAT4& mat)
 	box.bbox3D_mins += pos;
 
 	Levitation::zCBspBaseCollectPolysInBBox3D(pointer, rec, polys, third);
-	if (polys != nullptr) {
+	if (polys != NULL) {
 		if (third)
 		{
 			//create plane from intersecting poly
@@ -605,8 +605,8 @@ void Test(oCNpc* hero) {
 	zVEC3 objPos = collideDown.objectPos;
 	float yIntersect = objPos.y - iSect.y; // always > 0
 	zCInput* input = zCInput::GetInput();
-	bool upKeyPressed = input->KeyPressed(0x1A); // ü = 0x1A
-	bool downKeyPressed = input->KeyPressed(0x28); // ä = 0x1A
+	bool upKeyPressed = input->KeyPressed(0x1A) != 0; // ü = 0x1A
+	bool downKeyPressed = input->KeyPressed(0x28) != 0; // ä = 0x1A
 	heroLevitationBean->setMoveDown(false);
 	float distanceToGround = heroLevitationBean->getDistanceToGround(pos);
 	heroLevitationBean->update(distanceToGround);
@@ -662,8 +662,8 @@ void __cdecl zCVobCheckAutoUnlinkHook(zCVob* vob) {
 
 std::ostream & operator<<(std::ostream & os, const Plane & p)
 {
-	os << "(" << std::to_string(p.a) << ", " << std::to_string(p.b) << ", " << std::to_string(p.c) << ", "<< 
-		std::to_string(p.d) << ")";
+	os << "(" << p.a << ", " << p.b << ", " << p.c << ", "<< 
+		p.d << ")";
 	return os;
 }
 

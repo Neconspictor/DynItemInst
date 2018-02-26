@@ -46,7 +46,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 
 #include "api/g2/zcobject.h"
 #include "api/g2/ocvob.h"
-#include "api/g2/ocitem.h"
+#include "api/g2/ocitemExtended.h"
 #include "api/g2/ocnpcinventory.h"
 
 class oCAskBox;

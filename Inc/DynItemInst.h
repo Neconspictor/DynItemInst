@@ -37,8 +37,9 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <vector>
 #include <oCItemExtended.h>
 #include <ocgameExtended.h>
-#include <unordered_map>
+#include <map>
 #include <AdditMemory.h>
+#include <list>
 
 typedef void(__thiscall* OCItemInsertEffect)(oCItem*);
 
@@ -61,6 +62,31 @@ class DynItemInst : public Module
 
 public:
 
+	struct LevelChangeBean
+	{
+		oCItem* item;
+		int dynamicInstanceId;
+		int original_on_equip;
+		int original_on_unequip;
+		int effectVob;
+		int weaponMode;
+		AdditMemory* addit;
+	};
+
+	struct InstanceNames
+	{
+		std::string base;
+		std::string nearFight;
+		std::string distanceFight;
+		std::string rune;
+		std::string other;
+
+		int nearFightCounter;
+		int distanceFightCounter;
+		int runeCounter;
+		int otherCounter;
+	};
+
 	/**
 	 * Creates a new DynItemInst module.
 	 */
@@ -81,7 +107,7 @@ public:
 	static void oCMobContainerOpenHookNaked();
 	static void zCParserGetIndexHookNaked();
 	static void zCPar_SymbolTableGetSymbolStringHookNaked();
-	static void zCPar_SymbolTableGetSymbolHookNaked();
+	//static void zCPar_SymbolTableGetSymbolHookNaked();
 	static void zCPar_SymbolTableGetIndexHookNaked();
 
 	static OCItemInsertEffect oCItemInsertEffect;
@@ -235,7 +261,11 @@ public:
 							 * \param inventory The inventory the provided item is contained. If this field is NULL, it is expected
 							 * that the item is located in the current world.
 							 */
-	static void restoreItem(oCItem* item, oCNpcInventory* inventory = nullptr, std::unordered_map<int, oCItem*>* equippedSpells = nullptr, oCItem** activeSpellItem = nullptr);
+	static void restoreSpecificNpcItemStub( oCItem* item, 
+											oCNpcInventory* inventory,
+											AdditMemory* addit,
+											std::map<int, oCItem*>* equippedSpells = NULL, 
+											oCItem** activeSpellItem = NULL);
 
 	/**
 	 * Modifies a given oCItem for savegame writing if it has a dynamic instance id.
@@ -306,32 +336,7 @@ public:
 
 	static const std::string FILE_PATERN;
 
-private:
-
-	struct InstanceNames
-	{
-		std::string base;
-		std::string nearFight;
-		std::string distanceFight;
-		std::string rune;
-		std::string other;
-
-		int nearFightCounter;
-		int distanceFightCounter;
-		int runeCounter;
-		int otherCounter;
-	};
-
-	struct LevelChangeBean
-	{
-		oCItem* item;
-		int dynamicInstanceId;
-		int original_on_equip;
-		int original_on_unequip;
-		int effectVob;
-		int weaponMode;
-		AdditMemory* addit;
-	};
+	static InstanceNames instanceNames;
 
 private:
 	static std::string getClearedWorldName(zSTRING const & worldName);
@@ -342,19 +347,17 @@ private:
 
 	static void restoreSelectedSpell(oCNpc* npc, oCItem* selectedSpellItem);
 	static void restoreItemsOfNpc(oCNpc* npc);
-	static void restoreInventory(oCNpc* npc);
+	static void restoreSpecificNpcItem(void * obj, void * param, oCItem * itm);
+	static void restoreWorldItem(void * obj, void * param, oCItem * itm);
 	
 	static oCItem* restoreItemAfterLevelChange(oCNpc* npc, LevelChangeBean* bean, int weaponMode, int readiedWeaponId,
-		int munitionId, bool munitionUsesRightHand, std::unordered_map<int, oCItem*>* equippedSpells, 
+		int munitionId, bool munitionUsesRightHand, std::map<int, oCItem*>* equippedSpells, 
 		oCItem** selectedSpellItem);
 
 	static void restoreEquippedItem(oCItem*, oCNpcInventory* inventory, AdditMemory* addit, int instanceId, 
-		std::unordered_map<int, oCItem*>* equippedSpells, oCItem** activeSpellItem);
-	static void restoreWorldItem(oCItem*, int instanceId);
+		std::map<int, oCItem*>* equippedSpells, oCItem** activeSpellItem);
 
 private:
-
-	static InstanceNames instanceNames;
 
 	static const int LOAD_SAVEGAME_ADDRESS = 0x006C67D0;
 	static const int WRITE_SAVEGAME_ADDRESS = 0x006C5250;

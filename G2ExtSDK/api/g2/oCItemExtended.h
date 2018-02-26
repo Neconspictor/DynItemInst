@@ -1,12 +1,10 @@
 /*////////////////////////////////////////////////////////////////////////////
 
-This file is part of the G2Ext SDK headers.
+This file is part of DynItemInst. The components of this file are a mix of the G2Ext-Sdk file
+api/g2/oCItem.h and the file oCItem.d from the Ikarus Script package v. 1.2.0 from
+Sektenspinner.
 
-//////////////////////////////////////////////////////////////////////////////
-
-The G2Ext SDK headers
-
-Copyright © 2009, 2010 by Paindevs and Patrick Vogel
+Copyright © 2015 David Goeth
 
 All Rights reserved.
 
@@ -28,7 +26,7 @@ SUCH TERMS AND CONDITIONS.
 
 Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 
-/////////////////////////////////////////////////////////////////////////////*/
+/////////////////////////////////////////////////////////////////////////////**/
 
 #ifndef __API_G2_OCITEM_H__
 #define __API_G2_OCITEM_H__
@@ -51,7 +49,9 @@ class oCNpc;
 class zCView;
 class zCWorld;
 
-/** Insert description. */
+/** Insert description
+
+*/
 class oCItem : public oCVob
 {
 public:
@@ -124,11 +124,40 @@ public:
 	int 	inv_roty;								//  rotation around y-axis (in degrees)
 	int 	inv_rotz;								//  rotation around z-axis (in degrees)
 	int 	inv_animate;							//  rotate the item
+	int instanz;						//int Symbolindex
+	int c_manipulation;					//int ?
+	int last_manipulation;				//zREAL ?
+	int magic_value;					//int ?
+	int effectVob;						//oCVisualFX*
+	int next;	
+
 
 private:
 	char _data[28];
 
 public:
+
+	static void operator delete (void* p)
+	{
+		XCALL(0x007144A0); //
+	};
+
+	int HasFlag(int) 
+	{
+		XCALL(0x007126D0);
+	}
+
+	void InsertEffect()
+	{
+		XCALL(0x00712C40);
+	};
+
+	/*typedef void(__thiscall* OCItemInsertEffect)(oCItem*);
+	OCItemInsertEffect oCItemInsertEffect = (OCItemInsertEffect)0x00712C40;
+	typedef void(__thiscall* OCItemRemoveEffect)(oCItem*);
+	OCItemRemoveEffect oCItemRemoveEffect = (OCItemRemoveEffect)0x00712C00;*/
+
+
 	//.text:00712360 ; public: void __thiscall oCItem::CopyDamage(class oCItem *)
 	/** Insert description. 
 	* @usable Ingame only
@@ -318,6 +347,18 @@ public:
 		XCALL(0x00711970);
 	};
 
+	//.text:00711970 ; public: virtual void __thiscall oCItem::InitByScript(int, int)
+	/** Insert description.
+	* @usable Ingame only
+	*/
+	void InitByScript(int, int)
+	{
+		XCALL(0x00711BD0);
+	};
+
+	//typedef void(__thiscall* OCItemInitByScript)(void* pThis, int, int);
+	//OCItemInitByScript oCItemInitByScript = (OCItemInitByScript)0x00711BD0;
+
 	//.text:00712550 ; public: zINT __thiscall oCItem::IsDeadly(void)
 	/** Insert description. 
 	* @usable Ingame only
@@ -441,7 +482,7 @@ public:
 	/** Insert description. 
 	* @usable Ingame only
 	*/
-	virtual zINT SetVisual(zCVisual* p1)
+	void SetVisual(zCVisual* p1)
 	{
 		XCALL(0x00711910);
 	};
@@ -497,7 +538,7 @@ public:
 	*/
 	oCItem(void)
 	{
-		XCALL(0x00711290);
+		XCALL(0x00711290);  //00711290
 	};
 
 	//.text:00711470 ; public: __thiscall oCItem::oCItem(class zSTRING &, zINT)
@@ -508,6 +549,11 @@ public:
 	{
 		XCALL(0x00711470);
 	};
+
+	void ClearFlag(int flag)
+	{
+		XCALL(0x007126F0);
+	}
 };
 
 /** Insert description. */

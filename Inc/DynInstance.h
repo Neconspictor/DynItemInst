@@ -99,6 +99,8 @@ public:
 
 private:
 
+	static void* __cdecl gothic2OperatorNew(size_t size);
+
 	void createMemory(int intAmount, int strAmount);
 };
 
@@ -220,13 +222,11 @@ public:
 	std::list<std::string> activeWorlds;
 
 	//specifies whether this instance can be reassigned
-	bool notUsed;
+	bool reusable;
 
 	// specifies an instance id items assigned to this dynamic instances will assigned to, if
 	// the dynamic instance is marked as reusable!
 	int previousId;
-
-	bool reusable;
 
 	/**
 	 * Provides the Item's instance id.

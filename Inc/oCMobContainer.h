@@ -31,7 +31,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 
 #include "api/g2/ztypes.h"
 #include "api/g2/macros.h"
-#include "api/g2/ocitem.h"
+#include "api/g2/ocitemExtended.h"
 
 /**
  * Represents the gothic 2 oCMobContainer equivalent. A classic oCMobContainer is a chest.

@@ -38,7 +38,8 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include "api/interface.h"
 
 #include <vector>
-#include <unordered_map>
+#include <map>
+#include <list>
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -58,7 +59,7 @@ class zCVob;
 #define G2EXT_PARAMFLAGS_DEFINED
 
 /** internal use only */
-typedef enum
+enum
 {
 	G2EXT_PARAM_NO_VDFS_CHECK				= 0x00000001,
 	G2EXT_PARAM_NO_INJECTION				= 0x00000002,
@@ -225,7 +226,7 @@ typedef HRESULT (__stdcall *G2EXT_PLUGIN_VERSIONCHK_FUNC)	(int&, int&, G2EXT_DLL
 #define G2EXT_PLUGIN_INIT_FUNC_NAME		"G2Ext_PluginInit"
 #define G2EXT_PLUGIN_PREPARE_FUNC_NAME	"G2Ext_PluginPrepare"
 
-typedef std::unordered_map<UINT, UINT>	hmKey;
+typedef std::map<UINT, UINT>	hmKey;
 typedef std::list<oCItem*>				lstItem;
 typedef std::list<oCNpc*>				lstNpc;
 typedef std::list<zCVob*>				lstVob;

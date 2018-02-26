@@ -50,36 +50,4 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 
 #define G2EXT_DELETE( obj ) if (obj != NULL){delete obj;obj = NULL;}
 
-#include <boost/integer.hpp>  // for boost::uint_t
-
-/** fast pointer
-* @usable always
-*/
-typedef boost::uint_t<sizeof(void*) * CHAR_BIT>::fast ptr_t;
-/** 32bit unsigned integer
-* @usable always
-*/
-typedef boost::uint_t<32>::fast	uint32_t;
-/** 16bit unsigned integer
-* @usable always
-*/
-typedef boost::uint_t<16>::fast	uint16_t;
-/** 8bit unsigned integer
-* @usable always
-*/
-typedef boost::uint_t<8>::fast	uint8_t;
-
-/** 32bit integer
-* @usable always
-*/
-typedef boost::int_t<32>::fast	int32_t;
-/** 16bit integer
-* @usable always
-*/
-typedef boost::int_t<16>::fast	int16_t;
-/** 8bit integer
-* @usable always
-*/
-typedef boost::int_t<8>::fast	int8_t;
-
 #endif //__G2EXT_OSHEADER_H__

@@ -39,7 +39,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 
 class zERROR;
 
-Logger* Logger::instance = nullptr;
+Logger* Logger::instance = NULL;
 std::string Logger::logFileName;
 
 typedef int (__thiscall* ZERROR_REPORT)(void* pThis, int errorType, int, zSTRING const &, signed char, UINT, int, char*, char*);
@@ -56,7 +56,7 @@ Logger::~Logger()
 
 Logger* Logger::getLogger()
 {
-	if (instance == nullptr)
+	if (instance == NULL)
 	{
 		instance = new Logger();
 		Configuration::load("DII_Configuration.ini");
@@ -249,15 +249,15 @@ std::string Logger::logLevelToString(LogLevel level)
 
 std::string Logger::getTimeStamp()
 {
-	time_t timeStamp;
-	tm* currTime;
-	timeStamp = time(nullptr);
-	currTime = localtime(&timeStamp);
+	tm currTime;
+	time_t timeStamp = time(NULL);
+	//currTime = localtime(&timeStamp);
+	localtime_s(&currTime, &timeStamp);
 
 	// Clear the util stream content before filling it
 	util.clear();
 	util.str("");
-	util << currTime->tm_hour << ":" << currTime->tm_min << ":" << currTime->tm_sec;
+	util << currTime.tm_hour << ":" << currTime.tm_min << ":" << currTime.tm_sec;
 
 	return util.str();
 };

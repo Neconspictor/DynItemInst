@@ -40,10 +40,8 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <api/g2/ocnpc.h>
 #include <api/g2/ocnpcinventory.h>
 #include <api/g2/oCObjectFactory.h>
-#include <unordered_map>
+#include <map>
 #include <Configuration.h>
-#include <thread>
-#include <mutex>
 #include <Levitation.h>
 #include <functional>
 #include <Constants.h>
@@ -101,7 +99,7 @@ OCItemInsertEffect DynItemInst::oCItemInsertEffect = (OCItemInsertEffect)0x00712
 void DynItemInst::checkReusableInstances()
 {
 	ObjectManager* manager = ObjectManager::getObjectManager();
-	for (auto it = reusableMarkList.begin(); it != reusableMarkList.end(); ++it)
+	for (std::list<std::pair<int, int>>::iterator it = reusableMarkList.begin(); it != reusableMarkList.end(); ++it)
 	{
 		logStream << "DynItemInst::checkReusableInstances: mark as reusable: " << it->first << ", " << it->second << std::endl;
 		util::debug(&logStream);
@@ -138,20 +136,25 @@ void DynItemInst::hookModule()
 		//0x006521E0
 
 	HookManager* hookManager = HookManager::getHookManager();
-	hookManager->addFunctionHook((LPVOID*)&loadSavegame, loadSavegameHookNaked, moduleDesc);
-	hookManager->addFunctionHook((LPVOID*)&writeSavegame, writeSavegameHookNaked, moduleDesc);
-	hookManager->addFunctionHook((LPVOID*)&oCItemGetValue, oCItemGetValueHookNaked, moduleDesc);
+	hookManager->addFunctionHook((LPVOID*)&loadSavegame, loadSavegameHook, moduleDesc);
+	hookManager->addFunctionHook((LPVOID*)&writeSavegame, writeSavegameHook, moduleDesc);
+	hookManager->addFunctionHook((LPVOID*)&oCItemGetValue, oCItemGetValueHook, moduleDesc);
+	
 
-	hookManager->addFunctionHook((LPVOID*)&createInstance, createInstanceHookNaked, moduleDesc);
-	hookManager->addFunctionHook((LPVOID*)&oCGameLoadGame, oCGameLoadGameHookNaked, moduleDesc);
-	hookManager->addFunctionHook((LPVOID*)&oCGameChangeLevel, oCGameChangeLevelHookNaked, moduleDesc);
-	hookManager->addFunctionHook((LPVOID*)&oCItemMulitSlot, oCItemMulitSlotHookNaked, moduleDesc);
-	hookManager->addFunctionHook((LPVOID*)&oCMobContainerOpen, oCMobContainerOpenHookNaked, moduleDesc);
-
-	hookManager->addFunctionHook((LPVOID*)&zCParserGetIndex, zCParserGetIndexHookNaked, moduleDesc);
-	hookManager->addFunctionHook((LPVOID*)&zCPar_SymbolTableGetIndex, zCPar_SymbolTableGetIndexHookNaked, moduleDesc);
-	hookManager->addFunctionHook((LPVOID*)&zCPar_SymbolTableGetSymbol, zCPar_SymbolTableGetSymbolHookNaked, moduleDesc);
-	hookManager->addFunctionHook((LPVOID*)&zCPar_SymbolTableGetSymbolString, zCPar_SymbolTableGetSymbolStringHookNaked, moduleDesc);
+	hookManager->addFunctionHook((LPVOID*)&createInstance, createInstanceHook, moduleDesc);
+	hookManager->addFunctionHook((LPVOID*)&oCGameLoadGame, oCGameLoadGameHook, moduleDesc);
+	
+	hookManager->addFunctionHook((LPVOID*)&oCGameChangeLevel, oCGameChangeLevelHook, moduleDesc);
+	
+	hookManager->addFunctionHook((LPVOID*)&oCItemMulitSlot, oCItemMulitSlotHook, moduleDesc);
+	//hookManager->addFunctionHook((LPVOID*)&oCMobContainerOpen, oCMobContainerOpenHook, moduleDesc);
+	
+	
+	hookManager->addFunctionHook((LPVOID*)&zCParserGetIndex, zCParserGetIndexHook, moduleDesc);
+	hookManager->addFunctionHook((LPVOID*)&zCPar_SymbolTableGetIndex, zCPar_SymbolTableGetIndexHook, moduleDesc);
+	hookManager->addFunctionHook((LPVOID*)&zCPar_SymbolTableGetSymbol, zCPar_SymbolTableGetSymbolHook, moduleDesc);
+	hookManager->addFunctionHook((LPVOID*)&zCPar_SymbolTableGetSymbolString, zCPar_SymbolTableGetSymbolStringHook, moduleDesc);
+	
 
 	denyMultiSlot = true;
 	loadDynamicInstances();
@@ -162,20 +165,20 @@ void DynItemInst::hookModule()
 void DynItemInst::unHookModule()
 {
 	HookManager* hookManager = HookManager::getHookManager();
-	hookManager->removeFunctionHook((LPVOID*)&loadSavegame, loadSavegameHookNaked, moduleDesc);
-	hookManager->removeFunctionHook((LPVOID*)&writeSavegame, writeSavegameHookNaked, moduleDesc);
-	hookManager->removeFunctionHook((LPVOID*)&oCItemGetValue, oCItemGetValueHookNaked, moduleDesc);
+	hookManager->removeFunctionHook((LPVOID*)&loadSavegame, loadSavegameHook, moduleDesc);
+	hookManager->removeFunctionHook((LPVOID*)&writeSavegame, writeSavegameHook, moduleDesc);
+	hookManager->removeFunctionHook((LPVOID*)&oCItemGetValue, oCItemGetValueHook, moduleDesc);
 
-	hookManager->removeFunctionHook((LPVOID*)&createInstance, createInstanceHookNaked, moduleDesc);
-	hookManager->removeFunctionHook((LPVOID*)&oCGameLoadGame, oCGameLoadGameHookNaked, moduleDesc);
-	hookManager->removeFunctionHook((LPVOID*)&oCGameChangeLevel, oCGameChangeLevelHookNaked, moduleDesc);
-	hookManager->removeFunctionHook((LPVOID*)&oCItemMulitSlot, oCItemMulitSlotHookNaked, moduleDesc);
-	hookManager->removeFunctionHook((LPVOID*)&oCMobContainerOpen, oCMobContainerOpenHookNaked, moduleDesc);
+	hookManager->removeFunctionHook((LPVOID*)&createInstance, createInstanceHook, moduleDesc);
+	hookManager->removeFunctionHook((LPVOID*)&oCGameLoadGame, oCGameLoadGameHook, moduleDesc);
+	hookManager->removeFunctionHook((LPVOID*)&oCGameChangeLevel, oCGameChangeLevelHook, moduleDesc);
+	hookManager->removeFunctionHook((LPVOID*)&oCItemMulitSlot, oCItemMulitSlotHook, moduleDesc);
+	//hookManager->removeFunctionHook((LPVOID*)&oCMobContainerOpen, oCMobContainerOpenHook, moduleDesc);
 
-	hookManager->removeFunctionHook((LPVOID*)&zCParserGetIndex, zCParserGetIndexHookNaked, moduleDesc);
-	hookManager->removeFunctionHook((LPVOID*)&zCPar_SymbolTableGetIndex, zCPar_SymbolTableGetIndexHookNaked, moduleDesc);
-	hookManager->removeFunctionHook((LPVOID*)&zCPar_SymbolTableGetSymbol, zCPar_SymbolTableGetSymbolHookNaked, moduleDesc);
-	hookManager->removeFunctionHook((LPVOID*)&zCPar_SymbolTableGetSymbolString, zCPar_SymbolTableGetSymbolStringHookNaked, moduleDesc);
+	hookManager->removeFunctionHook((LPVOID*)&zCParserGetIndex, zCParserGetIndexHook, moduleDesc);
+	hookManager->removeFunctionHook((LPVOID*)&zCPar_SymbolTableGetIndex, zCPar_SymbolTableGetIndexHook, moduleDesc);
+	hookManager->removeFunctionHook((LPVOID*)&zCPar_SymbolTableGetSymbol, zCPar_SymbolTableGetSymbolHook, moduleDesc);
+	hookManager->removeFunctionHook((LPVOID*)&zCPar_SymbolTableGetSymbolString, zCPar_SymbolTableGetSymbolStringHook, moduleDesc);
 };
 
 
@@ -192,17 +195,17 @@ _declspec(naked) void DynItemInst::zCPar_SymbolTableGetSymbolStringHookNaked()
 }
 
 
-_declspec(naked) void DynItemInst::zCPar_SymbolTableGetSymbolHookNaked()
+/*_declspec(naked) void DynItemInst::zCPar_SymbolTableGetSymbolHookNaked()
 {
 	_asm
 	{
 		LEGO_HOOKENGINE_PREAMBLE
-		/*6 - 5 = 1 Bytes for remaining opcode */
+		//6 - 5 = 1 Bytes for remaining opcode
 			nop
-			/*finally hook function call*/
+			//finally hook function call
 			jmp DynItemInst::zCPar_SymbolTableGetSymbolHook
 	}
-}
+}*/
 
 
 _declspec(naked) void DynItemInst::zCPar_SymbolTableGetIndexHookNaked()
@@ -297,7 +300,7 @@ _declspec(naked) void DynItemInst::oCGameChangeLevelHookNaked()
 {
 	_asm
 	{
-		LEGO_HOOKENGINE_PREAMBLE
+		LEGO_HOOKENGINE_PREAMBLE_2_5
 		/*7 - 5 = 2 Bytes for remaining opcode */
 		nop
 		nop
@@ -346,7 +349,7 @@ int DynItemInst::oCItemGetValueHook(void* pThis) {
 zCPar_Symbol* DynItemInst::zCPar_SymbolTableGetSymbolHook(void* pThis, int index)
 {
 	zCPar_Symbol* result = zCPar_SymbolTableGetSymbol(pThis, index);
-	if (result == nullptr)
+	if (result == NULL)
 	{
 		result = ObjectManager::getObjectManager()->getSymbolByIndex(index);
 	}
@@ -357,7 +360,7 @@ zCPar_Symbol* DynItemInst::zCPar_SymbolTableGetSymbolHook(void* pThis, int index
 zCPar_Symbol* DynItemInst::zCPar_SymbolTableGetSymbolStringHook(void* pThis, zSTRING const & symbolName)
 {
 	zCPar_Symbol* result = ObjectManager::getObjectManager()->getSymbolByName(symbolName);
-	if (result == nullptr)
+	if (result == NULL)
 	{
 		result = zCPar_SymbolTableGetSymbolString(pThis, symbolName);
 	}
@@ -439,9 +442,9 @@ DynItemInst::~DynItemInst()
 	denyMultiSlot = true;
 
 	oCNpc* hero = oCNpc::GetHero();
-	while(npcList != nullptr) {
+	while(npcList != NULL) {
 		oCNpc* npc = npcList->GetData();
-		if (npc == nullptr) {
+		if (npc == NULL) {
 			npcList = npcList->GetNext();
 			continue;
 		}
@@ -453,7 +456,7 @@ DynItemInst::~DynItemInst()
 		}
 
 		oCNpcInventory* inventory = npc->GetInventory();
-		if (inventory == nullptr) {
+		if (inventory == NULL) {
 			npcList = npcList->GetNext();
 			continue;
 		}
@@ -470,7 +473,7 @@ DynItemInst::~DynItemInst()
 
 		resetInstanceNameStruct();
 
-		while(list != nullptr) {
+		while(list != NULL) {
 			oCItem* item = list->GetData();
 			int id = modifyItemForSaving(item, isHero);
 			int equiped = id && item->HasFlag(OCITEM_FLAG_EQUIPPED);
@@ -510,7 +513,7 @@ DynItemInst::~DynItemInst()
 	}
 	
 	zCListSort<oCItem>* itemList = world->GetItemList();
-	while(itemList != nullptr) {
+	while(itemList != NULL) {
 		oCItem* item = itemList->GetData();
 		int id = modifyItemForSaving(item, false);
 		if (id) manager->createAdditionalMemory(item, id, false);
@@ -565,71 +568,42 @@ DynItemInst::~DynItemInst()
 	util::logInfo(&logStream);
 };
 
- void DynItemInst::restoreItem(oCItem* item,  oCNpcInventory* inventory, std::unordered_map<int, oCItem*>* equippedSpells, oCItem** activeSpellItem) {
-	if (item == nullptr) return;
-	if (item->instanz < 0) {
-		ObjectManager* manager = ObjectManager::getObjectManager();
-		int additId = -item->instanz;
-		AdditMemory* addit = manager->getAddit(additId);
-		//mark additKey as visited
-		if (addit == nullptr || addit->visited) {
-			logStream << "DynItemInst::restoreItem: Addit is null or was already visited!!!" << std::endl;
-			logStream << item->name.ToChar() << " : " << additId << std::endl;
-			util::logFault(&logStream);
-			return;
-		}
+ void DynItemInst::restoreSpecificNpcItemStub( oCItem* item,  
+								oCNpcInventory* inventory, 
+								AdditMemory* addit,
+								std::map<int, oCItem*>* equippedSpells, 
+								oCItem** activeSpellItem) {
 
-		//Each item should only once be restored
-		addit->visited = true;
+	int instanceId = item->GetInstance();
+	bool originalMultiSlotSetting = denyMultiSlot;
+	denyMultiSlot = true;
 
-		int instanceId; 
-		if (addit->instanceId == manager->getIdForSpecialPurposes())
-		{
-			instanceId = item->GetInstance();
-		} else
-		{
-			instanceId = addit->instanceId;
-		}
+	// is the item equipped?
+	int equipped = item->HasFlag(OCITEM_FLAG_EQUIPPED);
 
-		int instanz = addit->instanz;
-		item->instanz = instanz;
-
-		zCWorld* world = oCGame::GetGame()->GetWorld();
-
-		// is item located in the world?
-		if (inventory == nullptr)
-		{
-			restoreWorldItem(item, instanceId);
-			return;
-		}
-
-		bool originalMultiSlotSetting = denyMultiSlot;
-		denyMultiSlot = true;
-
-		// is the item equipped?
-		int equipped = item->HasFlag(OCITEM_FLAG_EQUIPPED);
-
-		if (equipped)
-		{
-			restoreEquippedItem(item, inventory, addit, instanceId, 
-				equippedSpells, activeSpellItem);
-			logStream << "DynItemInst::restoreItem: Restored equipped item!" << std::endl;
-			util::debug(&logStream);
-			denyMultiSlot = originalMultiSlotSetting;
-			return;
-		}
-		
-		oCItemInitByScript(item, instanceId, item->instanz);
-		item->ClearFlag(OCITEM_FLAG_EQUIPPED);
-		inventory->Remove(item, item->instanz);
-		inventory->Insert(item);
+	if (equipped)
+	{
+		//TODO: test ausführlich!
+		restoreEquippedItem(item, inventory, addit, instanceId, 
+			equippedSpells, activeSpellItem);
+		//oCItemInitByScript(item, instanceId, item->instanz);
+		logStream << "DynItemInst::restoreItem: Restored equipped item!" << std::endl;
+		util::debug(&logStream);
 		denyMultiSlot = originalMultiSlotSetting;
+		return;
 	}
+		
+	oCItemInitByScript(item, instanceId, item->instanz);
+	item->ClearFlag(OCITEM_FLAG_EQUIPPED);
+	//inventory->Remove(item, item->instanz);
+	//inventory->Insert(item);
+
+	denyMultiSlot = originalMultiSlotSetting;
 }
 
 
  int DynItemInst::modifyItemForSaving(oCItem* item, bool isHeroItem) {
-	if (item == nullptr) return NULL;
+	if (item == NULL) return NULL;
 
 	if (item->instanz < 0)
 	{
@@ -719,11 +693,11 @@ DynItemInst::~DynItemInst()
 	 ObjectManager* manager = ObjectManager::getObjectManager();
 	 int additId = -item->instanz;
 	 AdditMemory* addit = manager->getAddit(additId);
-	 if (addit == nullptr) {
+	 if (addit == NULL) {
 		 logStream << "DynItemInst::makeEquippedCopy: Warning: Addit is null!!!" << std::endl;
 		 logStream << item->name.ToChar() << " : " << additId << std::endl;
 		 util::debug(&logStream, Logger::Fault);
-		 return nullptr;
+		 return NULL;
 	 }
 
 	 int instanceId = addit->instanceId;
@@ -740,7 +714,7 @@ DynItemInst::~DynItemInst()
 	 inventory->Remove(item, item->instanz);
 	 zCListSort<oCItem>* list = getInvItemByInstanceId(inventory, instanceId);
 	 oCItem* copy = oCObjectFactory::GetFactory()->CreateItem(instanceId);
-	 if (list != nullptr)
+	 if (list != NULL)
 	 {
 		 item = list->GetData();
 		 copy->instanz = item->instanz + amount;
@@ -756,6 +730,72 @@ DynItemInst::~DynItemInst()
 bool DynItemInst::itemsAreModified()
 {
 	return isSaveGameLoading() || levelChange || saveGameWriting;
+}
+
+void DynItemInst::restoreWorldItem(void* obj, void* param, oCItem* itm) {
+	if (itm == NULL) return;
+	if (itm->instanz >= 0) return;
+
+	ObjectManager* manager = ObjectManager::getObjectManager();
+
+	if (!manager->updateItemAndAddit(itm)) {
+		//Should not occur!!!!
+		//logStream << "DynItemInst::restoreItem: Addit is null or was already visited!!!" << std::endl;
+		//logStream << item->name.ToChar() << " : " << additId << std::endl;
+		//util::logFault(&logStream);
+		return;
+	}
+
+	int instanceID = itm->GetInstance();
+
+	zCWorld* world = oCGame::GetGame()->GetWorld();
+	oCItem* copy = oCObjectFactory::GetFactory()->CreateItem(instanceID);
+
+	//instanz (item count) has to be set manually
+	copy->instanz = itm->instanz;
+
+	// SetPositionWorld has to be done before adding the vob to the world!
+	// Otherwise the position won't be updated porperly and vob will be set to origin (0,0,0)!
+	zVEC3 pos;
+	itm->GetPositionWorld(pos.x, pos.y, pos.z);
+	//manager->oCItemSaveRemoveEffect(item);
+	//manager->oCItemSaveInsertEffect(item);
+	world->RemoveVob(itm);
+	copy->SetPositionWorld(pos);
+
+	world->AddVob(copy);
+	manager->oCItemSaveInsertEffect(copy);
+
+	//logStream << "DynItemInst::restoreItem: Restored world item: " << instanceId << std::endl;
+	//util::debug(&logStream);
+}
+
+static void restoreContainerItem(void* obj, void* param, oCItem* itm) {
+	if (itm == NULL) return;
+
+	ObjectManager* manager = ObjectManager::getObjectManager();
+	int instanceId = manager->getInstanceId(*itm);
+	int dummyID = zCParser::GetParser()->GetIndex("DII_DUMMY_ITEM");
+
+	if (dummyID == instanceId) {
+		bool test = false;
+	}
+
+	if (manager->IsModified(instanceId)) {
+		manager->assignInstanceId(itm, instanceId);
+	}
+
+	if (itm->instanz >= 0) return;
+
+	//ObjectManager* manager = ObjectManager::getObjectManager();
+
+	if (!manager->updateItemAndAddit(itm)) {
+		//Should not occur!!!!
+		//logStream << "DynItemInst::restoreItem: Addit is null or was already visited!!!" << std::endl;
+		//logStream << item->name.ToChar() << " : " << additId << std::endl;
+		//util::logFault(&logStream);
+		return;
+	}
 }
 
 
@@ -779,9 +819,9 @@ void DynItemInst::restoreDynamicInstances(oCGame* game) {
 
 	oCNpc* hero = oCNpc::GetHero();
 
-	while(npcList != nullptr) {
+	while(npcList != NULL) {
 		oCNpc* npc = npcList->GetData();
-		if (npc == nullptr || levelChange && (npc == hero)) {
+		if (npc == NULL || levelChange && (npc == hero)) {
 			npcList = npcList->GetNext();
 			continue;
 		}
@@ -790,11 +830,20 @@ void DynItemInst::restoreDynamicInstances(oCGame* game) {
 		npcList = npcList->GetNext();
 	}
 
-	auto func = [](oCItem* item)->void {
-		restoreItem(item);
-	};
+	//restore items in containers
+	std::list<oCMobContainer*>* containers = manager->getMobContainers();
 
-	manager->callForAllWorldItems(func);
+	while (containers->size() > 0) {
+		oCMobContainer* container = containers->back();
+		containers->pop_back();
+		manager->callForAllContainerItems(restoreContainerItem, NULL, NULL, container);
+	}
+	delete containers;
+
+
+	// World items have to be restored at last, as items in inventories and containers can be registered in the world
+	// But they have to be restored differently!!!
+	manager->callForAllWorldItems(restoreWorldItem, NULL, NULL);
 
 	denyMultiSlot = false;
 
@@ -811,7 +860,7 @@ bool DynItemInst::isSaveGameLoading()
  int DynItemInst::createInstanceHook(void* pThis, int instanceId, void* source)
 {
 	zCPar_Symbol* symbol = zCParser::GetParser()->GetSymbol(instanceId);
-	if (symbol == nullptr)
+	if (symbol == NULL)
 	{
 		logStream << "DynItemInst::createInstanceHook: symbol is null! InstanceId: " << instanceId << std::endl;
 		util::debug(&logStream, Logger::Warning);
@@ -844,6 +893,62 @@ void DynItemInst::oCGameLoadGameHook(void* pThis, int second, zSTRING const& wor
 	util::logInfo(&logStream);
 }
 
+struct LEVEL_CHANGE_PARAMS {
+	oCNpc* hero;
+	std::list<DynItemInst::LevelChangeBean*>* tempList;
+	std::stringstream* logStream;
+	int selectedSpellKey;
+};
+
+static void levelChangeForHero(void* obj, void* param, oCItem* itm) {
+	if (itm != NULL)
+	{
+		if (itm->HasFlag(OCITEM_FLAG_EQUIPPED))
+		{
+			LEVEL_CHANGE_PARAMS* params = (LEVEL_CHANGE_PARAMS*)param;
+			ObjectManager* manager = ObjectManager::getObjectManager();
+			DynItemInst::LevelChangeBean* bean = new DynItemInst::LevelChangeBean();
+			std::list<DynItemInst::LevelChangeBean*>* tempList = params->tempList;
+			int selectedSpellKey = params->selectedSpellKey;
+			oCNpc* hero = params->hero;
+			std::stringstream* logStream = params->logStream;
+
+			bean->item = itm;
+			bean->dynamicInstanceId = manager->getInstanceId(*itm);
+			bean->original_on_equip = itm->on_equip;
+			bean->original_on_unequip = itm->on_unequip;
+			bean->effectVob = itm->effectVob;
+			bean->addit = new AdditMemory();
+			bean->addit->spellKey = manager->getEquippedSpellKeyByItem(hero, itm);
+			bean->addit->activeSpellItem = (selectedSpellKey == (itm->spell));
+			*logStream << "item->effect: " << itm->effect.ToChar() << std::endl;
+			*logStream << "item->effectVob: " << itm->effectVob << std::endl;
+			util::debug(logStream);
+			itm->on_equip = 0;
+			itm->on_unequip = 0;
+
+			tempList->push_back(bean);
+		}
+	}
+}
+
+static void levelChangeRemoveInv(void* obj, void* param, oCItem* itm) {
+	if (itm != NULL)
+	{
+		ObjectManager* manager = ObjectManager::getObjectManager();
+		if (manager->isDynamicInstance(itm->GetInstance()))
+		{
+			//remove item from world list!
+			int* refCounter = manager->getRefCounter(itm);
+			if (*refCounter < 0)
+			{
+				*refCounter += 1;
+			}
+			oCGame::GetGame()->GetWorld()->RemoveVob(itm);
+		}
+	}
+}
+
 void __thiscall DynItemInst::oCGameChangeLevelHook(void* pThis, zSTRING const & first, zSTRING const & second) {
 	logStream << "DynItemInst::oCGameChangeLevelHook: change level..." << std::endl;
 	util::logInfo(&logStream);
@@ -863,14 +968,16 @@ void __thiscall DynItemInst::oCGameChangeLevelHook(void* pThis, zSTRING const & 
 	int munitionId = -1;
 	bool munitionUsesRightHand = false;
 	bool npcHasReadiedWeapon = false;
-	oCItem* temp = nullptr;
+	oCItem* temp = NULL;
 	oCItem** selectedSpellItem = &temp;
-	std::unordered_map<int, oCItem*> equippedSpells;
+	std::map<int, oCItem*> equippedSpells;
 	AdditMemory* addit = new AdditMemory();
 	int selectedSpellKey = manager->getSelectedSpellKey(hero);
 
-	std::function<void(oCItem*)> func = [&](oCItem* item)->void {
-		if (item != nullptr)
+	LEVEL_CHANGE_PARAMS params = { hero, &tempList, &logStream, selectedSpellKey };
+
+	/*std::function<void(oCItem*)> func = [&](oCItem* item)->void {
+		if (item != NULL)
 		{
 			if (item->HasFlag(OCITEM_FLAG_EQUIPPED))
 			{
@@ -892,12 +999,12 @@ void __thiscall DynItemInst::oCGameChangeLevelHook(void* pThis, zSTRING const & 
 				tempList.push_back(bean);
 			}
 		}
-	};
+	};*/
 
-	manager->callForInventoryItems(func, hero);
+	manager->callForInventoryItems(levelChangeForHero, NULL, &params, hero);
 
 
-	for (auto it = tempList.begin(); it != tempList.end(); ++it)
+	for (std::list<LevelChangeBean*>::iterator it = tempList.begin(); it != tempList.end(); ++it)
 	{
 		oCItem* item = (*it)->item;
 		if (manager->isValidWeapon(weaponMode, item))
@@ -915,8 +1022,8 @@ void __thiscall DynItemInst::oCGameChangeLevelHook(void* pThis, zSTRING const & 
 		hero->Equip((*it)->item);
 	}
 
-	func = [&](oCItem* item)->void {
-		if (item != nullptr)
+	/*func = [&](oCItem* item)->void {
+		if (item != NULL)
 		{
 			if (manager->isDynamicInstance(item->GetInstance()))
 			{
@@ -929,15 +1036,15 @@ void __thiscall DynItemInst::oCGameChangeLevelHook(void* pThis, zSTRING const & 
 				oCGame::GetGame()->GetWorld()->RemoveVob(item);
 			}
 		}
-	};
+	};*/
 
-	manager->callForInventoryItems(func, hero);
+	manager->callForInventoryItems(levelChangeRemoveInv, NULL, NULL, hero);
 
 	oCGameChangeLevel(pThis, first, second);
 
 	hero = oCNpc::GetHero();
 
-	for (auto it = tempList.begin(); it != tempList.end(); ++it)
+	for (std::list<LevelChangeBean*>::iterator it = tempList.begin(); it != tempList.end(); ++it)
 	{
 		restoreItemAfterLevelChange(hero, *it, weaponMode, readiedWeaponId, munitionId, munitionUsesRightHand,
 			&equippedSpells, selectedSpellItem);
@@ -992,20 +1099,21 @@ void DynItemInst::oCMobContainerOpenHook(void* pThis, oCNpc* npc)
 	zCListSort<oCItem>* listAddress = reinterpret_cast<zCListSort<oCItem>*>(address);
 	zCListSort<oCItem>* list = listAddress;
 
-	while(list != nullptr) {
+	while(list != NULL) {
 		oCItem* item = list->GetData();
-		if (item == nullptr) {
+		if (item == NULL) {
 			list = list->GetNext();
 			continue;
 		}
 
 		int instanceId = manager->getInstanceId(*item);
-		bool change = false;
-		if (instanceId == -1)
+		bool change = item->instanz < 0;
+		if (instanceId < 0)
 		{
 			instanceId = manager->getIndexByName(item->name);
 			change = true;
 		}
+
 		if (change && manager->IsModified(instanceId)) {
 			manager->assignInstanceId(item, instanceId);
 		}
@@ -1034,16 +1142,16 @@ zCListSort<oCItem>* DynItemInst::getInvItemByInstanceId(oCNpcInventory* inventor
 	inventory->UnpackCategory();
 	ObjectManager* manager = ObjectManager::getObjectManager();
 	zCListSort<oCItem>* list = reinterpret_cast<zCListSort<oCItem>*>(inventory->inventory_data);
-	while(list != nullptr) {
+	while(list != NULL) {
 		oCItem* item = list->GetData();
-		if (item != nullptr && manager->getInstanceId(*item) == instanceId)
+		if (item != NULL && manager->getInstanceId(*item) == instanceId)
 		{
 			return list;
 		}
 		list = list->GetNext();
 	}
 
-	return nullptr;
+	return NULL;
 };
 
 oCItem* DynItemInst::getInvItemByInstanceId2(oCNpcInventory* inventory, int instanceId)
@@ -1053,13 +1161,13 @@ oCItem* DynItemInst::getInvItemByInstanceId2(oCNpcInventory* inventory, int inst
 	for (int i = 0; i < itemNumber; ++i)
 	{
 		oCItem* itm = inventory->GetItem(i);
-		if (itm != nullptr && itm->GetInstance() == instanceId)
+		if (itm != NULL && itm->GetInstance() == instanceId)
 		{
 			return itm;
 		}
 	}
 
-	return nullptr;
+	return NULL;
 }
 
 
@@ -1125,7 +1233,7 @@ void DynItemInst::equipRangedWeapon(oCItem* item, oCNpcInventory* inventory, boo
 	oCItem* munition = list->GetData();
 	int arrowId = ObjectManager::getObjectManager()->getInstanceId(*munition);
 	zCListSort<oCItem>* list2 = list->GetNext();
-	oCItem* munition2 = nullptr;
+	oCItem* munition2 = NULL;
 	oCNpc* owner = inventory->GetOwner();
 
 	if (list2)
@@ -1195,125 +1303,75 @@ void DynItemInst::restoreSelectedSpell(oCNpc* npc, oCItem* selectedSpellItem)
 	}
 }
 
+struct RESTORE_NPC_ITEM_PARAMS {
+	std::stringstream* logStream;
+	oCNpcInventory* inventory;
+	std::map<int, oCItem*>* equippedSpells;
+	oCItem** selectedSpellItem;
+};
+
+void DynItemInst::restoreSpecificNpcItem(void* obj, void* param, oCItem* itm) {
+	if (itm == NULL) return;
+	if (itm->instanz >= 0) return;
+
+	ObjectManager* manager = ObjectManager::getObjectManager();
+	RESTORE_NPC_ITEM_PARAMS* params = (RESTORE_NPC_ITEM_PARAMS*)param;
+	std::stringstream* logStream = params->logStream;
+
+	int additID = manager->getAdditId(*itm);
+
+	if (!manager->updateItemAndAddit(itm)) {
+		//TODO ERROR
+		return;
+	}
+
+	AdditMemory* addit = manager->getAddit(additID);
+
+	util::assertDIIRequirements(addit != NULL, "DynItemInst::restoreSpecificNpcItem: addit != NULL");
+
+	bool equipped = false;
+
+	if (addit != NULL) {
+		equipped = (addit->flags & OCITEM_FLAG_EQUIPPED) != 0;
+	}
+
+	if (equipped)
+	{
+		itm->SetFlag(OCITEM_FLAG_EQUIPPED);
+		//equippedItems.push_back(item);
+		int instanceId = itm->GetInstance();
+		*logStream << "DynItemInst::restoreSpecificNpcItem: item with following id is marked as equipped: " << instanceId << std::endl;
+		util::debug(logStream);
+		//control that instanceId is that of a marked equipped item
+		int checkInstanceId = zCParser::GetParser()->GetIndex(zSTRING(instanceNames.base.c_str()));
+		util::assertDIIRequirements(instanceId != checkInstanceId, "DynItemInst::restoreSpecificNpcItem: instanceId != checkInstanceId");
+
+		restoreSpecificNpcItemStub(itm, 
+			params->inventory, 
+			addit,
+			params->equippedSpells, 
+			params->selectedSpellItem);
+	}
+	else
+	{
+		restoreSpecificNpcItemStub(itm, params->inventory, addit);
+	}
+}
+
 void DynItemInst::restoreItemsOfNpc(oCNpc * npc)
 {
 	std::list<oCItem*> tempList, equippedItems;
 	ObjectManager* manager = ObjectManager::getObjectManager();
 	oCNpcInventory* inventory = npc->GetInventory();
-	oCItem* temp = nullptr;
+	oCItem* temp = NULL;
 	oCItem** selectedSpellItem = &temp;
-	std::unordered_map<int, oCItem*> equippedSpells;
+	std::map<int, oCItem*> equippedSpells;
 
-	std::function<void(oCItem*)> func = [&](oCItem* item)->void {
-		if (item == nullptr) return;
-		int equipped = 0;
-		if (item->instanz < 0) {
+	RESTORE_NPC_ITEM_PARAMS params = { &logStream, inventory, &equippedSpells, selectedSpellItem };
 
-			logStream << "DynItemInst::restoreDynamicInstances: instanz < 0: " <<
-				item->name.ToChar() << std::endl;
-			util::debug(&logStream);
+	manager->callForInventoryItems(restoreSpecificNpcItem, NULL, &params, npc);
 
-			int additId = -item->instanz;
-			AdditMemory* addit = manager->getAddit(additId);
-			if (addit)
-			{
-				util::assertDIIRequirements(addit, "DynItemInst::restoreDynamicInstances: addit != nullptr");
-				equipped = addit->flags & OCITEM_FLAG_EQUIPPED;
-			}
-		}
-		if (equipped)
-		{
-			item->SetFlag(OCITEM_FLAG_EQUIPPED);
-			//equippedItems.push_back(item);
-			int instanceId = (item)->GetInstance();
-			logStream << "DynItemInst::restoreDynamicInstances: item with following id is marked as equipped: " << instanceId << std::endl;
-			util::debug(&logStream);
-			//control that instanceId is that of a marked equipped item
-			int checkInstanceId = zCParser::GetParser()->GetIndex(zSTRING(instanceNames.base.c_str()));
-			util::assertDIIRequirements(instanceId != checkInstanceId, "instanceId != checkInstanceId");
-			
-			restoreItem(item, inventory, &equippedSpells, selectedSpellItem);
-		}
-		else
-		{
-			restoreItem(item, inventory);
-		}
-	};
-
-	manager->callForInventoryItems(func, npc);
-
-	for (auto it = equippedSpells.begin(); it != equippedSpells.end(); ++it)
-	{
-		int key = it->first;
-		oCItem* item = it->second;
-		oCMag_Book* magBook = npc->GetSpellBook();
-		oCMag_BookNextRegisterAt(magBook, key);
-		npc->Equip(item);
-	}
-	equippedSpells.clear();
-
-	restoreSelectedSpell(npc, *selectedSpellItem);
-}
-
-void DynItemInst::restoreInventory(oCNpc* npc)
-{
-	oCNpcInventory* inventory = npc->GetInventory();
-	if (inventory == nullptr) {
-		return;
-	}
-
-	std::list<oCItem*> equippedItems;
-	ObjectManager* manager = ObjectManager::getObjectManager();
-
-	auto func = [&](oCItem* item)->void {
-		if (item == nullptr) return;
-		int equiped = 0;
-
-		logStream << "DynItemInst::restoreInventory: process item with id: " <<
-			item->GetInstance() << " and instanz " << item->instanz << std::endl;
-		util::debug(&logStream);
-
-		if (item->instanz < 0) {
-			int additId = -item->instanz;
-			AdditMemory* addit = manager->getAddit(additId);
-			if (addit)
-			{
-				util::assertDIIRequirements(addit, "DynItemInst::restoreInventory: addit != nullptr");
-				equiped = addit->flags & OCITEM_FLAG_EQUIPPED;
-			}
-		}
-		if (equiped)
-		{
-			item->SetFlag(OCITEM_FLAG_EQUIPPED);
-			equippedItems.push_back(item);
-			int instanceId = (item)->GetInstance();
-			logStream << "DynItemInst::restoreInventory: item with following id is marked as equipped: " << instanceId << std::endl;
-			util::debug(&logStream);
-			//control that instanceId is that of a marked equipped item
-			int checkInstanceId = zCParser::GetParser()->GetIndex(zSTRING(instanceNames.base.c_str()));
-			util::assertDIIRequirements(instanceId != checkInstanceId, "instanceId != checkInstanceId");
-
-		}
-		else
-		{
-			restoreItem(item, inventory);
-		}
-	};
-
-	manager->callForInventoryItems(func, npc);
-
-	oCItem* temp = nullptr;
-	oCItem** selectedSpellItem = &temp;
-	std::unordered_map<int, oCItem*> equippedSpells;
-
-	for (auto it = equippedItems.begin(); it != equippedItems.end(); ++it)
-	{
-		restoreItem(*it, inventory, &equippedSpells, selectedSpellItem);
-	}
-
-	equippedItems.clear();
-
-	for (auto it = equippedSpells.begin(); it != equippedSpells.end(); ++it)
+	for (std::map<int, oCItem*>::iterator it = equippedSpells.begin(); it != equippedSpells.end(); ++it)
 	{
 		int key = it->first;
 		oCItem* item = it->second;
@@ -1327,13 +1385,13 @@ void DynItemInst::restoreInventory(oCNpc* npc)
 }
 
 oCItem* DynItemInst::restoreItemAfterLevelChange(oCNpc* npc, LevelChangeBean* bean, int weaponMode, int readiedWeaponId,
-	int munitionId, bool munitionUsesRightHand, std::unordered_map<int, oCItem*>* equippedSpells, oCItem** selectedSpellItem)
+	int munitionId, bool munitionUsesRightHand, std::map<int, oCItem*>* equippedSpells, oCItem** selectedSpellItem)
 {
 	ObjectManager* manager = ObjectManager::getObjectManager();
 	oCNpcInventory* inv = npc->GetInventory();
 	inv->UnpackAllItems();
 	zCListSort<oCItem>* node = getInvItemByInstanceId(inv, bean->dynamicInstanceId);
-	oCItem* item = nullptr;
+	oCItem* item = NULL;
 	if (node) item = node->GetData();
 	if (!item) 	{
 		logStream << "DynItemInst::oCGameChangeLevelHook: inventory item to be equipped is null!" << std::endl;
@@ -1397,7 +1455,7 @@ oCItem* DynItemInst::restoreItemAfterLevelChange(oCNpc* npc, LevelChangeBean* be
 }
 
 void DynItemInst::restoreEquippedItem(oCItem* item, oCNpcInventory* inventory, AdditMemory* addit, 
-	int instanceId, std::unordered_map<int, oCItem*>* equippedSpells, oCItem** activeSpellItem)
+	int instanceId, std::map<int, oCItem*>* equippedSpells, oCItem** activeSpellItem)
 {
 	logStream << "DynItemInst::restoreItem: Restore equipped item..." << std::endl;
 	util::debug(&logStream);
@@ -1454,7 +1512,7 @@ void DynItemInst::restoreEquippedItem(oCItem* item, oCNpcInventory* inventory, A
 
 		// Since multi-slotting was denied, copy is now on a own slot (not merged) and can be accessed
 		copy = manager->searchItemInInvbyInstanzValue(inventory, searchValue);
-		util::assertDIIRequirements(copy != nullptr, "item to insert shouldn't be null!");
+		util::assertDIIRequirements(copy != NULL, "item to insert shouldn't be null!");
 		copy->instanz = copyStoreValue;
 		//Deny invocation of equip function
 		int equipFunction = copy->on_equip;
@@ -1535,26 +1593,4 @@ void DynItemInst::restoreEquippedItem(oCItem* item, oCNpcInventory* inventory, A
 			//util::debug(&logStream);
 		}
 	}
-}
-
-void DynItemInst::restoreWorldItem(oCItem* item, int instanceId)
-{
-	zCWorld* world = oCGame::GetGame()->GetWorld();
-	ObjectManager* manager = ObjectManager::getObjectManager();
-	oCItem* copy = oCObjectFactory::GetFactory()->CreateItem(instanceId);
-
-	// SetPositionWorld has to be done before adding the vob to the world!
-	// Otherwise the position won't be updated porperly and vob will be set to origin (0,0,0)!
-	zVEC3 pos;
-	item->GetPositionWorld(pos.x, pos.y, pos.z);
-	//manager->oCItemSaveRemoveEffect(item);
-	//manager->oCItemSaveInsertEffect(item);
-	world->RemoveVob(item);
-	copy->SetPositionWorld(pos);
-
-	world->AddVob(copy);
-	manager->oCItemSaveInsertEffect(copy);
-
-	logStream << "DynItemInst::restoreItem: Restored world item: " << instanceId << std::endl;
-	util::debug(&logStream);
 }

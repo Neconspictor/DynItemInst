@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -31,16 +31,29 @@
     <ClInclude Include="Inc\MoreViewDistance.h" />
     <ClInclude Include="Inc\ObjectManager.h" />
     <ClInclude Include="Inc\ocgameExtended.h" />
-    <ClInclude Include="Inc\oCItemExtended.h" />
     <ClInclude Include="Inc\oCMobContainer.h" />
     <ClInclude Include="Inc\PortalDrawDistance.h" />
-    <ClInclude Include="Inc\TestModule.h" />
     <ClInclude Include="Inc\Util.h" />
     <ClInclude Include="Inc\Util_Constants.h" />
     <ClInclude Include="Inc\zCOptionExtended.h" />
     <ClInclude Include="Inc\zCPar_SymbolTable.h" />
+    <ClInclude Include="inih-master\ini.h" />
+    <ClInclude Include="minhook-master\include\MinHook.h" />
+    <ClInclude Include="minhook-master\src\buffer.h" />
+    <ClInclude Include="minhook-master\src\hde\hde32.h" />
+    <ClInclude Include="minhook-master\src\hde\hde64.h" />
+    <ClInclude Include="minhook-master\src\hde\pstdint.h" />
+    <ClInclude Include="minhook-master\src\hde\table32.h" />
+    <ClInclude Include="minhook-master\src\hde\table64.h" />
+    <ClInclude Include="minhook-master\src\trampoline.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="inih-master\ini.c" />
+    <ClCompile Include="minhook-master\src\buffer.c" />
+    <ClCompile Include="minhook-master\src\hde\hde32.c" />
+    <ClCompile Include="minhook-master\src\hde\hde64.c" />
+    <ClCompile Include="minhook-master\src\hook.c" />
+    <ClCompile Include="minhook-master\src\trampoline.c" />
     <ClCompile Include="Src\Configuration.cpp" />
     <ClCompile Include="Src\CustomNpcFocus.cpp" />
     <ClCompile Include="Src\DllMain.cpp" />
@@ -60,7 +73,6 @@
     <ClCompile Include="Src\MoreViewDistance.cpp" />
     <ClCompile Include="Src\ObjectManager.cpp" />
     <ClCompile Include="Src\PortalDrawDistance.cpp" />
-    <ClCompile Include="Src\TestModule.cpp" />
     <ClCompile Include="Src\Util.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -79,13 +91,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140_xp</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140_xp</PlatformToolset>
+    <PlatformToolset>v90</PlatformToolset>
     <WholeProgramOptimization>false</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -100,58 +112,66 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>.\MinHook\include;.\G2ExtSDK;.\boost_1_59_0;.\Inc;$(IncludePath)</IncludePath>
-    <LibraryPath>.\MinHook\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>.\G2ExtSDK;.\Inc;.\minhook-master\include;.\inih-master;$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
     <TargetName>LoA_DII</TargetName>
+    <OutDir>D:\Gothic II Gold test\System\LoA</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LinkIncremental>
-    </LinkIncremental>
-    <IncludePath>.\MinHook\include;.\G2ExtSDK;.\boost_1_59_0;.\Inc;$(IncludePath)</IncludePath>
-    <LibraryPath>.\MinHook\lib;$(LibraryPath)</LibraryPath>
-    <TargetName>LoA</TargetName>
-    <OutDir>..\..\..\Program Files\JoWood\Gothic II Gold\System\LOA</OutDir>
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>.\G2ExtSDK;.\Inc;.\minhook-master\include;.\inih-master;$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
+    <TargetName>LoA_DII</TargetName>
+    <OutDir>D:\Gothic II Gold test\System\LoA</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <IntrinsicFunctions>
-      </IntrinsicFunctions>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <WholeProgramOptimization>
-      </WholeProgramOptimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;DYNITEMINST_EXPORTS;DETOURS_X86;DETOURS_32BIT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <MinimalRebuild>false</MinimalRebuild>
-      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <IntrinsicFunctions>false</IntrinsicFunctions>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;DYNITEMINST_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>.\boost_1_59_0\bin\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libboost_serialization-vc90-mt-gd-1_42.lib;libMinHook-x86-v140-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>exports.def</ModuleDefinitionFile>
+      <SubSystem>Windows</SubSystem>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <Optimization>MaxSpeed</Optimization>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;DYNITEMINST_EXPORTS;DETOURS_X86;DETOURS_32BIT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Optimization>Disabled</Optimization>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
+      <IntrinsicFunctions>false</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;DYNITEMINST_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <AdditionalOptions>/Zc:threadSafeInit %(AdditionalOptions)</AdditionalOptions>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <EnableParallelCodeGeneration>false</EnableParallelCodeGeneration>
+      <FloatingPointExceptions>false</FloatingPointExceptions>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <EnableCOMDATFolding>
-      </EnableCOMDATFolding>
-      <OptimizeReferences>
-      </OptimizeReferences>
+      <EnableCOMDATFolding>false</EnableCOMDATFolding>
+      <OptimizeReferences>false</OptimizeReferences>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libcmt.lib;libvcruntime.lib;libucrt.lib;libMinHook-x86-v140_xp-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>exports.def</ModuleDefinitionFile>
       <SubSystem>Windows</SubSystem>
+      <RandomizedBaseAddress>true</RandomizedBaseAddress>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

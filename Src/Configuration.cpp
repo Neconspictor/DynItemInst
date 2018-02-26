@@ -1,8 +1,7 @@
 #include <Configuration.h>
 #include <Logger.h>
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/ini_parser.hpp>
 #include <Util.h>
+#include <ini.h>
 
 using namespace std;
 
@@ -18,74 +17,94 @@ bool Configuration::debugisEnabled;
 float Configuration::farClipZMultiplicator;
 bool Configuration::loaDebug;
 
+
+typedef struct
+{
+	const char* logFile;
+	bool logInfos;
+	bool logWarnings;
+	bool logErrors;
+	bool logFatals;
+	bool logToConsole;
+	bool logToZSpy;
+	bool logToFile;
+	bool debugisEnabled;
+	float farClipZMultiplicator;
+	bool loaDebug;
+} configuration;
+
+static int handler(void* user, const char* section, const char* name,
+	const char* value)
+{
+/*	configuration* pconfig = (configuration*)user;
+
+#define MATCH(s, n) strcmp(section, s) == 0 && strcmp(name, n) == 0
+	if (MATCH("LOGGING", "logFile")) {
+		pconfig->logFile = strdup(value);
+	}
+	else if (MATCH("LOGGING", "logInfos")) {
+		pconfig->logInfos = atoi(value);
+	}
+	else if (MATCH("LOGGING", "logWarnings")) {
+		pconfig->logWarnings = atoi(value);
+	}
+	else if (MATCH("LOGGING", "logErrors")) {
+		pconfig->logErrors = atoi(value);
+	}
+	else if (MATCH("LOGGING", "logFatals")) {
+		pconfig->logFatals = atoi(value);
+	}
+	else if (MATCH("LOGGING", "logToZSpy")) {
+		pconfig->logToZSpy = atoi(value);
+	}
+	else if (MATCH("LOGGING", "logToFile")) {
+		pconfig->logToFile = atoi(value);
+	}
+	else if (MATCH("LOGGING", "logToConsole")) {
+		pconfig->logToConsole = atoi(value);
+	}
+	else if (MATCH("LOGGING", "debugEnabled")) {
+		pconfig->debugisEnabled = atoi(value);
+	}
+	else if (MATCH("DEBUG", "loaDebug")) {
+		pconfig->loaDebug = atoi(value);
+	}
+	else {
+		return 0;  // unknown section/name, error
+	}*/
+	return 1;
+}
+
+
 void Configuration::load(const string &filename)
 {
 	stringstream ss;
 	ss << util::getModuleDirectory(util::getModuleHandle()) << "\\" << filename;
-	using boost::property_tree::ptree;
-	ptree pt;
-	try
-	{
-		read_ini(ss.str(), pt);
-		logFile = pt.get<string>("LOGGING.logFile");
-		logInfos = pt.get("LOGGING.logInfos", false);
-		logWarnings = pt.get("LOGGING.logWarnings", false);
-		logErrors = pt.get("LOGGING.logErrors", false);
-		logFatals = pt.get("LOGGING.logFatals", false);
-		logToZSpy = pt.get("LOGGING.logToZSpy", false);
-		logToFile = pt.get("LOGGING.logToFile", false);
-		logToConsole = pt.get("LOGGING.logToConsole", false);
-		debugisEnabled = pt.get("LOGGING.debugEnabled", false);
-		loaDebug = pt.get("DEBUG.loaDebug", false);
 
-	} catch (boost::exception &e)
-	{
-		//ini couldn't be read; set standard settings
-		logFile = "DynItemInst_IkarusLog.txt";
-		logInfos = false;
-		logWarnings = false;
-		logErrors = false;
-		logFatals = true;
-		debugisEnabled = false;
-		loaDebug = false;
+	string path = ss.str();
+
+	//ini couldn't be read; set standard settings
+	logFile = "DynItemInst_IkarusLog.txt";
+	logInfos = true;
+	logWarnings = true;
+	logErrors = true;
+	logFatals = true;
+	debugisEnabled = true;
+	loaDebug = false;
+
+	logToZSpy = true;
+	logToFile = true;
+	logToConsole = true;
+
+	configuration config;
+	if (ini_parse("test.ini", handler, &config) < 0) {
+		printf("Can't load '%s'\n", path.c_str());
 	}
-
-}
-
-void Configuration::loadLoAIni()
-{
-	stringstream ss;
-	ss << util::getGothicSystemDirectory() << "\\" << "LoA.ini";
-	stringstream logStream;
-	logStream << "Configuration::loadLoAIni: Try to load LoA.ini in folder: " << ss.str() << endl;
-	util::logAlways(&logStream);
-
-	using boost::property_tree::ptree;
-	ptree pt;
-	try
-	{
-		read_ini(ss.str(), pt);
-		farClipZMultiplicator = pt.get("LOA.farClipZMultiplicator", 1.0f);
-		if (farClipZMultiplicator <= 0)
-		{
-			farClipZMultiplicator = 1.0f;
-		}
-
-	}
-	catch (boost::exception &e)
-	{
-		//ini couldn't be read; set standard settings
-		farClipZMultiplicator = 1.0f;
-	}
-
-	logStream << "Configuration::loadLoAIni: farClipZMultiplicator= " << farClipZMultiplicator << endl;
-	util::logAlways(&logStream);
-
 }
 
 void Configuration::save(const string &filename)
 {
-	stringstream ss;
+	/*stringstream ss;
 	ss << util::getModuleDirectory(util::getModuleHandle()) << "\\" << filename;
 	using boost::property_tree::ptree;
 	ptree pt;
@@ -99,7 +118,7 @@ void Configuration::save(const string &filename)
 	pt.put("LOGGING.logToConsole", logToConsole);
 	pt.put("LOGGING.debugEnabled", debugisEnabled);
 	pt.put("DEBUG.loaDebug", loaDebug);
-	write_ini(ss.str(), pt);
+	write_ini(ss.str(), pt);*/
 }
 
 

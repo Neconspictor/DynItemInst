@@ -150,7 +150,42 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
    __asm nop			  \
    __asm nop			  \
    __asm nop			  \
-}
+};
+
+
+
+#define LEGO_HOOKENGINE_PREAMBLE_2_5 __asm      \
+/* Port output */         \
+{                         \
+/*25 Bytes for hook engine stuff*/\
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+						  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+						  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+   __asm nop			  \
+};
 
 
 /**

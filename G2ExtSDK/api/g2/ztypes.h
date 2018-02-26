@@ -274,7 +274,7 @@ struct zVEC3
 
 inline std::ostream & operator<<(std::ostream &os, const zVEC3& v)
 {
-	os << "(" << std::to_string(v.x) << ", " << std::to_string(v.y) << ", " << std::to_string(v.z) << ")";
+	os << "(" << v.x << ", " << v.y << ", " << v.z << ")";
     return os;
 }
 

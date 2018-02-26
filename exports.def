@@ -1,4 +1,4 @@
-LIBRARY	"LoA-DII"
+LIBRARY	"LoA_DII"
 EXPORTS
 	Hook
 	Unhook

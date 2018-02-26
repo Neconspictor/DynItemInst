@@ -46,7 +46,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 using namespace std;
 using namespace constants;
 
-ObjectManager* ObjectManager::instanz = nullptr;
+ObjectManager* ObjectManager::instanz = NULL;
 
 //.text:0073ABE0 public: class oCVob * __thiscall oCNpc::GetLeftHand(void) proc near
 typedef oCVob* (__thiscall* OCNpcGetLeftHand)(oCNpc*);
@@ -61,6 +61,7 @@ ObjectManager::ObjectManager()
 {
 	this->instanceMap = map<int, DynInstance*>();
 	this->nextInstances = queue<int>();
+	this->instanceBegin = -1;
 };
 
 bool ObjectManager::isValidWeapon(int weaponMode, oCItem * item)
@@ -134,16 +135,16 @@ zCListSort<oCItem>* ObjectManager::getInvItemByInstanceId(oCNpcInventory* invent
 	inventory->UnpackCategory();
 	ObjectManager* manager = ObjectManager::getObjectManager();
 	zCListSort<oCItem>* list = reinterpret_cast<zCListSort<oCItem>*>(inventory->inventory_data);
-	while (list != nullptr) {
+	while (list != NULL) {
 		oCItem* item = list->GetData();
-		if (item != nullptr && manager->getInstanceId(*item) == instanceId)
+		if (item != NULL && manager->getInstanceId(*item) == instanceId)
 		{
 			return list;
 		}
 		list = list->GetNext();
 	}
 
-	return nullptr;
+	return NULL;
 }
 
 int ObjectManager::getSlotNumber(oCNpcInventory* inventory, oCItem* item)
@@ -176,11 +177,11 @@ oCItem* ObjectManager::searchItemInInvbyInstanzValue(oCNpcInventory* inventory, 
 	}
 
 	//no item was found
-	return nullptr;
+	return NULL;
 }
 
 void ObjectManager::drawWeaponSilently(oCNpc* npc, int weaponMode, int readedWeaponId, int munitionId, 
-	bool munitionUsesRightHand, unordered_map<int, oCItem*>* equippedSpells, 
+	bool munitionUsesRightHand, map<int, oCItem*>* equippedSpells, 
 	oCItem** activeSpellItem, AdditMemory* addit, bool createCopy)
 {
 	oCNpcInventory* inventory = npc->GetInventory();
@@ -231,7 +232,7 @@ void ObjectManager::drawWeaponSilently(oCNpc* npc, int weaponMode, int readedWea
 
 			// Since multi-slotting was denied, copy is now on a own slot (not merged) and can be accessed
 			copy = searchItemInInvbyInstanzValue(inventory, searchValue);
-			util::assertDIIRequirements(copy != nullptr, "item to insert shouldn't be null!");
+			util::assertDIIRequirements(copy != NULL, "item to insert shouldn't be null!");
 			copy->instanz = copyStoreValue;
 		}
 
@@ -315,7 +316,7 @@ void ObjectManager::drawWeaponSilently(oCNpc* npc, int weaponMode, int readedWea
 int ObjectManager::getSelectedSpellKey(oCNpc* npc)
 {
 	oCNpcInventory* inventory = npc->GetInventory();
-	if (inventory == nullptr) {
+	if (inventory == NULL) {
 		return -1;
 	}
 	inventory->UnpackAllItems();
@@ -354,7 +355,7 @@ g2ext_extended::zCPar_SymbolTable* ObjectManager::zCParserGetSymbolTable(void* p
 
 
 ObjectManager* ObjectManager::getObjectManager() {
-	if (instanz == nullptr)
+	if (instanz == NULL)
 	{
 		instanz = new ObjectManager();
 	}
@@ -362,15 +363,15 @@ ObjectManager* ObjectManager::getObjectManager() {
 };
 
 void ObjectManager::release() {
-	if (instanz != nullptr) {
+	if (instanz != NULL) {
 		instanz->releaseInstances();
 		delete instanz;
-		instanz = nullptr;
+		instanz = NULL;
 	}
 };
 
 int ObjectManager::createNewInstanceId(oCItem* item) {
-	if (item == nullptr) {
+	if (item == NULL) {
 		logStream << "ObjectManager::createNewInstanceId: item is null!" << std::endl;
 		util::logWarning(&logStream);
 		return 0;
@@ -383,7 +384,7 @@ int ObjectManager::createNewInstanceId(oCItem* item) {
 	zCPar_Symbol* old = parser->GetSymbol(parentId);
 
 
-	if (old == nullptr) {
+	if (old == NULL) {
 		logStream << "ObjectManager::createNewInstanceId: item parser symbol is null!" << std::endl;
 		util::logWarning(&logStream);
 		return 0;
@@ -455,7 +456,7 @@ void ObjectManager::releaseInstances() {
 	for (it = instanceMap.begin(); it != instanceMap.end(); ++it) {
 		DynInstance* item = (*it).second;
 		delete item;
-		(*it).second = nullptr;
+		(*it).second = NULL;
 	}
 
 	// clear all data structures
@@ -491,7 +492,7 @@ bool ObjectManager::assignInstanceId(oCItem* item, int id){
 
 void ObjectManager::resetDynItemInstances()
 {
-	for (auto it = instanceMap.begin(); it != instanceMap.end(); ++it)
+	for (std::map<int, DynInstance*>::iterator it = instanceMap.begin(); it != instanceMap.end(); ++it)
 	{
 		DynInstance* instance = it->second;
 		instance->resetActiveWorlds();
@@ -640,7 +641,7 @@ bool ObjectManager::assignInstanceId2(oCItem* item, int id)
 
 	//remove copy item
 	//oCItemOperatorDelete(copy);
-	//copy = nullptr;
+	//copy = NULL;
 	return true;
 };
 
@@ -658,7 +659,7 @@ bool ObjectManager::initByNewInstanceId(oCItem* item) {
 NULL will be returned.
 */
 int ObjectManager::getDynInstanceId(oCItem* item){
-	if (item == nullptr) return NULL;
+	if (item == NULL) return NULL;
 	int instanceId = getInstanceId(*item);
 	map<int, DynInstance*>::iterator it;
 	it = instanceMap.find(instanceId);
@@ -684,7 +685,7 @@ DynInstance* ObjectManager::getInstanceItem(int instanceId){
 	it = instanceMap.find(instanceId);
 	if (it == instanceMap.end())
 	{
-		return nullptr;		
+		return NULL;		
 	}
 	return (*it).second;
 }; 
@@ -771,10 +772,10 @@ list<oCMobContainer*>* ObjectManager::getMobContainers() {
 	zCWorld* world = oCGame::GetGame()->GetWorld();
 	zCListSort<zCVob>* vobList = world->GetVobList();
 	oCMobContainer* dummy = new oCMobContainer();
-	while(vobList != nullptr) {
+	while(vobList != NULL) {
 		zCVob* vob = vobList->GetData();
 		vobList = vobList->GetNext();
-		if (vob == nullptr){
+		if (vob == NULL){
 			continue;
 		}
 
@@ -786,30 +787,41 @@ list<oCMobContainer*>* ObjectManager::getMobContainers() {
 	return containerList;
 };
 
+static void test (void* obj, void* param, oCItem* itm) {
+	if (itm == NULL) return;
+	ObjectManager* manager = (ObjectManager*)obj;
+	set<int>* usedIds = (set<int>*)param;
+	int instanceId = manager->getInstanceId(*itm);
+	if (instanceId >= manager->getInstanceBegin())
+	{
+		usedIds->insert(instanceId);
+	}
+}
+
 void ObjectManager::changeKeyIfFreeIdAvailable(int* key, int indexCount)
 {
 	set<int> usedIds;
-	auto func = [&](oCItem* itm)
+	/*auto func = [&](oCItem* itm)
 	{
-		if (itm == nullptr) return;
+		if (itm == NULL) return;
 		int instanceId = getInstanceId(*itm);
 		if (instanceId >= instanceBegin)
 		{
 			usedIds.insert(instanceId);
 		}
-	};
+	};*/
 
 	//call the collection function func for all items in the world
-	callForAllItems(func);
+	callForAllItems(test, this, &usedIds);
 
-	for (auto it = usedIds.begin(); it != usedIds.end(); ++it)
+	for (set<int>::iterator it = usedIds.begin(); it != usedIds.end(); ++it)
 	{
 		logStream << "usedId: " << *it << endl;
 		util::debug(&logStream);
 	}
 
-	auto first = usedIds.begin();
-	auto second = ++usedIds.begin();
+	set<int>::iterator first = usedIds.begin();
+	set<int>::iterator second = ++usedIds.begin();
 	int diff;
 	bool foundId = false;
 	for (; second != usedIds.end() && (first != usedIds.end()); ++first, ++second)
@@ -820,7 +832,7 @@ void ObjectManager::changeKeyIfFreeIdAvailable(int* key, int indexCount)
 		util::debug(&logStream);
 		if (diff <= 0)
 		{
-			logStream << "ObjectManager::createNewInstanceId: strange diff: " << diff << endl;
+			logStream << "ObjectManager::changeKeyIfFreeIdAvailable: strange diff: " << diff << endl;
 			util::debug(&logStream);
 		}
 		else if (diff > 1)
@@ -853,7 +865,7 @@ void ObjectManager::createNewInstanceWithoutExistingId(oCItem* item, int key)
 	int parentId = getInstanceId(*item);
 	zCPar_Symbol* old = parser->GetSymbol(parentId);
 
-	if (old == nullptr) return;
+	if (old == NULL) return;
 
 	int* indexCount = getParserInstanceCount();
 	zCPar_Symbol* symbol = createNewSymbol(key, old);
@@ -913,7 +925,7 @@ void ObjectManager::createNewInstanceForExistingId(oCItem* item, int instanceId)
 	instanceItem->setInstanceID(instanceId);
 
 	//this instance id is now used again!
-	instanceItem->notUsed = false;
+	instanceItem->setReusable(true);
 
 	setParentInstanceId(instanceId, parentId);
 };
@@ -931,7 +943,15 @@ zCPar_Symbol* ObjectManager::createNewSymbol(ParserInfo* old)
 
 	zCPar_Symbol* parent = parser->GetSymbol("C_ITEM");
 
-	result = new zCPar_Symbol(); 
+	//result = new zCPar_Symbol(); 
+	
+	// The symbol will be managed by the Gothic 2 exe and thus the appropriate new operator has to be called!
+	void* memory = gothic2OperatorNew(0x3C); //sizeof(zCPar_Symbol) = 0x3C (-> see gothic 2 exe, address 0x0078DD02)
+	ZeroMemory(memory, 0x3C);
+	zCPar_SymbolConstructor(memory);
+
+	result = (zCPar_Symbol*)memory;
+
 	result->parent = ref->parent;
 	result->bitfield = ref->bitfield;
 	result->name = zSTRING(old->name.c_str());
@@ -1075,13 +1095,20 @@ zCPar_Symbol* ObjectManager::createNewSymbol(int instanceId, zCPar_Symbol* old) 
 	// Symbol already exists?
 	if (symbol) return symbol;
 
-	symbol = new zCPar_Symbol();
-	ZeroMemory(symbol, sizeof(zCPar_Symbol));
+	// The symbol will be managed by the Gothic 2 exe and thus the appropriate new operator has to be called!
+	void* memory = gothic2OperatorNew(0x3C); //sizeof(zCPar_Symbol) = 0x3C (-> see gothic 2 exe, address 0x0078DD02)
+	ZeroMemory(memory, 0x3C);
+	zCPar_SymbolConstructor(memory);
+
+	symbol = (zCPar_Symbol*)memory;
+	//ZeroMemory(symbol, sizeof(zCPar_Symbol));
 
 	stringstream ss; ss << "DII_" << instanceId;
 	string name = ss.str();
 	transform(name.begin(), name.end(), name.begin(), ::toupper);
-	symbol->name = zSTRING(name.c_str());
+	zSTRING nameZString(name.c_str());
+	symbol->name = nameZString;
+	const char* charRep = nameZString.ToChar();
 	symbol->parent = old->parent;
 	symbol->bitfield = old->bitfield;
 	symbol->offset = 0;
@@ -1096,8 +1123,8 @@ zCPar_Symbol* ObjectManager::createNewSymbol(int instanceId, zCPar_Symbol* old) 
 	/*symbol->parent = old->parent;
 	symbol->bitfield = old->bitfield;
 	symbol->offset = 0;
-	symbol->next = nullptr;
-	symbol->content.data_ptr = nullptr; DII_TestConstructor
+	symbol->next = NULL;
+	symbol->content.data_ptr = NULL; DII_TestConstructor
 	symbol->filenr = ZCPAR_SYMBOL_MARK_ID;*/
 
 	return symbol;
@@ -1190,7 +1217,7 @@ bool ObjectManager::InitItemWithDynInstance(oCItem* item, int index)
 bool ObjectManager::IsModified(oCItem* item)
 {
 	int index = getDynInstanceId(item);
-	auto it = instanceMap.find(index);
+	std::map<int, DynInstance*>::iterator it = instanceMap.find(index);
 	if (it == instanceMap.end())
 	{
 		return false;
@@ -1200,7 +1227,7 @@ bool ObjectManager::IsModified(oCItem* item)
 
 bool ObjectManager::IsModified(int instanceId)
 {
-	auto it = instanceMap.find(instanceId);
+	std::map<int, DynInstance*>::iterator it = instanceMap.find(instanceId);
 	if (it == instanceMap.end())
 	{
 		return false;
@@ -1210,8 +1237,8 @@ bool ObjectManager::IsModified(int instanceId)
 
 zCPar_Symbol* ObjectManager::getSymbolByIndex(int index)
 {
-	auto it = newInstanceToSymbolMap.find(index);
-	if (it == newInstanceToSymbolMap.end()) { return nullptr; }
+	map<int, zCPar_Symbol*>::iterator it = newInstanceToSymbolMap.find(index);
+	if (it == newInstanceToSymbolMap.end()) { return NULL; }
 	return it->second;
 }
 
@@ -1219,8 +1246,8 @@ zCPar_Symbol* ObjectManager::getSymbolByName(zSTRING symbolName)
 {
 	string name = symbolName.ToChar();
 	transform(name.begin(), name.end(),name.begin(), ::toupper);
-	auto it = nameToSymbolMap.find(name);
-	if (it == nameToSymbolMap.end()) { return nullptr; }
+	map<string, zCPar_Symbol*>::iterator it = nameToSymbolMap.find(name);
+	if (it == nameToSymbolMap.end()) { return NULL; }
 	return it->second;
 }
 
@@ -1229,7 +1256,7 @@ int ObjectManager::getIndexByName(zSTRING symbolName)
 {
 	string name = symbolName.ToChar();
 	transform(name.begin(), name.end(),name.begin(), ::toupper);
-	auto it = nameToIndexMap.find(name);
+	map<string, int>::iterator it = nameToIndexMap.find(name);
 	if (it == nameToIndexMap.end()) { return NULL; }
 	return it->second;
 }
@@ -1261,7 +1288,7 @@ void ObjectManager::createAdditionalMemory(oCItem* item, int id, bool isHeroItem
 
 void ObjectManager::removeAdditionalMemory(int additId){
 	bool isHeroItem = additId > HERO_ADDIT_BEGIN;
-	auto it = keyToAdditMap.find(additId);
+	map<int, AdditMemory*>::iterator it = keyToAdditMap.find(additId);
 	if (it == keyToAdditMap.end()) return;
 	AdditMemory* addit = it->second;
 	keyToAdditMap.erase(it);
@@ -1276,8 +1303,8 @@ void ObjectManager::removeAdditionalMemory(int additId){
 }
 
 void ObjectManager::removeAllAdditionalMemory(){
-	auto itBegin = keyToAdditMap.begin();
-	auto itEnd = keyToAdditMap.end();
+	map<int, AdditMemory*>::iterator itBegin = keyToAdditMap.begin();
+	map<int, AdditMemory*>::iterator itEnd = keyToAdditMap.end();
 	
 	while(itBegin != itEnd) {
 		removeAdditionalMemory(itBegin->first);
@@ -1288,12 +1315,12 @@ void ObjectManager::removeAllAdditionalMemory(){
 
 bool ObjectManager::hasAdditAssignment(oCItem& item){
 	AdditMemory* addit = getAddit(item);
-	return (addit != nullptr);
+	return (addit != NULL);
 }
 
 // Provides the id of additional memory for a given oCItem
 int ObjectManager::getAdditId(oCItem& item) {
-	if (item.instanz < 0) return item.instanz;
+	if (item.instanz < 0) return -item.instanz;
 	//if (getInstanceId(item) >= INSTANCE_BEGIN) return getInstanceId(item);
 	return getInstanceId(item);
 	//return NULL;
@@ -1301,8 +1328,8 @@ int ObjectManager::getAdditId(oCItem& item) {
 
 // Provides additional Memory for a specific additional memory id
 AdditMemory* ObjectManager::getAddit(int additId) {
-	auto it = keyToAdditMap.find(additId);
-	if (it == keyToAdditMap.end()) return nullptr;
+	map<int, AdditMemory*>::iterator it = keyToAdditMap.find(additId);
+	if (it == keyToAdditMap.end()) return NULL;
 	return it->second;
 }
 
@@ -1325,7 +1352,10 @@ int ObjectManager::calcAdditKey(bool isHeroItem) const
 		return HERO_ADDIT_BEGIN + (static_cast<int>(keyToAdditMap.size()) +1);
 	}
 	return (static_cast<int>(keyToAdditMap.size()) + 1);
-};
+}
+void * ObjectManager::gothic2OperatorNew(size_t size) {
+	XCALL(0x00565F50);
+}
 
 void ObjectManager::loadWorldObjects(char* filename) {
 	ifstream ifs(filename);
@@ -1481,16 +1511,45 @@ void ObjectManager::updateIkarusSymbols()
 	zCParser::GetParser()->CallFunc(arg.Upper());
 }
 
-void ObjectManager::callForAllItems(function<void(oCItem*)> func, oCItem** stopIfNotNullItem)
+bool ObjectManager::updateItemAndAddit(oCItem * item)
+{
+	int additId = getAdditId(*item);
+	AdditMemory* addit = getAddit(additId);
+
+	if (addit == NULL || addit->visited) {
+		return false;
+	}
+
+	//Each item should only once be restored
+	addit->visited = true;
+
+	//Update the item
+	int instanceId;
+	if (addit->instanceId == getIdForSpecialPurposes()) {
+		instanceId = item->GetInstance();
+	}
+	else {
+		instanceId = addit->instanceId;
+	}
+
+	setInstanceId(item, instanceId);
+
+	int instanz = addit->instanz;
+	item->instanz = instanz;
+
+	return true;
+}
+
+void ObjectManager::callForAllItems(void(*func)(void* obj, void* param, oCItem*), void* obj, void* param, oCItem** stopIfNotNullItem)
 {
 	zCWorld* world = oCGame::GetGame()->GetWorld();
 	zCListSort<oCNpc>* npcList = world->GetNpcList();
 	list<oCItem*> tempList;
 	list<oCItem*>::iterator it;
 
-	while (npcList != nullptr) {
+	while (npcList != NULL) {
 		oCNpc* npc = npcList->GetData();
-		if (npc == nullptr) {
+		if (npc == NULL) {
 			npcList = npcList->GetNext();
 			continue;
 		}
@@ -1498,7 +1557,7 @@ void ObjectManager::callForAllItems(function<void(oCItem*)> func, oCItem** stopI
 		oCVob* leftHandVob = oCNpcGetLeftHand(npc);
 		if (oCItem* leftHandItem = dynamic_cast<oCItem*>(leftHandVob))
 		{
-			func(leftHandItem);
+			func(obj, param, leftHandItem);
 			if (stopIfNotNullItem && *stopIfNotNullItem) {
 				logStream << "ObjectManager::callForAllItems: leftHandItem!" << endl;
 				util::debug(&logStream);
@@ -1508,7 +1567,7 @@ void ObjectManager::callForAllItems(function<void(oCItem*)> func, oCItem** stopI
 
 		if (oCItem* rightHandItem = dynamic_cast<oCItem*>(oCNpcGetRightHand(npc)))
 		{
-			func(rightHandItem);
+			func(obj, param, rightHandItem);
 			if (stopIfNotNullItem && *stopIfNotNullItem) {
 				logStream << "ObjectManager::callForAllItems: rightHandItem!" << endl;
 				util::debug(&logStream);
@@ -1517,16 +1576,16 @@ void ObjectManager::callForAllItems(function<void(oCItem*)> func, oCItem** stopI
 		}
 
 		oCNpcInventory* inventory = npc->GetInventory();
-		if (inventory == nullptr) {
+		if (inventory == NULL) {
 			npcList = npcList->GetNext();
 			continue;
 		}
 
 		inventory->UnpackAllItems();
 		zCListSort<oCItem>* list = reinterpret_cast<zCListSort<oCItem>*>(inventory->inventory_data);
-		while (list != nullptr) {
+		while (list != NULL) {
 			oCItem* item = list->GetData();
-			if (item != nullptr) tempList.push_back(item);
+			if (item != NULL) tempList.push_back(item);
 
 			list = list->GetNext();
 		}
@@ -1534,7 +1593,7 @@ void ObjectManager::callForAllItems(function<void(oCItem*)> func, oCItem** stopI
 
 		for (it = tempList.begin(); it != tempList.end(); ++it)
 		{
-			func(*it);
+			func(obj, param, *it);
 			if (stopIfNotNullItem && *stopIfNotNullItem) {
 				logStream << "ObjectManager::callForAllItems: found item in npc's inventory!" << endl;
 				util::debug(&logStream);
@@ -1547,7 +1606,7 @@ void ObjectManager::callForAllItems(function<void(oCItem*)> func, oCItem** stopI
 	tempList.clear();
 
 	list<oCMobContainer*>* containerList = getMobContainers();
-	auto contIt = containerList->begin();
+	list<oCMobContainer*>::iterator contIt = containerList->begin();
 	for (; contIt != containerList->end(); ++contIt)
 	{
 		oCMobContainer* container = *contIt;
@@ -1555,9 +1614,9 @@ void ObjectManager::callForAllItems(function<void(oCItem*)> func, oCItem** stopI
 		zCListSort<oCItem>* listAddress = reinterpret_cast<zCListSort<oCItem>*>(address);
 		zCListSort<oCItem>* list = listAddress;
 
-		while (list != nullptr) {
+		while (list != NULL) {
 			oCItem* item = list->GetData();
-			if (item != nullptr) {
+			if (item != NULL) {
 				tempList.push_back(item);
 			}
 			list = list->GetNext();
@@ -1566,7 +1625,7 @@ void ObjectManager::callForAllItems(function<void(oCItem*)> func, oCItem** stopI
 		it = tempList.begin();
 		for (; it != tempList.end(); ++it)
 		{
-			func(*it);
+			func(obj, param, *it);
 			if (stopIfNotNullItem && *stopIfNotNullItem) {
 				// containerList has to be deleted manually.
 				containerList->clear();
@@ -1585,9 +1644,9 @@ void ObjectManager::callForAllItems(function<void(oCItem*)> func, oCItem** stopI
 	tempList.clear();
 
 	zCListSort<oCItem>* itemList = world->GetItemList();
-	while (itemList != nullptr) {
+	while (itemList != NULL) {
 		oCItem* item = itemList->GetData();
-		if (item != nullptr)
+		if (item != NULL)
 		{
 			tempList.push_back(item);
 		}
@@ -1597,7 +1656,7 @@ void ObjectManager::callForAllItems(function<void(oCItem*)> func, oCItem** stopI
 	it = tempList.begin();
 	for (; it != tempList.end(); ++it)
 	{
-		func(*it);
+		func(obj, param, *it);
 		if (stopIfNotNullItem && *stopIfNotNullItem) {
 			logStream << "ObjectManager::callForAllItems: found item in world!" << endl;
 			util::debug(&logStream);
@@ -1612,45 +1671,64 @@ void ObjectManager::callForAllItems(function<void(oCItem*)> func, oCItem** stopI
 }
 
 
-void ObjectManager::callForInventoryItems(function<void(oCItem*)> func, oCNpc* npc)
+void ObjectManager::callForInventoryItems(void(*func)(void* obj, void* param, oCItem*), void* obj, void* param, oCNpc* npc)
 {
 	list<oCItem*> tempList;
 	oCNpcInventory* inventory = npc->GetInventory();
-	if (inventory == nullptr) return;
+	if (inventory == NULL) return;
 
 	inventory->UnpackAllItems();
-	zCListSort<oCItem>* list = reinterpret_cast<zCListSort<oCItem>*>(inventory->inventory_data);
-	while (list != nullptr) {
-		oCItem* item = list->GetData();
-		if (item != nullptr) tempList.push_back(item);
+	zCListSort<oCItem>* sortedList = reinterpret_cast<zCListSort<oCItem>*>(inventory->inventory_data);
+	while (sortedList != NULL) {
+		oCItem* item = sortedList->GetData();
+		if (item != NULL) tempList.push_back(item);
 
-		list = list->GetNext();
+		sortedList = sortedList->GetNext();
 	}
 
-	for (auto it = tempList.begin(); it != tempList.end(); ++it)
+	for (list<oCItem*>::iterator it = tempList.begin(); it != tempList.end(); ++it)
 	{
-		func(*it);
+		func(obj, param, *it);
 	}
 	tempList.clear();
 }
 
-void ObjectManager::callForAllWorldItems(function<void(oCItem*)> func)
+void ObjectManager::callForAllContainerItems(void(*func)(void *obj, void *param, oCItem *), void * obj, void * param, oCMobContainer * container)
+{
+	int address = (int)container->containList_next;
+	zCListSort<oCItem>* listAddress = reinterpret_cast<zCListSort<oCItem>*>(address);
+	zCListSort<oCItem>* list = listAddress;
+
+	while (list != NULL) {
+		oCItem* item = list->GetData();
+		if (item == NULL) {
+			list = list->GetNext();
+			continue;
+		}
+
+		func(obj, param, item);
+
+		list = list->GetNext();
+	}
+}
+
+void ObjectManager::callForAllWorldItems(void(*func)(void* obj, void* param, oCItem*), void* obj, void* param)
 {
 	zCWorld* world = oCGame::GetGame()->GetWorld();
 	list<oCItem*> tempList;
 	zCListSort<oCItem>* itemList = world->GetItemList();
-	while (itemList != nullptr) {
+	while (itemList != NULL) {
 		oCItem* item = itemList->GetData();
-		if (item != nullptr)
+		if (item != NULL)
 		{
 			tempList.push_back(item);
 		}
 		itemList = itemList->GetNext();
 	}
 
-	for (auto it = tempList.begin(); it != tempList.end(); ++it)
+	for (list<oCItem*>::iterator it = tempList.begin(); it != tempList.end(); ++it)
 	{
-		func(*it);
+		func(obj, param, *it);
 	}
 }
 
@@ -1687,7 +1765,7 @@ void ObjectManager::markAsReusable(int instanceId, int previousId)
 
 void ObjectManager::checkReusableInstances()
 {
-	for (auto it = instanceMap.begin(); it != instanceMap.end(); ++it)
+	for (map<int, DynInstance*>::iterator it = instanceMap.begin(); it != instanceMap.end(); ++it)
 	{
 		DynInstance* instance = it->second;
 		instance->checkNotUsed();
@@ -1706,12 +1784,30 @@ bool ObjectManager::isItemInWorld(oCItem* item)
 	return list->IsInList(item);
 }
 
+struct TEST2_PARAMS {
+	oCItem* result;
+	int instanceID;
+};
+
+static void test2(void* obj, void* param, oCItem* itm) {
+	if (itm == NULL) return;
+
+	TEST2_PARAMS* params = (TEST2_PARAMS*)param;
+	if (params->result != NULL) return;
+
+	if (itm->GetInstance() == params->instanceID)
+	{
+		params->result = itm;
+		//logStream << "ObjectManager::getItemByInstanceId: result found" << endl;
+		//util::debug(&logStream);
+	}
+}
+
 oCItem* ObjectManager::getItemByInstanceId(int instanceId)
 {
-	oCItem* result = nullptr;
-	auto func = [&](oCItem* itm) ->void {
-		if (itm == nullptr) return;
-		if (result != nullptr) return;
+	/*auto func = [&](oCItem* itm) ->void {
+		if (itm == NULL) return;
+		if (result != NULL) return;
 		
 		if (itm->GetInstance() == instanceId)
 		{
@@ -1719,15 +1815,17 @@ oCItem* ObjectManager::getItemByInstanceId(int instanceId)
 			logStream << "ObjectManager::getItemByInstanceId: result found" << endl;
 			util::debug(&logStream);
 		}
-	};
+	};*/
 
-	callForAllItems(func, &result);
-	return result;
+	TEST2_PARAMS params = {NULL, instanceId};
+
+	callForAllItems(test2, NULL, &params, &params.result);
+	return params.result;
 }
 
 void ObjectManager::oCItemSaveInsertEffect(oCItem* item)
 {
-	if (item == nullptr)
+	if (item == NULL)
 	{
 		return;
 	}
@@ -1735,7 +1833,7 @@ void ObjectManager::oCItemSaveInsertEffect(oCItem* item)
 	int* ptr = ((int*)item) + 0x340;
 
 	//Has the item already an effect active?
-	if (ptr != nullptr)
+	if (ptr != NULL)
 	{
 		return;
 	}
@@ -1745,7 +1843,7 @@ void ObjectManager::oCItemSaveInsertEffect(oCItem* item)
 
 void ObjectManager::oCItemSaveRemoveEffect(oCItem* item)
 {
-	if (item == nullptr)
+	if (item == NULL)
 	{
 		return;
 	}
@@ -1753,7 +1851,7 @@ void ObjectManager::oCItemSaveRemoveEffect(oCItem* item)
 	int* ptr = ((int*)item) + 0x340;
 
 	//Has the item no effect to remove?
-	if (ptr == nullptr)
+	if (ptr == NULL)
 	{
 		return;
 	}
@@ -1792,7 +1890,7 @@ void ObjectManager::equipRangedWeapon(oCItem* item, oCNpcInventory* inventory, b
 	oCItem* munition = list->GetData();
 	int arrowId = ObjectManager::getObjectManager()->getInstanceId(*munition);
 	zCListSort<oCItem>* list2 = list->GetNext();
-	oCItem* munition2 = nullptr;
+	oCItem* munition2 = NULL;
 	oCNpc* owner = inventory->GetOwner();
 
 	if (list2)

@@ -30,7 +30,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <Windows.h>
 #include <Shellapi.h>
 #include <stdlib.h>
-#include <string>
+#include <string.h>
 #include <sys/stat.h> // stat
 #include <errno.h>    // errno, ENOENT, EEXIST
 #include <Logger.h>
@@ -181,6 +181,9 @@ std::string util::trimFromRight(const std::string& str)
 {
 	// trim trailing spaces
 	size_t endpos = str.find_last_not_of(" ");
+
+	if (endpos < 0 || endpos > str.length()) return str;
+
 	if (str[endpos] == ' ')
 	{
 		return str.substr(0, endpos);
@@ -237,7 +240,7 @@ void util::getBool(std::stringstream& ss, bool& param)
 	}
 	std::string token;
 	getline(ss, token, ' ');
-	param = atoi(token.c_str());
+	param = atoi(token.c_str()) != 0;
 };
 
 void util::logInfo(std::stringstream* ss)

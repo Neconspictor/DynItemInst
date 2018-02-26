@@ -38,7 +38,6 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <DynItemInst.h>
 #include <Util.h>
 #include <Levitation.h>
-#include <TestModule.h>
 #include <zCPar_SymbolTable.h>
 
 
@@ -74,7 +73,7 @@ void __cdecl DaedalusExports::DII_CreateNewItem(int index, int instanceId) // Fu
 	// Check if provided instance id is valid
 	zCPar_Symbol* newInstanceSym = parser->GetSymbol(instanceId);
 
-	if (newInstanceSym == nullptr)
+	if (newInstanceSym == NULL)
 	{
 		logStream << "DaedalusExports::DII_CreateNewItem: newInstanceSym is Null! No item will be created!" << std::endl;
 		util::logWarning(&logStream);
@@ -94,7 +93,7 @@ void __cdecl DaedalusExports::DII_ReleaseItem(int index) // Func void DII_Releas
 	zCPar_Symbol* symbol = parser->GetSymbol(index);
 	oCItem* item = (oCItem*)symbol->offset;
 
-	if (item != nullptr)
+	if (item != NULL)
 	{
 		int* refCtr = (int*)((BYTE*)item + 0x4);
 		if (*refCtr >= 0)
@@ -107,7 +106,7 @@ void __cdecl DaedalusExports::DII_ReleaseItem(int index) // Func void DII_Releas
 
 int DaedalusExports::DII_CreateNewInstance(oCItem* item) //Func int DII_CreateNewInstance(var C_Item item)
 {
-	if (item == nullptr) {return NULL;}
+	if (item == NULL) {return NULL;}
 
 	logStream << "Param: " << item->name.ToChar();
 	util::debug(&logStream);
@@ -126,18 +125,18 @@ int DaedalusExports::DII_CreateNewInstance(oCItem* item) //Func int DII_CreateNe
 
 void DaedalusExports::DII_EquipItem(oCNpc* npc, int instanceId)
 {
-	if (npc == nullptr) return;
+	if (npc == NULL) return;
 	oCNpcInventory* inv = npc->GetInventory();
-	if (inv == nullptr) return;
+	if (inv == NULL) return;
 
 	oCItem* item = DynItemInst::getInvItemByInstanceId2(inv, instanceId);
-	if (item == nullptr) return;
+	if (item == NULL) return;
 	npc->Equip(item);
 }
 
 int DaedalusExports::DII_IsDynamic(oCItem* item) // Func DII_IsDynamic(VAR C_ITEM item)
 {
-	if (item == nullptr) {return FALSE;}
+	if (item == NULL) {return FALSE;}
 
 	bool modified = ObjectManager::getObjectManager()->IsModified(item);
 	if (modified)
@@ -165,7 +164,7 @@ BYTE* DaedalusExports::DII_GetUserData(int instanceId) // Func DII_UserData DII_
 	{
 		logStream << "DaedalusExports::DII_GetUserData: instanceId isn't dynamic" << std::endl;
 		util::debug(&logStream, Logger::Warning);
-		return nullptr;
+		return NULL;
 	}
 
 	DynInstance* storeItem = manager->getInstanceItem(instanceId);
@@ -180,7 +179,7 @@ float DaedalusExports::DII_GetLibVersion()
 
 void DaedalusExports::DII_DoStatistics()
 {
-	ObjectManager* manager = ObjectManager::getObjectManager();
+	/*ObjectManager* manager = ObjectManager::getObjectManager();
 	Logger* logger = Logger::getLogger();
 	int instanceBegin = manager->getInstanceBegin();
 
@@ -199,13 +198,13 @@ void DaedalusExports::DII_DoStatistics()
 	std::set<oCItem*, std::function<bool(oCItem*, oCItem*)>> itemSet(compare);
 
 	auto func = [&](oCItem* item) ->void {
-		if (item == nullptr) return;
+		if (item == NULL) return;
 
 		int id = manager->getInstanceId(*item);
 		if (id >= instanceBegin)
 		{
 			auto it = itemSet.find(item);
-			if (*it == nullptr)
+			if (*it == NULL)
 			{
 				itemSet.insert(item);
 				++dynamicItemCount;
@@ -221,7 +220,40 @@ void DaedalusExports::DII_DoStatistics()
 	manager->callForAllItems(func);
 
 	logStream << "Statistics: " << dynamicItemCount << " items have a dynamic instance id." << std::endl;
-	util::debug(&logStream);
+	util::debug(&logStream);*/
+}
+
+
+struct UPDATE_INSTANCE_PARAMS {
+	int index;
+	oCItem* item;
+};
+
+static void updateItem(void* obj, void* param, oCItem* itm) {
+	if (itm == NULL) return;
+
+	UPDATE_INSTANCE_PARAMS* params = (UPDATE_INSTANCE_PARAMS*)param;
+	ObjectManager* manager = ObjectManager::getObjectManager();
+	int id = manager->getDynInstanceId(itm);
+	if (id == params->index)
+	{
+		//int refCtr = *(int*)((BYTE*)itm + 0x4);
+
+		bool isInWorld = manager->isItemInWorld(itm);
+		int flags = itm->flags;
+		manager->oCItemSaveRemoveEffect(itm);
+		itm->InitByScript(id, itm->instanz);
+		itm->flags = flags;
+
+		manager->oCItemSaveInsertEffect(itm);
+		//itm->InsertEffect();
+
+		if (isInWorld)
+		{
+			zCWorld* world = oCGame::GetGame()->GetWorld();
+			world->AddVob(params->item);
+		}
+	}
 }
 
 void DaedalusExports::DII_UpdateInstance(oCItem* item)
@@ -231,7 +263,7 @@ void DaedalusExports::DII_UpdateInstance(oCItem* item)
 	if (index > 0)
 	{
 		DynInstance* dynInstance = manager->getInstanceItem(index);
-		if (dynInstance == nullptr)
+		if (dynInstance == NULL)
 		{
 			logStream << "DII_UpdateInstance: dynInstance is null!" << std::endl;
 			util::logWarning(&logStream);
@@ -242,8 +274,8 @@ void DaedalusExports::DII_UpdateInstance(oCItem* item)
 		zCWorld* world = oCGame::GetGame()->GetWorld();
 
 		//update all items of this id
-		auto func = [&](oCItem* itm) ->void {
-			if (itm == nullptr) return;
+		/*auto func = [&](oCItem* itm) ->void {
+			if (itm == NULL) return;
 			
 			int id = manager->getDynInstanceId(itm);
 			if (id == index)
@@ -264,8 +296,10 @@ void DaedalusExports::DII_UpdateInstance(oCItem* item)
 					world->AddVob(item);
 				}
 			}
-		};
-		manager->callForAllItems(func);
+		};*/
+
+		UPDATE_INSTANCE_PARAMS params = { index, item };
+		manager->callForAllItems(updateItem, NULL, &params);
 
 	} else
 	{
@@ -350,6 +384,7 @@ void DaedalusExports::DII_GetItemByInstanceId(int index,  int instanceId)
 	symbol->offset = (int)item;
 }
 
+
 void DaedalusExports::DII_ChangeItemsInstanceId(int targetId, int newId)
 {
 	ObjectManager* manager = ObjectManager::getObjectManager();
@@ -357,20 +392,16 @@ void DaedalusExports::DII_ChangeItemsInstanceId(int targetId, int newId)
 	oCWorld* gameWorld = oCGame::GetGame()->GetGameWorld();
 	oCObjectFactory* factory = oCObjectFactory::GetFactory();
 	std::list<oCItem*> targetList;
-	auto func = [&](oCItem* item) ->void {
-		if (item->GetInstance() == targetId && (item->instanz != 666))
-		{
-			targetList.push_back(item);
-		}
-	};
-
 
 	zCListSort<oCItem>* itemList = world->GetItemList();
-	while (itemList != nullptr) {
+	while (itemList != NULL) {
 		oCItem* item = itemList->GetData();
-		if (item != nullptr)
+		if (item != NULL)
 		{
-			func(item);
+			if (item->GetInstance() == targetId && (item->instanz != 666))
+			{
+				targetList.push_back(item);
+			}
 		}
 		itemList = itemList->GetNext();
 	}
@@ -383,9 +414,9 @@ void DaedalusExports::DII_ChangeItemsInstanceId(int targetId, int newId)
 	// don't consider items located in an npc's inventory
 	zCListSort<oCNpc>* npcList = world->GetNpcList();
 
-	while (npcList != nullptr) {
+	while (npcList != NULL) {
 		oCNpc* npc = npcList->GetData();
-		if (npc == nullptr) {
+		if (npc == NULL) {
 			npcList = npcList->GetNext();
 			continue;
 		}
@@ -394,7 +425,7 @@ void DaedalusExports::DII_ChangeItemsInstanceId(int targetId, int newId)
 		oCItem* item = dynamic_cast<oCItem*>(leftHanfVob);
 		if (item)
 		{
-			auto findIter = find(targetList.begin(), targetList.end(), item);
+			std::list<oCItem*>::iterator findIter = find(targetList.begin(), targetList.end(), item);
 			if (findIter != targetList.end())
 			{
 				logStream << "Found item in npc's left hand that should not be considered!" << std::endl;
@@ -404,18 +435,18 @@ void DaedalusExports::DII_ChangeItemsInstanceId(int targetId, int newId)
 		}
 
 		oCNpcInventory* inventory = npc->GetInventory();
-		if (inventory == nullptr) {
+		if (inventory == NULL) {
 			npcList = npcList->GetNext();
 			continue;
 		}
 
 		inventory->UnpackAllItems();
 		zCListSort<oCItem>* list = reinterpret_cast<zCListSort<oCItem>*>(inventory->inventory_data);
-		while (list != nullptr) {
+		while (list != NULL) {
 			oCItem* item = list->GetData();
-			if (item != nullptr)
+			if (item != NULL)
 			{
-				auto findIter = find(targetList.begin(), targetList.end(), item);
+				std::list<oCItem*>::iterator findIter = find(targetList.begin(), targetList.end(), item);
 				if (findIter != targetList.end())
 				{
 					logStream << "Found item in npc's inventory that should not be considered!" << std::endl;
@@ -587,104 +618,7 @@ ZCPar_SymbolGetStackPos zCPar_SymbolGetStackPos = (ZCPar_SymbolGetStackPos)0x007
 typedef void(__thiscall* ZCParserDoStack)(void* pThis, int);
 ZCParserDoStack zCParserDoStack = (ZCParserDoStack)0x00791960;
 
-zSTRING* msg = new zSTRING("DaedalusExport Test!");
-
 void DaedalusExports::DII_TransformationTest(zCVob* vob)
 {
 	return;
-	//TestModule::Test(vob);
-	for (auto it = TestModule::vobList.begin(); it != TestModule::vobList.end();)
-	{
-		if (*it == vob)
-		{
-			it = TestModule::vobList.erase(it);
-		} else
-		{
-			++it;
-		}
-	}
-	TestModule::vobList.push_back(vob);
-
-	zCParser* parser = zCParser::GetParser();
-	int index = parser->GetIndex(zSTRING("PRINT_TEST3")); 
-	logStream << "index: " << index << std::endl;
-	Logger::getLogger()->log(Logger::Warning, &logStream);
-	bool isExternal = false;
-	bool hasReturn = true;
-	void* dataStack = (BYTE*)parser + 0x58;
-	
-	g2ext_extended::zCPar_SymbolTable* currSymbolTable = ObjectManager::zCParserGetSymbolTable(parser);
-
-	zCPar_Symbol* symbol = currSymbolTable->GetSymbol(index);
-	int stackPosition = 0; 
-	*(int*)((BYTE*)parser + 0x219C) = index;
-	zCPar_SymbolGetStackPos(symbol, stackPosition, 0);
-
-	logStream << "stackPosition: " << stackPosition << std::endl;
-	logStream << "symbol->name.ToChar(): " << symbol->name.ToChar() << std::endl;
-	logStream << "symbol->bitfield: " << symbol->bitfield << std::endl;
-	logStream << "symbol->filenr: " << symbol->filenr << std::endl;
-	logStream << "symbol->line: " << symbol->line << std::endl;
-	logStream << "symbol->line_anz: " << symbol->line_anz << std::endl;
-	logStream << "symbol->offset: " << symbol->offset << std::endl;
-	logStream << "symbol->next: " << symbol->next << std::endl;
-	logStream << "symbol->parent: " << symbol->parent << std::endl;
-	logStream << "symbol->pos_beg: " << symbol->pos_beg << std::endl;
-	logStream << "symbol->pos_anz: " << symbol->pos_anz << std::endl;
-	logStream << "symbol->content.data_int: " << symbol->content.data_int << std::endl;
-	Logger::getLogger()->log(Logger::Warning, &logStream);
-
-	zCPar_StackClear(dataStack);
-
-	//zCPar_StackPush(dataStack,(int)msg);
-	//zCPar_StackPush(dataStack, 3);
-	
-	if (isExternal)
-	{
-		typedef int(__cdecl* External)();
-		External external = (External)stackPosition;
-		external();
-	} else
-	{
-		zCParserDoStack(parser, stackPosition);
-	}
-	
-	if (!hasReturn)
-	{
-		return;
-	}
-
-	// pop return value
-	int result = zCPar_DataStackPop(dataStack);
-	for (int i = 0; i < 1; ++i)
-	{
-		result = zCPar_DataStackPop(dataStack);
-	}
-	
-	*(int*)((BYTE*)parser + 0x219C) = -1;
-	//result = *((int*)zCParserCallFunc((int)parser, index));
-
-
-	logStream << "result: " << result << std::endl;
-	//logStream << "[result]: " << *(int*)result << std::endl;
-	Logger::getLogger()->log(Logger::Warning, &logStream);
-	//zCPar_Symbol symbol;
-	//symbol.content.data_pstring = msg;
-
-	//zCParserCallFunc((int)parser, index, msg);
-	
-	//zCPar_StackClear(dataStack);
-
-	//zCPar_Symbol symbol;
-	//symbol.content.data_pstring = msg;
-
-	//parser->CallFunc(zSTRING("PRINT"));
-	//parser->CallFunc(index, msg, msg, msg);
-	//zCPar_StackPushString(dataStack, *msg);
-	//zSTRING test;
-	
-	//parser->GetParameter(test);
-	//logStream << "test: " << test.ToChar() << std::endl;
-	//Logger::getLogger()->log(Logger::Warning, &logStream);
-	//printExternal();
 }
