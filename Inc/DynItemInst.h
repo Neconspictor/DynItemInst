@@ -314,6 +314,17 @@ public:
 	//.text:00534B70 private: void __thiscall zCBspSector::ActivateSectorRecIndoor(struct zTBBox2D const &, class zCBspSector *, int) proc near
 	static void __thiscall zCBspSectorActivateSectorRecIndoorHook(void* pThis, zTBBox2D const & second, void* third, int fourth);
 
+	//.text:0061CBC0 ; void __thiscall zCVob::SetHeadingAtWorld(zCVob *this, const struct zVEC3 *)
+	static void __thiscall zCVobSetHeadingAtWorldHook(void* pThis, zVEC3* vec);
+
+	static void __thiscall DoSurfaceAlignmentHook(void* pThis);
+
+	//.text:0050D4D0 ; int __thiscall zCAIPlayer::CheckFloorSliding(zCAIPlayer *__hidden this)
+	static int __thiscall zCAIPlayerCheckFloorSlidingHook(void* pThis);
+
+	static void __thiscall zCVobSetPhysicsEnabledHook(void* pThis, int second);
+
+
 
 	static void checkReusableInstances();
 
@@ -378,6 +389,10 @@ private:
 	static const int OCITEM_MULTI_SLOT = 0x007125A0;
 	static const int OCMOB_CONTAINER_OPEN = 0x00726500;
 	static const int ZCVISUAL_LOAD_VISUAL = 0x00606AD0;
+
+
+	//void __thiscall zCVob::SetHeadingAtWorld(zCVob *this, const struct zVEC3 *)
+	static const int ZCVOB_SET_HEADING_AT_WORLD = 0x0061CBC0;
 
 	static const int OCITEM_FLAG_ITEM_KAT_RUNE = 512;
 

@@ -93,8 +93,27 @@ typedef void ( __thiscall* OCMobContainerOpen )(void*, oCNpc*);
 OCMobContainerOpen oCMobContainerOpen;
 
 
+typedef void(__thiscall* ZCVobSetHeadingAtWorld)(void*, zVEC3*);
+ZCVobSetHeadingAtWorld zCVobSetHeadingAtWorld;
+typedef void(__thiscall* DoSurfaceAlignment)(void*); DoSurfaceAlignment doSurfaceAlignment2;
+
+typedef int(__thiscall* ZCAIPlayerCheckFloorSliding)(void*);
+ZCAIPlayerCheckFloorSliding zCAIPlayerCheckFloorSliding2;
+
+typedef void(__thiscall* ZCVobSetPhysicsEnabled)(void*, int); ZCVobSetPhysicsEnabled zCVobSetPhysicsEnabled2;
+
+typedef void(__thiscall* ZCVobCheckAndResolveCollisions)(void*); ZCVobCheckAndResolveCollisions zCVobCheckAndResolveCollisions2;
+
 
 OCItemInsertEffect DynItemInst::oCItemInsertEffect = (OCItemInsertEffect)0x00712C40;
+
+void DynItemInst::zCVobSetHeadingAtWorldHook(void * pThis, zVEC3 * vec)
+{
+	if (oCNpc::GetHero() == pThis) {
+		return;
+	}
+	zCVobSetHeadingAtWorld(pThis, vec);
+}
 
 void DynItemInst::checkReusableInstances()
 {
@@ -133,9 +152,21 @@ void DynItemInst::hookModule()
 	zCPar_SymbolTableGetSymbol = (ZCPar_SymbolTableGetSymbol)ZCPAR_SYMBOL_TABLE_GETSYMBOL;
 	zCPar_SymbolTableGetSymbolString = (ZCPar_SymbolTableGetSymbolString)ZCPAR_SYMBOL_TABLE_GETSYMBOL_STRING;
 
+	zCVobSetHeadingAtWorld = (ZCVobSetHeadingAtWorld)ZCVOB_SET_HEADING_AT_WORLD;
+	doSurfaceAlignment2 = reinterpret_cast<DoSurfaceAlignment>((DO_SURFACE_ALIGNMENT_ADDRESS));
+	zCAIPlayerCheckFloorSliding2 = reinterpret_cast<int(__thiscall*)(void*)>((ZCAIPLAYER_CHECK_FLOOR_SLIDING_ADDRESS));
+	zCVobSetPhysicsEnabled2 = reinterpret_cast<ZCVobSetPhysicsEnabled>(ZCVOB_SET_PHYSICS_ENABLED_ADDRESS);
+	zCVobCheckAndResolveCollisions2 = reinterpret_cast<ZCVobCheckAndResolveCollisions>((ZCVOB_CHECK_AND_RESOLVE_COLLISION_ADDRESS));
+
 		//0x006521E0
 
 	HookManager* hookManager = HookManager::getHookManager();
+
+	//hookManager->addFunctionHook((LPVOID*)&zCVobSetHeadingAtWorld, zCVobSetHeadingAtWorldHook, moduleDesc);
+	//hookManager->addFunctionHook((LPVOID*)&doSurfaceAlignment2, DoSurfaceAlignmentHook, moduleDesc);
+	//hookManager->addFunctionHook((LPVOID*)&zCAIPlayerCheckFloorSliding2, zCAIPlayerCheckFloorSlidingHook, moduleDesc);
+	//hookManager->addFunctionHook((LPVOID*)&zCVobSetPhysicsEnabled2, zCVobSetPhysicsEnabledHook, moduleDesc);
+
 	hookManager->addFunctionHook((LPVOID*)&loadSavegame, loadSavegameHook, moduleDesc);
 	hookManager->addFunctionHook((LPVOID*)&writeSavegame, writeSavegameHook, moduleDesc);
 	hookManager->addFunctionHook((LPVOID*)&oCItemGetValue, oCItemGetValueHook, moduleDesc);
@@ -181,6 +212,36 @@ void DynItemInst::unHookModule()
 	hookManager->removeFunctionHook((LPVOID*)&zCPar_SymbolTableGetSymbolString, zCPar_SymbolTableGetSymbolStringHook, moduleDesc);
 };
 
+
+void DynItemInst::DoSurfaceAlignmentHook(void* pThis)
+{
+	oCNpc* hero = oCNpc::GetHero();
+	bool adjust = (hero == pThis);
+	if (adjust) {
+		return;
+	}
+	return doSurfaceAlignment2(pThis);
+}
+
+int DynItemInst::zCAIPlayerCheckFloorSlidingHook(void * pThis)
+{
+	oCNpc* hero = oCNpc::GetHero();
+	if (hero != NULL && (pThis == hero)) {
+		return 1;
+	}
+	return zCAIPlayerCheckFloorSliding2(pThis);
+}
+
+void DynItemInst::zCVobSetPhysicsEnabledHook(void * pThis, int second)
+{
+	oCNpc* hero = oCNpc::GetHero();
+	if (hero != NULL && (pThis == hero)) {
+		//if (input->KeyPressed(0x1A)) return; //zCVobSetPhysicsEnabled(pThis, true);
+		//zCVobCheckAndResolveCollisions2(pThis);
+		return;
+	}
+	zCVobSetPhysicsEnabled2(pThis, second);
+}
 
 _declspec(naked) void DynItemInst::zCPar_SymbolTableGetSymbolStringHookNaked()
 {
