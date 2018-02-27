@@ -347,6 +347,7 @@ private:
 
 	static void restoreSelectedSpell(oCNpc* npc, oCItem* selectedSpellItem);
 	static void restoreItemsOfNpc(oCNpc* npc);
+	static void equipDynamicItem(void * obj, void * param, oCItem * itm);
 	static void restoreSpecificNpcItem(void * obj, void * param, oCItem * itm);
 	static void restoreWorldItem(void * obj, void * param, oCItem * itm);
 	
@@ -354,7 +355,7 @@ private:
 		int munitionId, bool munitionUsesRightHand, std::map<int, oCItem*>* equippedSpells, 
 		oCItem** selectedSpellItem);
 
-	static void restoreEquippedItem(oCItem*, oCNpcInventory* inventory, AdditMemory* addit, int instanceId, 
+	static void handleEquippedMagicItem(oCItem*, oCNpcInventory* inventory, AdditMemory* addit, int instanceId, 
 		std::map<int, oCItem*>* equippedSpells, oCItem** activeSpellItem);
 
 private:

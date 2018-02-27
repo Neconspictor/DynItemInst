@@ -583,12 +583,9 @@ DynItemInst::~DynItemInst()
 
 	if (equipped)
 	{
-		//TODO: test ausführlich!
-		restoreEquippedItem(item, inventory, addit, instanceId, 
+		item->SetFlag(OCITEM_FLAG_EQUIPPED);
+		handleEquippedMagicItem(item, inventory, addit, instanceId,
 			equippedSpells, activeSpellItem);
-		//oCItemInitByScript(item, instanceId, item->instanz);
-		logStream << "DynItemInst::restoreItem: Restored equipped item!" << std::endl;
-		util::debug(&logStream);
 		denyMultiSlot = originalMultiSlotSetting;
 		return;
 	}
@@ -1358,6 +1355,120 @@ void DynItemInst::restoreSpecificNpcItem(void* obj, void* param, oCItem* itm) {
 	}
 }
 
+void DynItemInst::equipDynamicItem(void * obj, void * param, oCItem * itm)
+{
+	if (itm == NULL) return;
+	ObjectManager* manager = ObjectManager::getObjectManager();
+	RESTORE_NPC_ITEM_PARAMS* params = (RESTORE_NPC_ITEM_PARAMS*)param;
+
+	int instanceID = itm->GetInstance();
+	if (!manager->isDynamicInstance(instanceID)) return;
+
+	bool equipped = (itm->flags & OCITEM_FLAG_EQUIPPED) != 0;
+
+	if (!equipped) return;
+
+	if (itm->HasFlag(512)) return; //item mustn't be a rune
+
+
+	logStream << "DynItemInst::equipDynamicItem: Restore equipped item..." << std::endl;
+	util::debug(&logStream);
+
+	oCNpc* owner = params->inventory->GetOwner();
+	int weaponMode = oCNpcGetWeaponMode(owner);
+
+	// only one equipped item can be the readied weapon for all weapon modes.
+	// So if the equipped weapon is valid for a specific weapon mode
+	// we have found the readied weapon!
+	if (manager->isValidWeapon(weaponMode, itm))
+	{
+		logStream << "DynItemInst::equipDynamicItem: Force to remove weapon..." << std::endl;
+		util::debug(&logStream);
+		oCNpcEV_ForceRemoveWeapon(owner, itm);
+	}
+
+	int amount = itm->instanz;
+	if (amount != 1)
+	{
+		logStream << "DynItemInst::equipDynamicItem: amount > 1!" << std::endl;
+		logStream << "item instance id: " << itm->GetInstance() << std::endl;
+		logStream << "item->name: " << itm->name.ToChar() << std::endl;
+		util::logFault(&logStream);
+	}
+
+	zCListSort<oCItem>* list = getInvItemByInstanceId(params->inventory, instanceID);
+	oCItem* copy = oCObjectFactory::GetFactory()->CreateItem(instanceID);
+
+	int slotNumber = manager->getSlotNumber(params->inventory, itm);
+	//util::assertDIIRequirements(slotNumber >= 0, "slotNumber >= 0");
+	logStream << "DynItemInst::equipDynamicItem: slotnumber= " << slotNumber << std::endl;
+	logStream << "item->description= " << itm->description.ToChar() << std::endl;
+	logStream << "item->GetInstance()= " << itm->GetInstance() << std::endl;
+	logStream << "item->instanz= " << itm->instanz << std::endl;
+	logStream << "copy->description= " << copy->description.ToChar() << std::endl;
+	logStream << "copy->GetInstance()= " << copy->GetInstance() << std::endl;
+	logStream << "copy->instanz= " << copy->instanz << std::endl;
+	util::debug(&logStream);
+
+	itm->ClearFlag(constants::OCITEM_FLAG_EQUIPPED);
+	params->inventory->RemoveByPtr(itm, itm->instanz);
+
+	//store some attribute to search for the copy after it was inserted into the inventory
+	//int copyStoreValue = copy->instanz;
+	//assign any value that will be unique
+	//int searchValue = -6666666;
+	//copy->instanz = searchValue;
+
+	copy = params->inventory->Insert(copy);
+	util::assertDIIRequirements(copy != NULL, "item to insert shouldn't be null!");
+
+	
+	int equipFunction = copy->on_equip;
+	
+	//Deny invocation of equip function
+	copy->on_equip = 0;
+
+	//clear equip flag, so that the item will definitely be equipped
+	copy->ClearFlag(constants::OCITEM_FLAG_EQUIPPED);
+
+	// Equip the item; multislot items will get split; We needn't have to give care for the on_equip function, 
+	// has the splitted item will be initiliazed by the Dynamic instance!
+	owner->Equip(copy);
+
+
+	//restore function
+
+	logStream << "DynItemInst::equipDynamicItem: item is now equipped!" << std::endl;
+	logStream << "DynItemInst::equipDynamicItem: Weapon mode: " << weaponMode << std::endl;
+	util::debug(&logStream);
+
+	copy->on_equip = equipFunction;
+	oCNpcSetWeaponMode2(owner, weaponMode);  //3 for one hand weapons
+
+
+	//TODO: Drawn munition is duplicated (one munition item too much)
+
+	// Is readied weapon a bow?
+	if (copy->HasFlag(1 << 19) && weaponMode == 5)
+	{
+		logStream << "DynItemInst::equipDynamicItem: Bow is readied!" << std::endl;
+		logStream << "DynItemInst::equipDynamicItem: Weapon mode: " << weaponMode << std::endl;
+		util::debug(&logStream);
+
+		equipRangedWeapon(copy, params->inventory, true);
+	}
+
+	// Is readied weapon a crossbow?
+	else if (copy->HasFlag(1 << 20) && weaponMode == 6)
+	{
+		logStream << "DynItemInst::equipDynamicItem: Crossbow is readied!" << std::endl;
+		logStream << "DynItemInst::equipDynamicItem: Weapon mode: " << weaponMode << std::endl;
+		util::debug(&logStream);
+
+		equipRangedWeapon(copy, params->inventory, false);
+	}
+}
+
 void DynItemInst::restoreItemsOfNpc(oCNpc * npc)
 {
 	std::list<oCItem*> tempList, equippedItems;
@@ -1369,7 +1480,14 @@ void DynItemInst::restoreItemsOfNpc(oCNpc * npc)
 
 	RESTORE_NPC_ITEM_PARAMS params = { &logStream, inventory, &equippedSpells, selectedSpellItem };
 
+	// restore dynmamic items
 	manager->callForInventoryItems(restoreSpecificNpcItem, NULL, &params, npc);
+
+	// sort equipped dynamic items after all dynamic items are restored
+	bool originalMultiSlotSetting = denyMultiSlot;
+	denyMultiSlot = false;
+	manager->callForInventoryItems(equipDynamicItem, NULL, &params, npc);
+	denyMultiSlot = originalMultiSlotSetting;
 
 	for (std::map<int, oCItem*>::iterator it = equippedSpells.begin(); it != equippedSpells.end(); ++it)
 	{
@@ -1454,143 +1572,44 @@ oCItem* DynItemInst::restoreItemAfterLevelChange(oCNpc* npc, LevelChangeBean* be
 	return item;
 }
 
-void DynItemInst::restoreEquippedItem(oCItem* item, oCNpcInventory* inventory, AdditMemory* addit, 
+void DynItemInst::handleEquippedMagicItem(oCItem* item, oCNpcInventory* inventory, AdditMemory* addit, 
 	int instanceId, std::map<int, oCItem*>* equippedSpells, oCItem** activeSpellItem)
 {
-	logStream << "DynItemInst::restoreItem: Restore equipped item..." << std::endl;
-	util::debug(&logStream);
+
+	if (item == NULL) return;
+	if (!item->HasFlag(512)) return; // Magic 
 
 	oCNpc* owner = inventory->GetOwner();
-	int weaponMode = oCNpcGetWeaponMode(owner);
-	ObjectManager* manager = ObjectManager::getObjectManager();
 
-	// only one equipped item can be the readied weapon for all weapon modes.
-	// So if the equipped weapon is valid for a specific weapon mode
-	// we have found the readied weapon!
-	if (manager->isValidWeapon(weaponMode, item) && !item->HasFlag(512))
+	logStream << "DynItemInst::restoreItem: Readied weapon is a magic thing!" << std::endl;
+	util::debug(&logStream);
+	oCMag_Book* magBook = oCNpcGetSpellBook(owner);
+	magBook = oCNpcGetSpellBook(owner);
+	int itemSpellKey = oCMag_BookGetKeyByItem(magBook, item);
+	if (itemSpellKey <= 7)
 	{
-		logStream << "DynItemInst::restoreItem: Force to remove weapon..." << std::endl;
-		util::debug(&logStream);
-		oCNpcEV_ForceRemoveWeapon(owner, item);
+		oCMag_BookDeRegisterItem(magBook, item);
+		oCMag_BookNextRegisterAt(magBook, itemSpellKey - 1);
 	}
-
-	int amount = item->instanz;
-	if (amount != 1)
+	if (addit->spellKey >= 0)
 	{
-		logStream << "DynItemInst::restoreItem: amount > 1!" << std::endl;
-		logStream << "item instance id: " << item->GetInstance() << std::endl;
-		logStream << "item->name: " << item->name.ToChar() << std::endl;
-		util::logFault(&logStream);
-	}
-
-	zCListSort<oCItem>* list = getInvItemByInstanceId(inventory, instanceId);
-	oCItem* copy = oCObjectFactory::GetFactory()->CreateItem(instanceId);
-
-	if (!item->HasFlag(512)) //item isn't a rune
-	{
-		int slotNumber = manager->getSlotNumber(inventory, item);
-		util::assertDIIRequirements(slotNumber >= 0, "slotNumber >= 0");
-		logStream << "DynItemInst::restoreItem: slotnumber= " << slotNumber << std::endl;
-		logStream << "item->description= " << item->description.ToChar() << std::endl;
-		logStream << "item->GetInstance()= " << item->GetInstance() << std::endl;
-		logStream << "item->instanz= " << item->instanz << std::endl;
-		logStream << "copy->description= " << copy->description.ToChar() << std::endl;
-		logStream << "copy->GetInstance()= " << copy->GetInstance() << std::endl;
-		logStream << "copy->instanz= " << copy->instanz << std::endl;
-		util::debug(&logStream);
-
-		inventory->Remove(item);
-
-		//store some attribute to search for the copy after it was inserted into the inventory
-		int copyStoreValue = copy->instanz;
-		//assign any value that will be unique
-		int searchValue = -6666666;
-		copy->instanz = searchValue;
-
-		//DynItemInst::denyMultiSlot = false;
-		inventory->Insert(copy);
-
-		// Since multi-slotting was denied, copy is now on a own slot (not merged) and can be accessed
-		copy = manager->searchItemInInvbyInstanzValue(inventory, searchValue);
-		util::assertDIIRequirements(copy != NULL, "item to insert shouldn't be null!");
-		copy->instanz = copyStoreValue;
-		//Deny invocation of equip function
-		int equipFunction = copy->on_equip;
-		copy->on_equip = 0;
-		copy->ClearFlag(constants::OCITEM_FLAG_EQUIPPED);
-		owner->Equip(copy);
-
-		//restore function
-
-		logStream << "DynItemInst::restoreItem: item is now equipped!" << std::endl;
-		logStream << "DynItemInst::restoreItem: Weapon mode: " << weaponMode << std::endl;
-		util::debug(&logStream);
-		copy = getInvItemByInstanceId(inventory, instanceId)->GetData();
-		copy->on_equip = equipFunction;
-		oCNpcSetWeaponMode2(owner, weaponMode);  //3 for one hand weapons
-	}
-	else
-	{
-		oCItemInitByScript(item, instanceId, item->instanz);
-		item->ClearFlag(constants::OCITEM_FLAG_EQUIPPED);
-	}
-
-	// Is readied weapon a bow?
-	if (copy && copy->HasFlag(1 << 19) && weaponMode == 5)
-	{
-		logStream << "DynItemInst::restoreItem: Bow is readied!" << std::endl;
-		logStream << "DynItemInst::restoreItem: Weapon mode: " << weaponMode << std::endl;
-		util::debug(&logStream);
-
-		equipRangedWeapon(copy, inventory, true);
-	}
-
-	// Is readied weapon a crossbow?
-	else if (copy && copy->HasFlag(1 << 20) && weaponMode == 6)
-	{
-		logStream << "DynItemInst::restoreItem: Crossbow is readied!" << std::endl;
-		logStream << "DynItemInst::restoreItem: Weapon mode: " << weaponMode << std::endl;
-		util::debug(&logStream);
-
-		equipRangedWeapon(copy, inventory, false);
-	}
-	else if (item && item->HasFlag(512)) // Magic 
-	{
-		logStream << "DynItemInst::restoreItem: Readied weapon is a magic thing!" << std::endl;
-		util::debug(&logStream);
-		oCMag_Book* magBook = oCNpcGetSpellBook(owner);
-		magBook = oCNpcGetSpellBook(owner);
-		int itemSpellKey = oCMag_BookGetKeyByItem(magBook, item);
-		if (itemSpellKey <= 7)
+		if (!equippedSpells)
 		{
-			oCMag_BookDeRegisterItem(magBook, item);
-			oCMag_BookNextRegisterAt(magBook, itemSpellKey - 1);
+			logStream << "DynItemInst::restoreItem: equippedSpells is null!" << std::endl;
+			util::debug(&logStream, Logger::Warning);
 		}
-		if (addit->spellKey >= 0)
+		else
 		{
-			if (!equippedSpells)
-			{
-				logStream << "DynItemInst::restoreItem: equippedSpells is null!" << std::endl;
-				util::debug(&logStream, Logger::Warning);
-			}
-			else
-			{
-				equippedSpells->insert(std::pair<int, oCItem*>(addit->spellKey, item));
-			}
+			equippedSpells->insert(std::pair<int, oCItem*>(addit->spellKey, item));
 		}
+	}
 
-		magBook = oCNpcGetSpellBook(owner);
-		if (magBook)
+	magBook = oCNpcGetSpellBook(owner);
+	if (magBook)
+	{
+		if (addit->activeSpellItem && activeSpellItem)
 		{
-			if (addit->activeSpellItem && activeSpellItem)
-			{
-				*activeSpellItem = item;
-			}
-
-			//logStream << "DynItemInst::restoreItem: selectedSpellKey = " << oCMag_BookGetSelectedSpellNr(magBook) << std::endl;
-			//util::debug(&logStream);
-			//logStream << "DynItemInst::restoreItem: An Spell is active" << std::endl;
-			//util::debug(&logStream);
+			*activeSpellItem = item;
 		}
 	}
 }
