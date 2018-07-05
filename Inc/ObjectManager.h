@@ -53,14 +53,6 @@ public:
 	 */
 	//static const int INSTANCE_BEGIN = 5000000;
 
-	/**
-	 * New additional memory for hero items will have keys with a value beginning at this constant.
-	 */
-	static const int HERO_ADDIT_BEGIN = 2000000000;
-
-	/**
-	* New additional memory for special items will have keys with a value beginning at this constant.
-	*/
 	static const int SPECIAL_ADDIT_BEGIN = 1500000000;
 
 	/**
@@ -104,10 +96,10 @@ public:
 	 * \return The list of all oCMobContainers the current oCGame contains.
 	 */
 	static std::list<oCMobContainer*>* getMobContainers();
-	void changeKeyIfFreeIdAvailable(int* key, int indexCount);
+
 	void createNewInstanceWithoutExistingId(oCItem* item, int key);
 
-	void createNewInstanceForExistingId(oCItem* item, int instanceId);
+	//void createNewInstanceForExistingId(oCItem* item, int instanceId);
 	/**
 			 * Creates a new oCItem instance which will be initialized with the members of the provided oCItem.
 			 * \param item The item to use for instance creation.
@@ -129,9 +121,10 @@ public:
 	 * \return Was the assignment successful?
 	 */
 	bool assignInstanceId(oCItem* item, int id);
-
-	void resetDynItemInstances();
 	
+	
+	static void oCItemOperatorDelete(oCItem* item);
+
 	static bool assignInstanceId2(oCItem* item, int id);
 
 	/**
@@ -271,109 +264,7 @@ public:
 	 */
 	int getIndexByName(zSTRING symbolName);
 
-	/**
-	 * creates an new AdditMemory and associates it to the specified oCItem. The arguments id specifies
-	 * The instance id the additional memory should store and isHeroItem specifies whether the item is 
-	 * contained in the player's inventory.
-	 * \param item The item for which additional memory should be created.
-	 * \param id The instance id the additional memory should store.
-	 * \param isHeroItem Is the given item in the player's inventory?
-	 */
-	void createAdditionalMemory(oCItem* item, int id, bool isHeroItem = false, bool activeSpellItem = false, int spellKey = -1);
-
-	/**
-	 * Deletes AdditionalMemory on the base of its key.
-	 * \param additId The key of the AdditMemory which should be deleted.
-	 */
-	void removeAdditionalMemory(int additId);
-
-	/**
-	 * Deletes all available additional memory.
-	 */
-	void removeAllAdditionalMemory();
-
-	/**
-	 * Deletes all elements of the provided AdditMemory list properly.
-	 * \param list The list of AdditMemory which elements should be removed.
-	 */
-	void removeAdditList(std::list<AdditMemory*>* list);
-
-	/**
-	 * Provides additional memory for all items in the player's inventory and stores
-	 * the result in the given AdditMemory list.
-	 * \param list The list in which all AdditMemory objects of all items in the player's inventory
-	 *  should be stored.
-	 */
-	void getHeroAddits(std::list<AdditMemory*>& list);
-
-	/**
-	 * Saves the given 'heroItemList' in the folder 'directoryPath' and names the file 'filename'.
-	 * \param heroItemList list in which all AdditMemory objects of all items in the player's 
-	 * inventory are stored.
-	 * \param directoryPath The path to the savegame folder the savegame should be stored.
-	 * \param filename The file name to which the additional memory should be stored.
-	 */
-	void saveHeroData(std::list<AdditMemory*> heroItemList, char* directoryPath, char* filename);
-
-	/**
-	 * Saves all items with a dynamic instance id into the folder 'directoryPath' and names the 
-	 * created file 'filename'. 'heroItemSize' specifies the size of items with a dynamic instance id
-	 * the player's inventory contains.
-	 * \param heroitemSize The amount of additional memory objects of all items in the player's 
-	 * inventory.
-	 * \param directoryPath The path to the savegame folder the savegame should be stored.
-	 * \param filename The file name to which the additional memory should be stored.
-	 */
-	void saveWorldObjects(int heroItemSize, char* directoryPath, char* filename);
-
-	/**
-	 * Loads all additional memory for world items from a specified filename.
-	 * \param pathToFile The path to the file from which the additional memory of world objects 
-	 * should to be loaded.
-	 */
-	void loadWorldObjects(char* pathToFile);
-
-	/**
-	 * Loads all additional memory for  items in the player's inventory from a specified filename.
-	 * \param pathToFile The path to the file from which the additional memory of the player's items 
-	 * should to be loaded.
-	 */
-	void loadHeroData(char* pathToFile);
-	
-	/**
-	 * Provides the key for the additonal memory created fot the given oCItem.
-	 * \param item The item to get the key from.
-	 * \return The key to the additional memory. If no additional memory was
-	 * created for the item, NULL will be returned.
-	 */
-	static int getAdditId(oCItem& item);
-
-	/**
-	 * Provides additional memory on the base of its key.
-	 * \param additId The key for the desired AdditMemory object.
-	 * \return The additional memory bound to the given key. If no additional memory was bound
-	 * to the key, NULL will be returned.
-	 */
-	AdditMemory* getAddit(int additId); 
-
-	/**
-	 * Provides additional memory of the given oCItem.
-	 * \param item The item to get additional memoyr from.
-	 * \return The additional memory bound to the given item. If no additional memory was
-	 * found, NULL will be returned.
-	 */
-	AdditMemory* getAddit(oCItem& item);
-
-	/**
-	 * Responses the question if the given oCItem has additional memory.
-	 * \param item The item to check
-	 * \return Has the given item additional memory?
-	 */
-	bool hasAdditAssignment(oCItem& item);
-
 	void updateIkarusSymbols();
-
-	bool updateItemAndAddit(oCItem* item);
 
 	void callForAllItems(void(*func)(void* obj, void* param, oCItem*), void* obj, void* param, oCItem** stopIfNotNullItem = NULL);
 	static void callForInventoryItems(void(*func)(void* obj, void* param, oCItem*), void* obj, void* param, oCNpc * npc);
@@ -385,10 +276,6 @@ public:
 	static int * getParserInstanceCount();
 
 	static int getIdForSpecialPurposes();
-
-	void markAsReusable(int instanceId, int previousId);
-
-	void checkReusableInstances();
 
 	/**
 	* Checks whether the specified oCItem is in the game world's list registered
@@ -408,38 +295,13 @@ public:
 	static void oCItemSaveRemoveEffect(oCItem* item);
 	bool isDynamicInstance(int instanceId);
 	static int* getRefCounter(oCItem* item);
-	
-	/**
-	 * Checks whether the given item is a ranged weapon.
-	 */
-	static bool isRangedWeapon(oCItem* item);
 
-	void equipRangedWeapon(oCItem * item, oCNpcInventory * inventory, bool munitionUsesRightHand);
-
-	
-	/**
-	 * Checks if the given item is valid for a specific weapon mode (1h weapon, 2h weapon, bow, crossbow, magic)
-	 */
-	static bool isValidWeapon(int weaponMode, oCItem* item);
-
-	/**
-	 * Checks if the munition of the specified item is supposed to be layed into the right hand.
-	 * If the given item isn't a ranged weapon, this function will return false.
-	 */
-	static bool munitionOfItemUsesRightHand(oCItem*);
 
 	static zCListSort<oCItem>* getInvItemByInstanceId(oCNpcInventory * inventory, int instanceId);
 	
 	int getSlotNumber(oCNpcInventory* inventory, oCItem* item);
 	
 	oCItem* searchItemInInvbyInstanzValue(oCNpcInventory* inventory, int searchValue);
-
-	void drawWeaponSilently(oCNpc* npc, int weaponMode, int readedWeaponId, 
-		int munitionId, bool munitionUsesRightHand, std::map<int, oCItem*>* equippedSpells, 
-		oCItem** activeSpellItem, AdditMemory* addit, bool createCopy = true);
-
-	int getSelectedSpellKey(oCNpc* npc);
-	int getEquippedSpellKeyByItem(oCNpc*, oCItem*);
 
 	static g2ext_extended::zCPar_SymbolTable* zCParserGetSymbolTable(void* parser);
 
@@ -470,16 +332,10 @@ private:
 	// <int instanceId, Item* item>
 	std::map<int, DynInstance*> instanceMap;
 
-	std::queue<int> nextInstances;
 	std::vector<ParserInfo> indexZCParSymbolNameMap;
 	std::map<int, zCPar_Symbol*> newInstanceToSymbolMap;
 	std::map<std::string, zCPar_Symbol*> nameToSymbolMap;
 	std::map<std::string, int> nameToIndexMap;
-	std::list<int> reusableInstances;
-
-	// <int additMemoryId, AdditMemory* additMemory>
-	std::map<int, AdditMemory*> keyToAdditMap;
-	std::queue<int> nextAdditKeys;
 
 	std::stringstream logStream;
 	int ObjectManager::instanceBegin;

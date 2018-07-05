@@ -60,73 +60,7 @@ OCNpcGetRightHand oCNpcGetRightHand = (OCNpcGetRightHand)0x0073ABE0;
 ObjectManager::ObjectManager()
 {
 	this->instanceMap = map<int, DynInstance*>();
-	this->nextInstances = queue<int>();
 	this->instanceBegin = -1;
-};
-
-bool ObjectManager::isValidWeapon(int weaponMode, oCItem * item)
-{
-	switch (weaponMode)
-	{
-
-	case 3:
-
-		//const int ITEM_KAT_NF = 2;
-		if (item->mainflags == 2)
-		{
-			return true;
-		}
-		break;
-	case 4:
-		//const int ITEM_KAT_NF = 2;
-		if (item->mainflags == 2)
-		{
-			return true;
-		}
-		break;
-	case 5:
-		//const int ITEM_BOW = 1 << 19;
-		if (item->HasFlag(1 << 19))
-		{
-			return true;
-		}
-		break;
-	case 6:
-		//const int ITEM_CROSSBOW = 1 << 20;
-		if (item->HasFlag(1 << 20))
-		{
-			return true;
-		}
-		break;
-	case 7:
-		// TODO why return always true???
-		//mainflag: ITEM_KAT_RUNE = 512
-		if (item->mainflags == 512)
-		{
-			return true;
-		}
-		break;
-	default: break;
-	}
-
-	return false;
-}
-
-bool ObjectManager::munitionOfItemUsesRightHand(oCItem* rangedWeapon)
-{
-	if (!isRangedWeapon(rangedWeapon))
-	{
-		return false;
-	}
-
-	//const int ITEM_BOW = 1<<19;
-	if (rangedWeapon->HasFlag(1<<19))
-	{
-		return true;
-	}
-	
-	//const int ITEM_CROSSBOW = 1 << 20;
-	return false;
 }
 
 
@@ -180,172 +114,6 @@ oCItem* ObjectManager::searchItemInInvbyInstanzValue(oCNpcInventory* inventory, 
 	return NULL;
 }
 
-void ObjectManager::drawWeaponSilently(oCNpc* npc, int weaponMode, int readedWeaponId, int munitionId, 
-	bool munitionUsesRightHand, map<int, oCItem*>* equippedSpells, 
-	oCItem** activeSpellItem, AdditMemory* addit, bool createCopy)
-{
-	oCNpcInventory* inventory = npc->GetInventory();
-	zCListSort<oCItem>* node = getInvItemByInstanceId(inventory, readedWeaponId);
-	if (!node)
-	{
-		logStream << "ObjectManager::drawWeaponSilently: node is null!" << std::endl;
-		util::logFault(&logStream);
-		return;
-	}
-
-	oCItem* item = node->GetData();
-
-	if (!item)
-	{
-		logStream << "ObjectManager::drawWeaponSilently: item is null!" << std::endl;
-		util::logFault(&logStream);
-		return;
-	}
-
-	oCItem* copy = item;
-	if (createCopy) copy = oCObjectFactory::GetFactory()->CreateItem(readedWeaponId);
-
-	if (!item->HasFlag(512)) //item isn't a rune
-	{
-		int slotNumber = getSlotNumber(inventory, item);
-		util::assertDIIRequirements(slotNumber >= 0, "slotNumber >= 0");
-		logStream << "ObjectManager::drawWeaponSilently: slotnumber= " << slotNumber << std::endl;
-		logStream << "item->description= " << item->description.ToChar() << std::endl;
-		logStream << "item->GetInstance()= " << item->GetInstance() << std::endl;
-		logStream << "item->instanz= " << item->instanz << std::endl;
-		logStream << "copy->description= " << copy->description.ToChar() << std::endl;
-		logStream << "copy->GetInstance()= " << copy->GetInstance() << std::endl;
-		logStream << "copy->instanz= " << copy->instanz << std::endl;
-		util::debug(&logStream);
-
-		//DynItemInst::denyMultiSlot = false;
-		if (createCopy)
-		{
-			inventory->Remove(item);
-
-			//store some attribute to search for the copy after it was inserted into the inventory
-			int copyStoreValue = copy->instanz;
-			//assign any value that will be unique
-			int searchValue = -6666666;
-			copy->instanz = searchValue;
-			inventory->Insert(copy);
-
-			// Since multi-slotting was denied, copy is now on a own slot (not merged) and can be accessed
-			copy = searchItemInInvbyInstanzValue(inventory, searchValue);
-			util::assertDIIRequirements(copy != NULL, "item to insert shouldn't be null!");
-			copy->instanz = copyStoreValue;
-		}
-
-		//Deny invocation of equip function
-		int equipFunction = copy->on_equip;
-		copy->on_equip = 0;
-		copy->ClearFlag(OCITEM_FLAG_EQUIPPED);
-		npc->Equip(copy);
-
-		//restore function
-
-		logStream << "DynItemInst::restoreItem: item is now equipped!" << std::endl;
-		logStream << "DynItemInst::restoreItem: Weapon mode: " << weaponMode << std::endl;
-		util::debug(&logStream);
-		copy = getInvItemByInstanceId(inventory, readedWeaponId)->GetData();
-		copy->on_equip = equipFunction;
-
-		oCNpcSetWeaponMode2(npc, weaponMode);  //3 for one hand weapons
-	}
-
-	// Is readied weapon a bow?
-	if (copy && copy->HasFlag(1 << 19) && weaponMode == 5)
-	{
-		logStream << "DynItemInst::restoreItem: Bow is readied!" << std::endl;
-		logStream << "DynItemInst::restoreItem: Weapon mode: " << weaponMode << std::endl;
-		util::debug(&logStream);
-
-		equipRangedWeapon(copy, inventory, true);
-	}
-
-	// Is readied weapon a crossbow?
-	else if (copy && copy->HasFlag(1 << 20) && weaponMode == 6)
-	{
-		logStream << "DynItemInst::restoreItem: Crossbow is readied!" << std::endl;
-		logStream << "DynItemInst::restoreItem: Weapon mode: " << weaponMode << std::endl;
-		util::debug(&logStream);
-
-		equipRangedWeapon(copy, inventory, false);
-	}
-	else if (item && item->HasFlag(512)) // Magic 
-	{
-		logStream << "DynItemInst::restoreItem: Readied weapon is a magic thing!" << std::endl;
-		util::debug(&logStream);
-		oCMag_Book* magBook = oCNpcGetSpellBook(npc);
-		magBook = oCNpcGetSpellBook(npc);
-		//int itemSpellKey = oCMag_BookGetKeyByItem(magBook, item);
-		if (addit->spellKey > 0)
-		{
-			oCMag_BookDeRegisterItem(magBook, item);
-			oCMag_BookNextRegisterAt(magBook, addit->spellKey);
-		}
-		if (addit && (addit->spellKey >= 0))
-		{
-			if (!equippedSpells)
-			{
-				logStream << "DynItemInst::restoreItem: equippedSpells is null!" << std::endl;
-				util::debug(&logStream, Logger::Warning);
-			}
-			else
-			{
-				equippedSpells->insert(std::pair<int, oCItem*>(addit->spellKey, item));
-			}
-		}
-
-		magBook = oCNpcGetSpellBook(npc);
-		if (magBook)
-		{
-			if (addit && (addit->activeSpellItem && activeSpellItem))
-			{
-				*activeSpellItem = item;
-			}
-
-			//logStream << "DynItemInst::restoreItem: selectedSpellKey = " << oCMag_BookGetSelectedSpellNr(magBook) << std::endl;
-			//util::debug(&logStream);
-			//logStream << "DynItemInst::restoreItem: An Spell is active" << std::endl;
-			//util::debug(&logStream);
-		}
-	}
-}
-
-int ObjectManager::getSelectedSpellKey(oCNpc* npc)
-{
-	oCNpcInventory* inventory = npc->GetInventory();
-	if (inventory == NULL) {
-		return -1;
-	}
-	inventory->UnpackAllItems();
-	zCListSort<oCItem>* list = reinterpret_cast<zCListSort<oCItem>*>(inventory->inventory_data);
-	oCMag_Book* magBook = oCNpcGetSpellBook(npc);
-
-	if (magBook) {
-		oCSpell* selectedSpell = oCMag_BookGetSelectedSpell(magBook);
-		if (selectedSpell)
-		{
-			return oCSpellGetSpellID(selectedSpell);
-		}
-	}
-
-	return -1;
-}
-
-int ObjectManager::getEquippedSpellKeyByItem(oCNpc* npc, oCItem* item)
-{
-	int equipped = item->HasFlag(OCITEM_FLAG_EQUIPPED);
-	oCMag_Book* magBook = oCNpcGetSpellBook(npc);
-	int spellKey = -1;
-	if (magBook && equipped) {
-		spellKey = oCMag_BookGetKeyByItem(magBook, item);
-		logStream << "ObjectManager::getEquippedSpellKeyByItem: spellKey = " << spellKey << std::endl;
-		util::debug(&logStream);
-	}
-	return spellKey;
-}
 
 g2ext_extended::zCPar_SymbolTable* ObjectManager::zCParserGetSymbolTable(void* parser)
 {
@@ -400,15 +168,8 @@ int ObjectManager::createNewInstanceId(oCItem* item) {
 		instanceBegin = key;
 	}
 
-	if (reusableInstances.size() > 0)
-	{
-		key = reusableInstances.front();
-		reusableInstances.pop_front();
-		createNewInstanceForExistingId(item, key);
-	} else
-	{
-		createNewInstanceWithoutExistingId(item, key);
-	}
+
+	createNewInstanceWithoutExistingId(item, key);
 
 	return key;
 };
@@ -429,13 +190,6 @@ void ObjectManager::createInstanceById(int id, DynInstance* item) {
 	if (instanceBegin < 0 || instanceBegin > id)
 	{
 		instanceBegin = id;
-	}
-
-	if (item->isReusable())
-	{
-		reusableInstances.push_back(id);
-		logStream << "added DynInstance to reusableInstances" << std::endl;
-		util::debug(&logStream);
 	}
 }
 
@@ -461,12 +215,10 @@ void ObjectManager::releaseInstances() {
 
 	// clear all data structures
 	instanceMap.clear();
-	nextInstances = queue<int>();
 	indexZCParSymbolNameMap.clear();
 	newInstanceToSymbolMap.clear();
 	nameToIndexMap.clear();
 	nameToSymbolMap.clear();
-	reusableInstances.clear();
 };
 
 bool ObjectManager::assignInstanceId(oCItem* item, int id){
@@ -490,16 +242,7 @@ bool ObjectManager::assignInstanceId(oCItem* item, int id){
 	return true;
 }
 
-void ObjectManager::resetDynItemInstances()
-{
-	for (std::map<int, DynInstance*>::iterator it = instanceMap.begin(); it != instanceMap.end(); ++it)
-	{
-		DynInstance* instance = it->second;
-		instance->resetActiveWorlds();
-	}
-}
-
-void oCItemOperatorDelete(oCItem* item)
+void ObjectManager::oCItemOperatorDelete(oCItem* item)
 {
 	XCALL(0x007144A0);
 }
@@ -798,67 +541,6 @@ static void test (void* obj, void* param, oCItem* itm) {
 	}
 }
 
-void ObjectManager::changeKeyIfFreeIdAvailable(int* key, int indexCount)
-{
-	set<int> usedIds;
-	/*auto func = [&](oCItem* itm)
-	{
-		if (itm == NULL) return;
-		int instanceId = getInstanceId(*itm);
-		if (instanceId >= instanceBegin)
-		{
-			usedIds.insert(instanceId);
-		}
-	};*/
-
-	//call the collection function func for all items in the world
-	callForAllItems(test, this, &usedIds);
-
-	for (set<int>::iterator it = usedIds.begin(); it != usedIds.end(); ++it)
-	{
-		logStream << "usedId: " << *it << endl;
-		util::debug(&logStream);
-	}
-
-	set<int>::iterator first = usedIds.begin();
-	set<int>::iterator second = ++usedIds.begin();
-	int diff;
-	bool foundId = false;
-	for (; second != usedIds.end() && (first != usedIds.end()); ++first, ++second)
-	{
-		diff = *second - *first;
-		logStream << "first: " << *first << endl;
-		logStream << "second: " << *second << endl;
-		util::debug(&logStream);
-		if (diff <= 0)
-		{
-			logStream << "ObjectManager::changeKeyIfFreeIdAvailable: strange diff: " << diff << endl;
-			util::debug(&logStream);
-		}
-		else if (diff > 1)
-		{
-			//there exists a dyn. instance id with no item using it. We gonna reuse it.
-			*key = *first + 1;
-			foundId = true;
-			break;
-		}
-	}
-
-	//compare last element of usedIds with the last index if no usable id was previously found
-	if (usedIds.begin() != usedIds.end() && !foundId)
-	{
-		int lastUsedId = *(--usedIds.end());
-		int lastIndex = indexCount - 1;
-		logStream << "lastUsedId: " << lastUsedId << endl;
-		logStream << "lastIndex: " << lastIndex << endl;
-		util::debug(&logStream);
-		if (lastIndex - lastUsedId >= 1)
-		{
-			*key = lastUsedId + 1;
-		}
-	}
-}
-
 void ObjectManager::createNewInstanceWithoutExistingId(oCItem* item, int key)
 {
 	zCParser* parser = zCParser::GetParser();
@@ -907,28 +589,15 @@ void ObjectManager::createNewInstanceWithoutExistingId(oCItem* item, int key)
 	util::debug(&logStream);
 }
 
-void ObjectManager::createNewInstanceForExistingId(oCItem* item, int instanceId)
+/*void ObjectManager::createNewInstanceForExistingId(oCItem* item, int instanceId)
 {
 	DynInstance* instanceItem = getInstanceItem(instanceId);
 	int parentId = getInstanceId(*item);
-/*	if (IsModified(item))
-	{
-		//DynInstance* oldStoreItem = getInstanceItem(parentId);
-		//instanceItem->copyUserData(*oldStoreItem);
-		if (instanceBegin > parentId)
-		{
-			instanceBegin = parentId;
-		}
-	}*/
-
 	instanceItem->store(*item);
 	instanceItem->setInstanceID(instanceId);
 
-	//this instance id is now used again!
-	instanceItem->setReusable(true);
-
 	setParentInstanceId(instanceId, parentId);
-};
+};*/
 
 
 
@@ -1005,12 +674,7 @@ void ObjectManager::updateContainerItem(ObjectManager::ParserInfo* info)
 	item->setInstanceID(info->newInstanceId);
 	item->setZCPar_SymbolName(info->name);
 	item->setParserSymbolBitfield(info->bitfield);
-
-	if (item->isReusable())
-	{
-		reusableInstances.push_back(item->getInstanceID());
-	}
-};
+}
 
 void ObjectManager::logSymbolData(zCPar_Symbol* sym)
 {
@@ -1261,240 +925,8 @@ int ObjectManager::getIndexByName(zSTRING symbolName)
 	return it->second;
 }
 
-void ObjectManager::createAdditionalMemory(oCItem* item, int id, bool isHeroItem, bool activeSpellItem, int spellKey){
-	if (item->instanz <= 0)
-	{
-		logStream << "ObjectManager::createAdditionalMemory: item->instanz <= 0!" << endl;
-		util::logWarning(&logStream);
-		return;
-	}
-
-	AdditMemory* addit = new AdditMemory();
-	int additKey = calcAdditKey(isHeroItem);
-	addit->additId = additKey;
-	addit->instanceId = id;
-	addit->referenceCount = 1;
-	addit->flags = item->flags;
-	addit->instanz = item->instanz;
-	addit->activeSpellItem = activeSpellItem;
-	addit->spellKey = spellKey;
-	item->instanz = -additKey;
-	keyToAdditMap.insert(pair<int,AdditMemory*>(addit->additId, addit));
-	logStream << "ObjectManager::createAdditionalMemory: created addit memory: "<< item->name.ToChar() << endl;
-	logStream << "ObjectManager::createAdditionalMemory: addit-key: " << additKey << endl;
-	logStream << "ObjectManager::createAdditionalMemory: object ptr: " << (int)item << endl;
-	util::debug(&logStream);
-}
-
-void ObjectManager::removeAdditionalMemory(int additId){
-	bool isHeroItem = additId > HERO_ADDIT_BEGIN;
-	map<int, AdditMemory*>::iterator it = keyToAdditMap.find(additId);
-	if (it == keyToAdditMap.end()) return;
-	AdditMemory* addit = it->second;
-	keyToAdditMap.erase(it);
-	if (!isHeroItem) {
-		nextAdditKeys.push(addit->additId);
-	}
-	//writeToConsole("Deleted additional memory", 0);
-	//writeToConsole("additId: ", addit->additId);
-	delete addit;
-	logStream << "ObjectManager::removeAdditionalMemory: addit-key removed: " << additId << endl;
-	util::debug(&logStream);
-}
-
-void ObjectManager::removeAllAdditionalMemory(){
-	map<int, AdditMemory*>::iterator itBegin = keyToAdditMap.begin();
-	map<int, AdditMemory*>::iterator itEnd = keyToAdditMap.end();
-	
-	while(itBegin != itEnd) {
-		removeAdditionalMemory(itBegin->first);
-		itBegin = keyToAdditMap.begin();
-		itEnd = keyToAdditMap.end();
-	}
-}
-
-bool ObjectManager::hasAdditAssignment(oCItem& item){
-	AdditMemory* addit = getAddit(item);
-	return (addit != NULL);
-}
-
-// Provides the id of additional memory for a given oCItem
-int ObjectManager::getAdditId(oCItem& item) {
-	if (item.instanz < 0) return -item.instanz;
-	//if (getInstanceId(item) >= INSTANCE_BEGIN) return getInstanceId(item);
-	return getInstanceId(item);
-	//return NULL;
-}
-
-// Provides additional Memory for a specific additional memory id
-AdditMemory* ObjectManager::getAddit(int additId) {
-	map<int, AdditMemory*>::iterator it = keyToAdditMap.find(additId);
-	if (it == keyToAdditMap.end()) return NULL;
-	return it->second;
-}
-
-AdditMemory* ObjectManager::getAddit(oCItem& item) {
-	int id = getAdditId(item);
-	return getAddit(id);
-}
-
-void ObjectManager::removeAdditList(std::list<AdditMemory*>* list){
-	while (!list->empty()) {
-		AdditMemory* addit = list->front();
-		list->pop_front();
-		removeAdditionalMemory(addit->additId);
-	}
-};
-
-int ObjectManager::calcAdditKey(bool isHeroItem) const
-{
-	if (isHeroItem) {
-		return HERO_ADDIT_BEGIN + (static_cast<int>(keyToAdditMap.size()) +1);
-	}
-	return (static_cast<int>(keyToAdditMap.size()) + 1);
-}
 void * ObjectManager::gothic2OperatorNew(size_t size) {
 	XCALL(0x00565F50);
-}
-
-void ObjectManager::loadWorldObjects(char* filename) {
-	ifstream ifs(filename);
-	if (ifs.fail()) {
-		logStream << "ObjectManager::loadWorldObjects: File was not found!" << std::endl;
-		logStream << "File name : " << filename << std::endl;
-		util::logWarning(&logStream);
-		return;
-	}
-
-	std::stringstream ss;
-	std::string line;
-	// Load additional memory informations
-	int size;
-	getline(ifs, line);
-	size = atoi(line.c_str());
-	for (size_t i = 0; i != size; ++i) {
-		AdditMemory* addit = new AdditMemory();
-		//ia >> addit;
-		ss.str();
-		ss.clear();
-		getline(ifs, line);
-		ss << line;
-		addit->deserialize(&ss);
-		addit->referenceCount = 0;
-		keyToAdditMap.insert(pair<int,AdditMemory*>(addit->additId, addit));
-	}
-};
-
-void ObjectManager::loadHeroData(char* filename) {
-	logStream << "ObjectManager::loadHeroData: load hero data..." << std::endl;
-	util::logInfo(&logStream);
-
-	ifstream ifs(filename);
-	if (ifs.fail()) {
-		logStream << "ObjectManager::loadHeroData: File wasn't found!" << endl;
-		util::logWarning(&logStream);
-		return;
-	}
-
-	std::stringstream ss;
-	std::string line;
-	// Load additional memory informations
-	int size;
-	getline(ifs, line);
-	size = atoi(line.c_str());
-	for (size_t i = 0; i != size; ++i) {
-		AdditMemory* addit = new AdditMemory();
-		//ia >> addit;
-		ss.str();
-		ss.clear();
-		getline(ifs, line);
-		ss << line;
-		addit->deserialize(&ss);
-		addit->referenceCount = 0;
-		keyToAdditMap.insert(pair<int,AdditMemory*>(addit->additId, addit));
-	}
-
-	logStream << "ObjectManager::loadHeroData: done." << endl;
-	util::logInfo(&logStream);
-};
-
-
-void ObjectManager::saveHeroData(std::list<AdditMemory*> heroItemList, char* directoryPath, char* filename) {
-	logStream << "ObjectManager::saveHeroData: save hero data..." << endl;
-	util::logInfo(&logStream);
-
-	string dir (directoryPath);
-	if (!util::existsDir(dir)) {
-		if(!util::makePath(dir)) {
-			logStream << "ObjectManager::saveHeroData: Couldn't access directory: " << directoryPath << endl;
-			util::logFault(&logStream);
-			return;
-		}
-	}
-
-	string fullpath = dir + string(filename);
-	ofstream ofs(const_cast<char*>(fullpath.c_str()));
-
-	// Save additional memory
-	int size = heroItemList.size();
-
-	logStream << "ObjectManager::saveHeroData: size of additional memory : " << size << endl;
-	util::logInfo(&logStream);
-
-	list<AdditMemory*>::iterator additIt;
-	ofs << size << '\n';
-	for (additIt = heroItemList.begin(); additIt != heroItemList.end(); ++additIt) {
-		AdditMemory* addit = *additIt;
-		//ofs << addit;
-		addit->serialize(ofs);
-		ofs << '\n';
-	}
-
-	logStream << "ObjectManager::saveHeroData: done." << endl;
-	util::logInfo(&logStream);
-};
-
-void ObjectManager::saveWorldObjects(int heroItemSize, char* directoryPath, char* filename) {
-	logStream << "ObjectManager::saveWorldObjects: save dii world objects..." << endl;
-	util::logInfo(&logStream);
-	
-	string dir (directoryPath);
-	if (!util::existsDir(dir)) {
-		if(!util::makePath(dir)) {
-			logStream << "ObjectManager::saveWorldObjects: folder doesn't exists: " << directoryPath << endl;
-			util::logFault(&logStream);
-			return;
-		}
-	}
-
-	string fullpath = dir + string(filename);
-	ofstream ofs(const_cast<char*>(fullpath.c_str()));
-
-	// Save additional memory
-	int size = keyToAdditMap.size() - heroItemSize;
-	//writeToConsole("size of additional memory: ", size);
-	map<int,AdditMemory*>::iterator additIt;
-	ofs << size << '\n';
-	for (additIt = keyToAdditMap.begin(); additIt != keyToAdditMap.end(); ++additIt) {
-		AdditMemory* addit = additIt->second;
-		if (addit->additId < HERO_ADDIT_BEGIN) {
-			//oa << addit;
-			addit->serialize(ofs);
-			ofs << '\n';
-		}
-	}
-
-	logStream << "ObjectManager::saveWorldObjects: done." << endl;
-	util::logInfo(&logStream);
-};
-
-void ObjectManager::getHeroAddits(std::list<AdditMemory*>& list) {
-	map<int, AdditMemory*>::iterator it = keyToAdditMap.begin();
-	for (; it != keyToAdditMap.end(); ++it) {
-		if (it->first > HERO_ADDIT_BEGIN) {
-			list.push_back(it->second);
-		}
-	}
 }
 
 
@@ -1509,35 +941,6 @@ void ObjectManager::updateIkarusSymbols()
 
 	//CallFunc needs uppercase string
 	zCParser::GetParser()->CallFunc(arg.Upper());
-}
-
-bool ObjectManager::updateItemAndAddit(oCItem * item)
-{
-	int additId = getAdditId(*item);
-	AdditMemory* addit = getAddit(additId);
-
-	if (addit == NULL || addit->visited) {
-		return false;
-	}
-
-	//Each item should only once be restored
-	addit->visited = true;
-
-	//Update the item
-	int instanceId;
-	if (addit->instanceId == getIdForSpecialPurposes()) {
-		instanceId = item->GetInstance();
-	}
-	else {
-		instanceId = addit->instanceId;
-	}
-
-	setInstanceId(item, instanceId);
-
-	int instanz = addit->instanz;
-	item->instanz = instanz;
-
-	return true;
 }
 
 void ObjectManager::callForAllItems(void(*func)(void* obj, void* param, oCItem*), void* obj, void* param, oCItem** stopIfNotNullItem)
@@ -1748,35 +1151,6 @@ int ObjectManager::getIdForSpecialPurposes()
 	return SPECIAL_ADDIT_BEGIN;
 }
 
-void ObjectManager::markAsReusable(int instanceId, int previousId)
-{
-	DynInstance* instance = getInstanceItem(instanceId);
-	if (!instance) return;
-
-	instance->setPreviousId(previousId);
-	instance->setReusable(true);
-	instance->checkNotUsed();
-
-	if (instance->isReusable())
-	{
-		reusableInstances.push_back(instanceId);
-	}
-}
-
-void ObjectManager::checkReusableInstances()
-{
-	for (map<int, DynInstance*>::iterator it = instanceMap.begin(); it != instanceMap.end(); ++it)
-	{
-		DynInstance* instance = it->second;
-		instance->checkNotUsed();
-
-		if (instance->isReusable())
-		{
-			reusableInstances.push_back(instance->getInstanceID());
-		}
-	}
-}
-
 bool ObjectManager::isItemInWorld(oCItem* item)
 {
 	zCWorld* world = oCGame::GetGame()->GetWorld();
@@ -1872,56 +1246,4 @@ bool ObjectManager::isDynamicInstance(int instanceId)
 int * ObjectManager::getRefCounter(oCItem * item)
 {
 	return (int*)((BYTE*)item + 0x4);
-}
-
-bool ObjectManager::isRangedWeapon(oCItem* item)
-{
-	//const int ITEM_KAT_FF = 4;
-	if (item->mainflags == 4)
-	{
-		return true;
-	}
-	return false;
-}
-
-void ObjectManager::equipRangedWeapon(oCItem* item, oCNpcInventory* inventory, bool munitionUsesRightHand)
-{
-	zCListSort<oCItem>* list = getInvItemByInstanceId(inventory, item->munition);
-	oCItem* munition = list->GetData();
-	int arrowId = ObjectManager::getObjectManager()->getInstanceId(*munition);
-	zCListSort<oCItem>* list2 = list->GetNext();
-	oCItem* munition2 = NULL;
-	oCNpc* owner = inventory->GetOwner();
-
-	if (list2)
-	{
-		munition2 = list2->GetData();
-	}
-
-	if (munition2 && munition2->instanz > 1)
-	{
-		logStream << "DynItemInst::updateRangedWeapon: munition2->instanz > 1!";
-		util::logFault(&logStream);
-	}
-
-	int amount = munition->instanz;
-	inventory->Remove(munition, munition->instanz);
-	if (munition2)
-	{
-		inventory->Remove(munition2, munition2->instanz);
-		amount += munition2->instanz;
-	}
-	munition = oCObjectFactory::GetFactory()->CreateItem(munition->GetInstance());
-	munition->instanz = amount;
-	inventory->Insert(munition);
-	munition = getInvItemByInstanceId(inventory, arrowId)->GetData();
-
-	if (munitionUsesRightHand)
-	{
-		oCNpcSetRightHand(owner, munition->SplitItem(1));
-	}
-	else
-	{
-		oCNpcSetLeftHand(owner, munition->SplitItem(1));
-	}
 }

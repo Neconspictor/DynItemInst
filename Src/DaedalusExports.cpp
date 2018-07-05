@@ -63,27 +63,15 @@ void DaedalusExports::unHookModule()
 }
 
 
-void __cdecl DaedalusExports::DII_CreateNewItem(int index, int instanceId) // Func void DII_CreateNewItem(var C_Item item, VAR INT instanceId)
+oCItem* __cdecl DaedalusExports::DII_CreateNewItem(int instanceId) // Func void DII_CreateNewItem(var C_Item item, VAR INT instanceId)
 {
-	if (index <= 0) return;
-	zCParser* parser = zCParser::GetParser();
-	zCPar_Symbol* symbol = parser->GetSymbol(index);
-	oCItem* item = (oCItem*)symbol->offset;
 
-	// Check if provided instance id is valid
-	zCPar_Symbol* newInstanceSym = parser->GetSymbol(instanceId);
+	oCItem* item = oCObjectFactory::GetFactory()->CreateItem(instanceId);
 
-	if (newInstanceSym == NULL)
-	{
-		logStream << "DaedalusExports::DII_CreateNewItem: newInstanceSym is Null! No item will be created!" << std::endl;
-		util::logWarning(&logStream);
-		return;
-	}
+	logStream << "DII_CreateNewItem: called! " << instanceId;
+	util::logWarning(&logStream);
 
-	item = oCObjectFactory::GetFactory()->CreateItem(instanceId);
-
-	// update the c_item
-	symbol->offset = (int)item;
+	return item;
 }
 
 void __cdecl DaedalusExports::DII_ReleaseItem(int index) // Func void DII_ReleaseItem(var C_Item item, VAR INT instanceId)
@@ -100,7 +88,25 @@ void __cdecl DaedalusExports::DII_ReleaseItem(int index) // Func void DII_Releas
 		{
 			oCGame::GetGame()->GetGameWorld()->RemoveVob(item);
 		}
+
+		*refCtr = 0;
 	}
+}
+
+void DaedalusExports::DII_DeleteItem(oCItem* item)
+{
+	if (item == NULL) return;
+
+	int* refCtr = (int*)((BYTE*)item + 0x4);
+	logStream << "DII_DeleteItem:  refCtr: " << *refCtr;
+	util::logWarning(&logStream);
+
+	if (*refCtr >= 0)
+	{
+		oCGame::GetGame()->GetGameWorld()->RemoveVob(item);
+	}
+
+	ObjectManager::oCItemOperatorDelete(item);
 }
 
 
@@ -312,41 +318,6 @@ void DaedalusExports::DII_AssignInstanceId(oCItem* item, int instanceId)
 {
 	ObjectManager* manager = ObjectManager::getObjectManager();
 	manager->assignInstanceId2(item, instanceId);
-}
-
-void DaedalusExports::DII_MarkAsReusable(int instanceId, int previousId)
-{
-	logStream << "DaedalusExports::DII_MarkAsReusable: before call!" << std::endl;
-	util::debug(&logStream);
-	ObjectManager* manager = ObjectManager::getObjectManager();
-	if (!DynItemInst::itemsAreModified())
-	{
-		manager->markAsReusable(instanceId, previousId);
-		logStream << "DaedalusExports::DII_MarkAsReusable: marked as reusable!" << std::endl;
-		util::debug(&logStream);
-	} else
-	{
-		//Marking isn'tinform DynItemInst that instanceId should be marked!
-		DynItemInst::addToReusableLists(instanceId, previousId);
-		logStream << "DaedalusExports::DII_MarkAsReusable: added to reusable list!" << std::endl;
-		util::debug(&logStream);
-	}
-	logStream << "DaedalusExports::DII_MarkAsReusable: function is enabled!" << std::endl;
-	util::debug(&logStream);
-	//manager->assignInstanceId2(item, instanceId);
-	logStream << "DaedalusExports::DII_MarkAsReusable: called" << std::endl;
-	util::debug(&logStream);
-}
-
-int DaedalusExports::DII_AreChangesPerformed()
-{
-	if ( DynItemInst::itemsAreModified())
-	{
-		//returning clear values is here important!
-		return 1;
-	}
-		//returning clear values is here important!
-		return 0;
 }
 
 void DaedalusExports::DII_GetItemByInstanceId(int index,  int instanceId)

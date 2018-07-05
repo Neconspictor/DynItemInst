@@ -67,9 +67,11 @@ public:
 	 * \param instanceId The instance id of the oCItem to be created.
 	 * \return The created item. If no item could be created, NULL will be returned.
 	 */
-	static void __cdecl  DII_CreateNewItem(int index, int instanceId);
+	static oCItem* __cdecl  DII_CreateNewItem(int instanceId);
 
 	static void __cdecl DII_ReleaseItem(int index);
+
+	static void __cdecl DII_DeleteItem(oCItem* item);
 	/**
 	 * An external for creating a new instance id from a given c_item.
 	 * Daedalus syntax: Func int DII_CreateNewInstance(C_Item item)
@@ -112,9 +114,6 @@ public:
 
 	//TODO: is this function used?
 	static void DII_AssignInstanceId(oCItem* item, int instanceId);
-
-	static void DII_MarkAsReusable(int instanceId, int previousId);
-	static int DII_AreChangesPerformed();
 
 	static void DII_GetItemByInstanceId(int index, int instanceId);
 

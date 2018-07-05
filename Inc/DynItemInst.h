@@ -38,7 +38,6 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <oCItemExtended.h>
 #include <ocgameExtended.h>
 #include <map>
-#include <AdditMemory.h>
 #include <list>
 
 typedef void(__thiscall* OCItemInsertEffect)(oCItem*);
@@ -62,31 +61,6 @@ class DynItemInst : public Module
 
 public:
 
-	struct LevelChangeBean
-	{
-		oCItem* item;
-		int dynamicInstanceId;
-		int original_on_equip;
-		int original_on_unequip;
-		int effectVob;
-		int weaponMode;
-		AdditMemory* addit;
-	};
-
-	struct InstanceNames
-	{
-		std::string base;
-		std::string nearFight;
-		std::string distanceFight;
-		std::string rune;
-		std::string other;
-
-		int nearFightCounter;
-		int distanceFightCounter;
-		int runeCounter;
-		int otherCounter;
-	};
-
 	/**
 	 * Creates a new DynItemInst module.
 	 */
@@ -102,9 +76,7 @@ public:
 	static void writeSavegameHookNaked();
 	static void createInstanceHookNaked();
 	static void oCGameLoadGameHookNaked();
-	static void oCGameChangeLevelHookNaked();
 	static void oCItemMulitSlotHookNaked();
-	static void oCMobContainerOpenHookNaked();
 	static void zCParserGetIndexHookNaked();
 	static void zCPar_SymbolTableGetSymbolStringHookNaked();
 	//static void zCPar_SymbolTableGetSymbolHookNaked();
@@ -198,17 +170,6 @@ public:
 	 */
 	static void __thiscall oCGameLoadGameHook(void* pThis, int second, zSTRING const & worldName);
 
-	/**
-			 * Extends functionality of oCGame::ChangeLevel(int, zSTRING const &, zSTRING const &)
-			 * Because equipped items of hero won't properly restored after a level change, all 
-			 * equiped items will be unequipped and equipped again after the original level change.
-			 * Additionally will all items with a dynamic instance restored in the target world and in the
-			 * player's inventory.
-			 * \param pThis A pointer to a valid oCGame object.
-			 * \param sourceWorld The world to be leaved.
-			 * \param targetWorld The world to be went to.
-			 */
-	static void __thiscall oCGameChangeLevelHook(void* pThis, zSTRING const & sourceWorld, zSTRING const & targetWorld);
 
 	/**
 	 * Extends functionality of oCItem::MulitSlot()
@@ -219,19 +180,6 @@ public:
 	 * \param pThis A pointer to a valid oCItem object.
 	 */
 	static int __thiscall oCItemMulitSlotHook(void* pThis);
-
-	/**
-	 * Extends functionality of oCMobCOntainer::Open()
-	 * Additionally by calling the original function this function initializes all items in the container
-	 * which have a dynamic instance id.
-	 * \param pThis A pointer to a valid oCMobContainer object.
-	 * \param npc The npc that wants to open the mob container.
-	 */
-	static void __thiscall oCMobContainerOpenHook(void* pThis, oCNpc* npc);
-
-
-
-	static void __thiscall oCMag_BookSetFrontSpellHook(void* pThis, int number);
 
 
 	/**
@@ -253,41 +201,6 @@ public:
 	static zCListSort<oCItem>* getInvItemByInstanceId(oCNpcInventory* inventory, int instanceId);
 
 	static oCItem* getInvItemByInstanceId2(oCNpcInventory* inventory, int instanceId);
-
-	/**
-							 * Restores a given oCItem from savegame if it was previously modified by modifyItemForSaving(oCItem* item, bool isHeroItem).
-							 * If the provided item isn't modified nothing will be done.
-							 * \param item The item which should be restored.
-							 * \param inventory The inventory the provided item is contained. If this field is NULL, it is expected
-							 * that the item is located in the current world.
-							 */
-	static void restoreSpecificNpcItemStub( oCItem* item, 
-											oCNpcInventory* inventory,
-											AdditMemory* addit,
-											std::map<int, oCItem*>* equippedSpells = NULL, 
-											oCItem** activeSpellItem = NULL);
-
-	/**
-	 * Modifies a given oCItem for savegame writing if it has a dynamic instance id.
-	 * If its instance id isn't dynamic nothing will be done.
-	 * \param item The item which should be modified.
-	 * \param isHeroItem is the item located in the player's inventory?
-	 * that the item is located in the current world.
-	 */
-	static int modifyItemForSaving(oCItem* item, bool isHeroItem);
-
-	/**
-	 * Restores all items, previously modified through modifyItemForSaving(oCItem* item, bool isHeroItem).
-	 * Recovery will be performed in the current world and in the inventories of all npcs.
-	 * \param game The game instance the recovery should be performed to.
-	 */
-	static void restoreDynamicInstances(oCGame* game);
-
-	static bool isSaveGameLoading();
-
-	static oCItem* makeEquippedCopy(oCItem* item, oCNpcInventory* inventory);
-
-	static bool itemsAreModified();
 
 	static void __thiscall zCCameraSetFarClipZHook(void* pThis, float value);
 
@@ -325,11 +238,6 @@ public:
 	static void __thiscall zCVobSetPhysicsEnabledHook(void* pThis, int second);
 
 
-
-	static void checkReusableInstances();
-
-	static void addToReusableLists(int instanceId, int previousId);
-
     /*! @copydoc Module::hookModule()
 	 */
 	virtual void hookModule() override;
@@ -341,33 +249,11 @@ public:
 public:
 	static const std::string SAVE_ITEM_FILE_EXT;
 	static const std::string SAVE_ITEM_INSTANCES;
-
-	static const std::string SAVE_ITEM_ADDIT;
-	static const std::string SAVE_ITEM_HERO_DATA;
-
 	static const std::string FILE_PATERN;
-
-	static InstanceNames instanceNames;
 
 private:
 	static std::string getClearedWorldName(zSTRING const & worldName);
-	static void loadDynamicInstances();
-	static void initAdditMemory();
-	static void equipRangedWeapon(oCItem* item, oCNpcInventory* inventory, bool munitionUsesRightHand);
-	static void resetInstanceNameStruct();
-
-	static void restoreSelectedSpell(oCNpc* npc, oCItem* selectedSpellItem);
-	static void restoreItemsOfNpc(oCNpc* npc);
-	static void equipDynamicItem(void * obj, void * param, oCItem * itm);
-	static void restoreSpecificNpcItem(void * obj, void * param, oCItem * itm);
-	static void restoreWorldItem(void * obj, void * param, oCItem * itm);
-	
-	static oCItem* restoreItemAfterLevelChange(oCNpc* npc, LevelChangeBean* bean, int weaponMode, int readiedWeaponId,
-		int munitionId, bool munitionUsesRightHand, std::map<int, oCItem*>* equippedSpells, 
-		oCItem** selectedSpellItem);
-
-	static void handleEquippedMagicItem(oCItem*, oCNpcInventory* inventory, AdditMemory* addit, int instanceId, 
-		std::map<int, oCItem*>* equippedSpells, oCItem** activeSpellItem);
+	static void loadDynamicInstances(int saveGameSlotNumber);
 
 private:
 
@@ -394,18 +280,7 @@ private:
 	//void __thiscall zCVob::SetHeadingAtWorld(zCVob *this, const struct zVEC3 *)
 	static const int ZCVOB_SET_HEADING_AT_WORLD = 0x0061CBC0;
 
-	static const int OCITEM_FLAG_ITEM_KAT_RUNE = 512;
-
-	static std::vector<zCPar_Symbol*>* symbols;
 	static bool showExtendedDebugInfo;
-	static int saveGameSlotNumber;
-
-	static bool denyMultiSlot;
-	static bool levelChange;
-	static bool saveGameIsLoading;
-	static bool saveGameWriting;
-
-	static std::list<std::pair<int, int>>reusableMarkList;
 
 	class DII_InstanceNameNotFoundException : protected std::exception {
 	private:

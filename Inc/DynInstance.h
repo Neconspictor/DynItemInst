@@ -129,12 +129,7 @@ public:
 	 */
 	~DynInstance();
 
-	void checkNotUsed();
-
 	void setPreviousId(int previousId);
-
-	bool isReusable();
-	void setReusable(bool reuse);
 
 public:
 	std::string zCPar_Symbol_name;
@@ -217,12 +212,6 @@ public:
 	int effectVob;						//oCVisualFX*
 	int next;							//138
 	DII_UserData dii_userData;
-	
-	// list of world names this instance is used
-	std::list<std::string> activeWorlds;
-
-	//specifies whether this instance can be reassigned
-	bool reusable;
 
 	// specifies an instance id items assigned to this dynamic instances will assigned to, if
 	// the dynamic instance is marked as reusable!
@@ -319,9 +308,6 @@ public:
 	 */
 	void copyUserData(DynInstance& source);
 
-	void addActiveWorld(std::string worldName);
-
-	void resetActiveWorlds();
 
 private:
 	static std::stringstream logStream;

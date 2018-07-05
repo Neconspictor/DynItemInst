@@ -3,6 +3,7 @@ EXPORTS
 	Hook
 	Unhook
 	DII_CreateNewItem
+	DII_DeleteItem
 	DII_ReleaseItem
 	DII_CreateNewInstance
 	DII_IsDynamic
@@ -12,8 +13,6 @@ EXPORTS
 	DII_UpdateInstance
 	DII_AssignInstanceId
 	DII_EquipItem
-	DII_AreChangesPerformed
-	DII_MarkAsReusable
 	DII_GetItemByInstanceId
 	DII_ChangeItemsInstanceId
 	DII_ToggleLevitation

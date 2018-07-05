@@ -40,14 +40,12 @@ std::stringstream DynInstance::logStream;
 DynInstance::DynInstance()
 {
 	previousId = -1;
-	reusable = false;
 }
 
 DynInstance::DynInstance(oCItem& item)
 {
 	store(item);
 	previousId = -1;
-	reusable = false;
 }
 
 DynInstance::~DynInstance()
@@ -80,7 +78,7 @@ static void restorePreviousId(void* obj, void* param, oCItem* itm) {
 	}
 }
 
-void DynInstance::checkNotUsed()
+/*void DynInstance::checkNotUsed()
 {
 	if (reusable) return;
 
@@ -101,22 +99,6 @@ void DynInstance::checkNotUsed()
 		}
 	}
 
-	// Assign all connected items in the world the previous instance id
-	ObjectManager* manager = ObjectManager::getObjectManager();
-	/*auto func = [&](oCItem* item)->void {
-		if (item && (item->GetInstance() == instanceID))
-		{
-			logStream << "item has instanceId marked as reusable: " << item->description.ToChar() << endl;
-			util::debug(&logStream);
-
-			manager->setInstanceId(item, previousId);
-			manager->oCItemSaveRemoveEffect(item);
-			item->effect = "";
-			item->InitByScript(previousId, 1);
-			item->InsertEffect();
-		}
-	};*/
-
 	RESTORE_PREVIOUS_ID_PARAMS params = {&logStream, instanceID, previousId };
 	manager->callForAllItems(restorePreviousId, NULL, &params);
 
@@ -124,21 +106,11 @@ void DynInstance::checkNotUsed()
 	{
 		previousId = -1;
 	}
-}
+}*/
 
 void DynInstance::setPreviousId(int previousId)
 {
 	this->previousId = previousId;
-}
-
-bool DynInstance::isReusable()
-{
-	return reusable;
-}
-
-void DynInstance::setReusable(bool reuse)
-{
-	reusable = reuse;
 }
 
 void DynInstance::store(oCItem& item) {
@@ -418,7 +390,7 @@ void DynInstance::setZCPar_SymbolName(std::string name)
 
 void DynInstance::serialize(std::ostream& os) const
 {
-	os << reusable << ' ';
+	//os << reusable << ' ';
 	util::writeString(os, zCPar_Symbol_name);
 	os << ' ';
 	os << zCPar_Symbol_Bitfield << ' ';
@@ -544,13 +516,13 @@ void DynInstance::serialize(std::ostream& os) const
 
 	dii_userData.serialize(os);
 
-	os << activeWorlds.size() << ' ';
+	/*os << activeWorlds.size() << ' ';
 
 	for (list<string>::const_iterator it = activeWorlds.begin(); it != activeWorlds.end(); ++it)
 	{
 		util::writeString(os, *it);
 		os << ' ';
-	}
+	}*/
 
 	os << previousId << ' ';
 }
@@ -558,20 +530,7 @@ void DynInstance::serialize(std::ostream& os) const
 
 void DynInstance::deserialize(std::stringstream* is)
 {
-	/*
-		os << notUsed << ' ';
-	writeString(os, zCPar_Symbol_name);
-	os << ' ';
-	os << zCPar_Symbol_Bitfield << ' ';
-	os << parentInstanceId << ' ';
-	os << instanceID << ' ';
-	os << idx << ' ';
-	writeString(os, name);
-	os << ' ';
-	writeString(os, nameID);
-	
-	*/
-	util::getBool(*is, reusable);
+	//util::getBool(*is, reusable);
 	util::readString(is, zCPar_Symbol_name);
 	zCPar_Symbol_name = util::trimFromRight(zCPar_Symbol_name);
 	util::getInt(*is, zCPar_Symbol_Bitfield);
@@ -689,17 +648,6 @@ void DynInstance::deserialize(std::stringstream* is)
 
 	dii_userData.deserialize(is);
 
-	int activeWorldSize = 0;
-	util::getInt(*is, activeWorldSize);
-	for (int i = 0; i < activeWorldSize; ++i)
-	{
-		string data = "";
-		util::readString(is, data);
-
-		//avoid duplicate names!
-		addActiveWorld(data);
-	}
-
 	util::getInt(*is, previousId);
 }
 
@@ -742,29 +690,6 @@ void DynInstance::copyUserData(DynInstance& source)
 
 		//TODO strings!!!
 	}*/
-}
-
-void DynInstance::addActiveWorld(string worldName)
-{
-	for (std::list<std::string>::iterator it = activeWorlds.begin(); it != activeWorlds.end(); ++it)
-	{
-		string active((*it).c_str());
-		if (worldName.compare(active) == 0)
-		{
-			// worldName was already added. Nothing to do
-			return;
-		}
-	}
-	activeWorlds.push_back(worldName);
-}
-
-void DynInstance::resetActiveWorlds()
-{
-	zCWorld* world = oCGame::GetGame()->GetWorld();
-	string worldName (world->worldName.ToChar());
-
-	//remove current world of list
-	activeWorlds.remove(worldName);
 }
 
 
