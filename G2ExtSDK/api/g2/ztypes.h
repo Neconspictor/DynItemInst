@@ -42,11 +42,19 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #endif
 
 #include "common/osheader.h"
+#include "macros.h"
 #include <string>
 #include <sstream>
 
 #define NULL 0
 #define zNEW(x) (new x)
+
+//.text:00565F80 ; void __cdecl operator delete__(void *)
+inline void cdecl gothicOperatorDeleteArray(void*)
+{
+	XCALL(0x00565F80)
+}
+
 
 struct zVEC2;
 struct zVEC3;
@@ -652,7 +660,8 @@ public:
 		this->m_numInArray	= 0;
 		if(this->m_array != NULL)
 		{
-			delete[] this->m_array;
+			//delete[] this->m_array;
+			gothicOperatorDeleteArray(this->m_array);
 			this->m_array = NULL;
 		};
 	};
@@ -697,7 +706,7 @@ public:
 	*/
 	const T& GetItem(const unsigned int pos)
 	{
-		if((pos =< this->m_numInArray) && (pos =< this->m_numAlloc))
+		if((pos < this->m_numInArray) && (pos < this->m_numAlloc))
 			return this->m_array[pos];
 	};
 

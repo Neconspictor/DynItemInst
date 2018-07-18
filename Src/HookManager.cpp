@@ -264,7 +264,7 @@ void HookManager::hook()
 
 	//Module* portalDistanceMultiplier = new PortalDrawDistance();
 
-	//Module* levitation = new Levitation();
+	Module* levitation = new Levitation();
 	//Module* customFocuses = new CustomNpcFocus();
 	manager->addModule(dynItemInstModule);
 	manager->addModule(externals);
@@ -284,7 +284,7 @@ void HookManager::hook()
 	//manager->addModule(testModule);
 
 	//manager->addModule(portalDistanceMultiplier);
-	//manager->addModule(levitation);
+	manager->addModule(levitation);
 	//manager->addModule(customFocuses);
 	manager->hookModules();
 

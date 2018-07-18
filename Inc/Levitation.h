@@ -17,12 +17,50 @@
 #define ZCVOB_CHECK_AND_RESOLVE_COLLISION_ADDRESS  0x0061F060//0x0061D190//0x0061E0D0 //Test: 0x0061F060
 #define ZCTRIGGER_ON_TOUCH_ADDRESS 0x00610640
 #define ZCVOB_HAS_ENOUGH_SPACE_ADDRESS 0x0077C6B0
-#define ZCVOB_GET_VELOCITY_ADDRESS 0x0061D1C0
+#define ZCVOB_GET_VELOCITY_ADDRESS 0x0061D1C0 //0x0061D1C0
 #define ZCBSPBASE_COLLECT_POLYS_IN_BBOX3D 0x00532EB0
 #define ZCVOB_IS_COLLIDING 0x0061F4F0
 
+////.text:00551150 ; private: int __fastcall zCCollObjectCharacter::TestHardCollisions
+#define ZCCOLL_OBJECT_CHARACTER_TEST_HARD_COLLIONS_ADDRESS 0x00551150
+
+#define ZCCOLL_OBJECT_CHARACTER_TEST_SOFT_COLLIONS_ADDRESS 0x00552180
+
+#define ZCCOLL_OBJECT_CHARACTER_DETECT_SELF_COLLISION_ADDRESS 0x00553230
+
+#define TESTSTATIC_CHAR_CHAR_ADDRESS 0x005501F0
+
+
+//.text:0050DC40 ; private: void __thiscall zCAIPlayer::CheckPhysics(void)
+#define ZCAIPLAYER_CHECK_PHYSICS 0x0050DC40
+
+//.text:00550E20 ; private: void __fastcall zCCollObjectCharacter::FindFloorWaterCeiling(class zVEC3 const &, struct zCCollObjectCharacter::zTSpatialState &)
+#define ZCCOLL_OBJECT_CHARACTER_FIND_FLOOR_WATER_CEILING 0x00550E20
+
+
+#define ZCVOB_END_MOVEMENT 0x0061E0D0
+
+#define ZCVOB_UPDATE_PHYSICS_ADDRESS 0x0061D2D0
+
+#define ZCVOB_CALC_GROUND_POLY_ADDRESS 0x0061ACD0
+
+//.text:00487C50; public: class zMAT4 & __thiscall zMAT4::SetTranslation(class zVEC3 const &)
+#define ZMAT4_SET_TRANSLATION_ADDRESS 0x00487C50
+
+#define ZCCOLL_OBJECT_CHARACTER_CALC_SLIDE_VECTOR_ADDRESS 0x00550870
 
 #define THISPTR_OFFSET(x) (((char *)this) + (x))
+
+struct zCBspBase_Small
+{
+	void* parent;
+	zTBBox3D bbox3D;
+	void** polyList;
+	int	numPolys;
+	int nodeType;
+};
+
+
 
 class Float
 {
@@ -50,8 +88,8 @@ namespace LevitationUtil
 	extern OCNpcResetPos oCNpcResetPos;
 
 	//.text:0061E0D0 public: virtual void __thiscall zCVob::EndMovement(int) proc near
-	typedef void(__thiscall* ZCVobEndMovement)(zCVob*, int);
-	extern ZCVobEndMovement zCVobEndMovement;
+	//typedef void(__thiscall* ZCVobEndMovement)(zCVob*, int);
+	//extern ZCVobEndMovement zCVobEndMovement;
 
 	//0061B720
 	typedef void(__thiscall* RotateLocalY)(void*, float);
@@ -108,7 +146,27 @@ struct GothicMemoryLocations
 		static const unsigned int GetAniTexture = 0x0064BA20;
 
 	};
+
 };
+
+struct zTSpatialState {
+	zREAL m_fFloorY;
+	zREAL m_fWaterY;
+	zREAL m_fCeilingY;
+	zREAL m_fLastFloorY;
+	GothicMemoryLocations::zCPolygon* m_poFloorPoly;
+	GothicMemoryLocations::zCPolygon* m_poWaterPoly;
+	GothicMemoryLocations::zCPolygon* m_poCeilingPoly;
+	struct {
+		uint8_t m_bFloorIsStair : 1;
+		uint8_t m_bFloorIsVob : 1;
+		uint8_t m_bIsUninited : 1;
+		//	zUINT8                : 0;
+	};
+	//	zUINT8 __align[3];
+};
+
+std::ostream& operator<<(std::ostream& os, const zTSpatialState& spatialState);
 
 const int zMAT_GROUP_WATER = 5;
 const int zMAT_GROUP_SNOW = 6;
@@ -121,6 +179,11 @@ public:
 	}
 
 	static int __thiscall IsPortalMaterial(void* pThis);
+
+	zSTRING& GetName()
+	{
+		XCALL(0x0055FF10);
+	}
 };
 
 
@@ -387,9 +450,44 @@ public:
 	static int __thiscall zCVobHasEnoughSpaceHook(void* pThis, zVEC3&);  //not really(?) used!!!
 	static zVEC3 __thiscall zCVobGetVelocityHook(void* pThis); //not really used!!!
 
+	static int __cdecl TestStatic_Char_CharHook(float, void* collisionObject1, zMAT4 const& mat1, void* collisionObject2, zMAT4 const& mat2, void* collisionReportPtr);
+
+
+
+	//.text:00550870 ; private: int __fastcall zCCollObjectCharacter::CalcSlideVector(class zVEC3 const &, class zVEC3 const &, class zVEC3 &, class zVEC3 &, float &)
+	static int __fastcall zCCollObjectCharacterCalcSlideVectorHook(void* pThis, zVEC3 const & vec1, zVEC3 const & vec2, zVEC3 & vec3, zVEC3 & vec4, float& floatValue);
+
+	//.text:00487C50; public: class zMAT4 & __thiscall zMAT4::SetTranslation(class zVEC3 const &)
+	static zMAT4& __thiscall zMAT4SetTranslationHook(zMAT4* pThis, zVEC3 const & translation);
+
+	//.text:0061ACD0 ; public: void __thiscall zCVob::CalcGroundPoly(void)
+	static void __thiscall zCVobCalcGroundPolyHook(void* pThis);
+
+
+	//.text:0061D2D0 ; private: void __thiscall zCVob::UpdatePhysics(void)
+	static void __thiscall zCVobUpdatePhysicsHook(void* pThis);
+
+	//.text:0061E0D0 ; public: virtual void __thiscall zCVob::EndMovement(int)
+	static void __thiscall zCVobEndMovementHook(void* pThis, int arg0);
+
+	//.text:00552180 ; private: int __fastcall zCCollObjectCharacter::TestSoftCollisions(class zVEC3 const &, class zVEC3 const &, class zVEC3 &, class zVEC3 &)
+	static int __fastcall zCCollObjectCharacterTestSoftCollisionsHook(void* pThis, zVEC3 const& vec1, zVEC3& vec2, zVEC3& vec3, zVEC3& vec4);
+
+	static int __fastcall zCCollObjectCharacterTestHardCollisionsHook(void* pThis, zVEC3& vec1, zVEC3& vec2, zVEC3& vec3,
+		zTSpatialState* zTSpatialState, zVEC3& vec4);
+
+	//.text:00553230 ; public: virtual void __fastcall zCCollObjectCharacter::DetectCollisionsSelf(class zCArray<class zCCollisionObject *> const &, class zCArray<class zCCollisionReport *> &)
+	static  void __fastcall zCCollObjectCharacterDetectCollisionsSelfHook(void* pThis, void* collisionObjectArray, void* collisionReports);
+
+	static void __thiscall zCAIPlayerCheckPhysicsHook(void* pThis);
+
+	static void __fastcall zCCollObjectCharacterFindFloorWaterCeilingHook(void* pThis, zVEC3 const & vec1, zTSpatialState* zTSpatialState);
+
 															   //non hooks
 	static int __thiscall zCVobIsColliding(void* pThis);
 	static int __fastcall zCBspBaseCollectPolysInBBox3D(void*, zTBBox3D const &, zCPolygon** &, int&);
+
+	static void __fastcall zCBspBaseCollectVobsInBBox3D(void* pThis, zCArray<zCVob*>& collectedVobs, zTBBox3D const& boundingBox);
 
 	//.text:00511320 public: int __thiscall zCAIPlayer::CheckEnoughSpaceMoveDir(class zVEC3 const &, int) proc near
 	static int __thiscall zCAIPlayerCheckEnoughSpaceMoveDirHook(void* pThis, zVEC3 const &, int);
@@ -409,11 +507,13 @@ public:
 };*/
 
 __int32 __cdecl sysGetTime();
-void levitate();
+zVEC3 levitate();
 void Test(oCNpc* npc);
 int calcPastFrameTime();
 Motion getCollideYDir(zVEC3, float, bool);
 Motion getCollideForwardDir(oCNpc*, float, bool);
+bool check_prePass(oCNpc* hero, const zMAT4& mat);
 void __cdecl zCVobCheckAutoUnlinkHook(zCVob* vob);
+bool checkVobCollision(void* zCBspBaseObject, zCVob* testedVob, zTBBox3D const& boundingBox);
 
 #endif __LEVITATION_H
