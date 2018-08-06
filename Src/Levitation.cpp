@@ -7,6 +7,8 @@
 #include <LevitationBean.h>
 #include <Util.h>
 #include <queue>
+#include <api/g2/zcparser.h>
+#include <api/g2/oCItemExtended.h>
 
 using namespace LevitationUtil;
 
@@ -37,7 +39,8 @@ ZCModelCalcModelBBox3DWorld zCModelCalcModelBBox3DWorld = (ZCModelCalcModelBBox3
 //.text:00511320 public: int __thiscall zCAIPlayer::CheckEnoughSpaceMoveDir(class zVEC3 const &, int) proc near
 typedef int(__thiscall* ZCAIPlayerCheckEnoughSpaceMoveDir)(void*, zVEC3 const &, int); ZCAIPlayerCheckEnoughSpaceMoveDir zCAIPlayerCheckEnoughSpaceMoveDir;
 
-
+//.text:00699F60 ; protected: int __thiscall oCAIHuman::PC_ActionMove(int)
+typedef int(__thiscall* OCAIHumanPC_ActionMove)(void* pThis, int); OCAIHumanPC_ActionMove oCAIHumanPC_ActionMove = (OCAIHumanPC_ActionMove)0x00699F60;
 
 
 
@@ -84,6 +87,29 @@ ZCAIPlayerCheckPhysics zCAIPlayerCheckPhysics;
 //.text:00550E20 ; private: void __fastcall zCCollObjectCharacter::FindFloorWaterCeiling(class zVEC3 const &, struct zCCollObjectCharacter::zTSpatialState &)
 typedef void(__fastcall* ZCCollObjectCharacterFindFloorWaterCeiling)(void* pThis, zVEC3 const & vec1, void* zTSpatialState);
 ZCCollObjectCharacterFindFloorWaterCeiling zCCollObjectCharacterFindFloorWaterCeiling;
+
+//.text:00706B60 ; protected: virtual void __thiscall oCItemContainer::DrawCategory(void)
+using OCItemContainerDrawCategory = void(__thiscall*)(void* pThis);
+OCItemContainerDrawCategory oCItemContainerDrawCategory = (OCItemContainerDrawCategory)0x00706B60;
+
+//.text:007092C0 ; public: virtual class oCItem * __thiscall oCItemContainer::GetSelectedItem(void)
+using OCItemContainerGetSelectedItem = oCItem * (__thiscall*)(oCItemContainer* pThis);
+OCItemContainerGetSelectedItem oCItemContainerGetSelectedItem = (OCItemContainerGetSelectedItem)0x007092C0;
+
+//.text:00707BA4 ; naked function
+using OCItemContainerDrawGetItem = void (*)();
+OCItemContainerDrawGetItem oCItemContainerDrawGetItem = (OCItemContainerDrawGetItem)0x00707BA4;
+
+//.text:00709740 ; void __thiscall oCItemContainer::NextItem(oCItemContainer *__hidden this)
+using OCItemContainerNextItem = void(__thiscall*)(oCItemContainer* pThis);
+OCItemContainerNextItem oCItemContainerNextItem = (OCItemContainerNextItem)0x00709740;
+
+//.text:007076B0 ; void __thiscall oCItemContainer::Draw(oCItemContainer *this)
+using OCItemContainerDraw = void (__thiscall*)(oCItemContainer* pThis);
+OCItemContainerDraw oCItemContainerDraw = (OCItemContainerDraw)0x007076B0;
+
+
+void oCItemContainerDrawGetItemNaked();
 
 namespace LevitationUtil
 {
@@ -180,10 +206,36 @@ void Levitation::hookModule()
 	//hookManager->addFunctionHook((LPVOID*)&zCCollObjectCharacterCalcSlideVector, zCCollObjectCharacterCalcSlideVectorHook, moduleDesc);
 	//hookManager->addFunctionHook((LPVOID*)&zMAT4SetTranslation, zMAT4SetTranslationHook, moduleDesc);
 	//hookManager->addFunctionHook((LPVOID*)&zCVobCalcGroundPoly, zCVobCalcGroundPolyHook, moduleDesc);
+	
+	
 	hookManager->addFunctionHook((LPVOID*)&zCVobUpdatePhysics, zCVobUpdatePhysicsHook, moduleDesc);
+
+
+	hookManager->addFunctionHook((LPVOID*)&oCAIHumanPC_ActionMove, oCAIHumanPC_ActionMoveHook, moduleDesc);
+
+
+
+
+	
+	hookManager->addFunctionHook((LPVOID*)&oCItemContainerDrawCategory, oCItemContainerDrawCategoryHook, moduleDesc);
+	//hookManager->addFunctionHook((LPVOID*)&oCItemContainerGetSelectedItem, oCItemContainerGetSelectedItemHook, moduleDesc);
+	
+	//hookManager->addFunctionHook((LPVOID*)&oCItemContainerDrawGetItem, oCItemContainerDrawGetItemNaked, moduleDesc);
+	//hookManager->addFunctionHook((LPVOID*)&oCItemContainerNextItem, oCItemContainerNextItemHook, moduleDesc);
+	hookManager->addFunctionHook((LPVOID*)&oCItemContainerNextItem, oCItemContainerNextItemReversed, moduleDesc);
+	//hookManager->addFunctionHook((LPVOID*)&oCItemContainerDraw, oCItemContainerDrawHook, moduleDesc);
+
+	
+	
+	
+	
 	//hookManager->addFunctionHook((LPVOID*)&zCVobEndMovement, zCVobEndMovementHook, moduleDesc);
-	hookManager->addFunctionHook((LPVOID*)&zCCollObjectCharacterTestHardCollisions, zCCollObjectCharacterTestHardCollisionsHook, moduleDesc);
-	hookManager->addFunctionHook((LPVOID*)&zCCollObjectCharacterTestSoftCollisions, zCCollObjectCharacterTestSoftCollisionsHook, moduleDesc);
+	
+	
+	//hookManager->addFunctionHook((LPVOID*)&zCCollObjectCharacterTestHardCollisions, zCCollObjectCharacterTestHardCollisionsHook, moduleDesc);
+	//hookManager->addFunctionHook((LPVOID*)&zCCollObjectCharacterTestSoftCollisions, zCCollObjectCharacterTestSoftCollisionsHook, moduleDesc);
+	
+	
 	//hookManager->addFunctionHook((LPVOID*)&zCCollObjectCharacterDetectCollisionsSelf, zCCollObjectCharacterDetectCollisionsSelfHook, moduleDesc);
 	
 	//hookManager->addFunctionHook((LPVOID*)&zCAIPlayerCheckPhysics, zCAIPlayerCheckPhysicsHook, moduleDesc);
@@ -223,6 +275,10 @@ void Levitation::zCVobDoFrameActivityHook(void* pThis)
 
 	if (adjust) {
 		//oldYPosition = hero->GetPosition().y;
+		char* modelPtr = (char*)hero->GetModel();
+
+		modelPtr[0x1F8] = 0xD;
+
 		zMAT4* mat = &hero->trafoObjToWorld;
 		oldLook = zVEC3(mat->m[0][2], mat->m[1][2], mat->m[2][2]);
 		heroLevitationBean->oldLook = oldLook;
@@ -245,7 +301,45 @@ void Levitation::zCVobDoFrameActivityHook(void* pThis)
 		}*/
 
 		//check if hard collision tests should be applied (important for vobs and mobs)
-		doHardTests = check_prePass(hero, hero->trafoObjToWorld);
+		//doHardTests = check_prePass(hero, hero->trafoObjToWorld);
+
+		//.text:0065F790 ; public: static class oCInformationManager & __cdecl oCInformationManager::GetInformationManager(void)
+		using OCInformationManagerGetInformationManager = void* (__cdecl*)();
+		static OCInformationManagerGetInformationManager oCInformationManagerGetInformationManager = (OCInformationManagerGetInformationManager)0x0065F790;
+		//.text:006609D0 ; public: int __fastcall oCInformationManager::HasFinished(void)
+		using OCInformationManagerHasFinished = int(__fastcall*)(void* pThis);
+		static OCInformationManagerHasFinished oCInformationManagerHasFinished = (OCInformationManagerHasFinished)0x006609D0;
+		
+		
+
+
+		void* infoManager = oCInformationManagerGetInformationManager();
+		int hasFinished = oCInformationManagerHasFinished(infoManager);
+
+		if (hasFinished)
+			levitatePosition = levitate();
+
+		/*zVEC3 pos;
+		hero->GetPositionWorld(pos.x, pos.y, pos.z);
+		float hoverDistance = heroLevitationBean->getDistanceToGround(pos);
+		if (hoverDistance < heroLevitationBean->HOVER_DISTANCE)
+		{
+			//fakeUpKey = true;
+			float speed = 10.0f; //100cm per second
+			float moveUpDistance = speed * float(frameTimePast) / 1000;
+			hero->GetPositionWorld(pos.x, pos.y, pos.z);
+			pos.y += moveUpDistance;
+			hero->SetPositionWorld(pos);
+			heroLevitationBean->setHoverDistance(heroLevitationBean->getDistanceToGround(pos));
+			//heroLevitationBean->increaseHoverDistance(moveUpDistance);
+		}*/
+
+		zVEC3 pos;
+		hero->GetPositionWorld(pos.x, pos.y, pos.z);
+		float hoverDistance = heroLevitationBean->getDistanceToGround(pos);
+		float add = 40 - hoverDistance;
+		pos.y += max(0, add);
+		hero->SetPositionWorld(pos);
 	}
 	zCVobDoFrameActivity(pThis);
 
@@ -276,7 +370,7 @@ void Levitation::zCVobDoFrameActivityHook(void* pThis)
 		}*/
 
 		//Test(hero);
-		levitatePosition = levitate();
+		//levitatePosition = levitate();
 		Test(hero);
 	}
 }
@@ -769,6 +863,442 @@ int Levitation::zCAIPlayerCheckEnoughSpaceMoveDirHook(void* pThis, zVEC3 const& 
 	}
 
 	return result;
+}
+
+int Levitation::oCAIHumanPC_ActionMoveHook(void* pThis, int param1)
+{
+	void* hero = (void*)oCNpc::GetHero();
+
+	bool adjust = adjustHeroPosition && pThis != nullptr;
+
+	if (adjust)
+	{
+		void* npc = *(void**)((char*)pThis + 0x12C);
+		adjust &= (npc == hero);
+	}
+
+	if (adjust)
+	{
+		int modelAddress = *(int*)((char*)pThis + 0x68);
+
+		if (modelAddress != 0)
+		{
+			char* model = (char*)modelAddress;
+			model[0x1F8] = 0xD;
+		}
+	}
+
+	return oCAIHumanPC_ActionMove(pThis, param1);
+}
+
+void Levitation::getState(oCItemContainer& container, ContainerState& state)
+{
+	state.selectedItemNumber = container.selectedItem;
+
+	int index = 0;
+	zCListSort<oCItem>* contents = container.contents;
+
+	while(contents->data == nullptr)
+	{
+		contents = contents->next;
+	}
+
+	// get the selected item
+	while(index < state.selectedItemNumber)
+	{
+		// Important: at first updating the index!
+		if (contents->data != nullptr)
+			++index;
+
+		contents = contents->next;
+	}
+	state.selectedItem = contents->data;
+	state.selectedItemList = contents;
+
+
+	// get the total item number
+	while (contents->next != nullptr) {
+		
+		// Important: at first updating the index!
+		if (contents->data != nullptr)
+			++index;
+
+		contents = contents->next;
+		
+	}
+	state.itemNumber = index;
+
+	// calculate row and column indices
+	state.selectedItemRowNumber = -1;
+	state.selectedItemColumnNumber = -1;
+	if (state.selectedItemNumber > 0)
+	{
+		index = state.selectedItemNumber - container.offset;
+		state.selectedItemRowNumber = (index / container.maxSlotsRow); // row index begins at 0
+		state.selectedItemColumnNumber = index % container.maxSlotsRow; // column index begins at 0	
+	}
+}
+
+void Levitation::oCItemContainerDrawCategoryHook(void* pThis)
+{
+	oCItemContainerDrawCategory(pThis);
+}
+
+oCItem* Levitation::oCItemContainerGetSelectedItemHook(oCItemContainer* pThis)
+{
+	oCItem* selectedItem = oCItemContainerGetSelectedItem(pThis);
+	if (selectedItem != nullptr && meetsCondition(selectedItem))
+	{
+		logStream << "oCItemContainerGetSelectedItemHook: called!" << std::endl;
+		util::logInfo(&logStream);
+		oCItemContainerNextItemHook(pThis);
+		selectedItem = oCItemContainerGetSelectedItem(pThis);
+	}
+	return selectedItem;
+}
+
+void Levitation::oCItemContainerDrawHook(oCItemContainer* pThis)
+{
+	oCItem* selectedItem = oCItemContainerGetSelectedItem(pThis);
+	if (selectedItem != nullptr && meetsCondition(selectedItem))
+	{
+		oCItemContainerNextItemHook(pThis);
+	}
+	oCItemContainerDraw(pThis);
+}
+
+bool Levitation::meetsCondition(oCItem* item)
+{
+	return item->amount <= 1;
+}
+
+oCItem* Levitation::myTestFunction(oCItem** currentItem, zCListSort<oCItem>** pointer, oCItem* item)
+{
+	if (item == nullptr) return nullptr;
+
+	// categories (mainflag)
+	static const int ITEM_KAT_NONE = 1 << 0;  // Sonstiges
+	static const int ITEM_KAT_NF = 1 << 1;  // Nahkampfwaffen
+	static const int ITEM_KAT_FF = 1 << 2;  // Fernkampfwaffen
+	static const int ITEM_KAT_MUN = 1 << 3;  // Munition (MULTI)
+	static const int ITEM_KAT_ARMOR = 1 << 4;  // Ruestungen
+	static const int ITEM_KAT_FOOD = 1 << 5;  // Nahrungsmittel (MULTI)
+	static const int ITEM_KAT_DOCS = 1 << 6;  // Dokumente
+	static const int ITEM_KAT_POTIONS = 1 << 7;  // Traenke
+	static const int ITEM_KAT_LIGHT = 1 << 8;  // Lichtquellen
+	static const int ITEM_KAT_RUNE = 1 << 9;  // Runen/Scrolls
+	static const int ITEM_KAT_MAGIC = 1 << 31;  // Ringe/Amulette/Guertel
+	static const int ITEM_KAT_KEYS = ITEM_KAT_NONE;
+
+	while(meetsCondition(item)) //item->mainflags & ITEM_KAT_NF || item->mainflags & ITEM_KAT_FF
+	{
+		if (pointer == nullptr) {
+			*currentItem = nullptr;
+			return nullptr;
+		}
+		*pointer = (*pointer)->next;
+		if (*pointer == nullptr) {
+			*currentItem = nullptr;
+			return nullptr;
+		}
+		zCListSort<oCItem>* list = *pointer;
+		item = list->data;
+		*currentItem = item;
+
+		if (item == nullptr) return nullptr;
+	}
+
+	/*std::stringstream ss;
+	ss << "size: " << pointer->GetSize() << std::endl;
+	if (pointer->GetSize() > 0)
+	{
+		ss << "first item name: " << pointer->data[0].name.ToChar() << std::endl;
+		ss << "first item name: " << pointer->data[0].amount << std::endl;
+	}
+	util::logAlways(&ss);*/
+
+	return item;
+}
+
+__declspec(naked) void oCItemContainerDrawGetItemNaked()
+{
+
+	//Pointer_toPointerOfItem= dword ptr -18Ch
+	// mov     eax, [esp+1B4h+Pointer_toPointerOfItem]
+	// esp + 0x1b4 - 0x18c
+	// esp +0x1b4 - 0x18c - 0x20
+	_asm {
+		push esp - 4 // esp -4
+		push ecx // esp -8
+		push edx // esp -12
+		push ebx // esp -16
+		push ebp // esp -20
+		push edi // esp -24
+		push esi // esp -28
+		push eax // esp -32 = 0x20
+		mov eax, esp //+ 0x1b4 - 0x18c + 0x20]
+		add eax, 0x1b4 - 0x18c + 0x20
+		push eax // esp - 36 = 0x24
+		mov eax, esp
+		add eax, 0x1b4 - 0x190 + 0x24
+		push eax
+		call Levitation::myTestFunction
+		add esp, 0xC // 3x push eax
+		pop esi
+		pop edi
+		pop ebp
+		pop ebx
+		pop edx
+		pop ecx
+		pop esp
+		test eax, eax
+		jz label
+		push 0x00707BAA
+		ret
+		label :
+		push 0x007083B4
+			ret
+	}
+}
+
+void Levitation::oCItemContainerNextItemHook(oCItemContainer* pThis)
+{
+	oCItemContainer* container = pThis;
+
+	ContainerState state {0};
+	getState(*container, state);
+
+	zCListSort<oCItem>* contents = state.selectedItemList;
+
+	int index = state.selectedItemNumber;
+	if (contents != nullptr)
+		contents = contents->next;
+
+	bool found = false;
+
+	while (contents != nullptr && !found)
+	{
+		++index;
+		oCItem* selectedItem = contents->data;
+		if (selectedItem != nullptr && !meetsCondition(selectedItem))
+		{
+			// we have what we want!
+			found = true;
+		}
+		contents = contents->next;
+	}
+
+	// update state of container when there was found a valid item
+	if (found)
+	{
+		container->selectedItem = index;
+	}
+}
+
+int ITEM_ACTIVE = 0x40000000;
+
+void sub(oCItemContainer* container, int& posX, int& posY, int selectedItemIndex, int containerOffset)
+{
+
+	loc_709780: // TODO: remove gotos
+
+	zCListSort<oCItem>* contents = container->contents;
+	zCListSort<oCItem>* contentsNext = contents->next;
+
+	int lastItemIndex = 0;
+
+	while (contentsNext != nullptr)
+	{
+		contentsNext = contentsNext->next;
+		++lastItemIndex;
+	}
+
+	--lastItemIndex; // index is 'item count - 1'
+
+	if (container->selectedItem < lastItemIndex) //.text:0070979C                 cmp     container->selectedItem, lastItemIndex
+												 //.text:0070979E                 jge     loc_709899
+	{
+
+			if (oCItemContainer::IsSplitScreen(container))  // else will jump to .text:00709853 loc_709853:
+			{
+				//int bufferFlowCheck = (container->selectedItem + 1) / container->maxSlotsCol; // .text:007097B7                 cdq
+				int modulo = (container->selectedItem + 1) % container->maxSlotsCol; // .text:007097B7                 cdq
+
+				if (modulo == 0) // no buffer overflow has happened; else will jump to .text:00709853 loc_709853:
+				{
+					oCItemContainer* nextActiveContainer = nullptr;
+					oCItemContainer::GetPosition(container, posX, posY);
+
+					//.data:00AB0FD8 ; void *dword_AB0FD8
+					zCList<oCItemContainer>* openContainers = *(zCList<oCItemContainer>**)0x00AB0FD8;
+
+					while (openContainers != nullptr)
+					{
+						oCItemContainer* currentContainer = openContainers->data;
+
+						if (currentContainer != container)
+						{
+							if (!oCItemContainer::IsPassive(currentContainer) && oCItemContainer::IsOpen(currentContainer))
+							{
+								int currentContainerPosX;
+								int currentContainerPosY;
+								oCItemContainer::GetPosition(currentContainer, currentContainerPosX, currentContainerPosY);
+
+								if (currentContainerPosX > posX)
+								{
+									nextActiveContainer = currentContainer;
+								}
+							}
+						}
+
+						//.text:0070982E loc_70982E:
+						openContainers = openContainers->next;
+
+					}
+
+					//.text:00709835                 mov     eax, [esp+2Ch+oCItemContainer_var]
+
+					if (nextActiveContainer != nullptr)
+					{
+						oCItemContainer::Activate(nextActiveContainer);
+					}
+
+					//.text:00709844 loc_709844: 
+					if (nextActiveContainer != nullptr) //.text:00709851                 jnz     short loc_7098A7
+					{
+						goto loc_7098A7;
+					}
+				}
+			}
+
+			//.text:00709853 loc_709853:
+			container->selectedItem = container->selectedItem + 1;
+			int lastVisibleItemIndex = container->maxSlots + container->offset - 1;
+
+
+			if (container->selectedItem > lastVisibleItemIndex)
+			{
+				container->offset = container->offset + container->maxSlots;
+			}
+
+			//.text:00709872 loc_709872: 
+
+			if (container->m_bManipulateItemsDisabled == 0)
+			{
+				goto loc_7098A7;
+			}
+
+			// We know that there are enough items as 'container->selectedItem < lastItemIndex'; 
+			// Thus there won't be a nullptr exception!
+			if (oCItemContainer::GetSelectedItem(container)->HasFlag(ITEM_ACTIVE)) {
+				//.text:00709891                 jnz     loc_709780
+				goto loc_709780;
+			}
+	}
+	else
+	{
+		//.text:00709899 loc_709899:
+		container->selectedItem = selectedItemIndex;
+		container->offset = containerOffset;
+	}
+
+loc_7098A7:;
+}
+
+void Levitation::oCItemContainerNextItemReversed(oCItemContainer* container)
+{
+	int posX;
+	int posY;
+
+	if (container->contents == nullptr) return;
+
+	int selectedItemIndex = container->selectedItem;
+	int containerOffset = container->offset;
+
+
+	if (oCItemContainerGetSelectedItem(container) != nullptr)
+	{
+		oCItem* selectedItem = oCItemContainerGetSelectedItem(container);
+		selectedItem->RotateForInventory(1.0f);
+	}
+
+	//.text:00709780 loc_709780: 
+
+	sub(container, posX, posY, selectedItemIndex, containerOffset);
+
+	//.text:007098A7 loc_7098A7:
+
+	if (oCItemContainer::IsSplitScreen(container))
+	{
+		if (selectedItemIndex == container->selectedItem)
+		{
+			if (containerOffset == container->offset)
+			{
+				selectedItemIndex = 0;
+				int posX;
+				int posY;
+				oCItemContainer::GetPosition(container, posX, posY);
+
+				//.data:00AB0FD8 ; void *dword_AB0FD8
+				zCList<oCItemContainer>* openContainers = *(zCList<oCItemContainer>**)0x00AB0FD8;
+
+				if (openContainers != nullptr)
+				{
+					oCItemContainer* activeContainer = nullptr;
+					do
+					{
+						oCItemContainer* currentContainer = openContainers->data;
+						if (currentContainer != container)
+						{
+							if (!oCItemContainer::IsPassive(currentContainer))
+							{
+								if (oCItemContainer::IsOpen(currentContainer))
+								{
+									int currentPosX;
+									int currentPosY;
+									oCItemContainer::GetPosition(currentContainer, currentPosX, currentPosY);
+
+									if (currentPosX > posX)
+									{
+										activeContainer = currentContainer;
+										posX = currentPosX;
+									}
+								}
+							}
+						}
+
+						//.text:0070993E loc_70993E:
+						openContainers = openContainers->next;
+					} while (openContainers != nullptr);
+
+					if (activeContainer != nullptr)
+					{
+						oCItemContainer::Activate(activeContainer);
+					}
+
+					
+				}
+			}
+		}
+		
+	} 
+	//.text:00709952 loc_709952:  	
+
+	if (selectedItemIndex >= 0)
+	{
+		if (container->m_bManipulateItemsDisabled != 0)
+		{
+			if (oCItemContainer::GetSelectedItem(container) != nullptr)
+			{
+				if (oCItemContainer::GetSelectedItem(container)->HasFlag(ITEM_ACTIVE))
+				{
+					container->selectedItem = -1;
+					container->offset = containerOffset;
+				}
+			}
+		}
+	}
+
 }
 
 // TODO: Floor aligning doesn't work properly on certain cases; keyword: consider poly normals!

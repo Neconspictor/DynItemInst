@@ -35,7 +35,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include "api/g2/ztypes.h"
 #include <api/g2/zcpar_symbol.h>
 #include <vector>
-#include <oCItemExtended.h>
+#include <api/g2/oCItemExtended.h>
 #include <ocgameExtended.h>
 #include <map>
 #include <list>

@@ -90,6 +90,12 @@
     <Filter Include="inih\src">
       <UniqueIdentifier>{0141e6ff-9ae3-4d8c-8e93-30824c231b11}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Telekinesis">
+      <UniqueIdentifier>{198519d7-5802-4928-b37d-1074be721bd1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Telekinesis">
+      <UniqueIdentifier>{2e2fbe60-153a-4db5-a14e-c3f74707746b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Inc\DllMain.h">
@@ -197,6 +203,9 @@
     <ClInclude Include="inih-master\ini.h">
       <Filter>inih\include</Filter>
     </ClInclude>
+    <ClInclude Include="Inc\Telekinesis.hpp">
+      <Filter>Header Files\Telekinesis</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\DllMain.cpp">
@@ -270,6 +279,9 @@
     </ClCompile>
     <ClCompile Include="inih-master\ini.c">
       <Filter>inih\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Telekinesis.cpp">
+      <Filter>Source Files\Telekinesis</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

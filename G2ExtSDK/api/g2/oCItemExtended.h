@@ -28,22 +28,15 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 
 /////////////////////////////////////////////////////////////////////////////**/
 
-#ifndef __API_G2_OCITEM_H__
-#define __API_G2_OCITEM_H__
+#pragma once
 
-#ifndef __G2EXT_API_HEADER
-#define __G2EXT_API_HEADER
-#endif  //__G2EXT_API_HEADER
-
-#ifdef _G2EXT_COMPILE_SPACER
-#error Cannot use gothic headers on spacer dll (_G2EXT_COMPILE_SPACER defined)
-#endif
 
 #include "api/g2/ztypes.h"
 #include "api/g2/macros.h"
 #include "api/g2/zcobject.h"
 #include "api/g2/ocvob.h"
 #include "api/g2/zcvob.h"
+#include <api/g2/zcinputcallback.h>
 
 class oCNpc;
 class zCView;
@@ -124,6 +117,8 @@ public:
 	int 	inv_roty;								//  rotation around y-axis (in degrees)
 	int 	inv_rotz;								//  rotation around z-axis (in degrees)
 	int 	inv_animate;							//  rotate the item
+
+	int amount;
 	int instanz;						//int Symbolindex
 	int c_manipulation;					//int ?
 	int last_manipulation;				//zREAL ?
@@ -131,9 +126,6 @@ public:
 	int effectVob;						//oCVisualFX*
 	int next;	
 
-
-private:
-	char _data[28];
 
 public:
 
@@ -433,11 +425,11 @@ public:
 		XCALL(0x00713800);
 	};
 
-	// -- .text:00712F10 ; zINT __stdcall oCItem__RotateForInventory(float)
+	// .text:00712F10 ; void __thiscall oCItem::RotateForInventory(oCItem *this, float)
 	/** Insert description. 
 	* @usable Ingame only
 	*/
-	void RotateForInventory(zFLOAT p1)
+	void __thiscall RotateForInventory(zFLOAT p1)
 	{
 		XCALL(0x00712F10);
 	};
@@ -455,7 +447,7 @@ public:
 	/** Insert description. 
 	* @usable Ingame only
 	*/
-	virtual zINT SetByScriptInstance(const zSTRING* p1, zINT p2)
+	/*__virtual*/ zINT SetByScriptInstance(const zSTRING* p1, zINT p2)
 	{
 		XCALL(0x00712710);
 	};
@@ -559,10 +551,9 @@ public:
 /** Insert description. */
 class oCItemContainer
 {
-protected:
-	int		_vtbl;
 public:
-	void*	contents;
+	int		_vtbl; //vtable is automatically generated due to inheritance and virtual functions!
+	zCListSort<oCItem>*	contents;
 	oCNpc*	npc;
 	zSTRING titleText;
 	int		invMode;
@@ -603,7 +594,7 @@ public:
 	/** Insert description. 
 	* @usable Ingame only
 	*/
-	virtual void Activate(void)
+	static void __thiscall Activate(oCItemContainer* pThis)
 	{
 		XCALL(0x00709230);
 	};
@@ -612,7 +603,7 @@ public:
 	/** Insert description. 
 	* @usable Ingame only
 	*/
-	virtual zINT CanManipulateItems(void)
+	static zINT __thiscall CanManipulateItems(oCItemContainer* pThis)
 	{
 		XCALL(0x007050F0);
 	};
@@ -621,7 +612,7 @@ public:
 	/** Insert description. 
 	* @usable Ingame only
 	*/
-	virtual zINT CanTransferMoreThanOneItem(void)
+	static zINT __thiscall CanTransferMoreThanOneItem(oCItemContainer* pThis)
 	{
 		XCALL(0x00705120);
 	};
@@ -630,7 +621,7 @@ public:
 	/** Insert description. 
 	* @usable Ingame only
 	*/
-	virtual void Close(void)
+	static void __thiscall Close(oCItemContainer* pThis)
 	{
 		XCALL(0x00708F30);
 	};
@@ -639,7 +630,7 @@ public:
 	/** Insert description. 
 	* @usable Ingame only
 	*/
-	static void Container_Draw(void)
+	static void __cdecl Container_Draw(void)
 	{
 		XCALL(0x00704B90);
 	};
@@ -648,7 +639,7 @@ public:
 	/** Insert description. 
 	* @usable Ingame only
 	*/
-	static void Container_PrepareDraw(void)
+	static void __cdecl Container_PrepareDraw(void)
 	{
 		XCALL(0x00704B80);
 	};
@@ -657,7 +648,7 @@ public:
 	/** Insert description. 
 	* @usable Ingame only
 	*/
-	static oCItem* CreateCurrencyItem(int pA)
+	static oCItem* __cdecl CreateCurrencyItem(int pA)
 	{
 		XCALL(0x00704AA0);
 	};
@@ -666,7 +657,7 @@ public:
 	/** Insert description. 
 	* @usable Ingame only
 	*/
-	virtual void Deactivate(void)
+	static void __thiscall Deactivate(oCItemContainer* pThis)
 	{
 		XCALL(0x00709290);
 	};
@@ -675,7 +666,7 @@ public:
 	/** Insert description. 
 	* @usable Ingame only
 	*/
-	void DisableTransferMoreThanOneItem(int pA)
+	static void __thiscall DisableTransferMoreThanOneItem(oCItemContainer* pThis, int pA)
 	{
 		XCALL(0x00705100);
 	};
@@ -684,12 +675,11 @@ public:
 	/** Insert description. 
 	* @usable Ingame only
 	*/
-	/*
-	virtual zCListSort<class oCItem>* GetContents(void)
+	
+	static zCListSort<class oCItem>* __thiscall GetContents(oCItemContainer* pThis)
 	{
 		XCALL(0x00708540);
 	};
-	*/
 
 	//.text:00704A00 ; public: static zINT __cdecl oCItemContainer::GetCurrencyInstance(void)
 	/** Insert description. 
@@ -740,7 +730,7 @@ public:
 	/** Insert description. 
 	* @usable Ingame only
 	*/
-	zINT GetMode(void)
+	static zINT __thiscall GetMode(oCItemContainer* pThis)
 	{
 		XCALL(0x007050A0);
 	};
@@ -749,16 +739,25 @@ public:
 	/** Insert description. 
 	* @usable Ingame only
 	*/
-	virtual zSTRING GetName(void)
+	static zSTRING __thiscall GetName(oCItemContainer* pThis)
 	{
 		XCALL(0x00704F10);
+	};
+
+	//.text:00706A90; void __thiscall oCItemContainer::GetPosition(oCItemContainer *this, int *, int *)
+	/** Insert description.
+	* @usable Ingame only
+	*/
+	static void __thiscall GetPosition(oCItemContainer* pThis, int& posX, int& posY)
+	{
+		XCALL(0x00706A90);
 	};
 
 	//.text:007092C0 ; public: virtual class oCItem * __thiscall oCItemContainer::GetSelectedItem(void)
 	/** Insert description. 
 	* @usable Ingame only
 	*/
-	virtual oCItem* GetSelectedItem(void)
+	static oCItem* __thiscall GetSelectedItem(oCItemContainer* pThis)
 	{
 		XCALL(0x007092C0);
 	};
@@ -767,7 +766,7 @@ public:
 	/** Insert description. 
 	* @usable Ingame only
 	*/
-	virtual zINT GetSelectedItemCount(void)
+	static zINT __thiscall GetSelectedItemCount(oCItemContainer* pThis)
 	{
 		XCALL(0x007092F0);
 	};
@@ -776,7 +775,7 @@ public:
 	/** Insert description. 
 	* @usable Ingame only
 	*/
-	virtual void GetSize(zINT & p1, zINT & p2)
+	static void __thiscall GetSize(oCItemContainer* pThis, zINT & p1, zINT & p2)
 	{
 		XCALL(0x00706A70);
 	};
@@ -785,7 +784,7 @@ public:
 	/** Insert description. 
 	* @usable Ingame only
 	*/
-	virtual short GetTransferCount(void)
+	static short __thiscall GetTransferCount(oCItemContainer* pThis)
 	{
 		XCALL(0x00705130);
 	};
@@ -803,7 +802,7 @@ public:
 	/** Insert description. 
 	* @usable Ingame only
 	*/
-	virtual void IncTransferCount(int p1)
+	static void __thiscall IncTransferCount(oCItemContainer* pThis, int p1)
 	{
 		XCALL(0x00705150);
 	};
@@ -812,7 +811,7 @@ public:
 	/** Insert description. 
 	* @usable Ingame only
 	*/
-	virtual oCItem* Insert(oCItem* p1)
+	static oCItem* __thiscall Insert(oCItemContainer* pThis, oCItem* p1)
 	{
 		XCALL(0x00709360);
 	};
@@ -821,7 +820,7 @@ public:
 	/** Insert description. 
 	* @usable Ingame only
 	*/
-	virtual zINT IsActive(void)
+	static zINT __thiscall  IsActive(oCItemContainer* pThis)
 	{
 		XCALL(0x007050D0);
 	};
@@ -830,7 +829,7 @@ public:
 	/** Insert description. 
 	* @usable Ingame only
 	*/
-	virtual zINT IsEmpty(void)
+	static zINT __thiscall IsEmpty(oCItemContainer* pThis)
 	{
 		XCALL(0x00709E10);
 	};
@@ -839,7 +838,7 @@ public:
 	/** Insert description. 
 	* @usable Ingame only
 	*/
-	virtual zINT IsOpen(void)
+	static zINT __thiscall IsOpen(oCItemContainer* pThis)
 	{
 		XCALL(0x00709200);
 	};
@@ -848,7 +847,7 @@ public:
 	/** Insert description. 
 	* @usable Ingame only
 	*/
-	virtual zINT IsPassive(void)
+	static zINT __thiscall IsPassive(oCItemContainer* pThis)
 	{
 		XCALL(0x00708F20);
 	};
@@ -857,7 +856,7 @@ public:
 	/** Insert description. 
 	* @usable Ingame only
 	*/
-	virtual zINT IsSplitScreen(void)
+	static zINT __thiscall IsSplitScreen(oCItemContainer* pThis)
 	{
 		XCALL(0x00709E40);
 	};
@@ -866,7 +865,7 @@ public:
 	/** Insert description. 
 	* @usable Ingame only
 	*/
-	virtual void Open(zINT p1, zINT p2, zINT p3)
+	static void __thiscall Open(oCItemContainer* pThis, zINT p1, zINT p2, zINT p3)
 	{
 		XCALL(0x00709E40);
 	};
@@ -875,7 +874,7 @@ public:
 	/** Insert description. 
 	* @usable Ingame only
 	*/
-	virtual void OpenPassive(zINT p1, zINT p2, zINT p3)
+	static void OpenPassive(oCItemContainer* pThis, zINT p1, zINT p2, zINT p3)
 	{
 		XCALL(0x007086D0);
 	};
@@ -884,7 +883,7 @@ public:
 	/** Insert description. 
 	* @usable Ingame only
 	*/
-	virtual void Remove(oCItem* p1)
+	static void __thiscall Remove(oCItemContainer* pThis, oCItem* p1)
 	{
 		XCALL(0x00709430);
 	};
@@ -893,7 +892,7 @@ public:
 	/** Insert description. 
 	* @usable Ingame only
 	*/
-	virtual void Remove(oCItem* p1, zINT p2)
+	static void __thiscall Remove(oCItemContainer* pThis, oCItem* p1, zINT p2)
 	{
 		XCALL(0x007094E0);
 	};
@@ -902,7 +901,7 @@ public:
 	/** Insert description. 
 	* @usable Ingame only
 	*/
-	virtual void RemoveByPtr(oCItem* p1, zINT p2)
+	static void __thiscall RemoveByPtr(oCItemContainer* pThis, oCItem* p1, zINT p2)
 	{
 		XCALL(0x007094D0);
 	};
@@ -911,7 +910,7 @@ public:
 	/** Insert description. 
 	* @usable Ingame only
 	*/
-	virtual void RemoveByPtr(oCItem* p1)
+	static void __thiscall RemoveByPtr(oCItemContainer* pThis, oCItem* p1)
 	{
 		XCALL(0x00704B50);
 	};
@@ -920,18 +919,18 @@ public:
 	/** Insert description. 
 	* @usable Ingame only
 	*/
-	/*
-	void SetContents(zCListSort<class oCItem> * p1)
+	
+	static void __thiscall SetContents(oCItemContainer* pThis, zCListSort<class oCItem> * p1)
 	{
 		XCALL(0x007084F0);
 	};
-	*/
+	
 
 	//.text:007050B0 ; public: virtual void __thiscall oCItemContainer::SetMode(int)
 	/** Insert description. 
 	* @usable Ingame only
 	*/
-	virtual void SetMode(int p1)
+	static void __thiscall SetMode(oCItemContainer* pThis, int p1)
 	{
 		XCALL(0x007050B0);
 	};
@@ -940,7 +939,7 @@ public:
 	/** Insert description. 
 	* @usable Ingame only
 	*/
-	virtual void SetName(zSTRING & p1)
+	static void __thiscall SetName(oCItemContainer* pThis, zSTRING & p1)
 	{
 		XCALL(0x00704F60);
 	};
@@ -949,7 +948,7 @@ public:
 	/** Insert description. 
 	* @usable Ingame only
 	*/
-	void SetTransferCount(int p1)
+	static void __thiscall SetTransferCount(oCItemContainer* pThis, int p1)
 	{
 		XCALL(0x00705140);
 	};
@@ -967,7 +966,7 @@ public:
 	/** Insert description. 
 	* @usable Ingame only
 	*/
-	zINT TransferItem(void ** p1, zINT p2, zINT p3)
+	static zINT __thiscall TransferItem(oCItemContainer* pThis, void ** p1, zINT p2, zINT p3)
 	{
 		XCALL(0x00709F40);
 	};
@@ -981,7 +980,3 @@ public:
 		XCALL(0x00704D00);
 	};
 };
-
-#undef __G2EXT_API_HEADER
-
-#endif // __API_G2_OCITEM_H__

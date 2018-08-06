@@ -1,3 +1,5 @@
+#include "ztypes.h"
+#include "ztypes.h"
 /*////////////////////////////////////////////////////////////////////////////
 
 This file is part of the G2Ext SDK headers.
@@ -82,7 +84,7 @@ INLINE void zVEC2::Clear()
 { 
 	x = 1.0f; 
 	y = 1.0f; 
-};
+}
 
 INLINE void zVEC2::Set(float _x, float _y) 
 { 
@@ -228,6 +230,12 @@ INLINE void zVEC3::Clear()
 	x = 1.0f;
 	y = 1.0f; 
 	z = 1.0f; 
+}
+
+INLINE float zVEC3::Length() const
+{
+	float lengthSquare = x * x + y * y + z * z;
+	return (lengthSquare <= 0) ? 0 : std::sqrt(lengthSquare);
 };
 
 INLINE void zVEC3::Set(float _x, float _y, float _z) 
@@ -304,7 +312,7 @@ INLINE zVEC3 zVEC3::operator - () const
 
 INLINE zVEC3 zVEC3::operator + ( const zVEC3& v ) const
 {
-	return zVEC3(x + v.x, y + v.y, z - v.z);
+	return zVEC3(x + v.x, y + v.y, z + v.z);
 };
 
 INLINE zVEC3 zVEC3::operator - ( const zVEC3& v ) const
@@ -333,6 +341,12 @@ INLINE bool zVEC3::operator == ( const zVEC3& v ) const
 INLINE bool zVEC3::operator != ( const zVEC3& v ) const
 {
 	return ( x != v.x || y != v.y || z != v.z );
+};
+
+
+INLINE zVEC3 operator * (float f, const zVEC3& v)
+{
+	return zVEC3(v.x * f, v.y * f, v.z * f);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1,6 +1,6 @@
 #pragma once
 #include "Module.h"
-#include "oCItemExtended.h"
+#include <api/g2/oCItemExtended.h>
 #include <api/g2/ocnpc.h>
 
 class LoA : public Module

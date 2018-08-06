@@ -43,7 +43,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 
 class oCMob : public zCVob
 {
-private:    
+public:    
 	zSTRING			name;
 	int				bitfield;
 	zSTRING			visualDestroyed;

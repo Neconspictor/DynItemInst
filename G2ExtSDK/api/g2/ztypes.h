@@ -30,16 +30,8 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 
 /////////////////////////////////////////////////////////////////////////////*/
 
-#ifndef __ZTYPES_H_INCLUDED__
-#define __ZTYPES_H_INCLUDED__
+#pragma once
 
-#ifndef __G2EXT_API_HEADER
-#define __G2EXT_API_HEADER
-#endif  //__G2EXT_API_HEADER
-
-#ifdef _G2EXT_COMPILE_SPACER
-#error Cannot use gothic headers on spacer dll (_G2EXT_COMPILE_SPACER defined)
-#endif
 
 #include "common/osheader.h"
 #include "macros.h"
@@ -208,6 +200,8 @@ struct zVEC3
 	*/
 	inline void Clear();
 
+	inline float Length() const;
+
 	/** Insert description. 
 	*/
 	inline void Set( float _x, float _y, float _z );
@@ -279,6 +273,8 @@ struct zVEC3
 		return out;
 	}*/
 };
+
+zVEC3 operator * (float f, const zVEC3& v);
 
 inline std::ostream & operator<<(std::ostream &os, const zVEC3& v)
 {
@@ -750,10 +746,10 @@ public:
 template<class T>
 class zCList
 {
-protected:
+public:
 	T*  data;
 	zCList<T>* next;
-public:
+
 	/** Insert description. 
 	*/
 	zCList()
@@ -875,7 +871,7 @@ protected:
 template<class T>
 class zCListSort
 {
-protected:
+public:
 	int(*compare)(T *ele1,T *ele2);
 	T*				data;
 	zCListSort<T>*	next;
@@ -1100,7 +1096,3 @@ public:
 
 #include "api/g2/zstring.h"
 #include "api/g2/zcobject.h"
-
-#undef __G2EXT_API_HEADER
-
-#endif // __ZTYPES_H_INCLUDED__

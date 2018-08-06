@@ -32,6 +32,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #define __DaedalusExportsH__
 
 #include "Module.h"
+#include "Telekinesis.hpp"
 
 class oCItem;
 class zCParser;
@@ -128,12 +129,34 @@ public:
 
 	static void DII_TransformationTest(zCVob* vob);
 
+	static void DII_TelekineseTest();
+
+	static bool DII_Npc_CanTalk(oCNpc* npc);
+
+	static TelekinesisInterpolator* DII_Telekinesis_createInterpolator(const zVEC3* vobPosition,
+		const zVEC3* npcPosition, 
+		int upMoveAmount,  // cm
+		int speed // cm / s
+	);
+
+	static void DII_Telekinesis_GetInterpolatedVec(TelekinesisInterpolator* interpolatorPtr, zVEC3* dest);
+
+	static void DII_Telekinesis_deleteInterpolator(TelekinesisInterpolator* interpolatorPtr);
+
+	static void DII_Telekinesis_Interpolate(TelekinesisInterpolator* interpolatorPtr, oCItem* item);
+
+	static int DII_Npc_CanSeeVob(oCNpc* npc, zCVob* vob);
+
+	static void DII_DrobVob(oCNpc* npc, zCVob* vob);
+
 public:
 
 	/**
 	 * The version of this library.
 	 */
 	static const float LIB_VERSION;
+
+	static std::vector<std::unique_ptr<TelekinesisInterpolator>> interpolators;
 };
 
 #endif __DaedalusExportsH__

@@ -33,6 +33,7 @@
     <ClInclude Include="Inc\ocgameExtended.h" />
     <ClInclude Include="Inc\oCMobContainer.h" />
     <ClInclude Include="Inc\PortalDrawDistance.h" />
+    <ClInclude Include="Inc\Telekinesis.hpp" />
     <ClInclude Include="Inc\Util.h" />
     <ClInclude Include="Inc\Util_Constants.h" />
     <ClInclude Include="Inc\zCOptionExtended.h" />
@@ -73,6 +74,7 @@
     <ClCompile Include="Src\MoreViewDistance.cpp" />
     <ClCompile Include="Src\ObjectManager.cpp" />
     <ClCompile Include="Src\PortalDrawDistance.cpp" />
+    <ClCompile Include="Src\Telekinesis.cpp" />
     <ClCompile Include="Src\Util.cpp" />
   </ItemGroup>
   <ItemGroup>

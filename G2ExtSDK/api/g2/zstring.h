@@ -48,7 +48,11 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 class zSTRING
 {
 private:
-	char data[20];
+	int __vtbl;
+	int allocator;
+	char* data;
+	int length;
+	int allocatedBytes;
 
 public:
 	//.text:00402AF0 ; public: __thiscall zSTRING::zSTRING(void)

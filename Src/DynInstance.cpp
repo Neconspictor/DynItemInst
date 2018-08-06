@@ -221,16 +221,17 @@ void DynInstance::store(oCItem& item) {
 	inv_roty= item.inv_roty;								//  rotation around y-axis (in degrees)
 	inv_rotz= item.inv_rotz;								//  rotation around z-axis (in degrees)
 	inv_animate= item.inv_animate;							//  rotate the item
+	amount = item.amount;
 	instanz= item.instanz;						//int Symbolindex
 	c_manipulation = item.c_manipulation;					//int ?
 	last_manipulation= item.last_manipulation;				//zREAL ?
 	magic_value = item.magic_value;					//int ?
 	effectVob= item.effectVob;						//oCVisualFX*
 	next = item.next;	
-	int address = reinterpret_cast<int>(&item);
-	address += 0x330;
-	int* instance = reinterpret_cast<int*>(address);
-	instanceID = *instance;
+	//int address = reinterpret_cast<int>(&item);
+	//address += 0x330;
+	//int* instance = reinterpret_cast<int*>(address);
+	//instanceID = *instance;
 }
 
 
@@ -395,7 +396,6 @@ void DynInstance::serialize(std::ostream& os) const
 	os << ' ';
 	os << zCPar_Symbol_Bitfield << ' ';
 	os << parentInstanceId << ' ';
-	os << instanceID << ' ';
 	os << idx << ' ';
 	util::writeString(os, name);
 	os << ' ';
@@ -507,6 +507,8 @@ void DynInstance::serialize(std::ostream& os) const
 	os << inv_roty << ' ';								//  rotation around y-axis (in degrees)
 	os << inv_rotz << ' ';								//  rotation around z-axis (in degrees)
 	os << inv_animate << ' ';							//  rotate the item
+
+	os << amount << ' ';
 	os << instanz << ' ';						//    ar & Symbolindex
 	os << c_manipulation << ' ';					//int ?
 	os << last_manipulation << ' ';				//zREAL ?
@@ -535,7 +537,6 @@ void DynInstance::deserialize(std::stringstream* is)
 	zCPar_Symbol_name = util::trimFromRight(zCPar_Symbol_name);
 	util::getInt(*is, zCPar_Symbol_Bitfield);
 	util::getInt(*is, parentInstanceId);
-	util::getInt(*is, instanceID);
 	util::getInt(*is, idx);
 	util::readString(is, name);
 	util::readString(is, nameID);
@@ -639,6 +640,8 @@ void DynInstance::deserialize(std::stringstream* is)
 	util::getInt(*is, inv_roty);
 	util::getInt(*is, inv_rotz);
 	util::getInt(*is, inv_animate);
+
+	util::getInt(*is, amount);
 	util::getInt(*is, instanz);
 	util::getInt(*is, c_manipulation);
 	util::getInt(*is, last_manipulation);

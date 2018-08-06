@@ -40,7 +40,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <set>
 #include <zCPar_SymbolTable.h>
 #include <api/g2/oCObjectFactory.h>
-#include <oCItemExtended.h>
+#include <api/g2/oCItemExtended.h>
 #include <Constants.h>
 
 using namespace std;

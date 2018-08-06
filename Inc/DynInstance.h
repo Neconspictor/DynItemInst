@@ -30,7 +30,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #define __DYN_INSTANCE_H__
 
 #include "ISerialization.h"
-#include "oCItemExtended.h"
+#include <api/g2/oCItemExtended.h>
 #include <sstream>
 #include <list>
 
@@ -99,7 +99,7 @@ public:
 
 private:
 
-	static void* __cdecl gothic2OperatorNew(size_t size);
+	static void* __cdecl gothic2OperatorNew(std::size_t size);
 
 	void createMemory(int intAmount, int strAmount);
 };
@@ -135,7 +135,6 @@ public:
 	std::string zCPar_Symbol_name;
 	int zCPar_Symbol_Bitfield;
 	int parentInstanceId;
-	int instanceID;
 	int		idx;
 	std::string name;
 	std::string nameID;
@@ -205,6 +204,8 @@ public:
 	int 	inv_roty;								//  rotation around y-axis (in degrees)
 	int 	inv_rotz;								//  rotation around z-axis (in degrees)
 	int 	inv_animate;							//  rotate the item
+
+	int amount;
 	int instanz;						//int Symbolindex
 	int c_manipulation;					//int ?
 	int last_manipulation;				//zREAL ?
@@ -221,14 +222,14 @@ public:
 	 * Provides the Item's instance id.
 	 */
 	int getInstanceID() const {
-		return instanceID;	
+		return instanz;	
 	}
 
 	/**
 	 * Sets the this' instance id to the given one.
 	 */
 	void setInstanceID(int newID) {
-		instanceID = newID;
+		instanz = newID;
 	}
 
 	/**

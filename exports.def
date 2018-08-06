@@ -19,3 +19,13 @@ EXPORTS
 	DII_SetHeroFocusMode
 	DII_Test
 	DII_TransformationTest
+	DII_TelekineseTest
+	DII_Npc_CanTalk
+
+	DII_Telekinesis_createInterpolator
+	DII_Telekinesis_GetInterpolatedVec
+	DII_Telekinesis_Interpolate
+	DII_Telekinesis_deleteInterpolator
+
+	DII_Npc_CanSeeVob
+	DII_DrobVob
