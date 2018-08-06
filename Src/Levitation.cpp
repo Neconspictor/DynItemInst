@@ -108,6 +108,10 @@ OCItemContainerNextItem oCItemContainerNextItem = (OCItemContainerNextItem)0x007
 using OCItemContainerDraw = void (__thiscall*)(oCItemContainer* pThis);
 OCItemContainerDraw oCItemContainerDraw = (OCItemContainerDraw)0x007076B0;
 
+//.text:00705B80 ; int __cdecl oCItemCompareFunction(int,int)
+using OCItemCompareFunction = int(__cdecl*)(oCItem* a, oCItem* b);
+OCItemCompareFunction oCItemCompareFunction = (OCItemCompareFunction)0x00705B80;
+
 
 void oCItemContainerDrawGetItemNaked();
 
@@ -226,7 +230,7 @@ void Levitation::hookModule()
 	//hookManager->addFunctionHook((LPVOID*)&oCItemContainerDraw, oCItemContainerDrawHook, moduleDesc);
 
 	
-	
+	//hookManager->addFunctionHook((LPVOID*)&oCItemCompareFunction, oCItemCompareFunctionHook, moduleDesc);
 	
 	
 	//hookManager->addFunctionHook((LPVOID*)&zCVobEndMovement, zCVobEndMovementHook, moduleDesc);
@@ -1095,120 +1099,13 @@ void Levitation::oCItemContainerNextItemHook(oCItemContainer* pThis)
 	}
 }
 
-int ITEM_ACTIVE = 0x40000000;
-
-void sub(oCItemContainer* container, int& posX, int& posY, int selectedItemIndex, int containerOffset)
-{
-
-	loc_709780: // TODO: remove gotos
-
-	zCListSort<oCItem>* contents = container->contents;
-	zCListSort<oCItem>* contentsNext = contents->next;
-
-	int lastItemIndex = 0;
-
-	while (contentsNext != nullptr)
-	{
-		contentsNext = contentsNext->next;
-		++lastItemIndex;
-	}
-
-	--lastItemIndex; // index is 'item count - 1'
-
-	if (container->selectedItem < lastItemIndex) //.text:0070979C                 cmp     container->selectedItem, lastItemIndex
-												 //.text:0070979E                 jge     loc_709899
-	{
-
-			if (oCItemContainer::IsSplitScreen(container))  // else will jump to .text:00709853 loc_709853:
-			{
-				//int bufferFlowCheck = (container->selectedItem + 1) / container->maxSlotsCol; // .text:007097B7                 cdq
-				int modulo = (container->selectedItem + 1) % container->maxSlotsCol; // .text:007097B7                 cdq
-
-				if (modulo == 0) // no buffer overflow has happened; else will jump to .text:00709853 loc_709853:
-				{
-					oCItemContainer* nextActiveContainer = nullptr;
-					oCItemContainer::GetPosition(container, posX, posY);
-
-					//.data:00AB0FD8 ; void *dword_AB0FD8
-					zCList<oCItemContainer>* openContainers = *(zCList<oCItemContainer>**)0x00AB0FD8;
-
-					while (openContainers != nullptr)
-					{
-						oCItemContainer* currentContainer = openContainers->data;
-
-						if (currentContainer != container)
-						{
-							if (!oCItemContainer::IsPassive(currentContainer) && oCItemContainer::IsOpen(currentContainer))
-							{
-								int currentContainerPosX;
-								int currentContainerPosY;
-								oCItemContainer::GetPosition(currentContainer, currentContainerPosX, currentContainerPosY);
-
-								if (currentContainerPosX > posX)
-								{
-									nextActiveContainer = currentContainer;
-								}
-							}
-						}
-
-						//.text:0070982E loc_70982E:
-						openContainers = openContainers->next;
-
-					}
-
-					//.text:00709835                 mov     eax, [esp+2Ch+oCItemContainer_var]
-
-					if (nextActiveContainer != nullptr)
-					{
-						oCItemContainer::Activate(nextActiveContainer);
-					}
-
-					//.text:00709844 loc_709844: 
-					if (nextActiveContainer != nullptr) //.text:00709851                 jnz     short loc_7098A7
-					{
-						goto loc_7098A7;
-					}
-				}
-			}
-
-			//.text:00709853 loc_709853:
-			container->selectedItem = container->selectedItem + 1;
-			int lastVisibleItemIndex = container->maxSlots + container->offset - 1;
-
-
-			if (container->selectedItem > lastVisibleItemIndex)
-			{
-				container->offset = container->offset + container->maxSlots;
-			}
-
-			//.text:00709872 loc_709872: 
-
-			if (container->m_bManipulateItemsDisabled == 0)
-			{
-				goto loc_7098A7;
-			}
-
-			// We know that there are enough items as 'container->selectedItem < lastItemIndex'; 
-			// Thus there won't be a nullptr exception!
-			if (oCItemContainer::GetSelectedItem(container)->HasFlag(ITEM_ACTIVE)) {
-				//.text:00709891                 jnz     loc_709780
-				goto loc_709780;
-			}
-	}
-	else
-	{
-		//.text:00709899 loc_709899:
-		container->selectedItem = selectedItemIndex;
-		container->offset = containerOffset;
-	}
-
-loc_7098A7:;
-}
 
 void Levitation::oCItemContainerNextItemReversed(oCItemContainer* container)
 {
 	int posX;
 	int posY;
+
+	static const int ITEM_ACTIVE = 0x40000000;
 
 	if (container->contents == nullptr) return;
 
@@ -1223,82 +1120,173 @@ void Levitation::oCItemContainerNextItemReversed(oCItemContainer* container)
 	}
 
 	//.text:00709780 loc_709780: 
+	do {
 
-	sub(container, posX, posY, selectedItemIndex, containerOffset);
+		zCListSort<oCItem>* contents = container->contents;
+		zCListSort<oCItem>* contentsNext = contents->next;
+
+		int lastItemIndex = 0;
+
+		while (contentsNext != nullptr)
+		{
+			contentsNext = contentsNext->next;
+			++lastItemIndex;
+		}
+
+		--lastItemIndex; // index is 'item count - 1'
+
+		if (container->selectedItem >= lastItemIndex) //.text:0070979C                 cmp     container->selectedItem, lastItemIndex
+													  //.text:0070979E                 jge     loc_709899
+		{
+			//.text:00709899 loc_709899:
+			container->selectedItem = selectedItemIndex;
+			container->offset = containerOffset;
+			break;
+		}
+
+		int modulo = (container->selectedItem + 1) % container->maxSlotsCol; // .text:007097B7                 cdq
+
+		if (oCItemContainer::IsSplitScreen(container) && modulo == 0)  // else will jump to .text:00709853 loc_709853:
+		{
+			oCItemContainer* nextActiveContainer = nullptr;
+			oCItemContainer::GetPosition(container, posX, posY);
+
+			//.data:00AB0FD8 ; void *dword_AB0FD8
+			zCList<oCItemContainer>* openContainers = *(zCList<oCItemContainer>**)0x00AB0FD8;
+
+			while (openContainers != nullptr)
+			{
+				oCItemContainer* currentContainer = openContainers->data;
+
+				if (currentContainer != container
+					&& !oCItemContainer::IsPassive(currentContainer)
+					&& oCItemContainer::IsOpen(currentContainer))
+				{
+					int currentContainerPosX;
+					int currentContainerPosY;
+					oCItemContainer::GetPosition(currentContainer, currentContainerPosX, currentContainerPosY);
+
+					if (currentContainerPosX > posX)
+					{
+						nextActiveContainer = currentContainer;
+					}
+				}
+
+				//.text:0070982E loc_70982E:
+				openContainers = openContainers->next;
+			}
+
+			//.text:00709835                 mov     eax, [esp+2Ch+oCItemContainer_var]
+
+			if (nextActiveContainer != nullptr)
+			{
+				oCItemContainer::Activate(nextActiveContainer);
+				break;
+			}
+		}
+
+		//.text:00709853 loc_709853:
+		container->selectedItem = container->selectedItem + 1;
+		int lastVisibleItemIndex = container->maxSlots + container->offset - 1;
+
+
+		if (container->selectedItem > lastVisibleItemIndex)
+		{
+			container->offset = container->offset + container->maxSlots;
+		}
+
+		//.text:00709872 loc_709872: 
+
+		if (container->m_bManipulateItemsDisabled == 0)
+		{
+			//goto loc_7098A7;
+			break;
+		}
+
+		// We know that there are enough items as 'container->selectedItem < lastItemIndex'; 
+		// Thus there won't be a nullptr exception!
+		if (oCItemContainer::GetSelectedItem(container)->HasFlag(ITEM_ACTIVE)) {
+			//.text:00709891                 jnz     loc_709780
+			continue;
+		}
+
+		break;
+
+	} while (true);
+
+	//loc_7098A7:;
+
+	//.data:00AB0FD8 ; void *dword_AB0FD8
+	zCList<oCItemContainer>* openContainers = *(zCList<oCItemContainer>**)0x00AB0FD8;
+
 
 	//.text:007098A7 loc_7098A7:
 
-	if (oCItemContainer::IsSplitScreen(container))
+	if (oCItemContainer::IsSplitScreen(container)
+		&& selectedItemIndex == container->selectedItem
+		&& containerOffset == container->offset
+		&& openContainers != nullptr)
 	{
-		if (selectedItemIndex == container->selectedItem)
+		selectedItemIndex = 0;
+		int posX;
+		int posY;
+		oCItemContainer::GetPosition(container, posX, posY);
+
+		oCItemContainer* activeContainer = nullptr;
+		do
 		{
-			if (containerOffset == container->offset)
+			oCItemContainer* currentContainer = openContainers->data;
+			if (currentContainer != container
+				&& !oCItemContainer::IsPassive(currentContainer)
+				&& oCItemContainer::IsOpen(currentContainer))
 			{
-				selectedItemIndex = 0;
-				int posX;
-				int posY;
-				oCItemContainer::GetPosition(container, posX, posY);
+				int currentPosX;
+				int currentPosY;
+				oCItemContainer::GetPosition(currentContainer, currentPosX, currentPosY);
 
-				//.data:00AB0FD8 ; void *dword_AB0FD8
-				zCList<oCItemContainer>* openContainers = *(zCList<oCItemContainer>**)0x00AB0FD8;
-
-				if (openContainers != nullptr)
+				if (currentPosX > posX)
 				{
-					oCItemContainer* activeContainer = nullptr;
-					do
-					{
-						oCItemContainer* currentContainer = openContainers->data;
-						if (currentContainer != container)
-						{
-							if (!oCItemContainer::IsPassive(currentContainer))
-							{
-								if (oCItemContainer::IsOpen(currentContainer))
-								{
-									int currentPosX;
-									int currentPosY;
-									oCItemContainer::GetPosition(currentContainer, currentPosX, currentPosY);
-
-									if (currentPosX > posX)
-									{
-										activeContainer = currentContainer;
-										posX = currentPosX;
-									}
-								}
-							}
-						}
-
-						//.text:0070993E loc_70993E:
-						openContainers = openContainers->next;
-					} while (openContainers != nullptr);
-
-					if (activeContainer != nullptr)
-					{
-						oCItemContainer::Activate(activeContainer);
-					}
-
-					
+					activeContainer = currentContainer;
+					posX = currentPosX;
 				}
 			}
+
+			//.text:0070993E loc_70993E:
+			openContainers = openContainers->next;
+		} while (openContainers != nullptr);
+
+		if (activeContainer != nullptr)
+		{
+			oCItemContainer::Activate(activeContainer);
 		}
-		
 	} 
 	//.text:00709952 loc_709952:  	
 
-	if (selectedItemIndex >= 0)
+
+	oCItem* selectedItem = oCItemContainer::GetSelectedItem(container);
+
+	if (selectedItemIndex >= 0 
+	&& container->m_bManipulateItemsDisabled != 0
+	&& selectedItem != nullptr 
+	&& selectedItem->HasFlag(ITEM_ACTIVE))
 	{
-		if (container->m_bManipulateItemsDisabled != 0)
-		{
-			if (oCItemContainer::GetSelectedItem(container) != nullptr)
-			{
-				if (oCItemContainer::GetSelectedItem(container)->HasFlag(ITEM_ACTIVE))
-				{
-					container->selectedItem = -1;
-					container->offset = containerOffset;
-				}
-			}
-		}
+		container->selectedItem = -1;
+		container->offset = containerOffset;
+	}
+}
+
+int Levitation::oCItemCompareFunctionHook(oCItem* a, oCItem* b)
+{
+	//if (a == nullptr) return b != nullptr;
+	//if (b == nullptr) return false;
+	if  (a->damageTotal > b->damageTotal) {
+		return -1;
+	} else if (a->damageTotal == b->damageTotal)
+	{
+		return 0;
 	}
 
+	return 1;
 }
 
 // TODO: Floor aligning doesn't work properly on certain cases; keyword: consider poly normals!

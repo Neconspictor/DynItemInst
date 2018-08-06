@@ -525,6 +525,9 @@ public:
 	static void __thiscall oCItemContainerNextItemHook(oCItemContainer* pThis);
 
 	static void __thiscall oCItemContainerNextItemReversed(oCItemContainer* container);
+
+	//.text:00705B80 ; int __cdecl oCItemCompareFunction(int,int)
+	static int __cdecl oCItemCompareFunctionHook(oCItem* a, oCItem* b);
 };
 
 struct Motion
