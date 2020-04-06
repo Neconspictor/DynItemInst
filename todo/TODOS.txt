@@ -1,3 +1,12 @@
-- refactoring
-- maybe config file for fine tuning logging (not important)
-- if two items are dynamic and one is equipped, the other is selected while loading, too! -> fix that!
+- do not store item parser symbol index since they can change if the script base symbols change 
+(e.g. through mod update or a Ninja patch). Use the instance name instead.
+When loading the new instances, every dynamic instance gets assigned a new parser symbol. The DII intern class
+tracks the current parser symbol index (optionally)
+-DII_CreateNewInstance should return the name of the new symbol and not its parser symbol index; 
+
+-A second DII_CreateNewInstance version where the user can specifiy the name for the resulting dynamic item.
+This function can fail, if the specified name is already assigned for an existing parser symbol.
+Thus we need proper error handling. This second version of DII_CreateNewInstance should return an error code.
+(0 = no error, 1 = item couldn't be created)
+
+- A new function that takes the name of an item and returns its parser symbol index.
