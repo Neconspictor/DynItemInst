@@ -212,6 +212,12 @@ void util::readString(std::stringstream* is, std::string& data)
 	data = trimFromRight(data);
 }
 
+void util::readAndTrim(std::stringstream* is, std::string& data)
+{
+	readString(is, data);
+	data = trimFromRight(data);
+}
+
 void util::writeString(std::ostream& os, const std::string& data)
 {
 	// c-strings avoid Nullbytes to be written

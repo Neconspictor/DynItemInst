@@ -66,9 +66,8 @@ public:
 	 */
 	struct ParserInfo
 	{
-		int newInstanceId;
-		int oldInstanceId;
-		std::string name;
+		const char* newSymbolName;
+		const char* oldSymbolName;
 		int bitfield;
 		DynInstance* container;
 	};
@@ -174,7 +173,7 @@ public:
 	 * \param instanceId The instance id of which the parent instance id should be set
 	 * \param value The the parent instance id to be set
 	 */
-	void setParentInstanceId(int instanceId, int value);
+	void setParentSymbolName(int instanceID, const std::string& parentInstanceSymbolName);
 
 	/**
 	 * Provides the parent instance id for a given instance id.
@@ -182,7 +181,7 @@ public:
 	 * \param instanceId The instance id of which the parent instance id should be returned.
 	 * \return the parent instance id of the given instance id.
 	 */
-	int getParentInstanceId(int instanceId);
+	const std::string& getParentSymbolName(int instanceID);
 
 	/**
 	 * Sets the instance id for a given oCItem.
@@ -271,8 +270,6 @@ public:
 	static void callForAllContainerItems(void(*func)(void* obj, void* param, oCItem*), void* obj, void* param, oCMobContainer* container);
 	static void callForAllWorldItems(void(*func)(void* obj, void* param, oCItem*), void* obj, void* param);
 
-	int getInstanceBegin() const;
-
 	static int * getParserInstanceCount();
 
 	static int getIdForSpecialPurposes();
@@ -331,15 +328,11 @@ private:
 
 	// <int instanceId, Item* item>
 	std::map<int, DynInstance*> instanceMap;
-
-	std::vector<ParserInfo> indexZCParSymbolNameMap;
 	std::map<int, zCPar_Symbol*> newInstanceToSymbolMap;
 	std::map<std::string, zCPar_Symbol*> nameToSymbolMap;
-	std::map<std::string, int> nameToIndexMap;
+	std::map<std::string, int> nameToInstanceMap;
 
 	std::stringstream logStream;
-	int ObjectManager::instanceBegin;
-
 private:
 
 	/**
@@ -347,10 +340,10 @@ private:
 	 */
 	ObjectManager();
 
-	static zCPar_Symbol* createNewSymbol(ParserInfo* old);
+	static zCPar_Symbol* createNewSymbol(const ParserInfo* old);
 	bool addSymbolToSymbolTable(zCPar_Symbol* symbol);
 	DynInstance * createNewInstanceItem(int instanceId);
-	void updateContainerItem(ObjectManager::ParserInfo* info);
+	void updateContainerItem(const ObjectManager::ParserInfo* info);
 	/**
 	 * Logs the current status of the provided zCPar_Symbol pointer.
 	 * \param sym The symbol to log.
@@ -358,9 +351,10 @@ private:
 	void logSymbolData(zCPar_Symbol* sym);
 
 	/**
-	 * Creates for all registered instances zCPar_Symbols and registers the latter.
+	 * Creates a zCPar_Symbol from a ParserInfo object and adds it to the parser.
+	 * @return: The index of the new created zCPar_Symbol into the symbol table of the parser.
 	 */
-	void createParserSymbols();
+	int createParserSymbol(const ParserInfo& info);
 
 	zCPar_Symbol * createNewSymbol(int instanceId, zCPar_Symbol * old) const;
 

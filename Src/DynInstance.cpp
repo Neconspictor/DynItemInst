@@ -39,13 +39,13 @@ std::stringstream DynInstance::logStream;
 
 DynInstance::DynInstance()
 {
-	previousId = -1;
+	mPreviousSymbolName = "";
 }
 
 DynInstance::DynInstance(oCItem& item)
 {
 	store(item);
-	previousId = -1;
+	mPreviousSymbolName = "";
 }
 
 DynInstance::~DynInstance()
@@ -108,9 +108,9 @@ static void restorePreviousId(void* obj, void* param, oCItem* itm) {
 	}
 }*/
 
-void DynInstance::setPreviousId(int previousId)
+void DynInstance::setPreviousSymbolName(const std::string& symbolName)
 {
-	this->previousId = previousId;
+	mPreviousSymbolName = symbolName;
 }
 
 void DynInstance::store(oCItem& item) {
@@ -369,33 +369,40 @@ void DynInstance::init(oCItem* item, int index) {
 };
 
 
-int DynInstance::getParentInstanceId() {
-	return parentInstanceId;	
+const std::string& DynInstance::getParentSymbolName() {
+	return mParentSymbolName;	
 };
 
-void DynInstance::setParentInstanceId(int parentInstanceId){
-	this->parentInstanceId = parentInstanceId;
+void DynInstance::setParentSymbolName(const std::string& symbolName){
+	mParentSymbolName = symbolName;
 }
 
 
-std::string DynInstance::getZCPar_SymbolName()
+const std::string& DynInstance::getSymbolName()
 {
-	return zCPar_Symbol_name;
+	return mSymbolName;
 }
 
 
-void DynInstance::setZCPar_SymbolName(std::string name)
+void DynInstance::setSymbolName(const std::string& symbolName)
 {
-	zCPar_Symbol_name = name;
+	mSymbolName = symbolName;
 }
 
 void DynInstance::serialize(std::ostream& os) const
 {
 	//os << reusable << ' ';
-	util::writeString(os, zCPar_Symbol_name);
+	util::writeString(os, mSymbolName);
 	os << ' ';
+	
+	util::writeString(os, mParentSymbolName);
+	os << ' ';
+
+	util::writeString(os, mPreviousSymbolName);
+	os << ' ';
+	
 	os << zCPar_Symbol_Bitfield << ' ';
-	os << parentInstanceId << ' ';
+	
 	os << idx << ' ';
 	util::writeString(os, name);
 	os << ' ';
@@ -517,26 +524,16 @@ void DynInstance::serialize(std::ostream& os) const
 	os << next << ' ';
 
 	dii_userData.serialize(os);
-
-	/*os << activeWorlds.size() << ' ';
-
-	for (list<string>::const_iterator it = activeWorlds.begin(); it != activeWorlds.end(); ++it)
-	{
-		util::writeString(os, *it);
-		os << ' ';
-	}*/
-
-	os << previousId << ' ';
 }
 
 
 void DynInstance::deserialize(std::stringstream* is)
 {
 	//util::getBool(*is, reusable);
-	util::readString(is, zCPar_Symbol_name);
-	zCPar_Symbol_name = util::trimFromRight(zCPar_Symbol_name);
+	util::readAndTrim(is, mSymbolName);
+	util::readAndTrim(is, mParentSymbolName);
+	util::readAndTrim(is, mPreviousSymbolName);
 	util::getInt(*is, zCPar_Symbol_Bitfield);
-	util::getInt(*is, parentInstanceId);
 	util::getInt(*is, idx);
 	util::readString(is, name);
 	util::readString(is, nameID);
@@ -650,8 +647,6 @@ void DynInstance::deserialize(std::stringstream* is)
 	util::getInt(*is, next);
 
 	dii_userData.deserialize(is);
-
-	util::getInt(*is, previousId);
 }
 
 int DynInstance::getParserSymbolBitfield()

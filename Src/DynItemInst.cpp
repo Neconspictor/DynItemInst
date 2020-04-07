@@ -454,11 +454,10 @@ DynItemInst::~DynItemInst()
 	 if (itemSymbol != nullptr)
 		itemSymbol->offset = (int)source;
 
-	int result = createInstance(pThis, instanceId, source);;
+	int result = createInstance(pThis, instanceId, source);
 
-	int instanceBegin = ObjectManager::getObjectManager()->getInstanceBegin();
-	bool isTarget = symbol && (instanceId >= instanceBegin) && (instanceBegin > 0);
-	if (isTarget)
+	auto isDynamic = ObjectManager::getObjectManager()->isDynamicInstance(instanceId);
+	if (isDynamic)
 	{
 		oCItem* item = (oCItem*)source;
 		ObjectManager* manager = ObjectManager::getObjectManager();

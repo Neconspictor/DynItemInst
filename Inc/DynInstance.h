@@ -129,12 +129,12 @@ public:
 	 */
 	~DynInstance();
 
-	void setPreviousId(int previousId);
+	void setPreviousSymbolName(const std::string& symbolName);
 
 public:
-	std::string zCPar_Symbol_name;
+	std::string mSymbolName;
 	int zCPar_Symbol_Bitfield;
-	int parentInstanceId;
+	std::string mParentSymbolName;
 	int		idx;
 	std::string name;
 	std::string nameID;
@@ -214,9 +214,9 @@ public:
 	int next;							//138
 	DII_UserData dii_userData;
 
-	// specifies an instance id items assigned to this dynamic instances will assigned to, if
+	// specifies the symbol name (the item id) items assigned to this dynamic instances will assigned to, if
 	// the dynamic instance is marked as reusable!
-	int previousId;
+	std::string mPreviousSymbolName;
 
 	/**
 	 * Provides the Item's instance id.
@@ -250,24 +250,24 @@ public:
 	 * Provides the parent's instance id of this dynamic instance. The Parent instance id is the parser 
 	 * index of the base class of this dynamic instance.
 	 */
-	int getParentInstanceId();
+	const std::string& getParentSymbolName();
 
 	/**
 	 * Sets this' parent instance id. The Parent instance id is the parser index of the base class of
 	 * this dynamic instance.
 	 */
-	void setParentInstanceId(int parentInstanceId);
+	void setParentSymbolName(const std::string& symbolName);
 
 	/**
 	 * \return The name of the zCPar_Symbol associated with this dynamic instance
 	 */
-	std::string getZCPar_SymbolName();
+	const std::string& getSymbolName();
 
 	/**
 	 * Sets the name of the zCPar_Symbol associated with this dynamic instance.
 	 * \param name The name of the zCPar_Symbol
 	 */
-	void setZCPar_SymbolName(std::string name);
+	void setSymbolName(const std::string& symbolName);
 
 	virtual void serialize(std::ostream&) const override;
 
