@@ -96,15 +96,18 @@ public:
 	 */
 	static std::list<oCMobContainer*>* getMobContainers();
 
-	void createNewInstanceWithoutExistingId(oCItem* item, int key);
+	/**
+	 * \return true if a new instance could be created. Otherwise false.
+	 */
+	bool createNewInstanceWithoutExistingId(oCItem* item, int key, const std::string& instanceName);
 
 	//void createNewInstanceForExistingId(oCItem* item, int instanceId);
 	/**
 			 * Creates a new oCItem instance which will be initialized with the members of the provided oCItem.
 			 * \param item The item to use for instance creation.
-			 * \return The instance id respectively the index of the new created zCPar_Symbol.
+			 * \return The instance id respectively the index of the new created zCPar_Symbol. Zero is returned if the instance couldn't be created.
 			 */
-	int createNewInstanceId(oCItem* item);
+	int createNewInstanceId(oCItem* item, const std::string& instanceName);
 
 	/**
 	 * Assigns a given Item to a given instance id but only if the Item wasn't assigned to one id already.
@@ -356,15 +359,7 @@ private:
 	 */
 	int createParserSymbol(const ParserInfo& info);
 
-	zCPar_Symbol * createNewSymbol(int instanceId, zCPar_Symbol * old) const;
-
-	/**
-	 * Calculates a new key for an AdditMemory object. The argument isHeroItem specifies whether
-	 * the key is used for an item of the inventory of the player's character.
-	 * \param isHeroItem Should the key be used for an item in the player's inventory?
-	 * \return The new created additional memory key. 
-	 */
-	int calcAdditKey(bool isHeroItem) const;
+	zCPar_Symbol * createNewSymbol(int instanceId, zCPar_Symbol * old, const std::string& symbolName) const;
 
 	static void* __cdecl gothic2OperatorNew(size_t size);
 };

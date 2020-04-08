@@ -6,6 +6,8 @@ EXPORTS
 	DII_DeleteItem
 	DII_ReleaseItem
 	DII_CreateNewInstance
+	DII_CreateNewInstanceStr
+	DII_CreateNewInstanceStr2
 	DII_IsDynamic
 	DII_IsInstanceDynamic
 	DII_GetUserData

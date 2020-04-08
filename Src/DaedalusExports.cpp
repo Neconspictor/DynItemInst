@@ -77,11 +77,11 @@ oCItem* __cdecl DaedalusExports::DII_CreateNewItem(int instanceId) // Func void 
 	return item;
 }
 
-void __cdecl DaedalusExports::DII_ReleaseItem(int index) // Func void DII_ReleaseItem(var C_Item item, VAR INT instanceId)
+void __cdecl DaedalusExports::DII_ReleaseItem(int parserSymbolIndex) // Func void DII_ReleaseItem(var C_Item item, VAR INT instanceId)
 {
-	if (index <= 0) return;
+	if (parserSymbolIndex <= 0) return;
 	zCParser* parser = zCParser::GetParser();
-	zCPar_Symbol* symbol = parser->GetSymbol(index);
+	zCPar_Symbol* symbol = parser->GetSymbol(parserSymbolIndex);
 	oCItem* item = (oCItem*)symbol->offset;
 
 	if (item != NULL)
@@ -122,14 +122,61 @@ int DaedalusExports::DII_CreateNewInstance(oCItem* item) //Func int DII_CreateNe
 
 	// Create new instance with item
 	ObjectManager* manager = ObjectManager::getObjectManager();
-	int key = manager->createNewInstanceId(item);
+
+	const std::string instanceName = "DII_" + std::to_string(*manager->getParserInstanceCount());
+
+	int parserSymbolIndex = manager->createNewInstanceId(item, instanceName);
+	if (!parserSymbolIndex) {
+		logStream << "DII_CreateNewInstanceStr2: Couldn't create new instance '" << instanceName << "'" << std::endl;
+		util::logWarning(&logStream);
+	}
+
 	int index = manager->getDynInstanceId(item);
 	logStream << "Index: " << index << std::endl;
 	util::debug(&logStream);
 
-	logStream << "CreateNewInstance::key: " << key << std::endl;
+	logStream << "CreateNewInstance::key: " << parserSymbolIndex << std::endl;
 	util::debug(&logStream);
-	return key;
+	return parserSymbolIndex;
+}
+
+zSTRING* DaedalusExports::DII_CreateNewInstanceStr(oCItem* item)
+{
+	const auto parserSymbolIndex = DII_CreateNewInstance(item);
+	auto* symbol = zCParser::GetParser()->GetSymbol(parserSymbolIndex);
+	return &symbol->name;
+}
+
+int DaedalusExports::DII_CreateNewInstanceStr2(oCItem* item, const char* instanceName)
+{
+	if (!instanceName || !item) {
+		return false;
+	}
+
+	std::string instanceNameStr = instanceName;
+	std::transform(instanceNameStr.begin(), instanceNameStr.end(), instanceNameStr.begin(), std::toupper);
+
+
+	logStream << "Param: " << item->name.ToChar();
+	util::debug(&logStream);
+
+	// Create new instance with item
+	ObjectManager* manager = ObjectManager::getObjectManager();
+
+	int parserSymbolIndex = manager->createNewInstanceId(item, instanceName);
+	if (!parserSymbolIndex) {
+		logStream << "DII_CreateNewInstanceStr2: Couldn't create new instance '" << instanceName << "'" << std::endl;
+		util::logWarning(&logStream);
+	}
+
+
+	int index = manager->getDynInstanceId(item);
+	logStream << "Index: " << index << std::endl;
+	util::debug(&logStream);
+
+	logStream << "DII_CreateNewInstanceStr2: parser symbol index for instance = " << parserSymbolIndex << std::endl;
+	util::debug(&logStream);
+	return parserSymbolIndex !=0;
 }
 
 void DaedalusExports::DII_EquipItem(oCNpc* npc, int instanceId)
@@ -155,9 +202,9 @@ int DaedalusExports::DII_IsDynamic(oCItem* item) // Func DII_IsDynamic(VAR C_ITE
 	return FALSE;
 }
 
-int DaedalusExports::DII_IsInstanceDynamic(int instanceId)
+int DaedalusExports::DII_IsInstanceDynamic(int parserSymbolIndex)
 {
-	bool modified = ObjectManager::getObjectManager()->isDynamicInstance(instanceId);
+	bool modified = ObjectManager::getObjectManager()->isDynamicInstance(parserSymbolIndex);
 	if (modified)
 	{
 		return TRUE;

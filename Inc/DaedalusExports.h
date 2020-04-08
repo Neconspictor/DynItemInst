@@ -68,9 +68,9 @@ public:
 	 * \param instanceId The instance id of the oCItem to be created.
 	 * \return The created item. If no item could be created, NULL will be returned.
 	 */
-	static oCItem* __cdecl  DII_CreateNewItem(int instanceId);
+	static oCItem* __cdecl  DII_CreateNewItem(int parserSymbolIndex);
 
-	static void __cdecl DII_ReleaseItem(int index);
+	static void __cdecl DII_ReleaseItem(int parserSymbolIndex);
 
 	static void __cdecl DII_DeleteItem(oCItem* item);
 	/**
@@ -81,8 +81,10 @@ public:
 	 * could be created, NULL will be returned.
 	 */
 	static int DII_CreateNewInstance(oCItem* item);
+	static zSTRING* DII_CreateNewInstanceStr(oCItem* item);
+	static int DII_CreateNewInstanceStr2(oCItem* item, const char* instanceName);
 
-	static void DII_EquipItem(oCNpc* npc, int instanceId);
+	static void DII_EquipItem(oCNpc* npc, int parserSymbolIndex);
 
 	/**
 	 * An external for checking if a given c_item has a dynamic instance id.
@@ -92,7 +94,7 @@ public:
 	 */
 	static int DII_IsDynamic(oCItem* item);
 
-	static int DII_IsInstanceDynamic(int instanceId);
+	static int DII_IsInstanceDynamic(int parserSymbolIndex);
 
 	/**
 	 * An external for getting additional memory of the instance of the given c_item.
@@ -102,7 +104,7 @@ public:
 	 * \param instanceId The instance id to get the DII_UserData from
 	 * \return The user data of the provided instance id
 	 */
-	static BYTE* DII_GetUserData(int instanceId);
+	static BYTE* DII_GetUserData(int parserSymbolIndex);
 
 	/**
 	 * Provides the version of the library.
@@ -114,12 +116,12 @@ public:
 	static void DII_UpdateInstance(oCItem* item);
 
 	//TODO: is this function used?
-	static void DII_AssignInstanceId(oCItem* item, int instanceId);
+	static void DII_AssignInstanceId(oCItem* item, int parserSymbolIndex);
 
-	static void DII_GetItemByInstanceId(int index, int instanceId);
+	static void DII_GetItemByInstanceId(int index, int parserSymbolIndex);
 
 	//Asiigns all items with instance id targetId the new id newId
-	static void DII_ChangeItemsInstanceId(int targetId, int newId);
+	static void DII_ChangeItemsInstanceId(int targetParserSymbolIndex, int newParserSymbolIndex);
 
 	static void DII_ToggleLevitation();
 

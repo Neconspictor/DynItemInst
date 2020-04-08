@@ -137,7 +137,7 @@ void ObjectManager::release() {
 	}
 };
 
-int ObjectManager::createNewInstanceId(oCItem* item) {
+int ObjectManager::createNewInstanceId(oCItem* item, const std::string& instanceName) {
 	if (item == NULL) {
 		logStream << "ObjectManager::createNewInstanceId: item is null!" << std::endl;
 		util::logWarning(&logStream);
@@ -162,7 +162,10 @@ int ObjectManager::createNewInstanceId(oCItem* item) {
 	int* indexCount = getParserInstanceCount();
 	int key = *indexCount;
 
-	createNewInstanceWithoutExistingId(item, key);
+	if (!createNewInstanceWithoutExistingId(item, key, instanceName)) {
+		logStream << "ObjectManager::createNewInstanceId: Couldn't create new instance '" << instanceName << "'" << endl;
+		return 0;
+	}
 
 	return key;
 };
@@ -517,16 +520,26 @@ static void test (void* obj, void* param, oCItem* itm) {
 	}
 }
 
-void ObjectManager::createNewInstanceWithoutExistingId(oCItem* item, int key)
+bool ObjectManager::createNewInstanceWithoutExistingId(oCItem* item, int key, const std::string& instanceName)
 {
 	zCParser* parser = zCParser::GetParser();
 	int parentId = getInstanceId(*item);
 	zCPar_Symbol* old = parser->GetSymbol(parentId);
 
-	if (old == NULL) return;
+	if (old == NULL) {
+		std::stringstream logStream;
+		logStream << "ObjectManager::createNewInstanceWithoutExistingId: Couldn't create new instance since parent instance symbol couldn't be found! instanceName = " << instanceName << endl;
+		return false;
+	}
 
 	int* indexCount = getParserInstanceCount();
-	zCPar_Symbol* symbol = createNewSymbol(key, old);
+	zCPar_Symbol* symbol = createNewSymbol(key, old, instanceName);
+
+	if (!symbol) {
+		std::stringstream logStream;
+		logStream << "ObjectManager::createNewInstanceWithoutExistingId: Couldn't create symbol '" << instanceName << "'" << endl;
+		return false;
+	}
 
 	if (!addSymbolToSymbolTable(symbol))
 	{
@@ -560,8 +573,10 @@ void ObjectManager::createNewInstanceWithoutExistingId(oCItem* item, int key)
 
 	logStream << "ObjectManager::createNewInstanceWithoutExistingId(): indexCount = " << *indexCount << endl;
 	util::debug(&logStream);
-	logStream << "ObjectManager::createNewInstanceWithoutExistingId(): key = " << key << endl;
+	logStream << "ObjectManager::createNewInstanceWithoutExistingId(): parser symbol index = " << key << endl;
 	util::debug(&logStream);
+
+	return true;
 }
 
 /*void ObjectManager::createNewInstanceForExistingId(oCItem* item, int instanceId)
@@ -712,7 +727,7 @@ int ObjectManager::createParserSymbol(const ParserInfo& info)
 	return newInstanceId;
 }
 
-zCPar_Symbol* ObjectManager::createNewSymbol(int instanceId, zCPar_Symbol* old) const
+zCPar_Symbol* ObjectManager::createNewSymbol(int instanceId, zCPar_Symbol* old, const std::string& symbolName) const
 {
 
 	zCPar_Symbol* symbol;
@@ -722,18 +737,29 @@ zCPar_Symbol* ObjectManager::createNewSymbol(int instanceId, zCPar_Symbol* old) 
 	symbol = parser->GetSymbol(instanceId);
 
 	// Symbol already exists?
-	if (symbol) return symbol;
+	if (symbol) {
+		stringstream logStream;
+		logStream << "ObjectManager::createNewSymbol: Symbol for instance id '" << instanceId << "' already exists!" << endl;
+		util::logWarning(&logStream);
+		return nullptr;
+	}
+
+	//We have to check that the symbol name doesn't refer to an existing symbol
+	if (parser->GetSymbol(symbolName.c_str())) {
+		stringstream logStream;
+		logStream << "ObjectManager::createNewSymbol: Symbol with name '" << symbolName << "' already exists!" << endl;
+		util::logWarning(&logStream);
+		return nullptr;
+	}
+
 
 	// The symbol will be managed by the Gothic 2 exe and thus the appropriate new operator has to be called!
 	void* memory = gothic2OperatorNew(0x3C); //sizeof(zCPar_Symbol) = 0x3C (-> see gothic 2 exe, address 0x0078DD02)
 	ZeroMemory(memory, 0x3C);
 	zCPar_SymbolConstructor(memory);
-
 	symbol = (zCPar_Symbol*)memory;
-	//ZeroMemory(symbol, sizeof(zCPar_Symbol));
 
-	stringstream ss; ss << "DII_" << instanceId;
-	string name = ss.str();
+	string name = symbolName;
 	transform(name.begin(), name.end(), name.begin(), ::toupper);
 	zSTRING nameZString(name.c_str());
 	symbol->name = nameZString;
@@ -742,19 +768,6 @@ zCPar_Symbol* ObjectManager::createNewSymbol(int instanceId, zCPar_Symbol* old) 
 	symbol->bitfield = old->bitfield;
 	symbol->offset = 0;
 	symbol->content.data_ptr = 0;
-	/*symbol->next = old->next;
-	symbol->content.data_ptr = 0;//ref->content.data_ptr;
-	symbol->filenr = old->filenr;//ZCPAR_SYMBOL_MARK_ID;
-	symbol->line = old->line;
-	symbol->line_anz = old->line_anz;
-	symbol->pos_beg = old->pos_beg;
-	symbol->pos_anz = old->pos_anz;*/
-	/*symbol->parent = old->parent;
-	symbol->bitfield = old->bitfield;
-	symbol->offset = 0;
-	symbol->next = NULL;
-	symbol->content.data_ptr = NULL; DII_TestConstructor
-	symbol->filenr = ZCPAR_SYMBOL_MARK_ID;*/
 
 	return symbol;
 };
