@@ -53,6 +53,10 @@ struct zSTRINGSerialized
  */
 class DII_UserData : public ISerialization {
 public:
+
+	static constexpr const char* INT_AMOUNT_DAEDALUS_VAR = "DII_USER_DATA_INTEGER_AMOUNT";
+	static constexpr const char* STR_AMOUNT_DAEDALUS_VAR = "DII_USER_DATA_STRING_AMOUNT";
+
 	DII_UserData();
 	//DII_UserData(zCParser* parser, int instance);
 	~DII_UserData();
@@ -61,23 +65,12 @@ public:
 
 	virtual void deserialize(std::stringstream*) override;
 
+	static int getIntAmount();
+	static int getStringAmount();
+
+	void assertEqualAmounts();
+
 public:
-
-	/**
-	 * Specifies the size for additional memory.
-	 */
-	static const int MAX_USER_DATA = 100;
-
-	static const int MAX_STRING_DATA = 1;
-
-	/**
-	 * Stores the user data.
-	 */
-/*	struct Data
-	{
-		int data[MAX_USER_DATA];
-		zSTRINGSerialized stringData[MAX_STRING_DATA];
-	};*/
 
 	struct MemoryData
 	{
@@ -307,7 +300,7 @@ public:
 	 * Makes the user data of this class to a copy of the content of the user data a given dynamic instance has.
 	 * \param source The dynamic instance to copy the user data from.
 	 */
-	void copyUserData(DynInstance& source);
+	//void copyUserData(DynInstance& source);
 
 
 private:

@@ -659,70 +659,29 @@ void DynInstance::setParserSymbolBitfield(int bitfield)
 	zCPar_Symbol_Bitfield = bitfield;
 }
 
-bool outOfRange(int index)
-{
-	if (index < 0 || index > DII_UserData::MAX_USER_DATA) return true;
-	return false;
-};
-
-/*void DynInstance::setUserData(int index, int data)
-{
-	dii_userData.userData.pData->data[index] = data;
-}
-
-int DynInstance::getUserData(int index)
-{
-	return dii_userData.userData.pData->data[index];
-}*/
-
 BYTE* DynInstance::getUserData()
 {
 	return dii_userData.userData.pMemory;
 }
 
-void DynInstance::copyUserData(DynInstance& source)
-{
+//void DynInstance::copyUserData(DynInstance& source)
+//{
 	/*for (int i = 0; i < dii_userData.userData.intAmount; ++i)
 	{
 		dii_userData.userData.getIntBegin()[i] = source.dii_userData.userData.getIntBegin()[i];
 
 		//TODO strings!!!
 	}*/
-}
+//}
 
 
 DII_UserData::DII_UserData()
 {
-	//get intAmount and strAmount from the parser
-	zCParser* parser; parser = zCParser::GetParser();
-	int intAmountIndex = parser->GetIndex("DII_USER_DATA_INTEGER_AMOUNT");
-	int strAmountIndex = parser->GetIndex("DII_USER_DATA_STRING_AMOUNT");
-	zCPar_Symbol* intAmountSymbol = parser->GetSymbol(intAmountIndex);
-	zCPar_Symbol* strAmountSymbol = parser->GetSymbol(strAmountIndex);
-	
-	createMemory(intAmountSymbol->content.data_int, strAmountSymbol->content.data_int);
-	//ZeroMemory(userData.pData, sizeof(Data));
-	//ZeroMemory(userData.pData->data, sizeof(int) * MAX_USER_DATA);
+	createMemory(getIntAmount(), getStringAmount());
 }
-
-/*DII_UserData::DII_UserData(zCParser* parser, int instance)
-{
-	ZeroMemory(userData.pData->data, sizeof(int) * MAX_USER_DATA);
-	for (int i = 0; i < MAX_STRING_DATA; ++i)
-	{
-		//zSTRINGSerialized str = userData.stringData[i];
-		//if (str.len != 0)
-		//{
-		//	delete str.ptr;
-		//	str.len = 0;
-		//}
-	}
-	parser->CreateInstance(instance, &userData);
-}*/
 
 DII_UserData::~DII_UserData()
 {
-
 	std::stringstream ss; ss <<"Called ~DII_UserData()" << std::endl;
 	util::debug(&ss);
 	//release allocated memory
@@ -808,6 +767,8 @@ void DII_UserData::deserialize(std::stringstream* is)
 	util::getInt(*is, userData.intAmount);
 	util::getInt(*is, userData.strAmount);
 
+	assertEqualAmounts();
+
 	//init int array
 	for (int i = 0; i < userData.intAmount; ++i)
 	{
@@ -847,6 +808,58 @@ void DII_UserData::deserialize(std::stringstream* is)
 		ss << "string loaded: " << std::string(test->ToChar()) << std::endl;
 		util::debug(&ss);
 
+	}
+}
+
+int DII_UserData::getIntAmount()
+{
+	zCParser* parser; parser = zCParser::GetParser();
+	int intAmountIndex = parser->GetIndex(INT_AMOUNT_DAEDALUS_VAR);
+	zCPar_Symbol* intAmountSymbol = parser->GetSymbol(intAmountIndex);
+
+	if (!intAmountSymbol) {
+		std::stringstream logStream;
+		logStream << "DII_UserData::getIntAmount: '" << INT_AMOUNT_DAEDALUS_VAR << "' not defined!" << endl;
+		util::logFatal(&logStream);
+	}
+
+	return intAmountSymbol->content.data_int;
+}
+
+int DII_UserData::getStringAmount()
+{
+	zCParser* parser; parser = zCParser::GetParser();
+	int strAmountIndex = parser->GetIndex(STR_AMOUNT_DAEDALUS_VAR);
+	zCPar_Symbol* strAmountSymbol = parser->GetSymbol(strAmountIndex);
+
+	if (!strAmountSymbol) {
+		std::stringstream logStream;
+		logStream << "DII_UserData::getStringAmount: '" << STR_AMOUNT_DAEDALUS_VAR <<  "' not defined!" << endl;
+		util::logFatal(&logStream);
+	}
+
+	return strAmountSymbol->content.data_int;
+}
+
+void DII_UserData::assertEqualAmounts()
+{
+	const auto expectedIntAmount = getIntAmount();
+	const auto expectedStrAmount = getStringAmount();
+
+	if (expectedIntAmount != userData.intAmount) {
+
+		std::stringstream logStream;
+		logStream << "DII_UserData::assertEqualAmounts: int amount (" << userData.intAmount <<
+				") doesn't match defined int amount (" << expectedIntAmount << ")"<< endl;
+		util::logFatal(&logStream);
+	}
+
+	if (expectedStrAmount != userData.strAmount) {
+
+		std::stringstream logStream;
+		logStream << "DII_UserData::assertEqualAmounts: string amount (" << userData.strAmount <<
+			") doesn't match defined string amount (" << expectedStrAmount << ")" << endl;
+		util::logFatal(&logStream);
 	}
 }
 

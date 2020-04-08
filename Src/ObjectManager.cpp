@@ -784,7 +784,9 @@ int ObjectManager::getInstanceId(oCItem& item) {
 void ObjectManager::setParentSymbolName(int instanceID, const std::string& parentInstanceSymbolName) {
 	auto instanceIT = instanceMap.find(instanceID);
 	if (instanceIT == instanceMap.end()) {
-		throw std::runtime_error("ObjectManager::setParentInstanceId: instanceID not registered: " + std::to_string(instanceID));
+		std::stringstream logStream;
+		logStream << "ObjectManager::setParentInstanceId: instanceID not registered: " << instanceID << endl;
+		util::logFatal(&logStream);
 	}
 
 	DynInstance* instanceItem = instanceIT->second;
