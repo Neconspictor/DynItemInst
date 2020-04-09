@@ -122,12 +122,10 @@ public:
 	 */
 	~DynInstance();
 
-	void setPreviousSymbolName(const std::string& symbolName);
-
 public:
 	std::string mSymbolName;
 	int zCPar_Symbol_Bitfield;
-	std::string mParentSymbolName;
+	std::string mPrototypeSymbolName;
 	int		idx;
 	std::string name;
 	std::string nameID;
@@ -207,10 +205,6 @@ public:
 	int next;							//138
 	DII_UserData dii_userData;
 
-	// specifies the symbol name (the item id) items assigned to this dynamic instances will assigned to, if
-	// the dynamic instance is marked as reusable!
-	std::string mPreviousSymbolName;
-
 	/**
 	 * Provides the Item's instance id.
 	 */
@@ -243,13 +237,13 @@ public:
 	 * Provides the parent's instance id of this dynamic instance. The Parent instance id is the parser 
 	 * index of the base class of this dynamic instance.
 	 */
-	const std::string& getParentSymbolName();
+	const std::string& getPrototypeSymbolName();
 
 	/**
 	 * Sets this' parent instance id. The Parent instance id is the parser index of the base class of
 	 * this dynamic instance.
 	 */
-	void setParentSymbolName(const std::string& symbolName);
+	void setPrototypeSymbolName(const std::string& symbolName);
 
 	/**
 	 * \return The name of the zCPar_Symbol associated with this dynamic instance
@@ -276,19 +270,6 @@ public:
 	 * \param bitfield The bitefield parameter to be set
 	 */
 	void setParserSymbolBitfield(int bitfield);
-
-	/**
-	 * Sets the user data of a certain index.
-	 * \param index The index for the user data
-	 * \param data The value to be set
-	 */
-	//void setUserData(int index, int data);
-
-	/**
-	 * Provides the user data of a certain index.
-	 * \param index The index of the user data.
-	 */
-	//int getUserData(int index);
 
 	/**
 	 * Provides access to the user data member of this class.

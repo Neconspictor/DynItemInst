@@ -39,13 +39,11 @@ std::stringstream DynInstance::logStream;
 
 DynInstance::DynInstance()
 {
-	mPreviousSymbolName = "";
 }
 
 DynInstance::DynInstance(oCItem& item)
 {
 	store(item);
-	mPreviousSymbolName = "";
 }
 
 DynInstance::~DynInstance()
@@ -78,40 +76,6 @@ static void restorePreviousId(void* obj, void* param, oCItem* itm) {
 	}
 }
 
-/*void DynInstance::checkNotUsed()
-{
-	if (reusable) return;
-
-	if (previousId < 0) return;
-
-	bool notUsedInOtherWorlds = false;
-	if (activeWorlds.size() == 0)
-	{
-		notUsedInOtherWorlds = true;
-	}
-
-	if (activeWorlds.size() == 1)
-	{
-		string worldName = oCGame::GetGame()->GetWorld()->worldName.ToChar();
-		if (activeWorlds.front().compare(worldName) == 0)
-		{
-			notUsedInOtherWorlds = true;
-		}
-	}
-
-	RESTORE_PREVIOUS_ID_PARAMS params = {&logStream, instanceID, previousId };
-	manager->callForAllItems(restorePreviousId, NULL, &params);
-
-	if (notUsedInOtherWorlds)
-	{
-		previousId = -1;
-	}
-}*/
-
-void DynInstance::setPreviousSymbolName(const std::string& symbolName)
-{
-	mPreviousSymbolName = symbolName;
-}
 
 void DynInstance::store(oCItem& item) {
 	idx=item.idx;
@@ -369,12 +333,12 @@ void DynInstance::init(oCItem* item, int index) {
 };
 
 
-const std::string& DynInstance::getParentSymbolName() {
-	return mParentSymbolName;	
+const std::string& DynInstance::getPrototypeSymbolName() {
+	return mPrototypeSymbolName;	
 };
 
-void DynInstance::setParentSymbolName(const std::string& symbolName){
-	mParentSymbolName = symbolName;
+void DynInstance::setPrototypeSymbolName(const std::string& symbolName){
+	mPrototypeSymbolName = symbolName;
 }
 
 
@@ -395,10 +359,7 @@ void DynInstance::serialize(std::ostream& os) const
 	util::writeString(os, mSymbolName);
 	os << ' ';
 	
-	util::writeString(os, mParentSymbolName);
-	os << ' ';
-
-	util::writeString(os, mPreviousSymbolName);
+	util::writeString(os, mPrototypeSymbolName);
 	os << ' ';
 	
 	os << zCPar_Symbol_Bitfield << ' ';
@@ -531,8 +492,7 @@ void DynInstance::deserialize(std::stringstream* is)
 {
 	//util::getBool(*is, reusable);
 	util::readAndTrim(is, mSymbolName);
-	util::readAndTrim(is, mParentSymbolName);
-	util::readAndTrim(is, mPreviousSymbolName);
+	util::readAndTrim(is, mPrototypeSymbolName);
 	util::getInt(*is, zCPar_Symbol_Bitfield);
 	util::getInt(*is, idx);
 	util::readString(is, name);

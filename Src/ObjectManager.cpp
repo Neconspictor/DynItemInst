@@ -475,7 +475,7 @@ void ObjectManager::loadNewInstances(char* filename) {
 
 		ParserInfo info;
 		info.newSymbolName = instance->getSymbolName().c_str();
-		info.oldSymbolName = instance->getParentSymbolName().c_str();
+		info.oldSymbolName = instance->getPrototypeSymbolName().c_str();
 		info.bitfield = instance->getParserSymbolBitfield();
 		info.container = instance;
 
@@ -559,7 +559,7 @@ bool ObjectManager::createNewInstanceWithoutExistingId(oCItem* item, int key, co
 		}*/
 	}
 	instanceItem->store(*item);
-	setParentSymbolName(key, old->name.ToChar());
+	setPrototypeSymbolName(key, old->name.ToChar());
 
 	instanceItem->setParserSymbolBitfield(symbol->bitfield);
 	instanceItem->setSymbolName(symbol->name.ToChar());
@@ -795,7 +795,7 @@ int ObjectManager::getInstanceId(oCItem& item) {
 }
 
 
-void ObjectManager::setParentSymbolName(int instanceID, const std::string& parentInstanceSymbolName) {
+void ObjectManager::setPrototypeSymbolName(int instanceID, const std::string& protoInstanceSymbolName) {
 	auto instanceIT = instanceMap.find(instanceID);
 	if (instanceIT == instanceMap.end()) {
 		std::stringstream logStream;
@@ -804,7 +804,7 @@ void ObjectManager::setParentSymbolName(int instanceID, const std::string& paren
 	}
 
 	DynInstance* instanceItem = instanceIT->second;
-	instanceItem->setParentSymbolName(parentInstanceSymbolName);
+	instanceItem->setPrototypeSymbolName(protoInstanceSymbolName);
 }
 
 /*
@@ -816,7 +816,7 @@ const std::string& ObjectManager::getParentSymbolName(int instanceId) {
 	it = instanceMap.find(instanceId);
 	if (it == instanceMap.end()) return NULL;
 	DynInstance* instanceItem = it->second;
-	return instanceItem->getParentSymbolName();
+	return instanceItem->getPrototypeSymbolName();
 }
 
 
