@@ -22,6 +22,17 @@ func int max2(var C_Item a, var C_Item b) {
 	return +b.value;
 };
 
+
+func void debugPrintUserData(var DII_USER_DATA userData) {
+	MEM_Warn(ConcatStrings("userData.data[0] = ", IntToString(userData.data[0])));
+	MEM_Warn(ConcatStrings("userData.data[1] = ", IntToString(userData.data[1])));
+	
+	MEM_Warn(ConcatStrings("userData.magicWeaponNewDesc = ", userData.magicWeaponNewDesc));
+	MEM_Warn(ConcatStrings("userData.magicWeaponOldDesc = ", userData.magicWeaponOldDesc));
+	MEM_Warn(ConcatStrings("userData.magicWeaponNewEffect = ", userData.magicWeaponNewEffect));
+	MEM_Warn(ConcatStrings("userData.magicWeaponOldEffect = ", userData.magicWeaponOldEffect));
+};
+
 func void positionHero() {
 	if (teleportedHero == FALSE) {
 		if (Hlp_IsValidNpc(hero)) {
@@ -91,13 +102,21 @@ func void positionHero() {
 		var int canTalk; canTalk = DII_Npc_CanTalk(hero);
 		MEM_Warn(ConcatStrings("hero can talk = ", IntToString(canTalk)));
 	};
+
+	
 	
 	if (MEM_KeyState(KEY_I) == KEY_PRESSED) {
 	
 	// Create a dynamic instance and insert an item of it in the player's inventory.
 		MEM_Warn("Before DII test!");
 		var C_ITEM test;
+		
 		var int instance;
+		var int instanceCouldBeCreated;
+		var string instanceName;
+		var DII_USER_DATA userData;
+		var DII_USER_DATA userData2;
+		
 		test = DII_CreateNewItem(ItMW_1h_vlk_dagger);
 		test.damageTotal = 1000;
 		test.damage[DAM_INDEX_EDGE] = 1000;
@@ -105,12 +124,90 @@ func void positionHero() {
 		test.description = "hooked";
 		test.name = "I didn't imagine a proper name...";
 
-		instance = DII_CreateNewInstance(test);
-		CreateInvItems(hero, instance, 20);
+		//instanceName = DII_CreateNewInstanceStr(test);
+		instanceName = "hooked_dagger";
+		instanceCouldBeCreated = DII_CreateNewInstanceStr2(test, instanceName);
+		
+		if (instanceCouldBeCreated) {
+			MEM_Warn(ConcatStrings("instance name : ", instanceName));
+			instance = DII_GetInstanceID(instanceName);
+			
+			userData = DII_GetUserData(instance);
+			debugPrintUserData(userData);
+			
+			userData.data[1] = 666;
+			userData.magicWeaponNewDesc = "new desc";
+			userData.magicWeaponOldDesc = "old desc";
+			
+			userData2 = DII_GetUserData(instance);
+			debugPrintUserData(userData2);
+			
+			CreateInvItems(hero, instance, 20);
+		} else {
+			MEM_Warn("Couldn't create dynamic instance!");
+		};
+		
+		
 		DII_DeleteItem(test);
-		MEM_Warn("After DII test!");
+		
+		var int instance2; instance2 = DII_GetInstanceID("HOOKED_daGger");
+		MEM_Warn(IntToString(instance2));
 	
 	};
+	
+	
+	
+	if (MEM_KeyState(KEY_J) == KEY_PRESSED) {
+	
+	// Create a dynamic instance and insert an item of it in the player's inventory.
+		MEM_Warn("Before DII test!");
+		test = DII_CreateNewItem(ItMW_1h_vlk_dagger);
+		test.damageTotal = 1000;
+		test.damage[DAM_INDEX_EDGE] = 1000;
+		test.COUNT[2] = test.damageTotal;
+		test.description = "hooked";
+		test.name = "I didn't imagine a proper name...";
+
+		//instanceName = DII_CreateNewInstanceStr(test);
+		instanceName = "Hooked_Dagger2";
+		instanceCouldBeCreated = DII_CreateNewInstanceStr2(test, instanceName);
+		
+		if (instanceCouldBeCreated) {
+			MEM_Warn(ConcatStrings("instance name : ", instanceName));
+			instance = DII_GetInstanceID(instanceName);
+			CreateInvItems(hero, instance, 20);
+		} else {
+			MEM_Warn("Couldn't create dynamic instance!");
+		};
+		
+		
+		DII_DeleteItem(test);
+	
+	};
+	
+	
+	
+	
+	if (MEM_KeyState(KEY_K) == KEY_PRESSED) {
+		instance = DII_GetInstanceID("HOOKED_DAGGER");
+		MEM_Warn(IntToString(instance));
+		if (instance != -1) {
+			userData = DII_GetUserData(instance);
+			debugPrintUserData(userData);
+		};
+	};
+};
+
+func void myTest()
+{
+	// wird fuer jede Welt aufgerufen (vor STARTUP_<LevelName>)
+	Game_InitGerman();
+};
+
+func void myTest2()
+{
+	// wird fuer jede Welt aufgerufen (vor STARTUP_<LevelName>)
+	Game_InitGerman();
 };
 
 func void STARTUP_GLOBAL()

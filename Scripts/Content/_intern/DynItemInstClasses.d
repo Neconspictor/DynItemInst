@@ -9,7 +9,7 @@
  * the string members. DII will load the members assuming that order!
  */
  
-const int DII_USER_DATA_INTEGER_AMOUNT = 100;
+const int DII_USER_DATA_INTEGER_AMOUNT = 2;
 const int DII_USER_DATA_STRING_AMOUNT = 4;
 
 //indices used for magic weapons

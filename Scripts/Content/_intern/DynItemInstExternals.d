@@ -6,7 +6,7 @@
 
 const int dii_Initialized = 0;
 const int DII_SILENT = 0;
-const string DII_relativeLibraryPath = ".\DII\LoA_DII.DLL";
+const string DII_relativeLibraryPath = ".\DII\DII.DLL";
 
 // Callback function before oCNpc::EquipWeapon(oCItem*) is called.
 // Important: The specified function must have exact two int params and must be of return type 'void' (no return value!).
@@ -17,181 +17,6 @@ const string ZCPARSER_CREATE_INSTANCE_CALLBACK = "zCParserCreateInstance_Callbac
 
 //Callback function for oCNpc::IsMunitionAvailable(oCItem*); needs two int params
 const string OCNPC_ISMUNITIONAVAILABLE_CALLBACK_NAME = "oCNpcIsMunitionAvailable_Callback";
-
-// near fight weapon placeholders
-INSTANCE  DII_DUMMY_ITEM_NF_1(C_Item)
-{
-    name             =    "Don't use me for regular use...";
-    description        =  "DynItemInst Dummy Item";
-    mainflag             =    ITEM_KAT_NF;
-    flags                 =    ITEM_SWD;
-};
-
-INSTANCE  DII_DUMMY_ITEM_NF_2(C_Item)
-{
-    name             =    "Don't use me for regular use...";
-    description        =  "DynItemInst Dummy Item";
-    mainflag             =    ITEM_KAT_NF;
-    flags                 =    ITEM_SWD;
-};
-
-INSTANCE  DII_DUMMY_ITEM_NF_3(C_Item)
-{
-    name             =    "Don't use me for regular use...";
-    description        =  "DynItemInst Dummy Item";
-    mainflag             =    ITEM_KAT_NF;
-    flags                 =    ITEM_SWD;
-};
-
-// distance fight weapon placeholders
-INSTANCE  DII_DUMMY_ITEM_FF_1(C_Item)
-{
-    name             =    "Don't use me for regular use...";
-    description        =  "DynItemInst Dummy Item";
-    mainflag             =    ITEM_KAT_FF;
-    flags                 =    ITEM_BOW;
-};
-
-INSTANCE  DII_DUMMY_ITEM_FF_2(C_Item)
-{
-    name             =    "Don't use me for regular use...";
-    description        =  "DynItemInst Dummy Item";
-    mainflag             =    ITEM_KAT_FF;
-    flags                 =    ITEM_BOW;
-};
-
-INSTANCE  DII_DUMMY_ITEM_FF_3(C_Item)
-{
-    name             =    "Don't use me for regular use...";
-    description        =  "DynItemInst Dummy Item";
-    mainflag             =    ITEM_KAT_FF;
-    flags                 =    ITEM_BOW;
-};
-
-// rune placeholders
-INSTANCE  DII_DUMMY_ITEM_RUNE_1(C_Item)
-{
-    name             =    "Don't use me for regular use...";
-    description        =  "DynItemInst Dummy Rune Item";
-    mainflag             =    ITEM_KAT_RUNE;
-    flags                 =    0;
-};
-
-INSTANCE  DII_DUMMY_ITEM_RUNE_2(C_Item)
-{
-    name             =    "Don't use me for regular use...";
-    description        =  "DynItemInst Dummy Rune Item";
-    mainflag             =    ITEM_KAT_RUNE;
-    flags                 =    0;
-};
-
-INSTANCE  DII_DUMMY_ITEM_RUNE_3(C_Item)
-{
-    name             =    "Don't use me for regular use...";
-    description        =  "DynItemInst Dummy Rune Item";
-    mainflag             =    ITEM_KAT_RUNE;
-    flags                 =    0;
-};
-
-INSTANCE  DII_DUMMY_ITEM_RUNE_4(C_Item)
-{
-    name             =    "Don't use me for regular use...";
-    description        =  "DynItemInst Dummy Rune Item";
-    mainflag             =    ITEM_KAT_RUNE;
-    flags                 =    0;
-};
-
-
-INSTANCE  DII_DUMMY_ITEM_RUNE_5(C_Item)
-{
-    name             =    "Don't use me for regular use...";
-    description        =  "DynItemInst Dummy Rune Item";
-    mainflag             =    ITEM_KAT_RUNE;
-    flags                 =    0;
-};
-
-INSTANCE  DII_DUMMY_ITEM_RUNE_6(C_Item)
-{
-    name             =    "Don't use me for regular use...";
-    description        =  "DynItemInst Dummy Rune Item";
-    mainflag             =    ITEM_KAT_RUNE;
-    flags                 =    0;
-};
-
-INSTANCE  DII_DUMMY_ITEM_RUNE_7(C_Item)
-{
-    name             =    "Don't use me for regular use...";
-    description        =  "DynItemInst Dummy Rune Item";
-    mainflag             =    ITEM_KAT_RUNE;
-    flags                 =    0;
-};
-
-// other  placeholders
-INSTANCE  DII_DUMMY_ITEM_OTHER_1(C_Item)
-{
-    name             =    "Don't use me for regular use...";
-    description        =  "DynItemInst Dummy Other Item";
-    mainflag             =    0;
-    flags                 =    0;
-};
-
-INSTANCE  DII_DUMMY_ITEM_OTHER_2(C_Item)
-{
-    name             =    "Don't use me for regular use...";
-    description        =  "DynItemInst Dummy Other Item";
-    mainflag             =    0;
-    flags                 =    0;
-};
-
-INSTANCE  DII_DUMMY_ITEM_OTHER_3(C_Item)
-{
-    name             =    "Don't use me for regular use...";
-    description        =  "DynItemInst Dummy Other Item";
-    mainflag             =    0;
-    flags                 =    0;
-};
-
-INSTANCE  DII_DUMMY_ITEM_OTHER_4(C_Item)
-{
-    name             =    "Don't use me for regular use...";
-    description        =  "DynItemInst Dummy Other Item";
-    mainflag             =    0;
-    flags                 =    0;
-};
-
-INSTANCE  DII_DUMMY_ITEM_OTHER_5(C_Item)
-{
-    name             =    "Don't use me for regular use...";
-    description        =  "DynItemInst Dummy Other Item";
-    mainflag             =    0;
-    flags                 =    0;
-};
-
-INSTANCE  DII_DUMMY_ITEM_OTHER_6(C_Item)
-{
-    name             =    "Don't use me for regular use...";
-    description        =  "DynItemInst Dummy Other Item";
-    mainflag             =    0;
-    flags                 =    0;
-};
-
-INSTANCE  DII_DUMMY_ITEM_OTHER_7(C_Item)
-{
-    name             =    "Don't use me for regular use...";
-    description        =  "DynItemInst Dummy Other Item";
-    mainflag             =    0;
-    flags                 =    0;
-};
-
-
-//placeholder for all dii items being not equipped
-INSTANCE  DII_DUMMY_ITEM(C_Item)
-{
-    name             =    "Don't use me for regular use...";
-    description        =  "DynItemInst Dummy Item";
-    mainflag             =    0;
-    flags                 =    0;
-};
 
 // *****************************************************************
 // Provides the version number of the DynItemInst_Ikarus library.
@@ -233,45 +58,7 @@ FUNC INT _DII_GetExpectedLibVersion() {
     return addf(integral, fraction);
 };
 
-// ************************************************************
-// Creates a new item. The item will have the instance id n0.
-// ************************************************************
-/*func void DII_CreateNewItem (var int itm, var int n0) {
-    if (!dii_Initialized) {
-        MEM_ERROR("DII_CreateNewItem: Library isn't initialized!");
-        return;
-    };
-    const int call = 0;
-    var int ret;
-    //var int symb; symb = MEM_ReadIntArray (currSymbolTableAddress, itm);//symb = itm;
-    if (CALL_Begin(call)) {
-        var int adr;
-        adr = GetProcAddress (LoadLibrary (DII_relativeLibraryPath), "DII_CreateNewItem");
-		
-		//DII library couldn't be found?
-		if (!adr) {
-			MEM_ERROR("DII_CreateNewItem: ADDRESS	WASN'T FOUND!");
-		};
-		
-        CALL_IntParam(_@(n0));
-        CALL_IntParam(_@(itm));
-        CALL__cdecl(adr);
-        call = CALL_End();
-    };
-
-    //var int symb; symb = MEM_ReadIntArray (currSymbolTableAddress, itm);
-    //var int symb2; symb2 = MEM_ReadInt (symb + zCParSymbol_offset_offset);
-    //Print(ConcatStrings("item address: ", IntToString(symb2)));
-    //var int value; value = MEM_ReadInt(symb + zCParSymbol_offset_offset);
-    //symb = MEM_ReadIntArray (currSymbolTableAddress, itm);
-    //var int symb2; symb2 = MEM_ReadInt (symb + zCParSymbol_offset_offset);
-    //Print(ConcatStrings("item address: ", IntToString(symb2)));
-    //MEM_AssignInst(item, symb2);
-    //Print(ConcatStrings("name: ", itm.name));
-    //MEM_WriteInt (item + zCParSymbol_offset_offset, value);
-};*/
-
-FUNC C_ITEM DII_CreateNewItem (VAR INT n0) {
+FUNC C_ITEM DII_CreateNewItem (VAR INT instanceParserSymbolID) {
 	if (!dii_Initialized) {
 		MEM_Warn("DII_CreateNewItem: Library isn't initialized!");
 		return;
@@ -281,7 +68,7 @@ FUNC C_ITEM DII_CreateNewItem (VAR INT n0) {
 	if (CALL_Begin(call)) {
 		var int adr;
 		adr = GetProcAddress (LoadLibrary (DII_relativeLibraryPath), "DII_CreateNewItem");
-		CALL_IntParam(_@(n0));
+		CALL_IntParam(_@(instanceParserSymbolID));
 		CALL_PutRetValTo(_@(ret));
 		CALL__cdecl(adr);
 		call = CALL_End();
@@ -309,14 +96,15 @@ func void DII_ReleaseItem (var int itm) {
 	
 };
 
+
 // *********************************************************************
 // Creates a new dynamic item instance (dii) on the base of the item n0.
 // Objects having this new dii will have identic properties like n0.
 // *********************************************************************
-FUNC INT DII_CreateNewInstance (var c_item n0) {
+FUNC STRING DII_CreateNewInstanceStr (var c_item n0) {
     if (!dii_Initialized) {
-        MEM_Warn("DII_CreateNewInstance: Library isn't initialized!");
-        return 0;
+        MEM_Warn("DII_CreateNewInstanceStr: Library isn't initialized!");
+        return "";
     };
     const int call = 0;
     var int ptr;
@@ -324,14 +112,47 @@ FUNC INT DII_CreateNewInstance (var c_item n0) {
     ptr = MEM_InstToPtr(n0);
     if (CALL_Begin(call)) {
         var int adr;
-        adr = GetProcAddress (LoadLibrary (DII_relativeLibraryPath), "DII_CreateNewInstance");
+        adr = GetProcAddress (LoadLibrary (DII_relativeLibraryPath), "DII_CreateNewInstanceStr");
         CALL_IntParam(_@(ptr));
         CALL_PutRetValTo(_@(ret));
         CALL__cdecl(adr);
         call = CALL_End();
     };
-    return +ret;
+	
+	return MEM_ReadString(ret);
 };
+
+FUNC INT DII_CreateNewInstanceStr2 (var c_item n0, var string instanceName) {
+    if (!dii_Initialized) {
+        MEM_Warn("DII_CreateNewInstanceStr: Library isn't initialized!");
+        return 0;
+    };
+    const int call = 0;
+    var int ptr;
+    var int ret;
+	var zSTRING zStr;
+	zStr = _^(_@s(instanceName));
+    ptr = MEM_InstToPtr(n0);
+    if (CALL_Begin(call)) {
+        var int adr;
+        adr = GetProcAddress (LoadLibrary (DII_relativeLibraryPath), "DII_CreateNewInstanceStr2");
+		
+		CALL_IntParam(_@(zStr.ptr));
+		CALL_IntParam(_@(ptr));
+        
+		CALL_PutRetValTo(_@(ret));
+        CALL__cdecl(adr);
+        call = CALL_End();
+    };
+	
+	return +ret;
+};
+
+
+FUNC INT DII_GetInstanceID(var string instanceName) {
+	return MEM_GetSymbolIndex(instanceName);
+};
+
 
 // ************************************************************
 // Checks whether a given item n0 has a dynamic item instance.
@@ -358,7 +179,7 @@ FUNC INT DII_IsDynamic(var c_item n0) {
 	return +ret;
 };
 
-FUNC INT DII_IsInstanceDynamic(var int instanceId) {
+FUNC INT DII_IsInstanceDynamic(var int instanceParserSymbolID) {
     if (!dii_Initialized) {
         MEM_Warn("DII_IsInstanceDynamic: Library isn't initialized!");
         return 0;
@@ -368,7 +189,7 @@ FUNC INT DII_IsInstanceDynamic(var int instanceId) {
     if (CALL_Begin(call)) {
         var int adr;
         adr = GetProcAddress (LoadLibrary (DII_relativeLibraryPath), "DII_IsInstanceDynamic");
-        CALL_IntParam(_@(instanceId));
+        CALL_IntParam(_@(instanceParserSymbolID));
         CALL_PutRetValTo(_@(ret));
         CALL__cdecl(adr);
         call = CALL_End();
@@ -414,11 +235,11 @@ func void DII_DeleteItem (VAR C_ITEM n0) {
 
 // **********************************************************************
 // Provides access to the user data of a given dynamic item instance
-// which has the instance id n0. If the given instance id isn't dynamic,
-// a new DII_USER_DATA object will be returned.
+// which has the instance id instanceParserSymbolID. If the given instanceParserSymbolID isn't dynamic,
+// th null instance will be returned.
 // **********************************************************************
 
-FUNC DII_USER_DATA DII_GetUserData (var int n0) {
+FUNC DII_USER_DATA DII_GetUserData (var int instanceParserSymbolID) {
     if (!dii_Initialized) {
         MEM_Warn("DII_GetUserData: Library isn't initialized!");
         return;
@@ -428,26 +249,13 @@ FUNC DII_USER_DATA DII_GetUserData (var int n0) {
     if (CALL_Begin(call)) {
         var int adr;
         adr = GetProcAddress (LoadLibrary (DII_relativeLibraryPath), "DII_GetUserData");
-        CALL_IntParam(_@(n0));
+        CALL_IntParam(_@(instanceParserSymbolID));
         CALL_PutRetValTo(_@(ret));
         CALL__cdecl(adr);
         call = CALL_End();
     };
     MEM_PtrToInst(ret);
 };
-
-
-
-/*
-func void DII_DoStatistics() {
-    if (!dii_Initialized) {
-        return;
-    };
-
-    var int adr;
-    adr = GetProcAddress (LoadLibrary (".\DynItemInst_Ikarus\DynItemInst_Ikarus.DLL"), "DII_DoStatistics");
-    CALL__stdcall(adr);
-};*/
 
 // **********************************************************************************
 // Loads and inits the library DynItemInst_Ikarus.DLL. If the loaded library version
@@ -512,7 +320,7 @@ FUNC int DII_AreChangesPerformed() {
     return +ret;
 };
 
-func void DII_AssignInstanceId (var c_item itm, var int instanceId) {
+func void DII_AssignInstanceId (var c_item itm, var int instanceParserSymbolID) {
     if (!dii_Initialized) {
         MEM_Warn("DII_AssignInstanceId: Library isn't initialized!");
         return;
@@ -523,7 +331,7 @@ func void DII_AssignInstanceId (var c_item itm, var int instanceId) {
     if (CALL_Begin(call)) {
         var int adr;
         adr = GetProcAddress (LoadLibrary (DII_relativeLibraryPath), "DII_AssignInstanceId");
-        CALL_IntParam(_@(instanceId));
+        CALL_IntParam(_@(instanceParserSymbolID));
         CALL_IntParam(_@(itm));
         CALL__cdecl(adr);
         call = CALL_End();
@@ -548,7 +356,7 @@ func void DII_MarkAsReusable(var int instanceId, var int previousId) {
 };
 
 
-func void DII_GetItemByInstanceId (var int itm, var int instanceId) {
+func void DII_GetItemByInstanceId (var int itm, var int instanceParserSymbolID) {
     if (!dii_Initialized) {
 		MEM_Warn("DII_GetItemByInstanceId: Library isn't initialized!");
         return;
@@ -558,14 +366,14 @@ func void DII_GetItemByInstanceId (var int itm, var int instanceId) {
     if (CALL_Begin(call)) {
         var int adr;
         adr = GetProcAddress (LoadLibrary (DII_relativeLibraryPath), "DII_GetItemByInstanceId");
-        CALL_IntParam(_@(instanceId));
+        CALL_IntParam(_@(instanceParserSymbolID));
         CALL_IntParam(_@(itm));
         CALL__cdecl(adr);
         call = CALL_End();
     };
 };
 
-func void DII_ChangeItemsInstanceId (var int targetId, var int newId) {
+func void DII_ChangeItemsInstanceId (var int sourceInstanceParserSymbolID, var int targetInstanceParserSymbolID) {
     if (!dii_Initialized) {
 		MEM_Warn("DII_ChangeItemsInstanceId: Library isn't initialized!");
         return;
@@ -575,8 +383,8 @@ func void DII_ChangeItemsInstanceId (var int targetId, var int newId) {
     if (CALL_Begin(call)) {
         var int adr;
         adr = GetProcAddress (LoadLibrary (DII_relativeLibraryPath), "DII_ChangeItemsInstanceId");
-        CALL_IntParam(_@(newId));
-        CALL_IntParam(_@(targetId));
+        CALL_IntParam(_@(targetInstanceParserSymbolID));
+        CALL_IntParam(_@(sourceInstanceParserSymbolID));
         CALL__cdecl(adr);
         call = CALL_End();
     };
