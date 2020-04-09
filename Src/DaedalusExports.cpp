@@ -189,18 +189,18 @@ int DaedalusExports::DII_IsInstanceDynamic(int parserSymbolIndex)
 	return modified;
 }
 
-BYTE* DaedalusExports::DII_GetUserData(int instanceId) // Func DII_UserData DII_GetUserData(var int instanceId)
+BYTE* DaedalusExports::DII_GetUserData(int instanceIdParserSymbolIndex) // Func DII_UserData DII_GetUserData(var int instanceId)
 {
 	ObjectManager* manager = ObjectManager::getObjectManager();
 
-	if (!manager->IsModified(instanceId))
+	if (!manager->IsModified(instanceIdParserSymbolIndex))
 	{
 		logStream << "DaedalusExports::DII_GetUserData: instanceId isn't dynamic" << std::endl;
 		util::debug(&logStream, Logger::Warning);
 		return NULL;
 	}
 
-	DynInstance* storeItem = manager->getInstanceItem(instanceId);
+	DynInstance* storeItem = manager->getInstanceItem(instanceIdParserSymbolIndex);
 	return storeItem->getUserData();
 }
 
@@ -270,21 +270,21 @@ void DaedalusExports::DII_UpdateInstance(oCItem* item)
 	}
 }
 
-void DaedalusExports::DII_AssignInstanceId(oCItem* item, int instanceId)
+void DaedalusExports::DII_AssignInstanceId(oCItem* item, int instanceIdParserSymbolIndex)
 {
 	ObjectManager* manager = ObjectManager::getObjectManager();
-	manager->assignInstanceId2(item, instanceId);
+	manager->assignInstanceId2(item, instanceIdParserSymbolIndex);
 }
 
-void DaedalusExports::DII_GetItemByInstanceId(int index,  int instanceId)
+void DaedalusExports::DII_GetItemByInstanceId(int itemParserSymbolIndex,  int instanceIdParserSymbolIndex)
 {
-	if (index <= 0) return;
+	if (itemParserSymbolIndex <= 0) return;
 	zCParser* parser = zCParser::GetParser();
-	zCPar_Symbol* symbol = parser->GetSymbol(index);
+	zCPar_Symbol* symbol = parser->GetSymbol(itemParserSymbolIndex);
 	oCItem* item = (oCItem*)symbol->offset;
 
 	// Check if provided instance id is valid
-	zCPar_Symbol* instanceSym = parser->GetSymbol(instanceId);
+	zCPar_Symbol* instanceSym = parser->GetSymbol(instanceIdParserSymbolIndex);
 
 	if (!instanceSym)
 	{
@@ -295,7 +295,7 @@ void DaedalusExports::DII_GetItemByInstanceId(int index,  int instanceId)
 
 
 	ObjectManager* manager = ObjectManager::getObjectManager();
-	item = manager->getItemByInstanceId(instanceId);
+	item = manager->getItemByInstanceId(instanceIdParserSymbolIndex);
 
 	if (!item)
 	{
@@ -312,7 +312,7 @@ void DaedalusExports::DII_GetItemByInstanceId(int index,  int instanceId)
 }
 
 
-void DaedalusExports::DII_ChangeItemsInstanceId(int targetId, int newId)
+void DaedalusExports::DII_ChangeItemsInstanceId(int sourceInstanceParserSymbolIndex, int targetInstanceParserSymbolIndex)
 {
 	ObjectManager* manager = ObjectManager::getObjectManager();
 	zCWorld* world = oCGame::GetGame()->GetWorld();
@@ -325,7 +325,7 @@ void DaedalusExports::DII_ChangeItemsInstanceId(int targetId, int newId)
 		oCItem* item = itemList->GetData();
 		if (item != NULL)
 		{
-			if (item->GetInstance() == targetId && (item->amount != 666))
+			if (item->GetInstance() == sourceInstanceParserSymbolIndex)
 			{
 				targetList.push_back(item);
 			}
@@ -414,7 +414,7 @@ void DaedalusExports::DII_ChangeItemsInstanceId(int targetId, int newId)
 		int flags = item->flags;
 		int amount = item->amount;
 
-		oCItem* item2 = factory->CreateItem(newId);
+		oCItem* item2 = factory->CreateItem(targetInstanceParserSymbolIndex);
 		//memcpy(item2->);
 		item2->trafoObjToWorld = item->trafoObjToWorld;
 		item2->trafoObjToWorld.m[0][3] = 0;
@@ -438,7 +438,7 @@ void DaedalusExports::DII_ChangeItemsInstanceId(int targetId, int newId)
 		item2->flags = flags;
 		item2->amount = amount;
 		zCObjectSetObjectName(item2, zSTRING("ITLSTORCHBURNING"));
-		logStream << "exchanged item with id " << targetId << " with new item with id " << newId << std::endl;
+		logStream << "exchanged item with id " << sourceInstanceParserSymbolIndex << " with new item with id " << targetInstanceParserSymbolIndex << std::endl;
 		util::debug(&logStream);		
 	};
 

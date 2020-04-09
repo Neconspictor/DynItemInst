@@ -201,7 +201,7 @@ void DynInstance::store(oCItem& item) {
 
 
 
-void DynInstance::init(oCItem* item, int index) {
+void DynInstance::init(oCItem* item, int instanceParserSymbolID) {
 
 	ObjectManager*  manager = ObjectManager::getObjectManager();
 	manager->oCItemSaveRemoveEffect(item);
@@ -327,7 +327,7 @@ void DynInstance::init(oCItem* item, int index) {
 	int* instance = reinterpret_cast<int*>(address);
 
 	//Get current symbol index and set it as the item's instance id
-	*instance = index;
+	*instance = instanceParserSymbolID;
 
 	manager->oCItemSaveInsertEffect(item);
 };

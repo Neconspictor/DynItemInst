@@ -48,17 +48,6 @@ static ZCPAR_SYMBOL_CONSTRUCTOR zCPar_SymbolConstructor = (ZCPAR_SYMBOL_CONSTRUC
 
 class ObjectManager {
 public:
-	/**
-	 * New instance ids will have numbers which will start at this number in ascending order.
-	 */
-	//static const int INSTANCE_BEGIN = 5000000;
-
-	static const int SPECIAL_ADDIT_BEGIN = 1500000000;
-
-	/**
-	 * This number will be used to mark zCPar_Symbols of new instances.
-	 */
-	static const int ZCPAR_SYMBOL_MARK_ID = -6666666;
 
 	/**
 	 * A structure for storing relevant zCPar_Symbol information. Additionally it  provides 
@@ -112,7 +101,7 @@ public:
 	/**
 	 * Assigns a given Item to a given instance id but only if the Item wasn't assigned to one id already.
 	 */
-	void createInstanceById(int id, DynInstance* item);
+	void registerInstance(int instanceIdParserSymbolIndex, DynInstance* item);
 
 	/**
 	 * Assigns an oCItem to an specified instance id. True will be returned if the assignment
@@ -122,12 +111,12 @@ public:
 	 * \param id The instance id the item should be assigned to.
 	 * \return Was the assignment successful?
 	 */
-	bool assignInstanceId(oCItem* item, int id);
+	bool assignInstanceId(oCItem* item, int instanceIdParserSymbolIndex);
 	
 	
 	static void oCItemOperatorDelete(oCItem* item);
 
-	static bool assignInstanceId2(oCItem* item, int id);
+	static bool assignInstanceId2(oCItem* item, int instanceIdParserSymbolIndex);
 
 	/**
 	 * Provides the instance id of a given oCItem.
@@ -143,14 +132,14 @@ public:
 	 * \param item The item, the instance id of which should be set.
 	 * \param The dynamic instance id the item should be assigned to.
 	 */
-	void setDynInstanceId(oCItem* item, int id);
+	void setDynInstanceId(oCItem* item, int instanceIdParserSymbolIndex);
 
 	/**
 	 * \param instanceId The instance id to get the dynamic instance from.
 	 * \return the Item which is associated with the given instance id. NULL will be returned
 	 * if no connection could be found.
 	 */
-	DynInstance* getInstanceItem(int instanceId);
+	DynInstance* getInstanceItem(int instanceIdParserSymbolIndex);
 
 	/**
 	 * Stores all new created instances at a directory described by 'directoryPath'. If the provided 
@@ -176,7 +165,7 @@ public:
 	 * \param instanceId The instance id of which the parent instance id should be set
 	 * \param value The the parent instance id to be set
 	 */
-	void setPrototypeSymbolName(int instanceID, const std::string& parentInstanceSymbolName);
+	void setPrototypeSymbolName(int instanceParserSymbolID, const std::string& parentInstanceSymbolName);
 
 	/**
 	 * Provides the parent instance id for a given instance id.
@@ -184,7 +173,7 @@ public:
 	 * \param instanceId The instance id of which the parent instance id should be returned.
 	 * \return the parent instance id of the given instance id.
 	 */
-	const std::string& getParentSymbolName(int instanceID);
+	const std::string& getPrototypeSymbolName(int instanceParserSymbolID);
 
 	/**
 	 * Sets the instance id for a given oCItem.
@@ -192,7 +181,7 @@ public:
 	 * \param item The item of which the instance id should be set.
 	 * \param instanceId The new instance id
 	 */
-	static void setInstanceId(oCItem* item, int instanceId);
+	static void setInstanceId(oCItem* item, int instanceParserSymbolID);
 
 	/**
 	 * Provides the instance id for a given oCItem.
@@ -236,7 +225,7 @@ public:
 	 * \param instanceId The instance id to check
 	 * \return Has the given item a dynamic instance?
 	 */
-	bool IsModified(int instanceId);
+	bool IsModified(int instanceParserSymbolID);
 
 	/**
 	 * Provides the zCPar_Symbol with index 'index' if the provided index refers to a dynamic instance.
@@ -245,7 +234,7 @@ public:
 	 * \param index The index of the parser symbol.
 	 * \return The parser symbol of the given index.
 	 */
-	zCPar_Symbol* getSymbolByIndex(int index);
+	zCPar_Symbol* getSymbolByIndex(int parserSymbolID);
 
 	/**
 	 * Provides the zCPar_Symbol with name  'symbolName'. Symbols stored by this object manager 
@@ -275,8 +264,6 @@ public:
 
 	static int * getParserInstanceCount();
 
-	static int getIdForSpecialPurposes();
-
 	/**
 	* Checks whether the specified oCItem is in the game world's list registered
 	* \param item The oCItem to check
@@ -289,15 +276,15 @@ public:
 	 * \param instanceId the instance id for searching the oCItem
 	 * \return The first oCItem found
 	 */
-	oCItem* getItemByInstanceId(int instanceId);
+	oCItem* getItemByInstanceId(int instanceIdParserSymbolIndex);
 
 	static void oCItemSaveInsertEffect(oCItem* item);
 	static void oCItemSaveRemoveEffect(oCItem* item);
-	bool isDynamicInstance(int instanceId);
+	bool isDynamicInstance(int instanceIdParserSymbolIndex);
 	static int* getRefCounter(oCItem* item);
 
 
-	static zCListSort<oCItem>* getInvItemByInstanceId(oCNpcInventory * inventory, int instanceId);
+	static zCListSort<oCItem>* getInvItemByInstanceId(oCNpcInventory * inventory, int instanceIdParserSymbolIndex);
 	
 	int getSlotNumber(oCNpcInventory* inventory, oCItem* item);
 	
@@ -345,7 +332,7 @@ private:
 
 	static zCPar_Symbol* createNewSymbol(const ParserInfo* old);
 	bool addSymbolToSymbolTable(zCPar_Symbol* symbol);
-	DynInstance * createNewInstanceItem(int instanceId);
+	DynInstance * createNewInstanceItem(int instanceIdParserSymbolIndex);
 	void updateContainerItem(const ObjectManager::ParserInfo* info);
 	/**
 	 * Logs the current status of the provided zCPar_Symbol pointer.
@@ -359,7 +346,7 @@ private:
 	 */
 	int createParserSymbol(const ParserInfo& info);
 
-	zCPar_Symbol * createNewSymbol(int instanceId, zCPar_Symbol * old, const std::string& symbolName) const;
+	zCPar_Symbol * createNewSymbol(int instanceParserSymbolID, zCPar_Symbol * prototype, const std::string& symbolName) const;
 
 	static void* __cdecl gothic2OperatorNew(size_t size);
 };

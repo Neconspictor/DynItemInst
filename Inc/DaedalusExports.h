@@ -102,7 +102,7 @@ public:
 	 * \param instanceId The instance id to get the DII_UserData from
 	 * \return The user data of the provided instance id
 	 */
-	static BYTE* DII_GetUserData(int parserSymbolIndex);
+	static BYTE* DII_GetUserData(int instanceIdParserSymbolIndex);
 
 	/**
 	 * Provides the version of the library.
@@ -112,12 +112,12 @@ public:
 	static void DII_UpdateInstance(oCItem* item);
 
 	//TODO: is this function used?
-	static void DII_AssignInstanceId(oCItem* item, int parserSymbolIndex);
+	static void DII_AssignInstanceId(oCItem* item, int instanceIdParserSymbolIndex);
 
-	static void DII_GetItemByInstanceId(int index, int parserSymbolIndex);
+	static void DII_GetItemByInstanceId(int itemParserSymbolIndex, int instanceIdParserSymbolIndex);
 
 	//Asiigns all items with instance id targetId the new id newId
-	static void DII_ChangeItemsInstanceId(int targetParserSymbolIndex, int newParserSymbolIndex);
+	static void DII_ChangeItemsInstanceId(int sourceInstanceParserSymbolIndex, int targetInstanceParserSymbolIndex);
 
 	static void DII_ToggleLevitation();
 

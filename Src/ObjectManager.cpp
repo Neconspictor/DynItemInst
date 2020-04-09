@@ -64,14 +64,14 @@ ObjectManager::ObjectManager()
 }
 
 
-zCListSort<oCItem>* ObjectManager::getInvItemByInstanceId(oCNpcInventory* inventory, int instanceId)
+zCListSort<oCItem>* ObjectManager::getInvItemByInstanceId(oCNpcInventory* inventory, int instanceIdParserSymbolIndex)
 {
 	inventory->UnpackCategory();
 	ObjectManager* manager = ObjectManager::getObjectManager();
 	zCListSort<oCItem>* list = reinterpret_cast<zCListSort<oCItem>*>(inventory->inventory_data);
 	while (list != NULL) {
 		oCItem* item = list->GetData();
-		if (item != NULL && manager->getInstanceId(*item) == instanceId)
+		if (item != NULL && manager->getInstanceId(*item) == instanceIdParserSymbolIndex)
 		{
 			return list;
 		}
@@ -148,11 +148,11 @@ int ObjectManager::createNewInstanceId(oCItem* item, const std::string& instance
 	//Create new zCPar_Symbol for the newly created instance and register it to gothic.
 	zCParser* parser = zCParser::GetParser();
 
-	int parentId = getInstanceId(*item);
-	zCPar_Symbol* old = parser->GetSymbol(parentId);
+	int prototypeInstanceParserSymbolID = getInstanceId(*item);
+	zCPar_Symbol* prototypeSymbol = parser->GetSymbol(prototypeInstanceParserSymbolID);
 
 
-	if (old == NULL) {
+	if (prototypeSymbol == NULL) {
 		logStream << "ObjectManager::createNewInstanceId: item parser symbol is null!" << std::endl;
 		util::logWarning(&logStream);
 		return 0;
@@ -161,20 +161,20 @@ int ObjectManager::createNewInstanceId(oCItem* item, const std::string& instance
 
 
 	int* indexCount = getParserInstanceCount();
-	int key = *indexCount;
+	int instanceParserSymbolID = *indexCount;
 
-	if (!createNewInstanceWithoutExistingId(item, key, instanceName)) {
+	if (!createNewInstanceWithoutExistingId(item, instanceParserSymbolID, instanceName)) {
 		logStream << "ObjectManager::createNewInstanceId: Couldn't create new instance '" << instanceName << "'" << endl;
 		return 0;
 	}
 
-	return key;
+	return instanceParserSymbolID;
 };
 
-void ObjectManager::createInstanceById(int id, DynInstance* item) {
+void ObjectManager::registerInstance(int instanceIdParserSymbolIndex, DynInstance* item) {
 	// allow no reassignments
 	map<int, DynInstance*>::iterator it;
-	it = instanceMap.find(id);
+	it = instanceMap.find(instanceIdParserSymbolIndex);
 	if (it != instanceMap.end())
 	{
 		logStream << "Instance id already exists! Nothing will be created." << endl;
@@ -182,7 +182,7 @@ void ObjectManager::createInstanceById(int id, DynInstance* item) {
 		return;
 	}
 
-	instanceMap.insert(pair<int, DynInstance*>(id, item));
+	instanceMap.insert(pair<int, DynInstance*>(instanceIdParserSymbolIndex, item));
 }
 
 void ObjectManager::releaseInstances() {
@@ -210,17 +210,17 @@ void ObjectManager::releaseInstances() {
 	nameToSymbolMap.clear();
 };
 
-bool ObjectManager::assignInstanceId(oCItem* item, int id){
+bool ObjectManager::assignInstanceId(oCItem* item, int instanceIdParserSymbolIndex){
 	map<int,DynInstance*>::iterator it;
-	it = instanceMap.find(id);
+	it = instanceMap.find(instanceIdParserSymbolIndex);
 	if (it == instanceMap.end())
 	{
-		logStream<< "ObjectManager::assignInstanceId: instance id wasn't found: " << id << std::endl;
+		logStream<< "ObjectManager::assignInstanceId: instance id wasn't found: " << instanceIdParserSymbolIndex << std::endl;
 		util::debug(&logStream, Logger::Warning);
 		return false;
 	}
 	
-	setDynInstanceId(item, id);
+	setDynInstanceId(item, instanceIdParserSymbolIndex);
 
 	if(!initByNewInstanceId(item))
 	{
@@ -236,10 +236,10 @@ void ObjectManager::oCItemOperatorDelete(oCItem* item)
 	XCALL(0x007144A0);
 }
 
-bool ObjectManager::assignInstanceId2(oCItem* item, int id)
+bool ObjectManager::assignInstanceId2(oCItem* item, int instanceIdParserSymbolIndex)
 {
 	//TODO: get rid of the copy item!!!
-	oCItem* copy = oCObjectFactory::GetFactory()->CreateItem(id);
+	oCItem* copy = oCObjectFactory::GetFactory()->CreateItem(instanceIdParserSymbolIndex);
 
 	if (!copy) return false;
 	
@@ -365,7 +365,7 @@ bool ObjectManager::assignInstanceId2(oCItem* item, int id)
 	int* instance = reinterpret_cast<int*>(address);
 
 	//Get current symbol index and set it as the item's instance id
-	*instance = id;
+	*instance = instanceIdParserSymbolIndex;
 
 	//insert effect finally
 	//oCItemSaveRemoveEffect(item);
@@ -392,19 +392,19 @@ NULL will be returned.
 */
 int ObjectManager::getDynInstanceId(oCItem* item){
 	if (item == NULL) return NULL;
-	int instanceId = getInstanceId(*item);
+	int instanceIdParserSymbolIndex = getInstanceId(*item);
 	map<int, DynInstance*>::iterator it;
-	it = instanceMap.find(instanceId);
+	it = instanceMap.find(instanceIdParserSymbolIndex);
 	if (it == instanceMap.end()){return NULL;}
-	return instanceId;
+	return instanceIdParserSymbolIndex;
 }
 
-void ObjectManager::setDynInstanceId(oCItem* item, int id){
+void ObjectManager::setDynInstanceId(oCItem* item, int instanceIdParserSymbolIndex){
 	std::map<int, DynInstance*>::iterator it;
-	it = instanceMap.find(id);
+	it = instanceMap.find(instanceIdParserSymbolIndex);
 	if (it != instanceMap.end())
 	{
-		setInstanceId(item, id);
+		setInstanceId(item, instanceIdParserSymbolIndex);
 	} else
 	{
 		logStream << "ObjectManager::setInstanceId: parameter id has no assigned index. Nothing will be done." << endl;
@@ -412,9 +412,9 @@ void ObjectManager::setDynInstanceId(oCItem* item, int id){
 	}
 };
 
-DynInstance* ObjectManager::getInstanceItem(int instanceId){
+DynInstance* ObjectManager::getInstanceItem(int instanceIdParserSymbolIndex){
 	map<int,DynInstance*>::iterator it;
-	it = instanceMap.find(instanceId);
+	it = instanceMap.find(instanceIdParserSymbolIndex);
 	if (it == instanceMap.end())
 	{
 		return NULL;		
@@ -480,7 +480,7 @@ void ObjectManager::loadNewInstances(char* filename) {
 		info.container = instance;
 
 		auto id = createParserSymbol(info);
-		createInstanceById(id, instance);
+		registerInstance(id, instance);
 	}
 };
 
@@ -521,7 +521,7 @@ static void test (void* obj, void* param, oCItem* itm) {
 	}
 }
 
-bool ObjectManager::createNewInstanceWithoutExistingId(oCItem* item, int key, const std::string& instanceName)
+bool ObjectManager::createNewInstanceWithoutExistingId(oCItem* item, int instanceParserSymbolID, const std::string& instanceName)
 {
 	zCParser* parser = zCParser::GetParser();
 	int parentId = getInstanceId(*item);
@@ -534,7 +534,7 @@ bool ObjectManager::createNewInstanceWithoutExistingId(oCItem* item, int key, co
 	}
 
 	int* indexCount = getParserInstanceCount();
-	zCPar_Symbol* symbol = createNewSymbol(key, old, instanceName);
+	zCPar_Symbol* symbol = createNewSymbol(instanceParserSymbolID, old, instanceName);
 
 	if (!symbol) {
 		std::stringstream logStream;
@@ -544,11 +544,11 @@ bool ObjectManager::createNewInstanceWithoutExistingId(oCItem* item, int key, co
 
 	if (!addSymbolToSymbolTable(symbol))
 	{
-		if (*indexCount < key) *indexCount = key;
-		if (*indexCount == key) *indexCount += 1;
+		if (*indexCount < instanceParserSymbolID) *indexCount = instanceParserSymbolID;
+		if (*indexCount == instanceParserSymbolID) *indexCount += 1;
 	};
 
-	DynInstance* instanceItem = createNewInstanceItem(key);
+	DynInstance* instanceItem = createNewInstanceItem(instanceParserSymbolID);
 	if (IsModified(item))
 	{
 		/*DynInstance* oldStoreItem = getInstanceItem(parentId);
@@ -559,22 +559,22 @@ bool ObjectManager::createNewInstanceWithoutExistingId(oCItem* item, int key, co
 		}*/
 	}
 	instanceItem->store(*item);
-	setPrototypeSymbolName(key, old->name.ToChar());
+	setPrototypeSymbolName(instanceParserSymbolID, old->name.ToChar());
 
 	instanceItem->setParserSymbolBitfield(symbol->bitfield);
 	instanceItem->setSymbolName(symbol->name.ToChar());
-	instanceItem->setInstanceID(key);
+	instanceItem->setInstanceID(instanceParserSymbolID);
 
-	newInstanceToSymbolMap.insert(pair<int, zCPar_Symbol*>(key, symbol));
+	newInstanceToSymbolMap.insert(pair<int, zCPar_Symbol*>(instanceParserSymbolID, symbol));
 
 	string symbolName = symbol->name.ToChar();
 	transform(symbolName.begin(), symbolName.end(), symbolName.begin(), ::toupper);
 	nameToSymbolMap.insert(pair<string, zCPar_Symbol*>(symbolName, symbol));
-	nameToInstanceMap.insert(pair<string, int>(symbolName, key));
+	nameToInstanceMap.insert(pair<string, int>(symbolName, instanceParserSymbolID));
 
 	logStream << "ObjectManager::createNewInstanceWithoutExistingId(): indexCount = " << *indexCount << endl;
 	util::debug(&logStream);
-	logStream << "ObjectManager::createNewInstanceWithoutExistingId(): parser symbol index = " << key << endl;
+	logStream << "ObjectManager::createNewInstanceWithoutExistingId(): parser symbol index = " << instanceParserSymbolID << endl;
 	util::debug(&logStream);
 
 	return true;
@@ -618,7 +618,7 @@ zCPar_Symbol* ObjectManager::createNewSymbol(const ParserInfo* old)
 	result->offset = 0;
 	result->next = ref->next;
 	result->content.data_ptr = 0;//ref->content.data_ptr;
-	result->filenr = ref->filenr;//ZCPAR_SYMBOL_MARK_ID;
+	result->filenr = ref->filenr;
 	result->line = ref->line;
 	result->line_anz = ref->line_anz;
 	result->pos_beg = ref->pos_beg;
@@ -647,13 +647,13 @@ bool ObjectManager::addSymbolToSymbolTable(zCPar_Symbol* symbol)
 }
 
 
-DynInstance* ObjectManager::createNewInstanceItem(int instanceId)
+DynInstance* ObjectManager::createNewInstanceItem(int instanceIdParserSymbolIndex)
 {
-	DynInstance* result = getInstanceItem(instanceId);
+	DynInstance* result = getInstanceItem(instanceIdParserSymbolIndex);
 	if (!result)
 	{
 		result = new DynInstance();
-		instanceMap.insert(pair<int, DynInstance*>(instanceId, result));
+		instanceMap.insert(pair<int, DynInstance*>(instanceIdParserSymbolIndex, result));
 	}
 
 	return result;
@@ -728,19 +728,19 @@ int ObjectManager::createParserSymbol(const ParserInfo& info)
 	return newInstanceId;
 }
 
-zCPar_Symbol* ObjectManager::createNewSymbol(int instanceId, zCPar_Symbol* old, const std::string& symbolName) const
+zCPar_Symbol* ObjectManager::createNewSymbol(int instanceParserSymbolID, zCPar_Symbol* prototype, const std::string& symbolName) const
 {
 
 	zCPar_Symbol* symbol;
 	zCParser* parser = zCParser::GetParser();
 	//zCPar_Symbol* ref = parser->GetSymbol(parser->GetIndex("ItMw_1h_vlk_dagger"));
 
-	symbol = parser->GetSymbol(instanceId);
+	symbol = parser->GetSymbol(instanceParserSymbolID);
 
 	// Symbol already exists?
 	if (symbol) {
 		stringstream logStream;
-		logStream << "ObjectManager::createNewSymbol: Symbol for instance id '" << instanceId << "' already exists!" << endl;
+		logStream << "ObjectManager::createNewSymbol: Symbol for instance id '" << instanceParserSymbolID << "' already exists!" << endl;
 		util::logWarning(&logStream);
 		return nullptr;
 	}
@@ -765,8 +765,8 @@ zCPar_Symbol* ObjectManager::createNewSymbol(int instanceId, zCPar_Symbol* old, 
 	zSTRING nameZString(name.c_str());
 	symbol->name = nameZString;
 	const char* charRep = nameZString.ToChar();
-	symbol->parent = old->parent;
-	symbol->bitfield = old->bitfield;
+	symbol->parent = prototype->parent;
+	symbol->bitfield = prototype->bitfield;
 	symbol->offset = 0;
 	symbol->content.data_ptr = 0;
 
@@ -775,11 +775,11 @@ zCPar_Symbol* ObjectManager::createNewSymbol(int instanceId, zCPar_Symbol* old, 
 
 
 
-void ObjectManager::setInstanceId(oCItem* item, int value) {
+void ObjectManager::setInstanceId(oCItem* item, int instanceParserSymbolID) {
 	int address = reinterpret_cast<int>(item);
 	address += 0x330;
 	int* instance = reinterpret_cast<int*>(address);
-	*instance = value;
+	*instance = instanceParserSymbolID;
 
 }
 
@@ -795,11 +795,11 @@ int ObjectManager::getInstanceId(oCItem& item) {
 }
 
 
-void ObjectManager::setPrototypeSymbolName(int instanceID, const std::string& protoInstanceSymbolName) {
-	auto instanceIT = instanceMap.find(instanceID);
+void ObjectManager::setPrototypeSymbolName(int instanceParserSymbolID, const std::string& protoInstanceSymbolName) {
+	auto instanceIT = instanceMap.find(instanceParserSymbolID);
 	if (instanceIT == instanceMap.end()) {
 		std::stringstream logStream;
-		logStream << "ObjectManager::setParentInstanceId: instanceID not registered: " << instanceID << endl;
+		logStream << "ObjectManager::setParentInstanceId: instanceID not registered: " << instanceParserSymbolID << endl;
 		util::logFatal(&logStream);
 	}
 
@@ -811,10 +811,11 @@ void ObjectManager::setPrototypeSymbolName(int instanceID, const std::string& pr
 *	Provides the instance id the unmodified item had at the time at which 
 *	the new instance id instanceId was created for a specific item.
 */
-const std::string& ObjectManager::getParentSymbolName(int instanceId) {
+const std::string& ObjectManager::getPrototypeSymbolName(int instanceParserSymbolID) {
 	std::map<int,DynInstance*>::iterator it;
-	it = instanceMap.find(instanceId);
-	if (it == instanceMap.end()) return NULL;
+	it = instanceMap.find(instanceParserSymbolID);
+	static std::string empty = "";
+	if (it == instanceMap.end()) return empty;
 	DynInstance* instanceItem = it->second;
 	return instanceItem->getPrototypeSymbolName();
 }
@@ -872,9 +873,9 @@ bool ObjectManager::IsModified(oCItem* item)
 	return true;
 }
 
-bool ObjectManager::IsModified(int instanceId)
+bool ObjectManager::IsModified(int instanceParserSymbolID)
 {
-	std::map<int, DynInstance*>::iterator it = instanceMap.find(instanceId);
+	std::map<int, DynInstance*>::iterator it = instanceMap.find(instanceParserSymbolID);
 	if (it == instanceMap.end())
 	{
 		return false;
@@ -882,9 +883,9 @@ bool ObjectManager::IsModified(int instanceId)
 	return true;
 }
 
-zCPar_Symbol* ObjectManager::getSymbolByIndex(int index)
+zCPar_Symbol* ObjectManager::getSymbolByIndex(int parserSymbolID)
 {
-	map<int, zCPar_Symbol*>::iterator it = newInstanceToSymbolMap.find(index);
+	map<int, zCPar_Symbol*>::iterator it = newInstanceToSymbolMap.find(parserSymbolID);
 	if (it == newInstanceToSymbolMap.end()) { return NULL; }
 	return it->second;
 }
@@ -1124,11 +1125,6 @@ int* ObjectManager::getParserInstanceCount()
 	return (int*)(((BYTE*)parser) + 0x18 + 0x8);
 }
 
-int ObjectManager::getIdForSpecialPurposes()
-{
-	return SPECIAL_ADDIT_BEGIN;
-}
-
 bool ObjectManager::isItemInWorld(oCItem* item)
 {
 	zCWorld* world = oCGame::GetGame()->GetWorld();
@@ -1155,7 +1151,7 @@ static void test2(void* obj, void* param, oCItem* itm) {
 	}
 }
 
-oCItem* ObjectManager::getItemByInstanceId(int instanceId)
+oCItem* ObjectManager::getItemByInstanceId(int instanceIdParserSymbolIndex)
 {
 	/*auto func = [&](oCItem* itm) ->void {
 		if (itm == NULL) return;
@@ -1169,7 +1165,7 @@ oCItem* ObjectManager::getItemByInstanceId(int instanceId)
 		}
 	};*/
 
-	TEST2_PARAMS params = {NULL, instanceId};
+	TEST2_PARAMS params = {NULL, instanceIdParserSymbolIndex };
 
 	callForAllItems(test2, NULL, &params, &params.result);
 	return params.result;
@@ -1211,10 +1207,10 @@ void ObjectManager::oCItemSaveRemoveEffect(oCItem* item)
 	item->RemoveEffect();
 }
 
-bool ObjectManager::isDynamicInstance(int instanceId)
+bool ObjectManager::isDynamicInstance(int instanceIdParserSymbolIndex)
 {
 	map<int, DynInstance*>::iterator it;
-	it = instanceMap.find(instanceId);
+	it = instanceMap.find(instanceIdParserSymbolIndex);
 	if (it == instanceMap.end())
 	{
 		return false;

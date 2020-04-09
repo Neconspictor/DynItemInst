@@ -215,8 +215,8 @@ public:
 	/**
 	 * Sets the this' instance id to the given one.
 	 */
-	void setInstanceID(int newID) {
-		instanz = newID;
+	void setInstanceID(int instanceParserSymbolID) {
+		instanz = instanceParserSymbolID;
 	}
 
 	/**
@@ -229,9 +229,9 @@ public:
 	 * Inits the provided oCItem with this dynamic instance and sets the oCItem's instance id 
 	 * to the second parameter.
 	 * \param item The item to be initialized
-	 * \param index The symbol index of the dynamic instance.
+	 * \param instanceParserSymbolID The symbol index of the dynamic instance.
 	 */
-	void init(oCItem* item, int index);
+	void init(oCItem* item, int instanceParserSymbolID);
 
 	/**
 	 * Provides the parent's instance id of this dynamic instance. The Parent instance id is the parser 
