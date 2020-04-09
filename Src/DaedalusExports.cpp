@@ -77,25 +77,6 @@ oCItem* __cdecl DaedalusExports::DII_CreateNewItem(int instanceId) // Func void 
 	return item;
 }
 
-void __cdecl DaedalusExports::DII_ReleaseItem(int parserSymbolIndex) // Func void DII_ReleaseItem(var C_Item item, VAR INT instanceId)
-{
-	if (parserSymbolIndex <= 0) return;
-	zCParser* parser = zCParser::GetParser();
-	zCPar_Symbol* symbol = parser->GetSymbol(parserSymbolIndex);
-	oCItem* item = (oCItem*)symbol->offset;
-
-	if (item != NULL)
-	{
-		int* refCtr = (int*)((BYTE*)item + 0x4);
-		if (*refCtr >= 0)
-		{
-			oCGame::GetGame()->GetGameWorld()->RemoveVob(item);
-		}
-
-		*refCtr = 0;
-	}
-}
-
 void DaedalusExports::DII_DeleteItem(oCItem* item)
 {
 	if (item == NULL) return;
@@ -205,11 +186,7 @@ int DaedalusExports::DII_IsDynamic(oCItem* item) // Func DII_IsDynamic(VAR C_ITE
 int DaedalusExports::DII_IsInstanceDynamic(int parserSymbolIndex)
 {
 	bool modified = ObjectManager::getObjectManager()->isDynamicInstance(parserSymbolIndex);
-	if (modified)
-	{
-		return TRUE;
-	}
-	return FALSE;
+	return modified;
 }
 
 BYTE* DaedalusExports::DII_GetUserData(int instanceId) // Func DII_UserData DII_GetUserData(var int instanceId)
@@ -231,52 +208,6 @@ BYTE* DaedalusExports::DII_GetUserData(int instanceId) // Func DII_UserData DII_
 float DaedalusExports::DII_GetLibVersion()
 {
 	return LIB_VERSION;
-}
-
-void DaedalusExports::DII_DoStatistics()
-{
-	/*ObjectManager* manager = ObjectManager::getObjectManager();
-	Logger* logger = Logger::getLogger();
-	int instanceBegin = manager->getInstanceBegin();
-
-	if (instanceBegin < 0)
-	{
-		logStream << "Nothing to do, instanceBegin < 0!" << std::endl;
-		util::debug(&logStream);
-		return;
-	}
-
-	int dynamicItemCount = 0;
-	auto compare = [](oCItem* first, oCItem* second)->bool {
-		return first < second;
-	};
-
-	std::set<oCItem*, std::function<bool(oCItem*, oCItem*)>> itemSet(compare);
-
-	auto func = [&](oCItem* item) ->void {
-		if (item == NULL) return;
-
-		int id = manager->getInstanceId(*item);
-		if (id >= instanceBegin)
-		{
-			auto it = itemSet.find(item);
-			if (*it == NULL)
-			{
-				itemSet.insert(item);
-				++dynamicItemCount;
-
-				logStream << "Found item with dynamic instance id: " << id << std::endl;
-				int refCtr = *(int*)((BYTE*)item + 0x4);
-				logStream << "refCtr: " << refCtr << std::endl;
-				util::debug(&logStream);
-			}
-		}
-	};
-
-	manager->callForAllItems(func);
-
-	logStream << "Statistics: " << dynamicItemCount << " items have a dynamic instance id." << std::endl;
-	util::debug(&logStream);*/
 }
 
 
@@ -328,31 +259,6 @@ void DaedalusExports::DII_UpdateInstance(oCItem* item)
 		dynInstance->store(*item);
 
 		zCWorld* world = oCGame::GetGame()->GetWorld();
-
-		//update all items of this id
-		/*auto func = [&](oCItem* itm) ->void {
-			if (itm == NULL) return;
-			
-			int id = manager->getDynInstanceId(itm);
-			if (id == index)
-			{
-				//int refCtr = *(int*)((BYTE*)itm + 0x4);
-				
-				bool isInWorld = manager->isItemInWorld(itm);
-				int flags = itm->flags;
-				manager->oCItemSaveRemoveEffect(itm);
-				itm->InitByScript(id, itm->instanz);
-				itm->flags = flags;
-
-				manager->oCItemSaveInsertEffect(itm);
-				//itm->InsertEffect();
-
-				if (isInWorld)
-				{
-					world->AddVob(item);
-				}
-			}
-		};*/
 
 		UPDATE_INSTANCE_PARAMS params = { index, item };
 		manager->callForAllItems(updateItem, NULL, &params);

@@ -4,8 +4,6 @@ EXPORTS
 	Unhook
 	DII_CreateNewItem
 	DII_DeleteItem
-	DII_ReleaseItem
-	DII_CreateNewInstance
 	DII_CreateNewInstanceStr
 	DII_CreateNewInstanceStr2
 	DII_IsDynamic

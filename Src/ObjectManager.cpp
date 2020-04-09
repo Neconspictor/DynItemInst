@@ -42,6 +42,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <api/g2/oCObjectFactory.h>
 #include <api/g2/oCItemExtended.h>
 #include <Constants.h>
+#include <DaedalusExports.h>
 
 using namespace std;
 using namespace constants;
@@ -370,9 +371,9 @@ bool ObjectManager::assignInstanceId2(oCItem* item, int id)
 	//oCItemSaveRemoveEffect(item);
 	//oCItemSaveInsertEffect(item);
 
-	//remove copy item
-	//oCItemOperatorDelete(copy);
-	//copy = NULL;
+	//TODO: Verify!!!
+	DaedalusExports::DII_DeleteItem(copy);
+
 	return true;
 };
 

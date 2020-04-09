@@ -70,8 +70,6 @@ public:
 	 */
 	static oCItem* __cdecl  DII_CreateNewItem(int parserSymbolIndex);
 
-	static void __cdecl DII_ReleaseItem(int parserSymbolIndex);
-
 	static void __cdecl DII_DeleteItem(oCItem* item);
 	/**
 	 * An external for creating a new instance id from a given c_item.
@@ -110,8 +108,6 @@ public:
 	 * Provides the version of the library.
 	 */
 	static float DII_GetLibVersion();
-
-	static void DII_DoStatistics();
 
 	static void DII_UpdateInstance(oCItem* item);
 
