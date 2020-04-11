@@ -118,7 +118,7 @@ func void positionHero() {
 		var DII_USER_DATA userData;
 		var DII_USER_DATA userData2;
 		
-		test = DII_CreateNewItem(DII_GetSymbolName(ItMW_1h_vlk_dagger));
+		test = DII_CreateNewItem(DII_GetSymbolName(ItRw_Bow_L_01));//ItRw_Bow_L_01 //ItMW_1h_vlk_dagger
 		test.damageTotal = 1000;
 		test.damage[DAM_INDEX_EDGE] = 1000;
 		test.COUNT[2] = test.damageTotal;
@@ -162,7 +162,7 @@ func void positionHero() {
 	
 	// Create a dynamic instance and insert an item of it in the player's inventory.
 		MEM_Warn("Before DII test!");
-		test = DII_CreateNewItem(DII_GetSymbolName(ItMW_1h_vlk_dagger));
+		test = DII_CreateNewItem(DII_GetSymbolName(ItRw_Bow_L_01));
 		test.damageTotal = 1000;
 		test.damage[DAM_INDEX_EDGE] = 1000;
 		test.COUNT[2] = test.damageTotal;
@@ -200,6 +200,20 @@ func void positionHero() {
 	//DII_DeleteDII
 	if (MEM_KeyState(KEY_L) == KEY_PRESSED) {
 		DII_DeleteDII("Hooked_Dagger");
+	};
+	
+	if (MEM_KeyState(KEY_N) == KEY_PRESSED) {
+	
+		test = DII_CreateNewItem("Hooked_Dagger");
+		test.damageTotal = 333;
+		test.damage[DAM_INDEX_EDGE] = 333;
+		test.COUNT[2] = test.damageTotal;
+		test.description = "hooked was updated.";
+		test.name = "Updated hooked item";
+		test.effect	= "SPELLFX_FIREBOW";
+	
+		DII_UpdateInstance("HOOKED_DAGGER", test);
+		DII_DeleteItem(test);
 	};
 };
 

@@ -204,7 +204,7 @@ void DynInstance::store(oCItem& item) {
 void DynInstance::init(oCItem* item, int instanceParserSymbolID) {
 
 	ObjectManager*  manager = ObjectManager::getObjectManager();
-	manager->oCItemSaveRemoveEffect(item);
+	//manager->oCItemSaveRemoveEffect(item);
 
 	item->idx=idx;
 	item->name=zSTRING(name.c_str());
@@ -320,7 +320,7 @@ void DynInstance::init(oCItem* item, int instanceParserSymbolID) {
 	item->c_manipulation=c_manipulation;					//int ?
 	item->last_manipulation=last_manipulation;				//zREAL ?
 	item->magic_value=magic_value;					//int ?
-	item->effectVob=effectVob;						//oCVisualFX*
+	//item->effectVob=effectVob;						//oCVisualFX*
 	item->next = next;	
 	int address = reinterpret_cast<int>(item);
 	address += 0x330;
@@ -329,7 +329,7 @@ void DynInstance::init(oCItem* item, int instanceParserSymbolID) {
 	//Get current symbol index and set it as the item's instance id
 	*instance = instanceParserSymbolID;
 
-	manager->oCItemSaveInsertEffect(item);
+	//manager->oCItemSaveInsertEffect(item);
 };
 
 

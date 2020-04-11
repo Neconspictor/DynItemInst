@@ -53,9 +53,12 @@ ObjectManager* ObjectManager::instanz = NULL;
 typedef oCVob* (__thiscall* OCNpcGetLeftHand)(oCNpc*);
 OCNpcGetLeftHand oCNpcGetLeftHand = (OCNpcGetLeftHand) 0x0073ABE0;
 
+typedef void (__thiscall* OCNpcUpdateSlots)(oCNpc*);
+OCNpcUpdateSlots oCNpcUpdateSlots = (OCNpcUpdateSlots)0x0074A9D0;
+
 //.text:0073AB50 public: class oCVob * __thiscall oCNpc::GetRightHand(void) proc near
 typedef oCVob* (__thiscall* OCNpcGetRightHand)(oCNpc*);
-OCNpcGetRightHand oCNpcGetRightHand = (OCNpcGetRightHand)0x0073ABE0;
+OCNpcGetRightHand oCNpcGetRightHand = (OCNpcGetRightHand)0x0073AB50;
 
 
 ObjectManager::ObjectManager() = default;
@@ -940,12 +943,65 @@ void ObjectManager::callForAllItems(void(*func)(void* obj, void* param, oCItem*)
 
 	while (npcList != NULL) {
 		oCNpc* npc = npcList->GetData();
+
 		if (npc == NULL) {
 			npcList = npcList->GetNext();
 			continue;
 		}
 
-		oCVob* leftHandVob = oCNpcGetLeftHand(npc);
+		if (std::string(npc->name->ToChar()) == "Ich") {
+			bool test = true;
+
+			
+			auto& slots = npc->invSlot;
+			for (int i = 0; i < slots.GetSize(); ++i) {
+				auto* slot = npc->invSlot.GetItem(i);
+
+				char* slotMem = (char*)slot;
+
+				// vob in slot
+			//.text:0072C914                 mov     esi, [ebx+30h]
+			auto* slotItem = (oCItem*)(slotMem + 0x30);
+
+			if (slotItem) {
+				slotItem->name;
+			}
+
+			}
+
+			//.text:00738480 ; public: void __thiscall oCNpc::InitModel(void)
+
+			typedef void(__thiscall* OCNpcInitModel)(oCNpc*);
+			OCNpcInitModel ocCNpcInitModel = (OCNpcInitModel)0x00738480;
+
+			// .text:0073B1C0; public: void __thiscall oCNpc::SetRightHand(class oCVob*)
+			typedef void(__thiscall* OCNpcSetRightHand)(oCNpc*, void*);
+			OCNpcSetRightHand oCNpcSetRightHand = (OCNpcSetRightHand)0x0073B1C0;
+
+			/*ocCNpcInitModel(npc);
+
+
+			oCVob* rightHandVob = oCNpcGetRightHand(npc);
+			oCNpcSetRightHand(npc, rightHandVob);
+			if (rightHandVob)
+			{
+				oCItem* rightHandItem = dynamic_cast<oCItem*>(rightHandVob);
+				func(obj, param, rightHandItem);
+				//oCItemSaveRemoveEffect(rightHandItem);
+				//oCItemSaveInsertEffect(rightHandItem);
+
+				//oCNpcSetRightHand(npc, nullptr);
+				oCNpcSetRightHand(npc, rightHandVob);
+				
+
+			}*/
+
+
+			//npc->InitModel();
+			
+		}
+
+		/*oCVob* leftHandVob = oCNpcGetLeftHand(npc);
 		if (oCItem* leftHandItem = dynamic_cast<oCItem*>(leftHandVob))
 		{
 			func(obj, param, leftHandItem);
@@ -964,7 +1020,7 @@ void ObjectManager::callForAllItems(void(*func)(void* obj, void* param, oCItem*)
 				util::debug(&logStream);
 				return;
 			}
-		}
+		}*/
 
 		oCNpcInventory* inventory = npc->GetInventory();
 		if (inventory == NULL) {
@@ -972,8 +1028,13 @@ void ObjectManager::callForAllItems(void(*func)(void* obj, void* param, oCItem*)
 			continue;
 		}
 
+
+
+
 		inventory->UnpackAllItems();
-		zCListSort<oCItem>* list = reinterpret_cast<zCListSort<oCItem>*>(inventory->inventory_data);
+		auto* inv = &inventory->inv;
+
+		zCListSort<oCItem>* list = inv->contents;
 		while (list != NULL) {
 			oCItem* item = list->GetData();
 			if (item != NULL) tempList.push_back(item);
@@ -992,6 +1053,39 @@ void ObjectManager::callForAllItems(void(*func)(void* obj, void* param, oCItem*)
 			}
 		}
 		tempList.clear();
+
+		//oCNpcUpdateSlots(npc);
+
+		oCVob* rightHandVob = oCNpcGetRightHand(npc);
+		oCNpcSetRightHand(npc, rightHandVob);
+
+		//oCNpc_PutInSlot (hero, "ZS_LEFTHAND", MEM_InstToPtr(item), isInInventory);
+		////0x00749CB0 public: void __thiscall oCNpc::PutInSlot(class zSTRING const &,class oCVob *,int)
+		typedef void(__thiscall* OCNpcPutInSlot)(oCNpc*, zSTRING const&, oCVob*, int);
+		OCNpcPutInSlot oCNpcPutInSlot = (OCNpcPutInSlot)0x00749CB0;
+
+		//.text:00731EF0 ; public: class oCVob * __thiscall oCNpc::GetSlotVob(class zSTRING const &)
+		typedef oCVob* (__thiscall* OCNpcGetSlotVob)(oCNpc*, zSTRING const&);
+		OCNpcGetSlotVob oCNpcGetSlotVob = (OCNpcGetSlotVob)0x00731EF0;
+
+		static std::vector<const char*> SLOTS = {
+			"ZS_HELMET",
+			"ZS_LEFTHAND",
+			"ZS_LEFTARM",
+			"ZS_RIGHTHAND",
+			"ZS_CROSSBOW",
+			"ZS_LONGSWORD",
+			"ZS_SHIELD",
+			"ZS_BOW",
+			"ZS_SWORD",
+		};
+
+
+		for (const auto* slot : SLOTS){
+			zSTRING slotName(slot);
+			auto* vob = oCNpcGetSlotVob(npc, slotName);
+			oCNpcPutInSlot(npc, slotName, vob, 1);
+		}
 	}
 
 	tempList.clear();
@@ -1182,10 +1276,10 @@ void ObjectManager::oCItemSaveInsertEffect(oCItem* item)
 		return;
 	}
 
-	int* ptr = ((int*)item) + 0x340;
+	//int* ptr = ((int*)item) + 0x340;
 
 	//Has the item already an effect active?
-	if (ptr != NULL)
+	if (item->effectVob)
 	{
 		return;
 	}
@@ -1200,10 +1294,10 @@ void ObjectManager::oCItemSaveRemoveEffect(oCItem* item)
 		return;
 	}
 
-	int* ptr = ((int*)item) + 0x340;
+	//int* ptr = ((int*)item) + 0x340;
 
 	//Has the item no effect to remove?
-	if (ptr == NULL)
+	if (item->effectVob == NULL)
 	{
 		return;
 	}

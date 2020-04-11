@@ -226,7 +226,6 @@ float DaedalusExports::DII_GetLibVersion()
 
 struct UPDATE_INSTANCE_PARAMS {
 	int index;
-	oCItem* item;
 };
 
 static void updateItem(void* obj, void* param, oCItem* itm) {
@@ -239,48 +238,77 @@ static void updateItem(void* obj, void* param, oCItem* itm) {
 	{
 		//int refCtr = *(int*)((BYTE*)itm + 0x4);
 
+		constexpr int ITEM_ACTIVE = 0x40000000;
+		constexpr int ITEM_DROPPED = 1 << 10;
+		constexpr int ITEM_NFOCUS = 1 << 23;
+		bool isActive = itm->flags & ITEM_ACTIVE;
+		bool dropped = itm->flags & ITEM_DROPPED;
+		bool nfocus = itm->flags & ITEM_NFOCUS;
+
 		bool isInWorld = manager->isItemInWorld(itm);
-		int flags = itm->flags;
-		manager->oCItemSaveRemoveEffect(itm);
-		itm->InitByScript(id, itm->amount);
-		itm->flags = flags;
-
-		manager->oCItemSaveInsertEffect(itm);
-		//itm->InsertEffect();
-
-		if (isInWorld)
+		if (!isInWorld && isActive)
 		{
-			zCWorld* world = oCGame::GetGame()->GetWorld();
-			world->AddVob(params->item);
+			//zCWorld* world = oCGame::GetGame()->GetWorld();
+			//world->AddVob(itm);
+		}
+
+		//zCWorld* world = oCGame::GetGame()->GetWorld();
+		//world->AddVob(itm);
+		
+		
+		int flags = itm->flags;
+		//manager->oCItemSaveRemoveEffect(itm);
+		//itm->effect = "SPELLFX_FIREBOW";
+		itm->InitByScript(id, itm->amount);
+
+		if (isActive) itm->flags |= ITEM_ACTIVE;
+		if (dropped) itm->flags |= ITEM_DROPPED;
+		if (nfocus) itm->flags |= ITEM_NFOCUS;
+
+		//zCVob* effectVob = (zCVob*)itm->effectVob;
+		//if (effectVob) {
+		//	effectVob->trafo = itm->trafo;
+		//}
+		//itm->effectVob
+
+		//itm->flags = flags;
+		//world->AddVob(itm);
+
+		if (isInWorld && !isActive) { //&&!isActive
+			manager->oCItemSaveRemoveEffect(itm);
+			manager->oCItemSaveInsertEffect(itm);
+
+			//zCWorld* world = oCGame::GetGame()->GetWorld();
+			//world->AddVob(itm);
 		}
 	}
 }
 
-void DaedalusExports::DII_UpdateInstance(oCItem* item)
+bool DaedalusExports::DII_UpdateInstance(int instanceIdParserSymbolIndex, oCItem* item)
 {
 	ObjectManager* manager = ObjectManager::getObjectManager();
-	int index = manager->getDynInstanceId(item);
-	if (index > 0)
-	{
-		DynInstance* dynInstance = manager->getInstanceItem(index);
-		if (dynInstance == NULL)
-		{
-			logStream << "DII_UpdateInstance: dynInstance is null!" << std::endl;
-			util::logWarning(&logStream);
-			return;
-		}
-		dynInstance->store(*item);
+	DynInstance* dynInstance = manager->getInstanceItem(instanceIdParserSymbolIndex);
 
-		zCWorld* world = oCGame::GetGame()->GetWorld();
-
-		UPDATE_INSTANCE_PARAMS params = { index, item };
-		manager->callForAllItems(updateItem, NULL, &params);
-
-	} else
-	{
-		logStream << "DII_UpdateInstance: Couldn't update dynamic instance of item at address" << item << std::endl;
+	if (!item) {
+		logStream << "DII_UpdateInstance: item mustn't be null " << std::endl;
 		util::logWarning(&logStream);
+		return false;
 	}
+
+	if (!dynInstance)
+	{
+		logStream << "DII_UpdateInstance: dynInstance not found for instance id " << instanceIdParserSymbolIndex  << std::endl;
+		util::logWarning(&logStream);
+		return false;
+	}
+	dynInstance->store(*item);
+
+	zCWorld* world = oCGame::GetGame()->GetWorld();
+
+	UPDATE_INSTANCE_PARAMS params = { instanceIdParserSymbolIndex };
+	manager->callForAllItems(updateItem, NULL, &params);
+
+	return true;
 }
 
 void DaedalusExports::DII_AssignInstanceId(oCItem* item, int instanceIdParserSymbolIndex)

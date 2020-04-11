@@ -264,7 +264,7 @@ FUNC INT DII_IsInstanceDynamic(var string instanceName) {
 // @param itm : The item to be used for initializing the dii.
 // @return : True if the dii was successfully initialized.
 // ************************************************************
-func INT DII_SyncDII(var string instanceName, var c_item itm) {
+func INT DII_UpdateInstance(var string instanceName, var c_item itm) {
     if (!dii_Initialized) {
         MEM_Warn("DII_SyncDII: Library isn't initialized!");
         return FALSE;
@@ -277,9 +277,10 @@ func INT DII_SyncDII(var string instanceName, var c_item itm) {
     ptr = MEM_InstToPtr(itm);
 	var int ret;
     var int adr;
-    adr = GetProcAddress (LoadLibrary (DII_relativeLibraryPath), "DII_SyncDII");
-	CALL_IntParam(_@(instanceParserSymbolID));
-    CALL_IntParam(_@(ptr));
+    adr = GetProcAddress (LoadLibrary (DII_relativeLibraryPath), "DII_UpdateInstance");
+	
+	CALL_IntParam(ptr);
+	CALL_IntParam(instanceParserSymbolID);
 	CALL_PutRetValTo(_@(ret));
     CALL__cdecl(adr);
 	
