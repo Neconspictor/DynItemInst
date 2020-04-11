@@ -58,11 +58,36 @@ FUNC INT _DII_GetExpectedLibVersion() {
     return addf(integral, fraction);
 };
 
-FUNC C_ITEM DII_CreateNewItem (VAR INT instanceParserSymbolID) {
+// ************************************************************
+// Provides the instance id for an instance given by its string representation.
+// The instance id is an index into the parser symbol table.
+// ************************************************************
+FUNC INT DII_GetInstanceID(var string instanceName) {
+	return MEM_GetSymbolIndex(instanceName);
+};
+
+FUNC STRING DII_GetSymbolName(var int symbolIndex) {
+	var zCPar_Symbol symb;
+	symb = _^(MEM_GetSymbolByIndex(symbolIndex));
+	return symb.name;
+};
+
+// ************************************************************
+// Creates a new item.
+//
+// ATTENTION: The item has to be destroyed by DII_DeleteItem.
+// The item won't be stored into a savegame and is only valid for 
+// the current session (until gothic is terminated).
+// ************************************************************
+FUNC C_ITEM DII_CreateNewItem (var string instanceName) {
 	if (!dii_Initialized) {
 		MEM_Warn("DII_CreateNewItem: Library isn't initialized!");
 		return;
 	};
+	
+	var int instanceParserSymbolID;
+	instanceParserSymbolID = DII_GetInstanceID(instanceName);
+	
 	const int call = 0;
 	var int ret;
 	if (CALL_Begin(call)) {
@@ -76,32 +101,13 @@ FUNC C_ITEM DII_CreateNewItem (VAR INT instanceParserSymbolID) {
 	MEM_PtrToInst(ret);
 };
 
-// ************************************************************
-// Releases an item previously allocated with DII_CreateNewItem.
-// ************************************************************
-func void DII_ReleaseItem (var int itm) {
-    if (!dii_Initialized) {
-        MEM_Warn("DII_ReleaseItem: Library isn't initialized!");
-        return;
-    };
-    const int call = 0;
-    var int ret;
-    if (CALL_Begin(call)) {
-        var int adr;
-        adr = GetProcAddress (LoadLibrary (DII_relativeLibraryPath), "DII_ReleaseItem");
-        CALL_IntParam(_@(itm));
-        CALL__cdecl(adr);
-        call = CALL_End();
-    };
-	
-};
-
 
 // *********************************************************************
-// Creates a new dynamic item instance (dii) on the base of the item n0.
-// Objects having this new dii will have identic properties like n0.
+// Creates a new dynamic item instance (dii) on the base of the item itm.
+// Objects having this new dii will have identic properties like itm.
+// @return : The instance name of the newly created dii.
 // *********************************************************************
-FUNC STRING DII_CreateNewInstanceStr (var c_item n0) {
+FUNC STRING DII_CreateNewInstanceStr (var c_item itm) {
     if (!dii_Initialized) {
         MEM_Warn("DII_CreateNewInstanceStr: Library isn't initialized!");
         return "";
@@ -109,7 +115,7 @@ FUNC STRING DII_CreateNewInstanceStr (var c_item n0) {
     const int call = 0;
     var int ptr;
     var int ret;
-    ptr = MEM_InstToPtr(n0);
+    ptr = MEM_InstToPtr(itm);
     if (CALL_Begin(call)) {
         var int adr;
         adr = GetProcAddress (LoadLibrary (DII_relativeLibraryPath), "DII_CreateNewInstanceStr");
@@ -122,7 +128,14 @@ FUNC STRING DII_CreateNewInstanceStr (var c_item n0) {
 	return MEM_ReadString(ret);
 };
 
-FUNC INT DII_CreateNewInstanceStr2 (var c_item n0, var string instanceName) {
+
+// *********************************************************************
+// Creates a new dynamic item instance (dii) on the base of the item itm
+// and an instance name for the new dii.
+// Objects having this new dii will have identic properties like itm.
+// @return : TRUE, if the instance was successfully created. Otherwise FALSE.
+// *********************************************************************
+FUNC INT DII_CreateNewInstanceStr2 (var c_item itm, var string instanceName) {
     if (!dii_Initialized) {
         MEM_Warn("DII_CreateNewInstanceStr: Library isn't initialized!");
         return 0;
@@ -132,7 +145,7 @@ FUNC INT DII_CreateNewInstanceStr2 (var c_item n0, var string instanceName) {
     var int ret;
 	var zSTRING zStr;
 	zStr = _^(_@s(instanceName));
-    ptr = MEM_InstToPtr(n0);
+    ptr = MEM_InstToPtr(itm);
     if (CALL_Begin(call)) {
         var int adr;
         adr = GetProcAddress (LoadLibrary (DII_relativeLibraryPath), "DII_CreateNewInstanceStr2");
@@ -149,17 +162,56 @@ FUNC INT DII_CreateNewInstanceStr2 (var c_item n0, var string instanceName) {
 };
 
 
-FUNC INT DII_GetInstanceID(var string instanceName) {
-	return MEM_GetSymbolIndex(instanceName);
+// ***************************************************************
+//  Deletes a dynamic item instance by its instance name.
+// ***************************************************************
+func void DII_DeleteDII (var string instanceName) {
+    if (!dii_Initialized) {
+		MEM_Warn("DII_IsInstanceDynamic: Library isn't initialized!");
+        return;
+    };
+	
+	var int instanceParserSymbolID;
+	instanceParserSymbolID = DII_GetInstanceID(instanceName);
+	
+    const int call = 0;
+    if (CALL_Begin(call)) {
+        var int adr;
+        adr = GetProcAddress (LoadLibrary (DII_relativeLibraryPath), "DII_DeleteDII");
+        CALL_IntParam(_@(instanceParserSymbolID));
+        CALL__cdecl(adr);
+        call = CALL_End();
+    };
+};
+
+
+// ***************************************************************
+//  Removes an item from the current world and deletes it.
+// ***************************************************************
+func void DII_DeleteItem (VAR C_ITEM itm) {
+    if (!dii_Initialized) {
+		MEM_Warn("DII_IsInstanceDynamic: Library isn't initialized!");
+        return;
+    };
+    const int call = 0;
+    var int ptr;
+    ptr = MEM_InstToPtr(itm);
+    if (CALL_Begin(call)) {
+        var int adr;
+        adr = GetProcAddress (LoadLibrary (DII_relativeLibraryPath), "DII_DeleteItem");
+        CALL_IntParam(_@(ptr));
+        CALL__cdecl(adr);
+        call = CALL_End();
+    };
 };
 
 
 // ************************************************************
-// Checks whether a given item n0 has a dynamic item instance.
+// Checks whether a given item itm has a dynamic item instance.
 // If the item is dynamic, TRUE (1) otherwise FALSE (0) will
 // be returned.
 // ************************************************************
-FUNC INT DII_IsDynamic(var c_item n0) {
+FUNC INT DII_IsDynamic(var c_item itm) {
 	if (!dii_Initialized) {
 		MEM_Warn("DII_IsDynamic: Library isn't initialized!");
 		return 0;
@@ -167,7 +219,7 @@ FUNC INT DII_IsDynamic(var c_item n0) {
 	const int call = 0;
 	var int ptr;
 	var int ret;
-	ptr = MEM_InstToPtr(n0);
+	ptr = MEM_InstToPtr(itm);
 	if (CALL_Begin(call)) {
 		var int adr;
 		adr = GetProcAddress (LoadLibrary (DII_relativeLibraryPath), "DII_IsDynamic");
@@ -179,11 +231,19 @@ FUNC INT DII_IsDynamic(var c_item n0) {
 	return +ret;
 };
 
-FUNC INT DII_IsInstanceDynamic(var int instanceParserSymbolID) {
+// ************************************************************
+// Checks if an instance is a dynamic item instance.
+// @param instanceName : the name of the instance.
+// ************************************************************
+FUNC INT DII_IsInstanceDynamic(var string instanceName) {
     if (!dii_Initialized) {
         MEM_Warn("DII_IsInstanceDynamic: Library isn't initialized!");
         return 0;
     };
+	
+	var int instanceParserSymbolID;
+	instanceParserSymbolID = DII_GetInstanceID(instanceName);
+	
     const int call = 0;
     var int ret;
     if (CALL_Begin(call)) {
@@ -198,52 +258,50 @@ FUNC INT DII_IsInstanceDynamic(var int instanceParserSymbolID) {
 };
 
 
-
-func void DII_UpdateInstance(var c_item n0) {
+// ************************************************************
+// Initializes the properties of a dynamic item instance (dii) with the properties of an item.
+// @param instanceName : the instance name of the dii.
+// @param itm : The item to be used for initializing the dii.
+// @return : True if the dii was successfully initialized.
+// ************************************************************
+func INT DII_SyncDII(var string instanceName, var c_item itm) {
     if (!dii_Initialized) {
-        MEM_Warn("DII_UpdateInstance: Library isn't initialized!");
-        return;
+        MEM_Warn("DII_SyncDII: Library isn't initialized!");
+        return FALSE;
     };
+	
+	var int instanceParserSymbolID;
+	instanceParserSymbolID = DII_GetInstanceID(instanceName);
+	
     var int ptr;
-    ptr = MEM_InstToPtr(n0);
+    ptr = MEM_InstToPtr(itm);
+	var int ret;
     var int adr;
-    adr = GetProcAddress (LoadLibrary (DII_relativeLibraryPath), "DII_UpdateInstance");
-    CALL_IntParam(_@(n0));
+    adr = GetProcAddress (LoadLibrary (DII_relativeLibraryPath), "DII_SyncDII");
+	CALL_IntParam(_@(instanceParserSymbolID));
+    CALL_IntParam(_@(ptr));
+	CALL_PutRetValTo(_@(ret));
     CALL__cdecl(adr);
+	
+	return +ret;
 };
 
-
-// ***************************************************************
-//  Removes an item from the current world and deletes it.
-// ***************************************************************
-func void DII_DeleteItem (VAR C_ITEM n0) {
-    if (!dii_Initialized) {
-		MEM_Warn("DII_IsInstanceDynamic: Library isn't initialized!");
-        return;
-    };
-    const int call = 0;
-    var int ptr;
-    ptr = MEM_InstToPtr(n0);
-    if (CALL_Begin(call)) {
-        var int adr;
-        adr = GetProcAddress (LoadLibrary (DII_relativeLibraryPath), "DII_DeleteItem");
-        CALL_IntParam(_@(ptr));
-        CALL__cdecl(adr);
-        call = CALL_End();
-    };
-};
 
 // **********************************************************************
 // Provides access to the user data of a given dynamic item instance
-// which has the instance id instanceParserSymbolID. If the given instanceParserSymbolID isn't dynamic,
+// which has the instance name instanceName. If the given instanceName isn't a dii,
 // th null instance will be returned.
 // **********************************************************************
 
-FUNC DII_USER_DATA DII_GetUserData (var int instanceParserSymbolID) {
+FUNC DII_USER_DATA DII_GetUserData (var string instanceName) {
     if (!dii_Initialized) {
         MEM_Warn("DII_GetUserData: Library isn't initialized!");
         return;
     };
+	
+	var int instanceParserSymbolID;
+	instanceParserSymbolID = DII_GetInstanceID(instanceName);
+	
     const int call = 0;
     var int ret;
     if (CALL_Begin(call)) {
@@ -303,28 +361,19 @@ func void DII_Init()
     dii_Initialized = true;
 };
 
-FUNC int DII_AreChangesPerformed() {
-    if (!dii_Initialized) {
-        MEM_Warn("DII_AreChangesPerformed: Library isn't initialized!");
-        return 0;
-    };
-    const int call = 0;
-    var int ret;
-    if (CALL_Begin(call)) {
-        var int adr;
-        adr = GetProcAddress (LoadLibrary (DII_relativeLibraryPath), "DII_AreChangesPerformed");
-        CALL_PutRetValTo(_@(ret));
-        CALL__cdecl(adr);
-        call = CALL_End();
-    };
-    return +ret;
-};
 
-func void DII_AssignInstanceId (var c_item itm, var int instanceParserSymbolID) {
+func void DII_AssignInstanceId (var c_item itm, var string instanceName) {
     if (!dii_Initialized) {
         MEM_Warn("DII_AssignInstanceId: Library isn't initialized!");
         return;
     };
+	
+	var int instanceParserSymbolID;
+	instanceParserSymbolID = DII_GetInstanceID(instanceName);
+	
+	var int ptr;
+    ptr = MEM_InstToPtr(itm);
+	
     const int call = 0;
     var int ret;
     //var int symb; symb = MEM_ReadIntArray (currSymbolTableAddress, itm);//symb = itm;
@@ -332,35 +381,22 @@ func void DII_AssignInstanceId (var c_item itm, var int instanceParserSymbolID) 
         var int adr;
         adr = GetProcAddress (LoadLibrary (DII_relativeLibraryPath), "DII_AssignInstanceId");
         CALL_IntParam(_@(instanceParserSymbolID));
-        CALL_IntParam(_@(itm));
-        CALL__cdecl(adr);
-        call = CALL_End();
-    };
-};
-
-func void DII_MarkAsReusable(var int instanceId, var int previousId) {
-    if (!dii_Initialized) {
-        MEM_Warn("DII_MarkAsReusable: Library isn't initialized!");
-        return;
-    };
-    
-    const int call = 0;
-    if (CALL_Begin(call)) {
-        var int adr;
-        adr = GetProcAddress (LoadLibrary (DII_relativeLibraryPath), "DII_MarkAsReusable");
-        CALL_IntParam(_@(previousId));
-        CALL_IntParam(_@(instanceId));
+        CALL_IntParam(_@(ptr));
         CALL__cdecl(adr);
         call = CALL_End();
     };
 };
 
 
-func void DII_GetItemByInstanceId (var int itm, var int instanceParserSymbolID) {
+func void DII_GetItemByInstanceId (var int itm, var string instanceName) {
     if (!dii_Initialized) {
 		MEM_Warn("DII_GetItemByInstanceId: Library isn't initialized!");
         return;
     };
+	
+	var int instanceParserSymbolID;
+	instanceParserSymbolID = DII_GetInstanceID(instanceName);
+	
     const int call = 0;
     var int ret;
     if (CALL_Begin(call)) {

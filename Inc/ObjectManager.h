@@ -99,9 +99,16 @@ public:
 	int createNewInstanceId(oCItem* item, const std::string& instanceName);
 
 	/**
+	 * Deletes a DII by its parser symbol table index.
+	 * \param parserSymbolIndex The parser symbol table index referring to the DII.
+	 * \throws std::invalid_argument If the parserSymbolIndex doesn't referr to a valid DII.
+	 */
+	void deleteDII(int parserSymbolIndex);
+
+	/**
 	 * Assigns a given Item to a given instance id but only if the Item wasn't assigned to one id already.
 	 */
-	void registerInstance(int instanceIdParserSymbolIndex, DynInstance* item);
+	void registerInstance(int instanceIdParserSymbolIndex, std::unique_ptr<DynInstance> item);
 
 	/**
 	 * Assigns an oCItem to an specified instance id. True will be returned if the assignment
@@ -218,14 +225,7 @@ public:
 	 * \param item The item to check
 	 * \return Has the given item a dynamic instance?
 	 */
-	bool IsModified(oCItem* item);
-
-	/**
-	 * Checks whether the given instance id is a dynamic one.
-	 * \param instanceId The instance id to check
-	 * \return Has the given item a dynamic instance?
-	 */
-	bool IsModified(int instanceParserSymbolID);
+	bool isAssignedToDII(oCItem* item);
 
 	/**
 	 * Provides the zCPar_Symbol with index 'index' if the provided index refers to a dynamic instance.
@@ -317,7 +317,7 @@ private:
 	static ObjectManager* instanz;
 
 	// <int instanceId, Item* item>
-	std::map<int, DynInstance*> instanceMap;
+	std::map<int, std::unique_ptr<DynInstance>> instanceMap;
 	std::map<int, zCPar_Symbol*> newInstanceToSymbolMap;
 	std::map<std::string, zCPar_Symbol*> nameToSymbolMap;
 	std::map<std::string, int> nameToInstanceMap;

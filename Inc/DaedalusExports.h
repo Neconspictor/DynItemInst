@@ -64,12 +64,24 @@ public:
 
 	/**
 	 * An external for creating an item with a specific instance id.
-	 * Daedalus syntax: Func c_item DII_CreateNewItem(var int instanceId)
-	 * \param instanceId The instance id of the oCItem to be created.
+	 * Daedalus syntax: Func c_item DII_CreateNewItem(var int parserSymbolIndex)
+	 * \param parserSymbolIndex The instance id of the oCItem to be created.
 	 * \return The created item. If no item could be created, NULL will be returned.
 	 */
 	static oCItem* __cdecl  DII_CreateNewItem(int parserSymbolIndex);
 
+	/**
+	 * An external for deleting a dynamic instance by its parser symbol table index.
+	 * Daedalus syntax: Func void DII_DeleteDII(var string instanceName)
+	 * \param parserSymbolIndex The instance id to be deleted.
+	 */
+	static void __cdecl DII_DeleteDII(int parserSymbolIndex);
+
+	/**
+	 * An external for deleting an oCItem object by its pointer.
+	 * Daedalus syntax: Func void DII_DeleteItem(var oCItem itm)
+	 * \param item The oCItem to be deleted.
+	 */
 	static void __cdecl DII_DeleteItem(oCItem* item);
 	/**
 	 * An external for creating a new instance id from a given c_item.

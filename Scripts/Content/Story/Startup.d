@@ -44,10 +44,11 @@ func void positionHero() {
 			var C_Item c;
 			var C_Item d;
 			
-			a = DII_CreateNewItem(ItMw_1h_Vlk_Dagger);
-			b = DII_CreateNewItem(ItBE_Addon_MC);
-			c = DII_CreateNewItem(ItMw_1H_Mace_L_01);
-			d = DII_CreateNewItem(ItMw_1h_Bau_Axe);
+			
+			a = DII_CreateNewItem(DII_GetSymbolName(ItMw_1h_Vlk_Dagger));
+			b = DII_CreateNewItem(DII_GetSymbolName(ItBE_Addon_MC));
+			c = DII_CreateNewItem(DII_GetSymbolName(ItMw_1H_Mace_L_01));
+			d = DII_CreateNewItem(DII_GetSymbolName(ItMw_1h_Bau_Axe));
 			
 			a.value = 4;
 			b.value = 7;
@@ -117,7 +118,7 @@ func void positionHero() {
 		var DII_USER_DATA userData;
 		var DII_USER_DATA userData2;
 		
-		test = DII_CreateNewItem(ItMW_1h_vlk_dagger);
+		test = DII_CreateNewItem(DII_GetSymbolName(ItMW_1h_vlk_dagger));
 		test.damageTotal = 1000;
 		test.damage[DAM_INDEX_EDGE] = 1000;
 		test.COUNT[2] = test.damageTotal;
@@ -132,17 +133,17 @@ func void positionHero() {
 			MEM_Warn(ConcatStrings("instance name : ", instanceName));
 			instance = DII_GetInstanceID(instanceName);
 			
-			userData = DII_GetUserData(instance);
+			userData = DII_GetUserData(instanceName);
 			debugPrintUserData(userData);
 			
 			userData.data[1] = 666;
 			userData.magicWeaponNewDesc = "new desc";
 			userData.magicWeaponOldDesc = "old desc";
 			
-			userData2 = DII_GetUserData(instance);
+			userData2 = DII_GetUserData(instanceName);
 			debugPrintUserData(userData2);
 			
-			CreateInvItems(hero, instance, 20);
+			CreateInvItems(hero, DII_GetInstanceID(instanceName), 20);
 		} else {
 			MEM_Warn("Couldn't create dynamic instance!");
 		};
@@ -161,7 +162,7 @@ func void positionHero() {
 	
 	// Create a dynamic instance and insert an item of it in the player's inventory.
 		MEM_Warn("Before DII test!");
-		test = DII_CreateNewItem(ItMW_1h_vlk_dagger);
+		test = DII_CreateNewItem(DII_GetSymbolName(ItMW_1h_vlk_dagger));
 		test.damageTotal = 1000;
 		test.damage[DAM_INDEX_EDGE] = 1000;
 		test.COUNT[2] = test.damageTotal;
@@ -174,8 +175,7 @@ func void positionHero() {
 		
 		if (instanceCouldBeCreated) {
 			MEM_Warn(ConcatStrings("instance name : ", instanceName));
-			instance = DII_GetInstanceID(instanceName);
-			CreateInvItems(hero, instance, 20);
+			CreateInvItems(hero, DII_GetInstanceID(instanceName), 20);
 		} else {
 			MEM_Warn("Couldn't create dynamic instance!");
 		};
@@ -192,9 +192,14 @@ func void positionHero() {
 		instance = DII_GetInstanceID("HOOKED_DAGGER");
 		MEM_Warn(IntToString(instance));
 		if (instance != -1) {
-			userData = DII_GetUserData(instance);
+			userData = DII_GetUserData("HOOKED_DAGGER");
 			debugPrintUserData(userData);
 		};
+	};
+	
+	//DII_DeleteDII
+	if (MEM_KeyState(KEY_L) == KEY_PRESSED) {
+		DII_DeleteDII("Hooked_Dagger");
 	};
 };
 

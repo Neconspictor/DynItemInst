@@ -329,7 +329,7 @@ int DynItemInst::oCItemGetValueHook(void* pThis) {
 	oCItem* item = static_cast<oCItem*>(pThis);
 	ObjectManager* manager = ObjectManager::getObjectManager();
 	//if (manager->getDynInstanceId(item) > ObjectManager::INSTANCE_BEGIN) {
-	if (manager->IsModified(item)) {
+	if (manager->isAssignedToDII(item)) {
 		return item->value;
 	}
 	return oCItemGetValue(pThis);

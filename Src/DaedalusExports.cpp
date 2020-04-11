@@ -77,6 +77,19 @@ oCItem* __cdecl DaedalusExports::DII_CreateNewItem(int instanceId) // Func void 
 	return item;
 }
 
+void __cdecl DaedalusExports::DII_DeleteDII(int parserSymbolIndex)
+{
+	auto* manager = ObjectManager::getObjectManager();
+
+	try {
+		manager->deleteDII(parserSymbolIndex);
+	}
+	catch (const std::invalid_argument& e) {
+		logStream << e.what() << std::endl;
+		util::logWarning(&logStream);
+	}
+}
+
 void DaedalusExports::DII_DeleteItem(oCItem* item)
 {
 	if (item == NULL) return;
@@ -175,7 +188,7 @@ int DaedalusExports::DII_IsDynamic(oCItem* item) // Func DII_IsDynamic(VAR C_ITE
 {
 	if (item == NULL) {return FALSE;}
 
-	bool modified = ObjectManager::getObjectManager()->IsModified(item);
+	bool modified = ObjectManager::getObjectManager()->isAssignedToDII(item);
 	if (modified)
 	{
 		return TRUE;
@@ -193,7 +206,7 @@ BYTE* DaedalusExports::DII_GetUserData(int instanceIdParserSymbolIndex) // Func 
 {
 	ObjectManager* manager = ObjectManager::getObjectManager();
 
-	if (!manager->IsModified(instanceIdParserSymbolIndex))
+	if (!manager->isDynamicInstance(instanceIdParserSymbolIndex))
 	{
 		logStream << "DaedalusExports::DII_GetUserData: instanceId isn't dynamic" << std::endl;
 		util::debug(&logStream, Logger::Warning);

@@ -3,9 +3,10 @@ EXPORTS
 	Hook
 	Unhook
 	DII_CreateNewItem
-	DII_DeleteItem
 	DII_CreateNewInstanceStr
 	DII_CreateNewInstanceStr2
+	DII_DeleteDII
+	DII_DeleteItem
 	DII_IsDynamic
 	DII_IsInstanceDynamic
 	DII_GetUserData
