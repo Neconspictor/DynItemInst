@@ -17,9 +17,16 @@ namespace constants
 	
 	static int(__thiscall* oCNpcSetRightHand)(oCNpc*, oCVob*) = (int(__thiscall*)(oCNpc*, oCVob*))0x0073B1C0;
 	
+	typedef oCVob* (__thiscall* OCNpcGetSlotVob)(oCNpc*, zSTRING const&);
+	static const OCNpcGetSlotVob oCNpcGetSlotVob = (OCNpcGetSlotVob)0x00731EF0;
+
 	static int(__thiscall* oCNpcGetWeaponMode)(oCNpc*) = (int(__thiscall*)(oCNpc*))0x00738C40;
 	
 	static int(__thiscall* oCNpcIsMunitionAvailable)(oCNpc*, oCItem*) = (int(__thiscall*)(oCNpc*, oCItem*))0x0073C6E0;
+
+	typedef void(__thiscall* OCNpcPutInSlot)(oCNpc*, zSTRING const&, oCVob*, int); static const OCNpcPutInSlot oCNpcPutInSlot = (OCNpcPutInSlot)0x00749CB0;
+
+	
 	
 	static int(__thiscall* oCNpcSetLeftHand)(oCNpc*, oCVob*) = (int(__thiscall*)(oCNpc*, oCVob*))0x0073B0C0;
 	

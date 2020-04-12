@@ -63,14 +63,14 @@ public:
 public:
 
 	/**
+	 * Creates a new object manager.
+	 */
+	ObjectManager();
+
+	/**
 	 * \return the current instance of this class.
 	 */
 	static ObjectManager* getObjectManager();
-
-	/**
-	 * Deletes the current object manager (if one exists) and removes all dynamic instances.
-	 */
-	static void release();
 
 	/**
 	 * Calls oCItem::InitByScript(int, int), which initializes the given oCItem by its instance id.
@@ -311,11 +311,6 @@ private:
 		int parentId;
 	};
 
-	/**
-	 * singleton of this class
-	 */
-	static ObjectManager* instanz;
-
 	// <int instanceId, Item* item>
 	std::map<int, std::unique_ptr<DynInstance>> instanceMap;
 	std::map<int, zCPar_Symbol*> newInstanceToSymbolMap;
@@ -325,10 +320,8 @@ private:
 	std::stringstream logStream;
 private:
 
-	/**
-	 * Creates a new object manager.
-	 */
-	ObjectManager();
+	static constexpr const char* DII_SLOT_COUNT = "DII_SLOT_COUNT";
+	static constexpr const char* DII_SLOTS = "DII_SLOTS";
 
 	static zCPar_Symbol* createNewSymbol(const ParserInfo* old);
 	bool addSymbolToSymbolTable(zCPar_Symbol* symbol);
@@ -349,6 +342,10 @@ private:
 	zCPar_Symbol * createNewSymbol(int instanceParserSymbolID, zCPar_Symbol * prototype, const std::string& symbolName) const;
 
 	static void* __cdecl gothic2OperatorNew(size_t size);
+
+	int getSlotCount() const;
+	const zSTRING& getSlotName(int index) const;
+
 };
 
 #endif __ObjectManager_H__

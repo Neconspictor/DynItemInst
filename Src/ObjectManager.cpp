@@ -47,20 +47,6 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 using namespace std;
 using namespace constants;
 
-ObjectManager* ObjectManager::instanz = NULL;
-
-//.text:0073ABE0 public: class oCVob * __thiscall oCNpc::GetLeftHand(void) proc near
-typedef oCVob* (__thiscall* OCNpcGetLeftHand)(oCNpc*);
-OCNpcGetLeftHand oCNpcGetLeftHand = (OCNpcGetLeftHand) 0x0073ABE0;
-
-typedef void (__thiscall* OCNpcUpdateSlots)(oCNpc*);
-OCNpcUpdateSlots oCNpcUpdateSlots = (OCNpcUpdateSlots)0x0074A9D0;
-
-//.text:0073AB50 public: class oCVob * __thiscall oCNpc::GetRightHand(void) proc near
-typedef oCVob* (__thiscall* OCNpcGetRightHand)(oCNpc*);
-OCNpcGetRightHand oCNpcGetRightHand = (OCNpcGetRightHand)0x0073AB50;
-
-
 ObjectManager::ObjectManager() = default;
 
 
@@ -123,19 +109,9 @@ g2ext_extended::zCPar_SymbolTable* ObjectManager::zCParserGetSymbolTable(void* p
 
 
 ObjectManager* ObjectManager::getObjectManager() {
-	if (instanz == NULL)
-	{
-		instanz = new ObjectManager();
-	}
-	return instanz;
-};
+	static std::unique_ptr<ObjectManager> instance = std::make_unique<ObjectManager>();
 
-void ObjectManager::release() {
-	if (instanz != NULL) {
-		instanz->releaseInstances();
-		delete instanz;
-		instanz = NULL;
-	}
+	return instance.get();
 };
 
 int ObjectManager::createNewInstanceId(oCItem* item, const std::string& instanceName) {
@@ -920,6 +896,41 @@ void * ObjectManager::gothic2OperatorNew(size_t size) {
 	XCALL(0x00565F50);
 }
 
+int ObjectManager::getSlotCount() const
+{
+	auto* parser = zCParser::GetParser();
+	auto* symbol = parser->GetSymbol(DII_SLOT_COUNT);
+
+	if (!symbol) {
+		std::stringstream logStream;
+		logStream << "ObjectManager::getSlotCount(): " << DII_SLOT_COUNT << " is not defined" << endl;
+		util::logFatal(&logStream);
+	}
+
+	return symbol->content.data_int;
+}
+
+const zSTRING& ObjectManager::getSlotName(int index) const
+{
+	auto* parser = zCParser::GetParser();
+	auto* slot = parser->GetSymbol(DII_SLOTS);
+
+	if (!slot) {
+		std::stringstream logStream;
+		logStream << "ObjectManager::getSlotName(): " << DII_SLOTS << " is not defined" << endl;
+		util::logFatal(&logStream);
+	}
+
+	auto* pSlotName = slot->content.data_pstring;
+
+	static zSTRING empty;
+	if (!pSlotName) {
+		return empty;
+	}
+
+	return pSlotName[index];
+}
+
 
 void ObjectManager::updateIkarusSymbols()
 {
@@ -941,6 +952,9 @@ void ObjectManager::callForAllItems(void(*func)(void* obj, void* param, oCItem*)
 	list<oCItem*> tempList;
 	list<oCItem*>::iterator it;
 
+
+	const auto slotCount = getSlotCount();
+
 	while (npcList != NULL) {
 		oCNpc* npc = npcList->GetData();
 
@@ -951,84 +965,13 @@ void ObjectManager::callForAllItems(void(*func)(void* obj, void* param, oCItem*)
 
 		if (std::string(npc->name->ToChar()) == "Ich") {
 			bool test = true;
-
-			
-			auto& slots = npc->invSlot;
-			for (int i = 0; i < slots.GetSize(); ++i) {
-				auto* slot = npc->invSlot.GetItem(i);
-
-				char* slotMem = (char*)slot;
-
-				// vob in slot
-			//.text:0072C914                 mov     esi, [ebx+30h]
-			auto* slotItem = (oCItem*)(slotMem + 0x30);
-
-			if (slotItem) {
-				slotItem->name;
-			}
-
-			}
-
-			//.text:00738480 ; public: void __thiscall oCNpc::InitModel(void)
-
-			typedef void(__thiscall* OCNpcInitModel)(oCNpc*);
-			OCNpcInitModel ocCNpcInitModel = (OCNpcInitModel)0x00738480;
-
-			// .text:0073B1C0; public: void __thiscall oCNpc::SetRightHand(class oCVob*)
-			typedef void(__thiscall* OCNpcSetRightHand)(oCNpc*, void*);
-			OCNpcSetRightHand oCNpcSetRightHand = (OCNpcSetRightHand)0x0073B1C0;
-
-			/*ocCNpcInitModel(npc);
-
-
-			oCVob* rightHandVob = oCNpcGetRightHand(npc);
-			oCNpcSetRightHand(npc, rightHandVob);
-			if (rightHandVob)
-			{
-				oCItem* rightHandItem = dynamic_cast<oCItem*>(rightHandVob);
-				func(obj, param, rightHandItem);
-				//oCItemSaveRemoveEffect(rightHandItem);
-				//oCItemSaveInsertEffect(rightHandItem);
-
-				//oCNpcSetRightHand(npc, nullptr);
-				oCNpcSetRightHand(npc, rightHandVob);
-				
-
-			}*/
-
-
-			//npc->InitModel();
-			
 		}
-
-		/*oCVob* leftHandVob = oCNpcGetLeftHand(npc);
-		if (oCItem* leftHandItem = dynamic_cast<oCItem*>(leftHandVob))
-		{
-			func(obj, param, leftHandItem);
-			if (stopIfNotNullItem && *stopIfNotNullItem) {
-				logStream << "ObjectManager::callForAllItems: leftHandItem!" << endl;
-				util::debug(&logStream);
-				return;
-			}
-		}
-
-		if (oCItem* rightHandItem = dynamic_cast<oCItem*>(oCNpcGetRightHand(npc)))
-		{
-			func(obj, param, rightHandItem);
-			if (stopIfNotNullItem && *stopIfNotNullItem) {
-				logStream << "ObjectManager::callForAllItems: rightHandItem!" << endl;
-				util::debug(&logStream);
-				return;
-			}
-		}*/
 
 		oCNpcInventory* inventory = npc->GetInventory();
 		if (inventory == NULL) {
 			npcList = npcList->GetNext();
 			continue;
 		}
-
-
 
 
 		inventory->UnpackAllItems();
@@ -1054,21 +997,7 @@ void ObjectManager::callForAllItems(void(*func)(void* obj, void* param, oCItem*)
 		}
 		tempList.clear();
 
-		//oCNpcUpdateSlots(npc);
-
-		oCVob* rightHandVob = oCNpcGetRightHand(npc);
-		oCNpcSetRightHand(npc, rightHandVob);
-
-		//oCNpc_PutInSlot (hero, "ZS_LEFTHAND", MEM_InstToPtr(item), isInInventory);
-		////0x00749CB0 public: void __thiscall oCNpc::PutInSlot(class zSTRING const &,class oCVob *,int)
-		typedef void(__thiscall* OCNpcPutInSlot)(oCNpc*, zSTRING const&, oCVob*, int);
-		OCNpcPutInSlot oCNpcPutInSlot = (OCNpcPutInSlot)0x00749CB0;
-
-		//.text:00731EF0 ; public: class oCVob * __thiscall oCNpc::GetSlotVob(class zSTRING const &)
-		typedef oCVob* (__thiscall* OCNpcGetSlotVob)(oCNpc*, zSTRING const&);
-		OCNpcGetSlotVob oCNpcGetSlotVob = (OCNpcGetSlotVob)0x00731EF0;
-
-		static std::vector<const char*> SLOTS = {
+		/*static std::vector<const char*> SLOTS = {
 			"ZS_HELMET",
 			"ZS_LEFTHAND",
 			"ZS_LEFTARM",
@@ -1085,7 +1014,14 @@ void ObjectManager::callForAllItems(void(*func)(void* obj, void* param, oCItem*)
 			zSTRING slotName(slot);
 			auto* vob = oCNpcGetSlotVob(npc, slotName);
 			oCNpcPutInSlot(npc, slotName, vob, 1);
+		}*/
+
+		for (int i = 0; i < slotCount; ++i) {
+			auto& slotName = getSlotName(i);
+			auto* vob = oCNpcGetSlotVob(npc, slotName);
+			oCNpcPutInSlot(npc, slotName, vob, 1);
 		}
+
 	}
 
 	tempList.clear();
