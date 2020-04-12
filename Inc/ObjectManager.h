@@ -83,7 +83,7 @@ public:
 	/**
 	 * \return The list of all oCMobContainers the current oCGame contains.
 	 */
-	static std::list<oCMobContainer*>* getMobContainers();
+	static std::list<oCMobContainer*> getMobContainers();
 
 	/**
 	 * \return true if a new instance could be created. Otherwise false.
@@ -257,10 +257,10 @@ public:
 
 	void updateIkarusSymbols();
 
-	void callForAllItems(void(*func)(void* obj, void* param, oCItem*), void* obj, void* param, oCItem** stopIfNotNullItem = NULL);
-	static void callForInventoryItems(void(*func)(void* obj, void* param, oCItem*), void* obj, void* param, oCNpc * npc);
-	static void callForAllContainerItems(void(*func)(void* obj, void* param, oCItem*), void* obj, void* param, oCMobContainer* container);
-	static void callForAllWorldItems(void(*func)(void* obj, void* param, oCItem*), void* obj, void* param);
+	void callForAllItems(void(*func)(void* obj, void* param, oCItem*), void* obj, void* param);
+	void callForAllNpcItems(void(*func)(void* obj, void* param, oCItem*), void* obj, void* param);
+	void callForAllContainerItems(void(*func)(void* obj, void* param, oCItem*), void* obj, void* param);
+	void callForAllWorldItems(void(*func)(void* obj, void* param, oCItem*), void* obj, void* param);
 
 	static int * getParserInstanceCount();
 

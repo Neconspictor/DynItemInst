@@ -482,11 +482,12 @@ void ObjectManager::oCItemInitByScript(oCItem* item, int inst, int second)
 	XCALL(0x00711BD0);
 }
 
-list<oCMobContainer*>* ObjectManager::getMobContainers() {
-	list<oCMobContainer*>* containerList = new list<oCMobContainer*>();
+list<oCMobContainer*> ObjectManager::getMobContainers() {
+	list<oCMobContainer*> containerList;
 	zCWorld* world = oCGame::GetGame()->GetWorld();
 	zCListSort<zCVob>* vobList = world->GetVobList();
-	oCMobContainer* dummy = new oCMobContainer();
+	auto dummy = std::make_unique<oCMobContainer>();
+
 	while(vobList != NULL) {
 		zCVob* vob = vobList->GetData();
 		vobList = vobList->GetNext();
@@ -495,10 +496,10 @@ list<oCMobContainer*>* ObjectManager::getMobContainers() {
 		}
 
 		if (strcmp(typeid(*vob).name(), typeid(*dummy).name()) == 0) {
-			containerList->push_back(dynamic_cast<oCMobContainer*>(vob));
+			containerList.push_back(dynamic_cast<oCMobContainer*>(vob));
 		}
 	}
-	delete dummy;
+
 	return containerList;
 };
 
@@ -945,7 +946,15 @@ void ObjectManager::updateIkarusSymbols()
 	zCParser::GetParser()->CallFunc(arg.Upper());
 }
 
-void ObjectManager::callForAllItems(void(*func)(void* obj, void* param, oCItem*), void* obj, void* param, oCItem** stopIfNotNullItem)
+void ObjectManager::callForAllItems(void(*func)(void* obj, void* param, oCItem*), void* obj, void* param)
+{
+	callForAllNpcItems(func, obj, param);
+	callForAllContainerItems(func, obj, param);
+	callForAllWorldItems(func, obj, param);
+}
+
+
+void ObjectManager::callForAllNpcItems(void(*func)(void* obj, void* param, oCItem*), void* obj, void* param)
 {
 	zCWorld* world = oCGame::GetGame()->GetWorld();
 	zCListSort<oCNpc>* npcList = world->GetNpcList();
@@ -978,6 +987,8 @@ void ObjectManager::callForAllItems(void(*func)(void* obj, void* param, oCItem*)
 		auto* inv = &inventory->inv;
 
 		zCListSort<oCItem>* list = inv->contents;
+		tempList.clear();
+
 		while (list != NULL) {
 			oCItem* item = list->GetData();
 			if (item != NULL) tempList.push_back(item);
@@ -989,32 +1000,12 @@ void ObjectManager::callForAllItems(void(*func)(void* obj, void* param, oCItem*)
 		for (it = tempList.begin(); it != tempList.end(); ++it)
 		{
 			func(obj, param, *it);
-			if (stopIfNotNullItem && *stopIfNotNullItem) {
+			/*if (stopIfNotNullItem && *stopIfNotNullItem) {
 				logStream << "ObjectManager::callForAllItems: found item in npc's inventory!" << endl;
 				util::debug(&logStream);
 				return;
-			}
+			}*/
 		}
-		tempList.clear();
-
-		/*static std::vector<const char*> SLOTS = {
-			"ZS_HELMET",
-			"ZS_LEFTHAND",
-			"ZS_LEFTARM",
-			"ZS_RIGHTHAND",
-			"ZS_CROSSBOW",
-			"ZS_LONGSWORD",
-			"ZS_SHIELD",
-			"ZS_BOW",
-			"ZS_SWORD",
-		};
-
-
-		for (const auto* slot : SLOTS){
-			zSTRING slotName(slot);
-			auto* vob = oCNpcGetSlotVob(npc, slotName);
-			oCNpcPutInSlot(npc, slotName, vob, 1);
-		}*/
 
 		for (int i = 0; i < slotCount; ++i) {
 			auto& slotName = getSlotName(i);
@@ -1023,14 +1014,15 @@ void ObjectManager::callForAllItems(void(*func)(void* obj, void* param, oCItem*)
 		}
 
 	}
+}
 
-	tempList.clear();
+void ObjectManager::callForAllContainerItems(void(*func)(void *obj, void *param, oCItem *), void * obj, void * param)
+{
+	auto containerList = getMobContainers();
+	list<oCItem*> items;
 
-	list<oCMobContainer*>* containerList = getMobContainers();
-	list<oCMobContainer*>::iterator contIt = containerList->begin();
-	for (; contIt != containerList->end(); ++contIt)
+	for (auto* container : containerList)
 	{
-		oCMobContainer* container = *contIt;
 		int address = (int)container->containList_next;
 		zCListSort<oCItem>* listAddress = reinterpret_cast<zCListSort<oCItem>*>(address);
 		zCListSort<oCItem>* list = listAddress;
@@ -1038,98 +1030,15 @@ void ObjectManager::callForAllItems(void(*func)(void* obj, void* param, oCItem*)
 		while (list != NULL) {
 			oCItem* item = list->GetData();
 			if (item != NULL) {
-				tempList.push_back(item);
+				items.push_back(item);
 			}
 			list = list->GetNext();
 		}
 
-		it = tempList.begin();
-		for (; it != tempList.end(); ++it)
+		for (auto* item : items)
 		{
-			func(obj, param, *it);
-			if (stopIfNotNullItem && *stopIfNotNullItem) {
-				// containerList has to be deleted manually.
-				containerList->clear();
-				delete containerList;
-				if (stopIfNotNullItem && *stopIfNotNullItem) {
-					logStream << "ObjectManager::callForAllItems: found item in container!" << endl;
-					util::debug(&logStream);
-					return;
-				}
-				return;
-			}
+			func(obj, param, item);
 		}
-		tempList.clear();
-	}
-
-	tempList.clear();
-
-	zCListSort<oCItem>* itemList = world->GetItemList();
-	while (itemList != NULL) {
-		oCItem* item = itemList->GetData();
-		if (item != NULL)
-		{
-			tempList.push_back(item);
-		}
-		itemList = itemList->GetNext();
-	}
-
-	it = tempList.begin();
-	for (; it != tempList.end(); ++it)
-	{
-		func(obj, param, *it);
-		if (stopIfNotNullItem && *stopIfNotNullItem) {
-			logStream << "ObjectManager::callForAllItems: found item in world!" << endl;
-			util::debug(&logStream);
-			return;
-		}
-	}
-	tempList.clear();
-
-	// containerList has to be deleted manually.
-	containerList->clear();
-	delete containerList;
-}
-
-
-void ObjectManager::callForInventoryItems(void(*func)(void* obj, void* param, oCItem*), void* obj, void* param, oCNpc* npc)
-{
-	list<oCItem*> tempList;
-	oCNpcInventory* inventory = npc->GetInventory();
-	if (inventory == NULL) return;
-
-	inventory->UnpackAllItems();
-	zCListSort<oCItem>* sortedList = reinterpret_cast<zCListSort<oCItem>*>(inventory->inventory_data);
-	while (sortedList != NULL) {
-		oCItem* item = sortedList->GetData();
-		if (item != NULL) tempList.push_back(item);
-
-		sortedList = sortedList->GetNext();
-	}
-
-	for (list<oCItem*>::iterator it = tempList.begin(); it != tempList.end(); ++it)
-	{
-		func(obj, param, *it);
-	}
-	tempList.clear();
-}
-
-void ObjectManager::callForAllContainerItems(void(*func)(void *obj, void *param, oCItem *), void * obj, void * param, oCMobContainer * container)
-{
-	int address = (int)container->containList_next;
-	zCListSort<oCItem>* listAddress = reinterpret_cast<zCListSort<oCItem>*>(address);
-	zCListSort<oCItem>* list = listAddress;
-
-	while (list != NULL) {
-		oCItem* item = list->GetData();
-		if (item == NULL) {
-			list = list->GetNext();
-			continue;
-		}
-
-		func(obj, param, item);
-
-		list = list->GetNext();
 	}
 }
 
@@ -1138,6 +1047,7 @@ void ObjectManager::callForAllWorldItems(void(*func)(void* obj, void* param, oCI
 	zCWorld* world = oCGame::GetGame()->GetWorld();
 	list<oCItem*> tempList;
 	zCListSort<oCItem>* itemList = world->GetItemList();
+
 	while (itemList != NULL) {
 		oCItem* item = itemList->GetData();
 		if (item != NULL)
@@ -1147,9 +1057,9 @@ void ObjectManager::callForAllWorldItems(void(*func)(void* obj, void* param, oCI
 		itemList = itemList->GetNext();
 	}
 
-	for (list<oCItem*>::iterator it = tempList.begin(); it != tempList.end(); ++it)
+	for (auto* item : tempList)
 	{
-		func(obj, param, *it);
+		func(obj, param, item);
 	}
 }
 
@@ -1201,7 +1111,7 @@ oCItem* ObjectManager::getItemByInstanceId(int instanceIdParserSymbolIndex)
 
 	TEST2_PARAMS params = {NULL, instanceIdParserSymbolIndex };
 
-	callForAllItems(test2, NULL, &params, &params.result);
+	callForAllItems(test2, NULL, &params);
 	return params.result;
 }
 
