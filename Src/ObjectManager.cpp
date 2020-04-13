@@ -958,9 +958,6 @@ void ObjectManager::callForAllNpcItems(void(*func)(void* obj, void* param, oCIte
 {
 	zCWorld* world = oCGame::GetGame()->GetWorld();
 	zCListSort<oCNpc>* npcList = world->GetNpcList();
-	list<oCItem*> tempList;
-	list<oCItem*>::iterator it;
-
 
 	const auto slotCount = getSlotCount();
 
@@ -986,25 +983,12 @@ void ObjectManager::callForAllNpcItems(void(*func)(void* obj, void* param, oCIte
 		inventory->UnpackAllItems();
 		auto* inv = &inventory->inv;
 
-		zCListSort<oCItem>* list = inv->contents;
-		tempList.clear();
-
-		while (list != NULL) {
-			oCItem* item = list->GetData();
-			if (item != NULL) tempList.push_back(item);
-
-			list = list->GetNext();
-		}
+		std::list<oCItem*> items = util::create(inv->contents);
 		npcList = npcList->GetNext();
 
-		for (it = tempList.begin(); it != tempList.end(); ++it)
+		for (auto* item : items)
 		{
-			func(obj, param, *it);
-			/*if (stopIfNotNullItem && *stopIfNotNullItem) {
-				logStream << "ObjectManager::callForAllItems: found item in npc's inventory!" << endl;
-				util::debug(&logStream);
-				return;
-			}*/
+			func(obj, param, item);
 		}
 
 		for (int i = 0; i < slotCount; ++i) {
@@ -1019,22 +1003,14 @@ void ObjectManager::callForAllNpcItems(void(*func)(void* obj, void* param, oCIte
 void ObjectManager::callForAllContainerItems(void(*func)(void *obj, void *param, oCItem *), void * obj, void * param)
 {
 	auto containerList = getMobContainers();
-	list<oCItem*> items;
 
 	for (auto* container : containerList)
 	{
 		int address = (int)container->containList_next;
 		zCListSort<oCItem>* listAddress = reinterpret_cast<zCListSort<oCItem>*>(address);
 		zCListSort<oCItem>* list = listAddress;
-
-		while (list != NULL) {
-			oCItem* item = list->GetData();
-			if (item != NULL) {
-				items.push_back(item);
-			}
-			list = list->GetNext();
-		}
-
+		std::list<oCItem*> items = util::create(list);
+		
 		for (auto* item : items)
 		{
 			func(obj, param, item);
@@ -1045,19 +1021,10 @@ void ObjectManager::callForAllContainerItems(void(*func)(void *obj, void *param,
 void ObjectManager::callForAllWorldItems(void(*func)(void* obj, void* param, oCItem*), void* obj, void* param)
 {
 	zCWorld* world = oCGame::GetGame()->GetWorld();
-	list<oCItem*> tempList;
 	zCListSort<oCItem>* itemList = world->GetItemList();
+	std::list<oCItem*> items = util::create(itemList);
 
-	while (itemList != NULL) {
-		oCItem* item = itemList->GetData();
-		if (item != NULL)
-		{
-			tempList.push_back(item);
-		}
-		itemList = itemList->GetNext();
-	}
-
-	for (auto* item : tempList)
+	for (auto* item : items)
 	{
 		func(obj, param, item);
 	}

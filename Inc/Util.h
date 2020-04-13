@@ -33,6 +33,8 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <vector>
 #include <Windows.h>
 #include "Logger.h"
+#include <list>
+#include "api/g2/ztypes.h"
 
 #define LEGO_HOOKENGINE_PREAMBLE __asm      \
 /* Port output */         \
@@ -301,6 +303,20 @@ public:
 	static void logAlways(std::stringstream* ss);
 
 	static void callDaedalusFunction_Int2(std::string functionName, int first, int second, bool isExternal);
+
+    template<class T>
+    static std::list<T*> create(zCListSort<T>* zclist) {
+
+        std::list<T*> result;
+        while (zclist != NULL) {
+            auto* item = zclist->GetData();
+            if (item != NULL) result.push_back(item);
+
+            zclist = zclist->GetNext();
+        }
+
+        return result;
+    }
 
 private:
 	util() {};
