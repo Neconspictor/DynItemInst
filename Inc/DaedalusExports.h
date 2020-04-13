@@ -157,6 +157,8 @@ public:
 
 	static void DII_DrobVob(oCNpc* npc, zCVob* vob);
 
+	static int DII_convertFloatToInt(float f);
+
 public:
 
 	/**

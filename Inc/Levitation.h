@@ -516,5 +516,6 @@ public:
 	static float getLevitationSpeedVertical();
 	static float getLevitationSpeedForward();
 	static float getLevitationSpeedBackward();
+	static float getLevitationGravity();
 
 };

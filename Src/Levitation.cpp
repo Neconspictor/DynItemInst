@@ -821,6 +821,22 @@ float Levitation::getLevitationSpeedBackward()
 
 	return static_cast<float>(symbol->content.data_int);
 }
+float Levitation::getLevitationGravity()
+{
+	zCParser* parser; parser = zCParser::GetParser();
+	int index = parser->GetIndex("LEVITATION_GRAVITY");
+	zCPar_Symbol* symbol = parser->GetSymbol(index);
+
+	if (!index) {
+		std::stringstream logStream;
+		logStream << "Levitation::getLevitationGravity: '" << "LEVITATION_GRAVITY" << "' not defined!" << std::endl;
+		util::logFatal(&logStream);
+	}
+
+	float gravity = static_cast<float>(symbol->content.data_int);
+	if (gravity < 0.0) gravity = 0.0f;
+	return gravity;
+}
 ;
 
 zVEC3 Levitation::levitate() {
@@ -844,6 +860,7 @@ zVEC3 Levitation::levitate() {
 	float distanceVertical = speedVertical * float(frameTimePast) / 1000.0f;
 	float distanceForward = speedForward * float(frameTimePast) / 1000.0f;
 	float distanceBackward = speedBackward * float(frameTimePast) / 1000.0f;
+	float distanceGravity = getLevitationGravity() * float(frameTimePast) / 1000.0f;
 
 	zVEC3 oldLook = heroLevitationBean.oldLook;
 	zCInput* input = zCInput::GetInput();
@@ -882,6 +899,8 @@ zVEC3 Levitation::levitate() {
 	else if (moveDown) {
 		positionAdd.y -= distanceVertical;
 	}
+
+	positionAdd.y -= distanceGravity;
 
 	// Pressed Arrow_Up (levitation forward)
 	if (input->KeyPressed(0xC8)) {

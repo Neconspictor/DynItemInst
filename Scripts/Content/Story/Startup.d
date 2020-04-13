@@ -12,8 +12,6 @@
 
 var int teleportedHero;
 
-var int toggleLevitation;
-
 func int max2(var C_Item a, var C_Item b) {
 	if (a.value > b.value) {
 		return +a.value;
@@ -84,15 +82,8 @@ func void positionHero() {
 	};
 	
 	if (MEM_KeyState(KEY_H) == KEY_RELEASED) {
-		Print("Toogle levitation");
+		//Print("Toogle levitation");
 		DII_ToggleLevitation();
-		toggleLevitation = !toggleLevitation;
-		
-		if (toggleLevitation) {
-			Mdl_ApplyOverlayMds	(hero, "Humans_Levitate.mds"); 
-		} else {
-			Mdl_RemoveOverlayMDS(hero, "Humans_Levitate.mds");
-		};
 	};
 	
 	//if (MEM_KeyState(KEY_P) == KEY_RELEASED) {
@@ -170,15 +161,9 @@ func void positionHero() {
 		test.name = "I didn't imagine a proper name...";
 
 		//instanceName = DII_CreateNewInstanceStr(test);
-		instanceName = "Hooked_Dagger2";
-		instanceCouldBeCreated = DII_CreateNewInstanceStr2(test, instanceName);
-		
-		if (instanceCouldBeCreated) {
-			MEM_Warn(ConcatStrings("instance name : ", instanceName));
-			CreateInvItems(hero, DII_GetInstanceID(instanceName), 20);
-		} else {
-			MEM_Warn("Couldn't create dynamic instance!");
-		};
+		instanceName = DII_CreateNewInstanceStr(test);
+		MEM_Warn(ConcatStrings("instance name : ", instanceName));
+		CreateInvItems(hero, DII_GetInstanceID(instanceName), 20);
 		
 		
 		DII_DeleteItem(test);
@@ -241,6 +226,8 @@ func void INIT_GLOBAL()
 	Game_InitGerman();
 	
 	LeGo_Init(LeGo_All & ~LeGo_Bloodsplats);
+	
+	initLevitation();
 	
 	//InitDamage();
 	

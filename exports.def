@@ -30,3 +30,5 @@ EXPORTS
 
 	DII_Npc_CanSeeVob
 	DII_DrobVob
+
+	DII_convertFloatToInt

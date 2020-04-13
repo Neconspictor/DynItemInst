@@ -924,3 +924,11 @@ void DaedalusExports::DII_DrobVob(oCNpc* npc, zCVob* vob)
 	//zCRigidBodyPtr rigidBody = zCVobGetRigidBody(vob);
 	//zCRigidBodySetVelocity(rigidBody, zVEC3(0, -1,0));
 }
+
+int DaedalusExports::DII_convertFloatToInt(float f)
+{
+	logStream << "DII_convertFloatToInt: f = " << f << std::endl;
+	util::logAlways(&logStream);
+
+	return static_cast<int>(f);
+}
