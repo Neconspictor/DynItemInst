@@ -897,41 +897,6 @@ void * ObjectManager::gothic2OperatorNew(size_t size) {
 	XCALL(0x00565F50);
 }
 
-int ObjectManager::getSlotCount() const
-{
-	auto* parser = zCParser::GetParser();
-	auto* symbol = parser->GetSymbol(DII_SLOT_COUNT);
-
-	if (!symbol) {
-		std::stringstream logStream;
-		logStream << "ObjectManager::getSlotCount(): " << DII_SLOT_COUNT << " is not defined" << endl;
-		util::logFatal(&logStream);
-	}
-
-	return symbol->content.data_int;
-}
-
-const zSTRING& ObjectManager::getSlotName(int index) const
-{
-	auto* parser = zCParser::GetParser();
-	auto* slot = parser->GetSymbol(DII_SLOTS);
-
-	if (!slot) {
-		std::stringstream logStream;
-		logStream << "ObjectManager::getSlotName(): " << DII_SLOTS << " is not defined" << endl;
-		util::logFatal(&logStream);
-	}
-
-	auto* pSlotName = slot->content.data_pstring;
-
-	static zSTRING empty;
-	if (!pSlotName) {
-		return empty;
-	}
-
-	return pSlotName[index];
-}
-
 
 void ObjectManager::updateIkarusSymbols()
 {
@@ -959,7 +924,7 @@ void ObjectManager::callForAllNpcItems(void(*func)(void* obj, void* param, oCIte
 	zCWorld* world = oCGame::GetGame()->GetWorld();
 	zCListSort<oCNpc>* npcList = world->GetNpcList();
 
-	const auto slotCount = getSlotCount();
+	const auto slotCount = SlotInfo::getSlotCount();
 
 	while (npcList != NULL) {
 		oCNpc* npc = npcList->GetData();
@@ -992,7 +957,7 @@ void ObjectManager::callForAllNpcItems(void(*func)(void* obj, void* param, oCIte
 		}
 
 		for (int i = 0; i < slotCount; ++i) {
-			auto& slotName = getSlotName(i);
+			auto& slotName = SlotInfo::getSlotName(i);
 			auto* vob = oCNpcGetSlotVob(npc, slotName);
 			oCNpcPutInSlot(npc, slotName, vob, 1);
 		}
@@ -1121,4 +1086,39 @@ void ObjectManager::oCItemSaveRemoveEffect(oCItem* item)
 int * ObjectManager::getRefCounter(oCItem * item)
 {
 	return (int*)((BYTE*)item + 0x4);
+}
+
+int SlotInfo::getSlotCount()
+{
+	auto* parser = zCParser::GetParser();
+	auto* symbol = parser->GetSymbol(DII_SLOT_COUNT);
+
+	if (!symbol) {
+		std::stringstream logStream;
+		logStream << "SlotInfo::getSlotCount(): " << DII_SLOT_COUNT << " is not defined" << endl;
+		util::logFatal(&logStream);
+	}
+
+	return symbol->content.data_int;
+}
+
+const zSTRING& SlotInfo::getSlotName(int index)
+{
+	auto* parser = zCParser::GetParser();
+	auto* slot = parser->GetSymbol(DII_SLOTS);
+
+	if (!slot) {
+		std::stringstream logStream;
+		logStream << "SlotInfo::getSlotName(): " << DII_SLOTS << " is not defined" << endl;
+		util::logFatal(&logStream);
+	}
+
+	auto* pSlotName = slot->content.data_pstring;
+
+	static zSTRING empty;
+	if (!pSlotName) {
+		return empty;
+	}
+
+	return pSlotName[index];
 }

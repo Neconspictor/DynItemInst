@@ -26,8 +26,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 
 /////////////////////////////////////////////////////////////////////////////**/
 
-#ifndef __ObjectManager_H__
-#define __ObjectManager_H__
+#pragma once
 
 #include "DynInstance.h"
 #include <HookManager.h>
@@ -303,14 +302,6 @@ public:
 
 private:
 
-	/**
-	 * Stores relevant information for signing instances.
-	 */
-	struct InstanceInfo {
-		int id;
-		int parentId;
-	};
-
 	// <int instanceId, Item* item>
 	std::map<int, std::unique_ptr<DynInstance>> instanceMap;
 	std::map<int, zCPar_Symbol*> newInstanceToSymbolMap;
@@ -319,9 +310,6 @@ private:
 
 	std::stringstream logStream;
 private:
-
-	static constexpr const char* DII_SLOT_COUNT = "DII_SLOT_COUNT";
-	static constexpr const char* DII_SLOTS = "DII_SLOTS";
 
 	static zCPar_Symbol* createNewSymbol(const ParserInfo* old);
 	bool addSymbolToSymbolTable(zCPar_Symbol* symbol);
@@ -342,10 +330,16 @@ private:
 	zCPar_Symbol * createNewSymbol(int instanceParserSymbolID, zCPar_Symbol * prototype, const std::string& symbolName) const;
 
 	static void* __cdecl gothic2OperatorNew(size_t size);
-
-	int getSlotCount() const;
-	const zSTRING& getSlotName(int index) const;
-
 };
 
-#endif __ObjectManager_H__
+
+class SlotInfo {
+public:
+
+	static constexpr const char* DII_SLOT_COUNT = "DII_SLOT_COUNT";
+	static constexpr const char* DII_SLOTS = "DII_SLOTS";
+
+	static int getSlotCount();
+	static const zSTRING& getSlotName(int index);
+
+};
