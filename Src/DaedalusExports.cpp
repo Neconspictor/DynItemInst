@@ -126,7 +126,7 @@ int DaedalusExports::DII_CreateNewInstance(oCItem* item) //Func int DII_CreateNe
 #undef min
 #undef max
 
-		const std::string instanceName = "DII_" + std::to_string(util::generateRandom(std::numeric_limits<int>::min(), std::numeric_limits<int>::max()));
+		const std::string instanceName = "DII_*" + std::to_string(util::generateRandom(std::numeric_limits<int>::min(), std::numeric_limits<int>::max()));
 
 #pragma pop_macro("max")
 #pragma pop_macro("min")
