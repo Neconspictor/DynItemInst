@@ -35,6 +35,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include "Logger.h"
 #include <list>
 #include "api/g2/ztypes.h"
+#include <api/g2/macros.h>
 
 #define LEGO_HOOKENGINE_PREAMBLE __asm      \
 /* Port output */         \
@@ -250,6 +251,8 @@ public:
 	 */
 	static void safeDelete(void** address);
 
+    static int generateRandom(int min, int max);
+
 	/**
 	 * Provides the pth to the current working directory of this application.
 	 * \return The current working directory
@@ -284,6 +287,10 @@ public:
 	static HMODULE getModuleHandle();
 
 	static std::string getGothicSystemDirectory();
+
+    static void* __cdecl gothic2OperatorNew(size_t size) {
+        XCALL(0x00565F50);
+    }
 
 	static void assertDIIRequirements(bool expression, std::string errorMessage);
 

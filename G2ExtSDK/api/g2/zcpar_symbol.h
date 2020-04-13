@@ -48,6 +48,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 class zCPar_Symbol
 {
 public:
+
 	//.text:007A2F30 ; public: int __thiscall zCPar_Symbol::GetOffset(void)
 	/** Insert description. 
 	* @usable Ingame only
@@ -65,6 +66,12 @@ public:
 	{
 		XCALL(0x007A1DC0);
 	};
+
+	/**
+	 * Factory method for creating a new zCPar_Symbol object.
+	 * Note: The allocated memory has to be deallocated with ... TODO
+	 */
+	static zCPar_Symbol* create();
 
 public:
 	zSTRING			name;

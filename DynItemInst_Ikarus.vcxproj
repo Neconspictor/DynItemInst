@@ -55,6 +55,7 @@
     <ClCompile Include="minhook-master\src\hde\hde64.c" />
     <ClCompile Include="minhook-master\src\hook.c" />
     <ClCompile Include="minhook-master\src\trampoline.c" />
+    <ClCompile Include="Src\api\g2\zcpar_symbol.cpp" />
     <ClCompile Include="Src\Configuration.cpp" />
     <ClCompile Include="Src\CustomNpcFocus.cpp" />
     <ClCompile Include="Src\DllMain.cpp" />

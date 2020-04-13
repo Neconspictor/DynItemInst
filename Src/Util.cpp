@@ -44,6 +44,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <ObjectManager.h>
 #include <api/g2/zcparser.h>
 #include <Util_Constants.h>
+#include <random>
 
 
 HMODULE util::hModule = 0;
@@ -56,6 +57,14 @@ void util::safeDelete(void** pointer)
 		delete *pointer;
 		*pointer = NULL;
 	}
+}
+
+int util::generateRandom(int min, int max)
+{
+	std::random_device random_device;
+	std::mt19937 random_engine(random_device());
+	std::uniform_int_distribution<int> distribution(min, max);
+	return distribution(random_engine);
 }
 
 std::string util::getCurrentWorkingDir()

@@ -117,17 +117,26 @@ int DaedalusExports::DII_CreateNewInstance(oCItem* item) //Func int DII_CreateNe
 	// Create new instance with item
 	ObjectManager* manager = ObjectManager::getObjectManager();
 
-	const std::string instanceName = "DII_" + std::to_string(*manager->getParserInstanceCount());
 
-	int parserSymbolIndex = manager->createNewInstanceId(item, instanceName);
-	if (!parserSymbolIndex) {
-		logStream << "DII_CreateNewInstanceStr2: Couldn't create new instance '" << instanceName << "'" << std::endl;
-		util::logWarning(&logStream);
+	int parserSymbolIndex = 0;
+
+	while (!parserSymbolIndex) {
+#pragma push_macro("min")
+#pragma push_macro("max")
+#undef min
+#undef max
+
+		const std::string instanceName = "DII_" + std::to_string(util::generateRandom(std::numeric_limits<int>::min(), std::numeric_limits<int>::max()));
+
+#pragma pop_macro("max")
+#pragma pop_macro("min")
+
+		parserSymbolIndex = manager->createNewInstanceId(item, instanceName);
+		if (!parserSymbolIndex) {
+			logStream << "DII_CreateNewInstanceStr2: Couldn't create new instance '" << instanceName << "'" << std::endl;
+			util::logWarning(&logStream);
+		}
 	}
-
-	int index = manager->getDynInstanceId(item);
-	logStream << "Index: " << index << std::endl;
-	util::debug(&logStream);
 
 	logStream << "CreateNewInstance::key: " << parserSymbolIndex << std::endl;
 	util::debug(&logStream);

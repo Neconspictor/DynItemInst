@@ -527,7 +527,7 @@ bool ObjectManager::createNewInstanceWithoutExistingId(oCItem* item, int instanc
 	}
 
 	int* indexCount = getParserInstanceCount();
-	zCPar_Symbol* symbol = createNewSymbol(instanceParserSymbolID, old, instanceName);
+	zCPar_Symbol* symbol = createNewInstanceSymbol(instanceParserSymbolID, old, instanceName);
 
 	if (!symbol) {
 		std::stringstream logStream;
@@ -573,20 +573,7 @@ bool ObjectManager::createNewInstanceWithoutExistingId(oCItem* item, int instanc
 	return true;
 }
 
-/*void ObjectManager::createNewInstanceForExistingId(oCItem* item, int instanceId)
-{
-	DynInstance* instanceItem = getInstanceItem(instanceId);
-	int parentId = getInstanceId(*item);
-	instanceItem->store(*item);
-	instanceItem->setInstanceID(instanceId);
-
-	setParentInstanceId(instanceId, parentId);
-};*/
-
-
-
-
-zCPar_Symbol* ObjectManager::createNewSymbol(const ParserInfo* old)
+zCPar_Symbol* ObjectManager::createNewInstanceSymbol(const ParserInfo* old)
 {
 	zCParser* parser = zCParser::GetParser();
 	zCPar_Symbol* ref = parser->GetSymbol(old->oldSymbolName);
@@ -596,15 +583,7 @@ zCPar_Symbol* ObjectManager::createNewSymbol(const ParserInfo* old)
 
 	zCPar_Symbol* parent = parser->GetSymbol("C_ITEM");
 
-	//result = new zCPar_Symbol(); 
-	
-	// The symbol will be managed by the Gothic 2 exe and thus the appropriate new operator has to be called!
-	void* memory = gothic2OperatorNew(0x3C); //sizeof(zCPar_Symbol) = 0x3C (-> see gothic 2 exe, address 0x0078DD02)
-	ZeroMemory(memory, 0x3C);
-	zCPar_SymbolConstructor(memory);
-
-	result = (zCPar_Symbol*)memory;
-
+	result = zCPar_Symbol::create();
 	result->parent = ref->parent;
 	result->bitfield = ref->bitfield;
 	result->name = old->newSymbolName;
@@ -689,7 +668,7 @@ void ObjectManager::logSymbolData(zCPar_Symbol* sym)
 
 int ObjectManager::createParserSymbol(const ParserInfo& info)
 {
-	zCPar_Symbol* symbol = createNewSymbol(&info);
+	zCPar_Symbol* symbol = createNewInstanceSymbol(&info);
 	zCParser* parser = zCParser::GetParser();
 	if (!addSymbolToSymbolTable(symbol))
 	{
@@ -721,7 +700,7 @@ int ObjectManager::createParserSymbol(const ParserInfo& info)
 	return newInstanceId;
 }
 
-zCPar_Symbol* ObjectManager::createNewSymbol(int instanceParserSymbolID, zCPar_Symbol* prototype, const std::string& symbolName) const
+zCPar_Symbol* ObjectManager::createNewInstanceSymbol(int instanceParserSymbolID, zCPar_Symbol* prototype, const std::string& symbolName) const
 {
 
 	zCPar_Symbol* symbol;
@@ -746,12 +725,7 @@ zCPar_Symbol* ObjectManager::createNewSymbol(int instanceParserSymbolID, zCPar_S
 		return nullptr;
 	}
 
-
-	// The symbol will be managed by the Gothic 2 exe and thus the appropriate new operator has to be called!
-	void* memory = gothic2OperatorNew(0x3C); //sizeof(zCPar_Symbol) = 0x3C (-> see gothic 2 exe, address 0x0078DD02)
-	ZeroMemory(memory, 0x3C);
-	zCPar_SymbolConstructor(memory);
-	symbol = (zCPar_Symbol*)memory;
+	symbol = zCPar_Symbol::create();
 
 	string name = symbolName;
 	transform(name.begin(), name.end(), name.begin(), ::toupper);
@@ -892,11 +866,6 @@ int ObjectManager::getIndexByName(zSTRING symbolName)
 	if (it == nameToInstanceMap.end()) { return NULL; }
 	return it->second;
 }
-
-void * ObjectManager::gothic2OperatorNew(size_t size) {
-	XCALL(0x00565F50);
-}
-
 
 void ObjectManager::updateIkarusSymbols()
 {

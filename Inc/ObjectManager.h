@@ -311,7 +311,7 @@ private:
 	std::stringstream logStream;
 private:
 
-	static zCPar_Symbol* createNewSymbol(const ParserInfo* old);
+	static zCPar_Symbol* createNewInstanceSymbol(const ParserInfo* old);
 	bool addSymbolToSymbolTable(zCPar_Symbol* symbol);
 	DynInstance * createNewInstanceItem(int instanceIdParserSymbolIndex);
 	void updateContainerItem(const ObjectManager::ParserInfo* info);
@@ -327,9 +327,7 @@ private:
 	 */
 	int createParserSymbol(const ParserInfo& info);
 
-	zCPar_Symbol * createNewSymbol(int instanceParserSymbolID, zCPar_Symbol * prototype, const std::string& symbolName) const;
-
-	static void* __cdecl gothic2OperatorNew(size_t size);
+	zCPar_Symbol * createNewInstanceSymbol(int instanceParserSymbolID, zCPar_Symbol * prototype, const std::string& symbolName) const;
 };
 
 
