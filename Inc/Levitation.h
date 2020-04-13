@@ -493,32 +493,6 @@ public:
 
 	//.text:00699F60 ; protected: int __thiscall oCAIHuman::PC_ActionMove(int)
 	static int __thiscall oCAIHumanPC_ActionMoveHook(void* pThis, int param1);
-
-
-	struct ContainerState
-	{
-		int selectedItemRowNumber;		// index begins at 0
-		int selectedItemColumnNumber;	// index begins at 0
-		int selectedItemNumber;			// index begins at 0 (if there is a selected item);
-		oCItem* selectedItem;			// the selected item; nullptr if no item is selected
-		zCListSort<oCItem>* selectedItemList; // The list that has the selected item as its data member
-		int itemNumber;					// the total number of items in the container
-	};
-
-	static void getState(oCItemContainer& container, ContainerState& state);
-	//.text:00706B60 ; protected: virtual void __thiscall oCItemContainer::DrawCategory(void)
-	static void __thiscall oCItemContainerDrawCategoryHook(void* pThis);
-	//.text:007092C0 ; public: virtual class oCItem * __thiscall oCItemContainer::GetSelectedItem(void)
-	static oCItem* __thiscall oCItemContainerGetSelectedItemHook(oCItemContainer* pThis);
-	//.text:007076B0 ; void __thiscall oCItemContainer::Draw(oCItemContainer *this)
-	static void __thiscall oCItemContainerDrawHook(oCItemContainer* pThis);
-	static bool meetsCondition(oCItem* item); 
-	static oCItem* myTestFunction(oCItem** currentItem, zCListSort<oCItem>** pointer, oCItem* item);
-	//.text:00709740 ; void __thiscall oCItemContainer::NextItem(oCItemContainer *__hidden this)
-	static void __thiscall oCItemContainerNextItemHook(oCItemContainer* pThis);
-	static void __thiscall oCItemContainerNextItemReversed(oCItemContainer* container);
-	//.text:00705B80 ; int __cdecl oCItemCompareFunction(int,int)
-	static int __cdecl oCItemCompareFunctionHook(oCItem* a, oCItem* b);
 };
 
 struct Motion
