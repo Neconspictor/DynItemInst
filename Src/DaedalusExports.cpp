@@ -496,15 +496,6 @@ void DaedalusExports::DII_ChangeItemsInstanceId(int sourceInstanceParserSymbolIn
 	util::debug(&logStream);
 }
 
-void DaedalusExports::DII_ToggleLevitation()
-{
-	//toggle adjustHeroPosition
-	Levitation::yPos = oCNpc::GetHero()->GetPositionWorld().y;
-	Levitation::adjustHeroPosition = !Levitation::adjustHeroPosition;
-}
-
-
-
 void DaedalusExports::DII_SetHeroFocusMode(int mode)
 {
 	//for now ignore!

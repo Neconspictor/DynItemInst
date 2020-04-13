@@ -131,8 +131,6 @@ public:
 	//Asiigns all items with instance id targetId the new id newId
 	static void DII_ChangeItemsInstanceId(int sourceInstanceParserSymbolIndex, int targetInstanceParserSymbolIndex);
 
-	static void DII_ToggleLevitation();
-
 	static void DII_SetHeroFocusMode(int mode);
 
 	static void DII_Test(oCItem* item, int mode);

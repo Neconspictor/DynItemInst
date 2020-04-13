@@ -44,7 +44,6 @@ void LevitationData::update(oCNpc* npc, float distance)
 		float distDiff = oldDistanceToGround - distance;
 		if (distDiff > JUMP_VALUE * HOVER_DISTANCE) {
 			adaptHoverDistance(newPosition, distance);
-			std::cout << "called!!!!!!!" << std::endl;
 		}
 	}
 }

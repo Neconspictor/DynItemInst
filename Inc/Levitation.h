@@ -59,6 +59,15 @@ struct zCBspBase_Small
 };
 
 
+struct Motion
+{
+	zVEC3 normal;
+	float distance;
+	zVEC3 objectPos;
+	zVEC3 intersect;
+};
+
+
 
 class Float
 {
@@ -423,13 +432,10 @@ extern int COLLISION_HEAD_SIZE_Y;
 class Levitation : public Module
 {
 public:
-
-	static bool adjustHeroPosition;
 	static bool pausedGame;
 	static bool noCollision;
 	static int frameTime;
 	static int diffFrameTime;
-	static float yPos; //not really used!!!
 
 	Levitation();
 	virtual ~Levitation();
@@ -492,21 +498,23 @@ public:
 
 	//.text:00699F60 ; protected: int __thiscall oCAIHuman::PC_ActionMove(int)
 	static int __thiscall oCAIHumanPC_ActionMoveHook(void* pThis, int param1);
-};
 
-struct Motion
-{
-	zVEC3 normal;
-	float distance;
-	zVEC3 objectPos;
-	zVEC3 intersect;
-};
 
-__int32 __cdecl sysGetTime();
-zVEC3 levitate();
-void Test(oCNpc* npc);
-int calcPastFrameTime();
-Motion getCollideYDir(zVEC3, float, bool);
-Motion getCollideForwardDir(oCNpc*, float, bool);
-bool check_prePass(oCNpc* hero, const zMAT4& mat);
-bool checkVobCollision(void* zCBspBaseObject, zCVob* testedVob, zTBBox3D const& boundingBox);
+
+
+	static __int32 __cdecl sysGetTime();
+	static zVEC3 levitate();
+	static void doCustomCollisionCheck(oCNpc* npc);
+	static int calcPastFrameTime();
+	static Motion getCollideYDir(zVEC3, float, bool);
+	static Motion getCollideForwardDir(oCNpc*, float, bool);
+	static bool check_prePass(oCNpc* hero, const zMAT4& mat);
+	static bool checkVobCollision(void* zCBspBaseObject, zCVob* testedVob, zTBBox3D const& boundingBox);
+	static void doFloorAligning(zVEC3* finalPosition, zMAT4* mat);
+	static bool isLevitationActive();
+	static int getMinHoverDistance();
+	static float getLevitationSpeedVertical();
+	static float getLevitationSpeedForward();
+	static float getLevitationSpeedBackward();
+
+};

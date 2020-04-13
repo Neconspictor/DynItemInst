@@ -355,10 +355,13 @@ func void DII_Init()
         };
         return;
     };
+	
+	DII_InitSlots();
 
     var int adr;
     adr = GetProcAddress (LoadLibrary (DII_relativeLibraryPath), "Hook");
     CALL__stdcall(adr);
+	
     dii_Initialized = true;
 };
 
@@ -478,20 +481,30 @@ func void DII_TransformationTest(var int vobPtr) {
     };
 };
 
+
+var int DII_LevitationIsActive;
+const int LEVITATION_HOVER_DISTANCE = 40; // hover distance (in cm)
+const int LEVITATION_SPEED_VERTICAL = 50; // up/down levitation speed (in cm)
+const int LEVITATION_SPEED_FORWARD = 500; // forward levitation speed (in cm)
+const int LEVITATION_SPEED_BACKWARD = 100; // backward levitation speed (in cm)
+
 func void DII_ToggleLevitation() {
 	if (!dii_Initialized) {
         MEM_Warn("DII_ToggleLevitation: Library isn't initialized!");
         return;
     };
 	
-	const int call = 0;
+	
+	DII_LevitationIsActive = !DII_LevitationIsActive;
+	
+	/*const int call = 0;
     var int ret;
     if (CALL_Begin(call)) {
         var int adr;
         adr = GetProcAddress (LoadLibrary (DII_relativeLibraryPath), "DII_ToggleLevitation");
         CALL__cdecl(adr);
         call = CALL_End();
-    };
+    };*/
 };
 
 func void DII_TelekineseTest() {
