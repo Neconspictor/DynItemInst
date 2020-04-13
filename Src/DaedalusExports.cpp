@@ -725,22 +725,22 @@ int DaedalusExports::DII_Npc_CanSeeVob(oCNpc* npc, zCVob* vob)
 			case VOB_TYPE_MOB:
 				{
 					oCMob * mob = (oCMob*)vob;
-					logStream << "vob is mob: " << mob->name.ToChar() << std::endl;
-					util::logAlways(&logStream);
+					//logStream << "vob is mob: " << mob->name.ToChar() << std::endl;
+					//util::logAlways(&logStream);
 					break;
 				}
 			case VOB_TYPE_ITEM:
 				{
 					oCItem * item = (oCItem*)vob;
-					logStream << "vob is item: " << item->name.ToChar() << std::endl;
-					util::logAlways(&logStream);
+					//logStream << "vob is item: " << item->name.ToChar() << std::endl;
+					//util::logAlways(&logStream);
 					break;
 				}
 			case VOB_TYPE_NPC:
 				{
 					oCNpc * npc2 = (oCNpc*)vob;
-					logStream << "vob is npc: " << npc2->name[0].ToChar() << std::endl;
-					util::logAlways(&logStream);
+					//logStream << "vob is npc: " << npc2->name[0].ToChar() << std::endl;
+					//util::logAlways(&logStream);
 					break;
 				}
 			default: ;
@@ -771,9 +771,9 @@ int DaedalusExports::DII_Npc_CanSeeVob(oCNpc* npc, zCVob* vob)
 			bool hasStaticCollision = foundVob->bitfield[0] & zCVob_bitfield0_collDetectionStatic;
 			bool hasDynamicCollision = foundVob->bitfield[0] & zCVob_bitfield0_collDetectionDynamic;
 
-			logStream << "foundVob has static collision detection on: " << hasStaticCollision << std::endl;
-			logStream << "foundVob has dynamic collision detection on: " << hasDynamicCollision << std::endl;
-			util::logAlways(&logStream);
+			//logStream << "foundVob has static collision detection on: " << hasStaticCollision << std::endl;
+			//logStream << "foundVob has dynamic collision detection on: " << hasDynamicCollision << std::endl;
+			//util::logAlways(&logStream);
 
 			//int testCanSee = oCNpcCanSee(npc, vob, 0);
 			//logStream << "testCanSee: " << testCanSee << std::endl;
