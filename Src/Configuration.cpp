@@ -14,8 +14,6 @@ bool Configuration::logToConsole;
 bool Configuration::logToZSpy;
 bool Configuration::logToFile;
 bool Configuration::debugisEnabled;
-float Configuration::farClipZMultiplicator;
-bool Configuration::loaDebug;
 
 
 typedef struct
@@ -90,7 +88,6 @@ void Configuration::load(const string &filename)
 	logErrors = true;
 	logFatals = true;
 	debugisEnabled = true;
-	loaDebug = false;
 
 	logToZSpy = true;
 	logToFile = true;
@@ -127,11 +124,6 @@ string Configuration::getLogFile()
 	return logFile;
 }
 
-float Configuration::getFarClipZMultiplicator()
-{
-	return farClipZMultiplicator;
-}
-
 bool Configuration::debugEnabled()
 {
 	return debugisEnabled;
@@ -150,11 +142,6 @@ bool Configuration::getLogTozSpy()
 bool Configuration::getLogToConsole()
 {
 	return logToConsole;
-}
-
-bool Configuration::getLoADebug()
-{
-	return loaDebug;
 }
 
 bool Configuration::getLogInfos()

@@ -12,12 +12,10 @@ public:
 	static bool getLogWarnings();
 	static bool getLogErrors();
 	static bool getLogFatals();
-	static float getFarClipZMultiplicator();
 	static bool debugEnabled();
 	static bool getLogToFile();
 	static bool getLogTozSpy();
 	static bool getLogToConsole();
-	static bool getLoADebug();
 private:
 	static std::string logFile;
 	static bool logInfos;
@@ -28,6 +26,4 @@ private:
 	static bool logToZSpy;
 	static bool logToFile;
 	static bool debugisEnabled;
-	static float farClipZMultiplicator;
-	static bool loaDebug;
 };

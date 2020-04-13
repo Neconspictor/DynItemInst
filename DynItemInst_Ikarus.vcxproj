@@ -16,7 +16,6 @@
     <ClInclude Include="Inc\Constants.h" />
     <ClInclude Include="Inc\CustomNpcFocus.h" />
     <ClInclude Include="Inc\DllMain.h" />
-    <ClInclude Include="Inc\DynamicParsing.h" />
     <ClInclude Include="Inc\DynItemInst.h" />
     <ClInclude Include="Inc\DaedalusExports.h" />
     <ClInclude Include="Inc\HookManager.h" />
@@ -24,15 +23,11 @@
     <ClInclude Include="Inc\DynInstance.h" />
     <ClInclude Include="Inc\Levitation.h" />
     <ClInclude Include="Inc\LevitationBean.h" />
-    <ClInclude Include="Inc\LoA.h" />
-    <ClInclude Include="Inc\LoaDebug.h" />
     <ClInclude Include="Inc\Logger.h" />
     <ClInclude Include="Inc\Module.h" />
-    <ClInclude Include="Inc\MoreViewDistance.h" />
     <ClInclude Include="Inc\ObjectManager.h" />
     <ClInclude Include="Inc\ocgameExtended.h" />
     <ClInclude Include="Inc\oCMobContainer.h" />
-    <ClInclude Include="Inc\PortalDrawDistance.h" />
     <ClInclude Include="Inc\Telekinesis.hpp" />
     <ClInclude Include="Inc\Util.h" />
     <ClInclude Include="Inc\Util_Constants.h" />
@@ -59,7 +54,6 @@
     <ClCompile Include="Src\Configuration.cpp" />
     <ClCompile Include="Src\CustomNpcFocus.cpp" />
     <ClCompile Include="Src\DllMain.cpp" />
-    <ClCompile Include="Src\DynamicParsing.cpp" />
     <ClCompile Include="Src\DynItemInst.cpp" />
     <ClCompile Include="Src\DaedalusExports.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
@@ -68,13 +62,9 @@
     <ClCompile Include="Src\DynInstance.cpp" />
     <ClCompile Include="Src\Levitation.cpp" />
     <ClCompile Include="Src\LevitationBean.cpp" />
-    <ClCompile Include="Src\LoA.cpp" />
-    <ClCompile Include="Src\LoADebug.cpp" />
     <ClCompile Include="Src\Logger.cpp" />
     <ClCompile Include="Src\Module.cpp" />
-    <ClCompile Include="Src\MoreViewDistance.cpp" />
     <ClCompile Include="Src\ObjectManager.cpp" />
-    <ClCompile Include="Src\PortalDrawDistance.cpp" />
     <ClCompile Include="Src\Telekinesis.cpp" />
     <ClCompile Include="Src\Util.cpp" />
   </ItemGroup>

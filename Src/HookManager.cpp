@@ -42,11 +42,6 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <Configuration.h>
 #include <Levitation.h>
 #include <CustomNpcFocus.h>
-#include <MoreViewDistance.h>
-#include <LoaDebug.h>
-#include <PortalDrawDistance.h>
-#include <DynamicParsing.h>
-#include <LoA.h>
 
 HookManager* HookManager::instance = NULL;
 std::stringstream HookManager::logStream;
@@ -231,7 +226,6 @@ void HookManager::hook()
 	logStream << "logWarnings = " << Configuration::getLogWarnings() << std::endl;
 	logStream << "logErrors = " << Configuration::getLogErrors() << std::endl;
 	logStream << "logFatals = " << Configuration::getLogFatals() << std::endl;
-	logStream << "loaDebug = " << Configuration::getLoADebug() << std::endl;
 	logStream << "HookManager::hook: finished read." << std::endl;
 
 	util::logAlways(&logStream);
@@ -246,46 +240,13 @@ void HookManager::hook()
 		return;
 	}
 
-
-	bool addMoreDistanceViewModul = Configuration::getFarClipZMultiplicator() > 1;
-	bool addLoaDebug = Configuration::getLoADebug();
-
 	Module* dynItemInstModule = new DynItemInst();
 	Module* externals = new DaedalusExports();
-	//Module* loaModule = new LoA();
-	Module* moreViewDistance = NULL;
-	//Module* dynamicParsing = new DynamicParsing();
-	//if (addMoreDistanceViewModul)
-	//	moreViewDistance = new MoreViewDistance();
-
-	//Module* loaDebug = NULL;
-	//if (addLoaDebug)
-		//loaDebug = new LoADebug();
-
-	//Module* portalDistanceMultiplier = new PortalDrawDistance();
-
 	Module* levitation = new Levitation();
-	//Module* customFocuses = new CustomNpcFocus();
+
 	manager->addModule(dynItemInstModule);
 	manager->addModule(externals);
-	//manager->addModule(loaModule);
-
-	//if (moreViewDistance)
-	//	manager->addModule(moreViewDistance);
-
-	//if (loaDebug)
-	//	manager->addModule(loaDebug);
-
-
-	//manager->addModule(dynamicParsing);
-
-	//Module* testModule = new TestModule();
-
-	//manager->addModule(testModule);
-
-	//manager->addModule(portalDistanceMultiplier);
 	manager->addModule(levitation);
-	//manager->addModule(customFocuses);
 	manager->hookModules();
 
 	logStream << "HookManager::hook: done." << std::endl;

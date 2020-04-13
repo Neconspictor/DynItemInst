@@ -15,24 +15,6 @@
     <Filter Include="Source Files\CustomNpcFocus">
       <UniqueIdentifier>{ec7ef82e-4226-408e-9822-e8fd13a18508}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\MoreViewDistance">
-      <UniqueIdentifier>{49056bff-20dc-47ac-8602-33a550ebf473}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\MoreViewDistance">
-      <UniqueIdentifier>{120ef30e-2bb3-46ec-ac29-5a198a38e21c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\LoADebug">
-      <UniqueIdentifier>{47645fc9-b938-4696-8075-21d80ba6de11}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\LoADebug">
-      <UniqueIdentifier>{8763aa5f-3d59-4988-8062-bde725dab2c2}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\PortalDrawDistance">
-      <UniqueIdentifier>{064e12bd-85e6-44f9-917e-9d5917365a04}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\PortalDrawDistance">
-      <UniqueIdentifier>{bd4065e0-93b9-4f10-a0de-0f4a149f6da4}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\DynItemInst">
       <UniqueIdentifier>{380edbd3-57c6-403b-834b-0f82a42271fa}</UniqueIdentifier>
     </Filter>
@@ -56,18 +38,6 @@
     </Filter>
     <Filter Include="Source Files\Util">
       <UniqueIdentifier>{113b1f85-0b92-4858-8ac4-09386733677e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\DynamicParsing">
-      <UniqueIdentifier>{b01001b9-fd2b-459a-b27e-ff4e742cadfa}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\DynamicParsing">
-      <UniqueIdentifier>{39f368a2-84aa-4f37-9fc0-a05d7aff7e9a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\LoA">
-      <UniqueIdentifier>{5923ecc6-757a-4873-9f09-eb04ce1960ec}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\LoA">
-      <UniqueIdentifier>{9420ff78-5f41-4bc3-a7a4-5e70449543a1}</UniqueIdentifier>
     </Filter>
     <Filter Include="MinHook">
       <UniqueIdentifier>{9af6455f-e02d-447f-9aba-796dbc7512da}</UniqueIdentifier>
@@ -109,15 +79,6 @@
     </ClInclude>
     <ClInclude Include="Inc\CustomNpcFocus.h">
       <Filter>Header Files\CustomNpcFocuses</Filter>
-    </ClInclude>
-    <ClInclude Include="Inc\MoreViewDistance.h">
-      <Filter>Header Files\MoreViewDistance</Filter>
-    </ClInclude>
-    <ClInclude Include="Inc\LoaDebug.h">
-      <Filter>Header Files\LoADebug</Filter>
-    </ClInclude>
-    <ClInclude Include="Inc\PortalDrawDistance.h">
-      <Filter>Header Files\PortalDrawDistance</Filter>
     </ClInclude>
     <ClInclude Include="Inc\AdditMemory.h">
       <Filter>Header Files\DynItemInst</Filter>
@@ -170,17 +131,11 @@
     <ClInclude Include="Inc\HookManager.h">
       <Filter>Header Files\Util</Filter>
     </ClInclude>
-    <ClInclude Include="Inc\DynamicParsing.h">
-      <Filter>Header Files\DynamicParsing</Filter>
-    </ClInclude>
     <ClInclude Include="Inc\Constants.h">
       <Filter>Header Files\DynItemInst</Filter>
     </ClInclude>
     <ClInclude Include="Inc\Util_Constants.h">
       <Filter>Header Files\Util</Filter>
-    </ClInclude>
-    <ClInclude Include="Inc\LoA.h">
-      <Filter>Header Files\LoA</Filter>
     </ClInclude>
     <ClInclude Include="minhook-master\include\MinHook.h">
       <Filter>MinHook\include</Filter>
@@ -220,15 +175,6 @@
     <ClCompile Include="Src\CustomNpcFocus.cpp">
       <Filter>Source Files\CustomNpcFocus</Filter>
     </ClCompile>
-    <ClCompile Include="Src\MoreViewDistance.cpp">
-      <Filter>Source Files\MoreViewDistance</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\LoADebug.cpp">
-      <Filter>Source Files\LoADebug</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\PortalDrawDistance.cpp">
-      <Filter>Source Files\PortalDrawDistance</Filter>
-    </ClCompile>
     <ClCompile Include="Src\DynInstance.cpp">
       <Filter>Source Files\DynItemInst</Filter>
     </ClCompile>
@@ -261,12 +207,6 @@
     </ClCompile>
     <ClCompile Include="Src\Util.cpp">
       <Filter>Source Files\Util</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\DynamicParsing.cpp">
-      <Filter>Source Files\DynamicParsing</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\LoA.cpp">
-      <Filter>Source Files\LoA</Filter>
     </ClCompile>
     <ClCompile Include="minhook-master\src\buffer.c">
       <Filter>MinHook\src</Filter>
