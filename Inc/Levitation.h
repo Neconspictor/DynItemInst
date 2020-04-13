@@ -1,5 +1,4 @@
-#ifndef __LEVITATION_H
-#define __LEVITATION_H
+#pragma once
 
 #include <Module.h>
 #include <api/g2/ztypes.h>
@@ -507,25 +506,17 @@ public:
 	};
 
 	static void getState(oCItemContainer& container, ContainerState& state);
-
 	//.text:00706B60 ; protected: virtual void __thiscall oCItemContainer::DrawCategory(void)
 	static void __thiscall oCItemContainerDrawCategoryHook(void* pThis);
-
 	//.text:007092C0 ; public: virtual class oCItem * __thiscall oCItemContainer::GetSelectedItem(void)
 	static oCItem* __thiscall oCItemContainerGetSelectedItemHook(oCItemContainer* pThis);
-
 	//.text:007076B0 ; void __thiscall oCItemContainer::Draw(oCItemContainer *this)
 	static void __thiscall oCItemContainerDrawHook(oCItemContainer* pThis);
-
 	static bool meetsCondition(oCItem* item); 
-
 	static oCItem* myTestFunction(oCItem** currentItem, zCListSort<oCItem>** pointer, oCItem* item);
-
 	//.text:00709740 ; void __thiscall oCItemContainer::NextItem(oCItemContainer *__hidden this)
 	static void __thiscall oCItemContainerNextItemHook(oCItemContainer* pThis);
-
 	static void __thiscall oCItemContainerNextItemReversed(oCItemContainer* container);
-
 	//.text:00705B80 ; int __cdecl oCItemCompareFunction(int,int)
 	static int __cdecl oCItemCompareFunctionHook(oCItem* a, oCItem* b);
 };
@@ -538,11 +529,6 @@ struct Motion
 	zVEC3 intersect;
 };
 
-/*class zCMaterial {
-public:
-	static int __thiscall IsPortalMaterial(void* pThis);
-};*/
-
 __int32 __cdecl sysGetTime();
 zVEC3 levitate();
 void Test(oCNpc* npc);
@@ -552,5 +538,3 @@ Motion getCollideForwardDir(oCNpc*, float, bool);
 bool check_prePass(oCNpc* hero, const zMAT4& mat);
 void __cdecl zCVobCheckAutoUnlinkHook(zCVob* vob);
 bool checkVobCollision(void* zCBspBaseObject, zCVob* testedVob, zTBBox3D const& boundingBox);
-
-#endif __LEVITATION_H

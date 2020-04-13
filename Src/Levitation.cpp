@@ -161,96 +161,38 @@ void Levitation::hookModule()
 	zCAIPlayerCheckFloorSliding = reinterpret_cast<int(__thiscall*)(void*)>((ZCAIPLAYER_CHECK_FLOOR_SLIDING_ADDRESS));
 
 	doSurfaceAlignment = reinterpret_cast<DoSurfaceAlignment>((DO_SURFACE_ALIGNMENT_ADDRESS));
-
 	zCTriggerOnTouch = reinterpret_cast<ZCTriggerOnTouch>(ZCTRIGGER_ON_TOUCH_ADDRESS);
-
 	zCVobHasEnoughSpace = reinterpret_cast<ZCVobHasEnoughSpace>(ZCVOB_HAS_ENOUGH_SPACE_ADDRESS);
-
 	zCVobCheckAndResolveCollisions = reinterpret_cast<ZCVobCheckAndResolveCollisions>((ZCVOB_CHECK_AND_RESOLVE_COLLISION_ADDRESS));
 	zCVobGetVelocity = reinterpret_cast<zVEC3(__thiscall*)(void*)>(ZCVOB_GET_VELOCITY_ADDRESS);
-
 	zCAIPlayerCheckEnoughSpaceMoveDir = (ZCAIPlayerCheckEnoughSpaceMoveDir)0x00511320;
-
 	testStatic_Char_Char = (TestStatic_Char_Char)TESTSTATIC_CHAR_CHAR_ADDRESS;
-
 	zCCollObjectCharacterTestHardCollisions = (ZCCollObjectCharacterTestHardCollisions) ZCCOLL_OBJECT_CHARACTER_TEST_HARD_COLLIONS_ADDRESS;
-
 	zCAIPlayerCheckPhysics = (ZCAIPlayerCheckPhysics)ZCAIPLAYER_CHECK_PHYSICS;
 
 
 
 
 	zCVobUpdatePhysics = (ZCVobUpdatePhysics)ZCVOB_UPDATE_PHYSICS_ADDRESS;
-
 	zCVobEndMovement = (ZCVobEndMovement)ZCVOB_END_MOVEMENT;
-
 	zCCollObjectCharacterFindFloorWaterCeiling = (ZCCollObjectCharacterFindFloorWaterCeiling)ZCCOLL_OBJECT_CHARACTER_FIND_FLOOR_WATER_CEILING;
-
 	zCCollObjectCharacterTestSoftCollisions = (ZCCollObjectCharacterTestSoftCollisions)ZCCOLL_OBJECT_CHARACTER_TEST_SOFT_COLLIONS_ADDRESS;
-
 	zCCollObjectCharacterDetectCollisionsSelf = (ZCCollObjectCharacterDetectCollisionsSelf)ZCCOLL_OBJECT_CHARACTER_DETECT_SELF_COLLISION_ADDRESS;
-
 	zCVobCalcGroundPoly = (ZCVobCalcGroundPoly)ZCVOB_CALC_GROUND_POLY_ADDRESS;
-
 	zMAT4SetTranslation = (ZMAT4SetTranslation) ZMAT4_SET_TRANSLATION_ADDRESS;
-
 	zCCollObjectCharacterCalcSlideVector = (ZCCollObjectCharacterCalcSlideVector)ZCCOLL_OBJECT_CHARACTER_CALC_SLIDE_VECTOR_ADDRESS;
 
 	HookManager* hookManager = HookManager::getHookManager();
 	hookManager->addFunctionHook((LPVOID*)&zCVobDoFrameActivity, zCVobDoFrameActivityHook, moduleDesc);
-	//hookManager->addFunctionHook((LPVOID*)&zCVobSetPhysicsEnabled, zCVobSetPhysicsEnabledHook, moduleDesc);
 	hookManager->addFunctionHook((LPVOID*)&oCGamePause, oCGamePauseHook, moduleDesc);
-
-	hookManager->addFunctionHook((LPVOID*)&oCGameUnpause, oCGameUnpauseHook, moduleDesc);
-	//hookManager->addFunctionHook((LPVOID*)&testStatic_Char_Char, TestStatic_Char_CharHook, moduleDesc);
-
-
-
-	
-	//hookManager->addFunctionHook((LPVOID*)&zCCollObjectCharacterCalcSlideVector, zCCollObjectCharacterCalcSlideVectorHook, moduleDesc);
-	//hookManager->addFunctionHook((LPVOID*)&zMAT4SetTranslation, zMAT4SetTranslationHook, moduleDesc);
-	//hookManager->addFunctionHook((LPVOID*)&zCVobCalcGroundPoly, zCVobCalcGroundPolyHook, moduleDesc);
-	
+	hookManager->addFunctionHook((LPVOID*)&oCGameUnpause, oCGameUnpauseHook, moduleDesc);	
 	
 	hookManager->addFunctionHook((LPVOID*)&zCVobUpdatePhysics, zCVobUpdatePhysicsHook, moduleDesc);
-
-
 	hookManager->addFunctionHook((LPVOID*)&oCAIHumanPC_ActionMove, oCAIHumanPC_ActionMoveHook, moduleDesc);
-
-
-
 
 	
 	hookManager->addFunctionHook((LPVOID*)&oCItemContainerDrawCategory, oCItemContainerDrawCategoryHook, moduleDesc);
-	//hookManager->addFunctionHook((LPVOID*)&oCItemContainerGetSelectedItem, oCItemContainerGetSelectedItemHook, moduleDesc);
-	
-	//hookManager->addFunctionHook((LPVOID*)&oCItemContainerDrawGetItem, oCItemContainerDrawGetItemNaked, moduleDesc);
-	//hookManager->addFunctionHook((LPVOID*)&oCItemContainerNextItem, oCItemContainerNextItemHook, moduleDesc);
 	hookManager->addFunctionHook((LPVOID*)&oCItemContainerNextItem, oCItemContainerNextItemReversed, moduleDesc);
-	//hookManager->addFunctionHook((LPVOID*)&oCItemContainerDraw, oCItemContainerDrawHook, moduleDesc);
-
-	
-	//hookManager->addFunctionHook((LPVOID*)&oCItemCompareFunction, oCItemCompareFunctionHook, moduleDesc);
-	
-	
-	//hookManager->addFunctionHook((LPVOID*)&zCVobEndMovement, zCVobEndMovementHook, moduleDesc);
-	
-	
-	//hookManager->addFunctionHook((LPVOID*)&zCCollObjectCharacterTestHardCollisions, zCCollObjectCharacterTestHardCollisionsHook, moduleDesc);
-	//hookManager->addFunctionHook((LPVOID*)&zCCollObjectCharacterTestSoftCollisions, zCCollObjectCharacterTestSoftCollisionsHook, moduleDesc);
-	
-	
-	//hookManager->addFunctionHook((LPVOID*)&zCCollObjectCharacterDetectCollisionsSelf, zCCollObjectCharacterDetectCollisionsSelfHook, moduleDesc);
-	
-	//hookManager->addFunctionHook((LPVOID*)&zCAIPlayerCheckPhysics, zCAIPlayerCheckPhysicsHook, moduleDesc);
-	//hookManager->addFunctionHook((LPVOID*)&zCCollObjectCharacterFindFloorWaterCeiling, zCCollObjectCharacterFindFloorWaterCeilingHook, moduleDesc);
-	//hookManager->addFunctionHook((LPVOID*)&doSurfaceAlignment, DoSurfaceAlignmentHook, moduleDesc);
-	//hookManager->addFunctionHook((LPVOID*)&zCVobCheckAndResolveCollisions, zCVobCheckAndResolveCollisionsHook, moduleDesc);
-
-	//hookManager->addFunctionHook((LPVOID*)&zCTriggerOnTouch, zCTriggerOnTouchHook, moduleDesc);
-	//hookManager->addFunctionHook((LPVOID*)&zCVobHasEnoughSpace, zCVobHasEnoughSpaceHook, moduleDesc);
-
-	//hookManager->addFunctionHook((LPVOID*)&zCAIPlayerCheckEnoughSpaceMoveDir, zCAIPlayerCheckEnoughSpaceMoveDirHook, moduleDesc);
 }
 
 void Levitation::unHookModule()
@@ -286,23 +228,6 @@ void Levitation::zCVobDoFrameActivityHook(void* pThis)
 		zMAT4* mat = &hero->trafoObjToWorld;
 		oldLook = zVEC3(mat->m[0][2], mat->m[1][2], mat->m[2][2]);
 		heroLevitationBean->oldLook = oldLook;
-		//heroLevitationBean->oldXPos = mat->m[0][3];
-		//heroLevitationBean->oldYPos = mat->m[1][3];
-		//heroLevitationBean->oldZPos = mat->m[2][3];
-
-
-		//frameTimePast = calcPastFrameTime();
-		//Test(hero);
-
-		/*if (collisionObject != nullptr)
-		{
-			levitatePosition = hero->GetPositionWorld();
-			zMAT4* matCollisionObject = (zMAT4*)((char*)collisionObject + 0x44);
-			matCollisionObject->_14 = levitatePosition.x;
-			matCollisionObject->_24 = levitatePosition.y;
-			matCollisionObject->_34 = levitatePosition.z;
-			//zVEC3 translation(mat->_14, mat->_24, mat->_34);
-		}*/
 
 		//check if hard collision tests should be applied (important for vobs and mobs)
 		//doHardTests = check_prePass(hero, hero->trafoObjToWorld);
@@ -314,29 +239,12 @@ void Levitation::zCVobDoFrameActivityHook(void* pThis)
 		using OCInformationManagerHasFinished = int(__fastcall*)(void* pThis);
 		static OCInformationManagerHasFinished oCInformationManagerHasFinished = (OCInformationManagerHasFinished)0x006609D0;
 		
-		
-
 
 		void* infoManager = oCInformationManagerGetInformationManager();
 		int hasFinished = oCInformationManagerHasFinished(infoManager);
 
 		if (hasFinished)
 			levitatePosition = levitate();
-
-		/*zVEC3 pos;
-		hero->GetPositionWorld(pos.x, pos.y, pos.z);
-		float hoverDistance = heroLevitationBean->getDistanceToGround(pos);
-		if (hoverDistance < heroLevitationBean->HOVER_DISTANCE)
-		{
-			//fakeUpKey = true;
-			float speed = 10.0f; //100cm per second
-			float moveUpDistance = speed * float(frameTimePast) / 1000;
-			hero->GetPositionWorld(pos.x, pos.y, pos.z);
-			pos.y += moveUpDistance;
-			hero->SetPositionWorld(pos);
-			heroLevitationBean->setHoverDistance(heroLevitationBean->getDistanceToGround(pos));
-			//heroLevitationBean->increaseHoverDistance(moveUpDistance);
-		}*/
 
 		zVEC3 pos;
 		hero->GetPositionWorld(pos.x, pos.y, pos.z);
@@ -348,33 +256,6 @@ void Levitation::zCVobDoFrameActivityHook(void* pThis)
 	zCVobDoFrameActivity(pThis);
 
 	if (adjust) {
-		//noCollision = false;
-		//zCVobSetCollDetHook(hero, 1);
-
-		//hero->ResetXZRotationsWorld();
-		//zCVobSetPhysicsEnabled(hero, true);
-		//noCollision = true;
-
-		//zVEC3 pos = hero->GetPosition();
-		//if (pos.y < oldYPosition) {
-		//	hero->SetPositionWorld(zVEC3(pos.x, oldYPosition, pos.z));
-		//}
-
-		/*float hoverDistance = heroLevitationBean->getHoverDistance();
-		if (hoverDistance < heroLevitationBean->HOVER_DISTANCE)
-		{
-			//fakeUpKey = true;
-			float speed = 10.0f; //100cm per second
-			float moveUpDistance = speed * float(frameTimePast) / 1000;
-			pos = hero->GetPosition();
-			pos.y += moveUpDistance;
-			//hero->SetPositionWorld(pos);
-			heroLevitationBean->setHoverDistance(heroLevitationBean->getDistanceToGround(pos));
-			//heroLevitationBean->increaseHoverDistance(moveUpDistance);
-		}*/
-
-		//Test(hero);
-		//levitatePosition = levitate();
 		Test(hero);
 	}
 }
@@ -733,42 +614,6 @@ int Levitation::zCCollObjectCharacterTestHardCollisionsHook(void* pThis, zVEC3& 
 			//vec3.y = vec2.y;
 			float temp = vec3.y + 10;
 			vec3.y = max(vec2.y, temp);
-
-			if (result)
-			{
-				//logStream << "zCCollObjectCharacterTestHardCollisionsHook: after:" << std::endl;
-				//logStream << "result is = " << result << std::endl;
-				//util::logWarning(&logStream);
-				//vec3.y = vec2.y;
-				
-			}
-
-			/*//zVEC3 velo = zCVobGetVelocity(hero);
-			logStream << "zCCollObjectCharacterTestHardCollisionsHook: after:" << std::endl;
-			//logStream << "velo = " << velo << std::endl;
-			logStream << "vec1(after) = " << vec1 << std::endl;
-			logStream << "vec2(after) = " << vec2 << std::endl;
-			logStream << "vec3(after) = " << vec3 << std::endl;
-			logStream << "vec4(after) = " << vec4 << std::endl;
-			logStream << "zTSpatialState(after) = " << *zTSpatialState << std::endl;
-			util::logWarning(&logStream);
-			*/
-
-
-			//zMAT4* mat = (zMAT4*)((char*)collisionObject + 0x44);
-			//hero->GetPositionWorld();
-			//zVEC3 translation(mat->_14, mat->_24, mat->_34);
-			//translation = hero->GetPositionWorld();
-			//vec3.y = vec2.y;
-			//vec3.y = translation.y;
-
-			//float temp = vec2.y + levitatePosition.y;
-			//vec3.y = max(vec3.y, temp);
-			//vec3.y += 20;
-
-			//if (temp > vec3.y)
-			//	vec3.y = temp;
-			//vec1.y = vec3.y;
 		}
 		return result;
 	}
