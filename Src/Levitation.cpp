@@ -4,7 +4,7 @@
 #include <api/g2/zcinput.h>
 #include <api/g2/zcmodel.h>
 #include <api/g2/ocgame.h>
-#include <LevitationBean.h>
+#include <LevitationData.h>
 #include <Util.h>
 #include <queue>
 #include <api/g2/zcparser.h>
@@ -14,7 +14,6 @@ using namespace LevitationUtil;
 
 typedef void(__thiscall* ZCVobDoFrameActivity)(void*); ZCVobDoFrameActivity zCVobDoFrameActivity;
 typedef void(__thiscall* ZCVobSetPhysicsEnabled)(void*, int); ZCVobSetPhysicsEnabled zCVobSetPhysicsEnabled;
-typedef void(__cdecl* ZCVobCheckAutoUnlink)(zCVob*); ZCVobCheckAutoUnlink zCVobCheckAutoUnlink;
 typedef void(__thiscall* OCGamePause)(void*, int); OCGamePause oCGamePause;
 typedef void(__thiscall* OCGameUnpause)(void*); OCGameUnpause oCGameUnpause;
 typedef void(__thiscall* ZCVobSetCollDet)(void*, int); ZCVobSetCollDet zCVobSetCollDet;
@@ -132,7 +131,7 @@ int Levitation::frameTime = 0;
 int Levitation::diffFrameTime = 0;
 float Levitation::yPos = 0;
 
-LevitationBean* heroLevitationBean;
+LevitationData heroLevitationBean;
 bool heroLevitationBeanCalled;
 bool fakeUpKey;
 int frameTimePast;
@@ -155,8 +154,6 @@ void Levitation::hookModule()
 	zCVobSetPhysicsEnabled = reinterpret_cast<ZCVobSetPhysicsEnabled>(ZCVOB_SET_PHYSICS_ENABLED_ADDRESS);
 	oCGamePause = reinterpret_cast<OCGamePause>(OCGAME_PAUSE_ADDRESS);
 	oCGameUnpause = reinterpret_cast<OCGameUnpause>(OCGAME_UNPAUSE_ADDRESS);
-
-	zCVobCheckAutoUnlink = reinterpret_cast<void(__cdecl*)(zCVob*)>(ZCVOB_CHECK_AUTO_UNLINK_ADDRESS);
 	zCVobSetCollDet = reinterpret_cast<void(__thiscall*)(void*, int)>(ZCVOB_SET_COLL_DET_ADDRESS);
 	zCAIPlayerCheckFloorSliding = reinterpret_cast<int(__thiscall*)(void*)>((ZCAIPLAYER_CHECK_FLOOR_SLIDING_ADDRESS));
 
@@ -193,6 +190,12 @@ void Levitation::hookModule()
 
 void Levitation::unHookModule()
 {
+	HookManager* hookManager = HookManager::getHookManager();
+	hookManager->removeFunctionHook((LPVOID*)&zCVobDoFrameActivity, zCVobDoFrameActivityHook, moduleDesc);
+	hookManager->removeFunctionHook((LPVOID*)&oCGamePause, oCGamePauseHook, moduleDesc);
+	hookManager->removeFunctionHook((LPVOID*)&oCGameUnpause, oCGameUnpauseHook, moduleDesc);
+	hookManager->removeFunctionHook((LPVOID*)&zCVobUpdatePhysics, zCVobUpdatePhysicsHook, moduleDesc);
+	hookManager->removeFunctionHook((LPVOID*)&oCAIHumanPC_ActionMove, oCAIHumanPC_ActionMoveHook, moduleDesc);
 }
 
 zVEC3 levitatePosition;
@@ -201,10 +204,6 @@ bool doHardTests = false;
 void Levitation::zCVobDoFrameActivityHook(void* pThis)
 {
 	oCNpc* hero = oCNpc::GetHero();
-	if (!heroLevitationBeanCalled) {
-		heroLevitationBean = new LevitationBean(hero);
-		heroLevitationBeanCalled = true;
-	}
 	bool adjust = (hero == pThis) && adjustHeroPosition;
 	float oldYPosition = 0;
 	zVEC3 oldLook;
@@ -223,7 +222,7 @@ void Levitation::zCVobDoFrameActivityHook(void* pThis)
 
 		zMAT4* mat = &hero->trafoObjToWorld;
 		oldLook = zVEC3(mat->m[0][2], mat->m[1][2], mat->m[2][2]);
-		heroLevitationBean->oldLook = oldLook;
+		heroLevitationBean.oldLook = oldLook;
 
 		//check if hard collision tests should be applied (important for vobs and mobs)
 		//doHardTests = check_prePass(hero, hero->trafoObjToWorld);
@@ -244,10 +243,13 @@ void Levitation::zCVobDoFrameActivityHook(void* pThis)
 
 		zVEC3 pos;
 		hero->GetPositionWorld(pos.x, pos.y, pos.z);
-		float hoverDistance = heroLevitationBean->getDistanceToGround(pos);
-		float add = 40 - hoverDistance;
-		pos.y += max(0, add);
-		hero->SetPositionWorld(pos);
+		float hoverDistance = heroLevitationBean.getDistanceToGround(pos);
+		if (true) {
+			float add = 40 - hoverDistance;
+			pos.y += max(0, add);
+			hero->SetPositionWorld(pos);
+		}
+		
 	}
 	zCVobDoFrameActivity(pThis);
 
@@ -768,7 +770,7 @@ zVEC3 levitate() {
 	//Levitation::noCollision = true;
 	float speed = 100.0f; //100cm per second
 	float distance = speed * float(frameTimePast) / 1000;
-	zVEC3 oldLook = heroLevitationBean->oldLook;
+	zVEC3 oldLook = heroLevitationBean.oldLook;
 	zCInput* input = zCInput::GetInput();
 
 	hero->ResetXZRotationsLocal();
@@ -822,9 +824,9 @@ zVEC3 levitate() {
 	//finally apply changes
 	rotateLocalY(hero, angle);
 	zVEC3 finalPosition = hero->GetPositionWorld();
-	heroLevitationBean->oldXPos = finalPosition.x;
-	heroLevitationBean->oldYPos = finalPosition.y;
-	heroLevitationBean->oldZPos = finalPosition.z;
+	heroLevitationBean.oldXPos = finalPosition.x;
+	heroLevitationBean.oldYPos = finalPosition.y;
+	heroLevitationBean.oldZPos = finalPosition.z;
 	finalPosition += positionAdd;
 
 	hero->SetPositionWorld(finalPosition);
@@ -847,7 +849,7 @@ Motion getCollideYDir(zVEC3 pos, float middlePointDist, bool up) {
 	}
 	zCWorld* world = oCGame::GetGame()->GetWorld();
 	int flags = (1 << 0) | (1 << 7) | (1 << 8) | (1 << 9) | (1 << 10) | (1 << 11) | (1 << 14);
-	LevitationBean::zCWorldTraceRayNearestHit(world, pos, dir, NULL, flags);
+	LevitationData::zCWorldTraceRayNearestHit(world, pos, dir, NULL, flags);
 	zVEC3* intersection = &(world->foundIntersection);
 
 	Motion motion;
@@ -878,7 +880,7 @@ Motion getCollideForwardDir(oCNpc* npc, float middlepointDistance, bool backward
 
 	zCWorld* world = oCGame::GetGame()->GetWorld();
 	int flags = (1 << 0) | (1 << 7) | (1 << 8) | (1 << 9) | (1 << 10) | (1 << 11) | (1 << 14);
-	LevitationBean::zCWorldTraceRayNearestHit(world, pos, posOutside, NULL, flags);
+	LevitationData::zCWorldTraceRayNearestHit(world, pos, posOutside, NULL, flags);
 	zVEC3* intersection = &(world->foundIntersection);
 
 	Motion motion;
@@ -909,7 +911,7 @@ zVEC3 getCollidingPolyNormal(oCNpc* hero, const zMAT4& mat)
 
 	zCModel* model = hero->GetModel();
 	zCModelCalcModelBBox3DWorld(model);
-	zTBBox3D box = LevitationBean::zCModelGetBBox3D(model);
+	zTBBox3D box = LevitationData::zCModelGetBBox3D(model);
 
 	//make rec a little bit bigger than box
 	zTBBox3D rec;
@@ -935,7 +937,7 @@ zVEC3 getCollidingPolyNormal(oCNpc* hero, const zMAT4& mat)
 			Plane plane;
 			zVEC3 look = zVEC3(mat.m[0][2], mat.m[1][2], mat.m[2][2]);
 			zVEC3Normalize(&look);
-			zVEC3 oldPos = zVEC3(heroLevitationBean->oldXPos, heroLevitationBean->oldYPos, heroLevitationBean->oldZPos);
+			zVEC3 oldPos = zVEC3(heroLevitationBean.oldXPos, heroLevitationBean.oldYPos, heroLevitationBean.oldZPos);
 			zVEC3 dir = pos - oldPos;
 			zVEC3Normalize(&dir);
 
@@ -977,7 +979,7 @@ bool check_prePass(oCNpc* hero, const zMAT4& mat)
 
 	zCModel* model = hero->GetModel();
 	zCModelCalcModelBBox3DWorld(model);
-	zTBBox3D box = LevitationBean::zCModelGetBBox3D(model);
+	zTBBox3D box = LevitationData::zCModelGetBBox3D(model);
 
 	//make rec a little bit bigger than box
 	box.bbox3D_maxs += pos;
@@ -1078,7 +1080,7 @@ bool checkCollision(oCNpc* hero, const zMAT4& mat)
 
 	zCModel* model = hero->GetModel();
 	zCModelCalcModelBBox3DWorld(model);
-	zTBBox3D box = LevitationBean::zCModelGetBBox3D(model);
+	zTBBox3D box = LevitationData::zCModelGetBBox3D(model);
 
 	//make rec a little bit bigger than box
 	zTBBox3D rec;
@@ -1102,7 +1104,7 @@ bool checkCollision(oCNpc* hero, const zMAT4& mat)
 			Plane plane;
 			zVEC3 look = zVEC3(mat.m[0][2], mat.m[1][2], mat.m[2][2]);
 			zVEC3Normalize(&look);
-			zVEC3 oldPos = zVEC3(heroLevitationBean->oldXPos, heroLevitationBean->oldYPos, heroLevitationBean->oldZPos);
+			zVEC3 oldPos = zVEC3(heroLevitationBean.oldXPos, heroLevitationBean.oldYPos, heroLevitationBean.oldZPos);
 			zVEC3 dir = pos - oldPos;
 			zVEC3Normalize(&dir);
 
@@ -1176,14 +1178,14 @@ bool checkCollision(oCNpc* hero, const zMAT4& mat)
 void Test(oCNpc* hero) {
 
 	std::stringstream logStream;
-	zTBBox3D bBox = LevitationBean::zCModelGetBBox3D(hero->GetModel());// ->GetBBox3D();
+	zTBBox3D bBox = LevitationData::zCModelGetBBox3D(hero->GetModel());// ->GetBBox3D();
 	zVEC3 pos = hero->GetPosition();
 	zMAT4* mat = &(hero->trafoObjToWorld);
 	float yUpExt = bBox.bbox3D_maxs.y;
 
 	zCModel* model = hero->GetModel();
 	zCModelCalcModelBBox3DWorld(model);
-	zVEC3 oldPos = zVEC3(heroLevitationBean->oldXPos, heroLevitationBean->oldYPos, heroLevitationBean->oldZPos);
+	zVEC3 oldPos = zVEC3(heroLevitationBean.oldXPos, heroLevitationBean.oldYPos, heroLevitationBean.oldZPos);
 
 	if (checkCollision(hero, *mat))
 	{
@@ -1198,14 +1200,6 @@ void Test(oCNpc* hero) {
 		//} 
 	}
 }
-
-void __cdecl zCVobCheckAutoUnlinkHook(zCVob* vob) {
-	oCNpc* hero = oCNpc::GetHero();
-	if (hero != NULL && (vob == hero) && Levitation::adjustHeroPosition) {
-		//return;
-	}
-	zCVobCheckAutoUnlink(vob);
-};
 
 std::ostream & operator<<(std::ostream & os, const Plane & p)
 {

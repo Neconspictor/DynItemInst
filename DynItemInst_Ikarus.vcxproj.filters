@@ -110,9 +110,6 @@
     <ClInclude Include="Inc\Levitation.h">
       <Filter>Header Files\Levitation</Filter>
     </ClInclude>
-    <ClInclude Include="Inc\LevitationBean.h">
-      <Filter>Header Files\Levitation</Filter>
-    </ClInclude>
     <ClInclude Include="Inc\DaedalusExports.h">
       <Filter>Header Files\DaedalusExports</Filter>
     </ClInclude>
@@ -167,6 +164,9 @@
     <ClInclude Include="Inc\Telekinesis.hpp">
       <Filter>Header Files\Telekinesis</Filter>
     </ClInclude>
+    <ClInclude Include="Inc\LevitationData.h">
+      <Filter>Header Files\Levitation</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\DllMain.cpp">
@@ -185,9 +185,6 @@
       <Filter>Source Files\DynItemInst</Filter>
     </ClCompile>
     <ClCompile Include="Src\Levitation.cpp">
-      <Filter>Source Files\Levitation</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\LevitationBean.cpp">
       <Filter>Source Files\Levitation</Filter>
     </ClCompile>
     <ClCompile Include="Src\DaedalusExports.cpp">
@@ -231,6 +228,9 @@
     </ClCompile>
     <ClCompile Include="Src\api\g2\zcpar_symbol.cpp">
       <Filter>Source Files\api\g2</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\LevitationData.cpp">
+      <Filter>Source Files\Levitation</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

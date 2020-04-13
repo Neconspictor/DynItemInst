@@ -7,7 +7,6 @@
 
 #define ZCVOB_DO_FRAME_ACTIVITY_ADDRESS 0x00602C60
 #define ZCVOB_SET_PHYSICS_ENABLED_ADDRESS 0x0061D190
-#define ZCVOB_CHECK_AUTO_UNLINK_ADDRESS 0x0061AAC0
 #define OCGAME_PAUSE_ADDRESS 0x006C8AD0
 #define OCGAME_UNPAUSE_ADDRESS 0x006C8D50
 #define ZCVOB_SET_COLL_DET_ADDRESS 0x006D0000		
@@ -510,5 +509,4 @@ int calcPastFrameTime();
 Motion getCollideYDir(zVEC3, float, bool);
 Motion getCollideForwardDir(oCNpc*, float, bool);
 bool check_prePass(oCNpc* hero, const zMAT4& mat);
-void __cdecl zCVobCheckAutoUnlinkHook(zCVob* vob);
 bool checkVobCollision(void* zCBspBaseObject, zCVob* testedVob, zTBBox3D const& boundingBox);

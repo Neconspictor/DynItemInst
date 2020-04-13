@@ -8,7 +8,7 @@ typedef int(__fastcall* ZCWorldTraceRayNearestHit)(void* pThis, zVEC3 const &, z
 typedef zTBBox3D(__thiscall* ZCModelGetBBox3D)(void* pThis);
 
 
-class LevitationBean
+class LevitationData
 {
 public:
 
@@ -23,13 +23,13 @@ public:
 
 	zVEC3 oldLook;
 
-	LevitationBean(oCNpc* npc);
+	LevitationData();
 
 	zVEC3 getOldPosition();
 
 	float getHoverDistance();
 
-	void update(float distance);
+	void update(oCNpc* npc, float distance);
 
 	/**
 	* Provides the distance from the position pos to the world ground (worldmesh and vobs with collision).
@@ -51,7 +51,6 @@ public:
 	static ZCModelGetBBox3D zCModelGetBBox3D;
 
 private:
-	oCNpc* npc;
 	zVEC3 oldPosition;
 	float middlePointDistance;
 	float oldDistanceToGround;
@@ -60,7 +59,7 @@ private:
 
 	bool isGreaterOrEqual(zVEC3& newPosition);
 
-	float getMiddlePointDistance();
+	float getMiddlePointDistance(oCNpc* npc);
 
 	void adaptHoverDistance(zVEC3& newPosition, float newDistanceToGround);
 };
