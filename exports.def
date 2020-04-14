@@ -1,4 +1,4 @@
-LIBRARY	"LoA_DII"
+LIBRARY	"NecPack"
 EXPORTS
 	Hook
 	Unhook
