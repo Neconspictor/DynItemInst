@@ -149,6 +149,8 @@ public:
 
 	static void NECPACK_DrobVob(oCNpc* npc, zCVob* vob);
 
+	static int LEVITATION_IsGamePaused();
+
 public:
 
 	/**

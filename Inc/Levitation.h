@@ -432,7 +432,7 @@ extern int COLLISION_HEAD_SIZE_Y;
 class Levitation : public Module
 {
 public:
-	static bool pausedGame;
+	static bool gameIsPaused;
 	static bool noCollision;
 	static int frameTime;
 	static int diffFrameTime;

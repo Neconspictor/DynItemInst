@@ -9,6 +9,24 @@ var int LEVITATION_barHandle;
 var int LEVITATION_startTime;
 var int LEVITATION_investedTimeUpMovement;
 
+
+func int LEVITATION_IsGamePaused() {
+	if (!NECPACK_Initialized) {
+		MEM_Warn("LEVITATION_IsGamePaused: Library isn't initialized!");
+        return 0;
+    };
+    const int call = 0;
+    var int ret;
+    if (CALL_Begin(call)) {
+        var int adr;
+        adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "LEVITATION_IsGamePaused");
+        CALL_PutRetValTo(_@(ret));
+        CALL__cdecl(adr);
+        call = CALL_End();
+    };
+    return +ret;
+};
+
 func void LEVITATION_Init() {
 	
 	if (!LEVITATION_barHandle) {
@@ -16,6 +34,21 @@ func void LEVITATION_Init() {
 		Bar_Hide(LEVITATION_barHandle);
 	};
 	
+};
+
+
+func void LEVITATION_Begin() {
+	if (!NECPACK_Initialized) {
+        MEM_Warn("LEVITATION_Begin: Library isn't initialized!");
+        return;
+    };
+	
+	LEVITATION_IsActive = TRUE;
+	Bar_Show(LEVITATION_barHandle);
+	Bar_SetPromille(LEVITATION_barHandle, 1000);
+	Mdl_ApplyOverlayMds	(hero, "Humans_Levitate.mds"); 
+	LEVITATION_investedTimeUpMovement = FLOATNULL;
+	FF_ApplyOnce(LEVITATION_InvestUpMovement);
 };
 
 func void LEVITATION_End() {
@@ -30,7 +63,24 @@ func void LEVITATION_End() {
 	FF_Remove(LEVITATION_InvestUpMovement);
 };
 
+
+func void LEVITATION_Toggle() {
+	if (!NECPACK_Initialized) {
+        MEM_Warn("LEVITATION_Toggle: Library isn't initialized!");
+        return;
+    };
+		
+	if (LEVITATION_IsActive) {
+		LEVITATION_End();
+	} else {
+		LEVITATION_Begin();
+	};
+};
+
 func void LEVITATION_InvestUpMovement() {
+
+	// do nothing if game is currently paused.
+	if (LEVITATION_IsGamePaused()) {return;};
 
 	// we add 1/120 to the invested time as constant contribution.
 	LEVITATION_investedTimeUpMovement = addf(LEVITATION_investedTimeUpMovement, 
@@ -58,30 +108,5 @@ func void LEVITATION_InvestUpMovement() {
 	
 	if (MEM_KeyState(KEY_RETURN) == KEY_PRESSED || barPromille == 0) {
 		LEVITATION_End();
-	};
-};
-
-
-
-
-func void LEVITATION_Toggle() {
-	if (!NECPACK_Initialized) {
-        MEM_Warn("LEVITATION_Toggle: Library isn't initialized!");
-        return;
-    };
-	
-	LEVITATION_IsActive = !LEVITATION_IsActive;
-	
-	if (LEVITATION_IsActive) {
-		Bar_Show(LEVITATION_barHandle);
-		Bar_SetPromille(LEVITATION_barHandle, 1000);
-		Mdl_ApplyOverlayMds	(hero, "Humans_Levitate.mds"); 
-		LEVITATION_investedTimeUpMovement = FLOATNULL;
-		FF_ApplyOnce(LEVITATION_InvestUpMovement);
-		
-	} else {
-		Bar_Hide(LEVITATION_barHandle);
-		Mdl_RemoveOverlayMDS(hero, "Humans_Levitate.mds");
-		FF_Remove(LEVITATION_InvestUpMovement);
 	};
 };

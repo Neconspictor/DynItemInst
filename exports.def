@@ -26,3 +26,5 @@ EXPORTS
 
 	TELEKINESIS_Npc_CanSeeVob
 	NECPACK_DrobVob
+
+	LEVITATION_IsGamePaused

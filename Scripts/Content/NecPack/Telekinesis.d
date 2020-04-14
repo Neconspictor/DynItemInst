@@ -71,7 +71,7 @@ func void TELEKINESIS_Interpolate(var int pTelekinesisInterpolator, var int item
 };
 
 func int TELEKINESIS_Npc_CanSeeVob(var int pNpc, var int pVob) {
-if (!NECPACK_Initialized) {
+	if (!NECPACK_Initialized) {
 		MEM_Warn("TELEKINESIS_Npc_CanSeeVob: Library isn't initialized!");
         return 0;
     };

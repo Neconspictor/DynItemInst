@@ -108,6 +108,9 @@ func INT Spell_ProcessMana (VAR INT manaInvested)
 	
 	//telekinesis
 	if (activeSpell == SPL_Telekinesis				)	{	return	Spell_Logic_Telekinesis	(manaInvested);	};
+	
+	//levitation
+	if (activeSpell == SPL_Levitation				)	{	return	Spell_Logic_Levitation	(manaInvested);	};
 
 //Leer
 

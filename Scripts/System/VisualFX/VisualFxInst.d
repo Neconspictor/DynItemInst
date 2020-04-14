@@ -84,6 +84,97 @@ INSTANCE spellFX_telekinesis_Origin		(CFx_Base_Proto)
 
 
 
+
+///   													XXXXXXXXXXXXXXXXXX
+///   													XX  LEVITATION  XX
+///   													XXXXXXXXXXXXXXXXXX
+
+/*instance spellFX_Levitation		(CFx_Base_Proto)
+{
+		visname_S 			= "MFX_ArmyOfDarkness_INIT";
+		visAlpha			= 1;
+
+		emtrjmode_s 		= "FIXED";
+		emTrjOriginNode 	= "ZS_RIGHTHAND";
+		LightPresetname 	= "REDAMBIENCE";
+
+		};
+
+		instance spellFX_Levitation_KEY_OPEN(C_ParticleFXEmitKey)
+		{
+				LightRange = 0.01;
+		};
+
+		instance spellFX_Levitation_KEY_INIT		(C_ParticleFXEmitKey)
+		{
+				LightRange = 0.01;
+		};
+
+		instance spellFX_Levitation_KEY_INVEST_1 (C_ParticleFXEmitKey)
+		{
+			LightRange = 200;
+			emCreateFXID = 	"spellFX_SummonCreature_LEFTHAND";
+		};
+		instance spellFX_Levitation_KEY_CAST		(C_ParticleFXEmitKey)
+		{
+			emCreateFXID		= "spellFX_SummonCreature_ORIGIN";
+			pfx_ppsisloopingchg = 1;
+};*/
+
+
+INSTANCE spellFX_Levitation	(CFx_Base_Proto)
+{
+		visname_S 			= "MFX_Transform_INIT";
+		emtrjoriginnode 	= "ZS_RIGHTHAND";
+		emtrjmode_s 		= "fixed";
+		emtrjloopmode_s 	= "NONE";
+		emtrjeasefunc_s 	= "LINEAR";
+		emtrjdynupdatedelay = 5000;
+		};
+
+		instance spellFX_Levitation_KEY_INVEST_0		(C_ParticleFXEmitKey)
+		{
+				//visname_S 			= "MFX_Transform_ORIGIN";
+				emCreateFXID		= "spellFX_Transform_ORIGIN";
+		};
+
+		instance spellFX_Levitation_KEY_INVEST_1		(C_ParticleFXEmitKey)
+		{
+				//visname_S 			= "MFX_Transform_ORIGIN";
+				emCreateFXID		= "spellFX_Transform_ORIGIN";
+		};
+
+		instance spellFX_Levitation_KEY_CAST			(C_ParticleFXEmitKey)
+		{
+				pfx_ppsisloopingChg = 1;
+				emCreateFXID		= "spellFX_Transform_BLEND";
+};
+
+
+instance spellFX_Levitation_ORIGIN	(CFx_Base_Proto)
+{
+		visname_S 				= "MFX_Transform_ORIGIN";
+		emtrjoriginnode 		= "BIP01";
+		emtrjmode_s 			= "FIXED";
+		emtrjdynupdatedelay 	= 0;
+		emselfrotvel_s 			= "0 0 50";
+};
+
+instance spellFX_Levitation_BLEND	(CFx_Base_Proto)
+{
+		visname_S 				= "MFX_Transform_BLEND";
+		emtrjmode_s 			= "FIXED";
+		emtrjoriginnode 		= "ZS_RIGHTHAND";
+		emtrjdynupdatedelay 	= 0;
+		sfxid					= "MFX_Transform_Cast";
+		sfxisambient			= 1;
+
+};
+
+
+
+
+
 INSTANCE STARGATE_SCREENBLEND	(CFx_Base_Proto)
 {
 	// userstring 0: screenblend loop duration

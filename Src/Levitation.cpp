@@ -124,7 +124,7 @@ namespace LevitationUtil
 }
 
 int COLLISION_HEAD_SIZE_Y = 25;
-bool Levitation::pausedGame = false;
+bool Levitation::gameIsPaused = false;
 bool Levitation::noCollision = false;
 int Levitation::frameTime = 0;
 int Levitation::diffFrameTime = 0;
@@ -271,16 +271,16 @@ void Levitation::zCVobSetPhysicsEnabledHook(void* pThis, int second)
 void Levitation::oCGamePauseHook(void* pThis, int second)
 {
 	logStream << "Paused Game!" << std::endl;
-	util::debug(&logStream);
-	Levitation::pausedGame = true;
+	util::logAlways(&logStream);
+	Levitation::gameIsPaused = true;
 	oCGamePause(pThis, second);
 }
 
 void Levitation::oCGameUnpauseHook(void* pThis)
 {
 	logStream << "Unpaused Game!" << std::endl;
-	util::debug(&logStream);
-	Levitation::pausedGame = false;
+	util::logAlways(&logStream);
+	Levitation::gameIsPaused = false;
 	oCGameUnpause(pThis);
 }
 
@@ -844,7 +844,7 @@ zVEC3 Levitation::levitate() {
 	zVEC3 positionAdd(0, 0, 0);
 
 	if (!isLevitationActive()) return positionAdd;
-	if (Levitation::pausedGame) return positionAdd;
+	if (Levitation::gameIsPaused) return positionAdd;
 
 	std::stringstream logStream;
 

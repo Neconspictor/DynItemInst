@@ -870,3 +870,8 @@ void DaedalusExports::NECPACK_DrobVob(oCNpc* npc, zCVob* vob)
 	//zCRigidBodyPtr rigidBody = zCVobGetRigidBody(vob);
 	//zCRigidBodySetVelocity(rigidBody, zVEC3(0, -1,0));
 }
+
+int DaedalusExports::LEVITATION_IsGamePaused()
+{
+	return Levitation::gameIsPaused;
+}
