@@ -4,21 +4,21 @@
 // error message will be appear to the user in form of a message box.
 // **********************************************************************************
 
-func void DII_Init()
+func void NECPACK_InitPerceptions()
 {
     var int expectedLibVersion;
     var int libVersion;
     var string msg;
-    expectedLibVersion = _DII_GetExpectedLibVersion();
-    libVersion = DII_GetLibVersion();
+    expectedLibVersion = _NECPACK_GetExpectedLibVersion();
+    libVersion = NECPACK_GetLibVersion();
 
     //Library couldn't be loaded?
     if (!libVersion) {
-        dii_Initialized = false;
-        if (!DII_SILENT) {
-            MEMINT_HandleError(zERR_TYPE_FATAL, ConcatStrings(DII_relativeLibraryPath, " couldn't be loaded!"));
+        NECPACK_Initialized = false;
+        if (!NECPACK_SILENT) {
+            MEMINT_HandleError(zERR_TYPE_FATAL, ConcatStrings(NECPACK_relativeLibraryPath, " couldn't be loaded!"));
         } else {
-            msg = ConcatStrings("DII_Init: ", DII_relativeLibraryPath);
+            msg = ConcatStrings("NECPACK_Init: ", NECPACK_relativeLibraryPath);
             msg = ConcatStrings(msg, " couldn't be loaded!");
             MEM_Error(msg);
         };
@@ -29,8 +29,8 @@ func void DII_Init()
         msg = ConcatStrings(msg, " , loadded lib version: ");
         msg = ConcatStrings(msg, toStringf(libVersion));
         msg = ConcatStrings(msg, "; Library version doesn't conform to expected one! No initialization will be performed and DII won't work!");
-        dii_Initialized = false;
-        if (!DII_SILENT) {
+        NECPACK_Initialized = false;
+        if (!NECPACK_SILENT) {
             MEMINT_HandleError(zERR_TYPE_FATAL, msg);
         } else {
             MEM_Error(msg);
@@ -38,11 +38,15 @@ func void DII_Init()
         return;
     };
 	
-	DII_InitSlots();
+	NECPACK_InitSlots();
 
     var int adr;
-    adr = GetProcAddress (LoadLibrary (DII_relativeLibraryPath), "Hook");
+    adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "Hook");
     CALL__stdcall(adr);
 	
-    dii_Initialized = true;
+    NECPACK_Initialized = true;
+};
+
+func void NECPACK_INIT_GLOBAL() {
+	LEVITATION_Init();
 };

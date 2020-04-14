@@ -28,7 +28,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 
 
 
-#include <DynItemInst.h>
+#include <DII.h>
 #include <ObjectManager.h>
 #include <Util.h>
 #include <HookManager.h>
@@ -45,11 +45,11 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 
 using namespace constants;
 
-const std::string DynItemInst::SAVE_ITEM_FILE_EXT = ".SAV";
-const std::string DynItemInst::SAVE_ITEM_INSTANCES  = "DII_INSTANCES";
-const std::string DynItemInst::FILE_PATERN = "DII_*";
+const std::string DII::SAVE_ITEM_FILE_EXT = ".SAV";
+const std::string DII::SAVE_ITEM_INSTANCES  = "DII_INSTANCES";
+const std::string DII::FILE_PATERN = "DII_*";
 
-bool DynItemInst::showExtendedDebugInfo = false;
+bool DII::showExtendedDebugInfo = false;
 
 
 typedef void ( __thiscall* LoadSavegame )(void*, int, int); 
@@ -90,9 +90,9 @@ typedef void(__thiscall* ZCVobSetPhysicsEnabled)(void*, int); ZCVobSetPhysicsEna
 typedef void(__thiscall* ZCVobCheckAndResolveCollisions)(void*); ZCVobCheckAndResolveCollisions zCVobCheckAndResolveCollisions2;
 
 
-OCItemInsertEffect DynItemInst::oCItemInsertEffect = (OCItemInsertEffect)0x00712C40;
+OCItemInsertEffect DII::oCItemInsertEffect = (OCItemInsertEffect)0x00712C40;
 
-void DynItemInst::zCVobSetHeadingAtWorldHook(void * pThis, zVEC3 * vec)
+void DII::zCVobSetHeadingAtWorldHook(void * pThis, zVEC3 * vec)
 {
 	if (oCNpc::GetHero() == pThis) {
 		return;
@@ -100,7 +100,7 @@ void DynItemInst::zCVobSetHeadingAtWorldHook(void * pThis, zVEC3 * vec)
 	zCVobSetHeadingAtWorld(pThis, vec);
 }
 
-void DynItemInst::hookModule()
+void DII::hookModule()
 {
 	loadSavegame = (LoadSavegame) (LOAD_SAVEGAME_ADDRESS);
 	writeSavegame = (WriteSavegame) (WRITE_SAVEGAME_ADDRESS);
@@ -149,7 +149,7 @@ void DynItemInst::hookModule()
 	hookManager->addFunctionHook((LPVOID*)&zCPar_SymbolTableGetSymbolString, zCPar_SymbolTableGetSymbolStringHook, moduleDesc);
 }
 
-void DynItemInst::unHookModule()
+void DII::unHookModule()
 {
 	HookManager* hookManager = HookManager::getHookManager();
 	hookManager->removeFunctionHook((LPVOID*)&loadSavegame, loadSavegameHook, moduleDesc);
@@ -168,7 +168,7 @@ void DynItemInst::unHookModule()
 };
 
 
-void DynItemInst::DoSurfaceAlignmentHook(void* pThis)
+void DII::DoSurfaceAlignmentHook(void* pThis)
 {
 	oCNpc* hero = oCNpc::GetHero();
 	bool adjust = (hero == pThis);
@@ -178,7 +178,7 @@ void DynItemInst::DoSurfaceAlignmentHook(void* pThis)
 	return doSurfaceAlignment2(pThis);
 }
 
-int DynItemInst::zCAIPlayerCheckFloorSlidingHook(void * pThis)
+int DII::zCAIPlayerCheckFloorSlidingHook(void * pThis)
 {
 	oCNpc* hero = oCNpc::GetHero();
 	if (hero != NULL && (pThis == hero)) {
@@ -187,7 +187,7 @@ int DynItemInst::zCAIPlayerCheckFloorSlidingHook(void * pThis)
 	return zCAIPlayerCheckFloorSliding2(pThis);
 }
 
-void DynItemInst::zCVobSetPhysicsEnabledHook(void * pThis, int second)
+void DII::zCVobSetPhysicsEnabledHook(void * pThis, int second)
 {
 	oCNpc* hero = oCNpc::GetHero();
 	if (hero != NULL && (pThis == hero)) {
@@ -198,7 +198,7 @@ void DynItemInst::zCVobSetPhysicsEnabledHook(void * pThis, int second)
 	zCVobSetPhysicsEnabled2(pThis, second);
 }
 
-_declspec(naked) void DynItemInst::zCPar_SymbolTableGetSymbolStringHookNaked()
+_declspec(naked) void DII::zCPar_SymbolTableGetSymbolStringHookNaked()
 {
 	_asm
 	{
@@ -206,7 +206,7 @@ _declspec(naked) void DynItemInst::zCPar_SymbolTableGetSymbolStringHookNaked()
 		/*6 - 5 = 1 Bytes for remaining opcode */
 			nop
 			/*finally hook function call*/
-			jmp DynItemInst::zCPar_SymbolTableGetSymbolStringHook
+			jmp DII::zCPar_SymbolTableGetSymbolStringHook
 	}
 }
 
@@ -219,24 +219,24 @@ _declspec(naked) void DynItemInst::zCPar_SymbolTableGetSymbolStringHookNaked()
 		//6 - 5 = 1 Bytes for remaining opcode
 			nop
 			//finally hook function call
-			jmp DynItemInst::zCPar_SymbolTableGetSymbolHook
+			jmp DII::zCPar_SymbolTableGetSymbolHook
 	}
 }*/
 
 
-_declspec(naked) void DynItemInst::zCPar_SymbolTableGetIndexHookNaked()
+_declspec(naked) void DII::zCPar_SymbolTableGetIndexHookNaked()
 {
 	_asm
 	{
 		LEGO_HOOKENGINE_PREAMBLE
 		/*5 - 5 = 0 Bytes for remaining opcode */
 			/*finally hook function call*/
-			jmp DynItemInst::zCPar_SymbolTableGetIndexHook
+			jmp DII::zCPar_SymbolTableGetIndexHook
 	}
 }
 
 
-_declspec(naked) void DynItemInst::zCParserGetIndexHookNaked()
+_declspec(naked) void DII::zCParserGetIndexHookNaked()
 {
 	_asm
 	{
@@ -244,12 +244,12 @@ _declspec(naked) void DynItemInst::zCParserGetIndexHookNaked()
 		/*6 - 5 = 1 Bytes for remaining opcode */
 			nop
 			/*finally hook function call*/
-			jmp DynItemInst::zCParserGetIndexHook
+			jmp DII::zCParserGetIndexHook
 	}
 }
 
 
-_declspec(naked) void DynItemInst::loadSavegameHookNaked()
+_declspec(naked) void DII::loadSavegameHookNaked()
 {
 	_asm
 	{
@@ -258,11 +258,11 @@ _declspec(naked) void DynItemInst::loadSavegameHookNaked()
 			nop
 			nop
 			/*finally hook function call*/
-			jmp DynItemInst::loadSavegameHook
+			jmp DII::loadSavegameHook
 	}
 }
 
-_declspec(naked) void DynItemInst::writeSavegameHookNaked()
+_declspec(naked) void DII::writeSavegameHookNaked()
 {
 	_asm
 	{
@@ -270,12 +270,12 @@ _declspec(naked) void DynItemInst::writeSavegameHookNaked()
 		/*6 - 5 = 1 Byte for remaining opcode */
 			nop
 			/*finally hook function call*/
-			jmp DynItemInst::writeSavegameHook
+			jmp DII::writeSavegameHook
 	}
 }
 
 
-_declspec(naked) void DynItemInst::oCItemGetValueHookNaked()
+_declspec(naked) void DII::oCItemGetValueHookNaked()
 {
 	_asm
 	{
@@ -286,33 +286,33 @@ _declspec(naked) void DynItemInst::oCItemGetValueHookNaked()
 		nop
 		nop
 		/*finally hook function call*/
-		jmp DynItemInst::oCItemGetValueHook	
+		jmp DII::oCItemGetValueHook
 	}
 }
 
-_declspec(naked) void DynItemInst::createInstanceHookNaked()
+_declspec(naked) void DII::createInstanceHookNaked()
 {
 	_asm
 	{
 		LEGO_HOOKENGINE_PREAMBLE
 		/*5 - 5 = 0 Bytes for remaining opcode */
 		/*finally hook function call*/
-		jmp DynItemInst::createInstanceHook
+		jmp DII::createInstanceHook
 	}
 }
 
-_declspec(naked) void DynItemInst::oCGameLoadGameHookNaked()
+_declspec(naked) void DII::oCGameLoadGameHookNaked()
 {
 	_asm
 	{
 		LEGO_HOOKENGINE_PREAMBLE
 		/*5 - 5 = 0 Bytes for remaining opcode */
 		/*finally hook function call*/
-			jmp DynItemInst::oCGameLoadGameHook
+			jmp DII::oCGameLoadGameHook
 	}
 }
 
-_declspec(naked) void DynItemInst::oCItemMulitSlotHookNaked()
+_declspec(naked) void DII::oCItemMulitSlotHookNaked()
 {
 	_asm
 	{
@@ -320,12 +320,12 @@ _declspec(naked) void DynItemInst::oCItemMulitSlotHookNaked()
 		/*6 - 5 = 1 Byte for remaining opcode */
 			nop
 			/*finally hook function call*/
-			jmp DynItemInst::oCItemMulitSlotHook
+			jmp DII::oCItemMulitSlotHook
 	}
 }
 
 
-int DynItemInst::oCItemGetValueHook(void* pThis) {
+int DII::oCItemGetValueHook(void* pThis) {
 	oCItem* item = static_cast<oCItem*>(pThis);
 	ObjectManager* manager = ObjectManager::getObjectManager();
 	//if (manager->getDynInstanceId(item) > ObjectManager::INSTANCE_BEGIN) {
@@ -337,7 +337,7 @@ int DynItemInst::oCItemGetValueHook(void* pThis) {
 
 
 
-zCPar_Symbol* DynItemInst::zCPar_SymbolTableGetSymbolHook(void* pThis, int index)
+zCPar_Symbol* DII::zCPar_SymbolTableGetSymbolHook(void* pThis, int index)
 {
 	zCPar_Symbol* result = zCPar_SymbolTableGetSymbol(pThis, index);
 	if (result == NULL)
@@ -348,7 +348,7 @@ zCPar_Symbol* DynItemInst::zCPar_SymbolTableGetSymbolHook(void* pThis, int index
 	return result;
 }
 
-zCPar_Symbol* DynItemInst::zCPar_SymbolTableGetSymbolStringHook(void* pThis, zSTRING const & symbolName)
+zCPar_Symbol* DII::zCPar_SymbolTableGetSymbolStringHook(void* pThis, zSTRING const & symbolName)
 {
 	zCPar_Symbol* result = ObjectManager::getObjectManager()->getSymbolByName(symbolName);
 	if (result == NULL)
@@ -358,7 +358,7 @@ zCPar_Symbol* DynItemInst::zCPar_SymbolTableGetSymbolStringHook(void* pThis, zST
 	return result;
 }
 
-int DynItemInst::zCPar_SymbolTableGetIndexHook(void* pThis, zSTRING const& symbolName)
+int DII::zCPar_SymbolTableGetIndexHook(void* pThis, zSTRING const& symbolName)
 {
 	int result = zCPar_SymbolTableGetIndex(pThis, symbolName);
 	if (result == NULL)
@@ -368,7 +368,7 @@ int DynItemInst::zCPar_SymbolTableGetIndexHook(void* pThis, zSTRING const& symbo
 	return result;
 }
 
-int DynItemInst::zCParserGetIndexHook(void* pThis, zSTRING const& symbolName)
+int DII::zCParserGetIndexHook(void* pThis, zSTRING const& symbolName)
 {
 	int result = ObjectManager::getObjectManager()->getIndexByName(symbolName);
 	if (result == NULL)
@@ -378,18 +378,18 @@ int DynItemInst::zCParserGetIndexHook(void* pThis, zSTRING const& symbolName)
 	return result;
 }
 
-DynItemInst::DynItemInst()
+DII::DII()
 	:Module()
 {
-	moduleDesc = "DynItemInst";
+	moduleDesc = "DII";
 }
 
-DynItemInst::~DynItemInst()
+DII::~DII()
 {
 }
 
 
- void DynItemInst::loadSavegameHook(void* pThis,int saveGameSlotNumber, int b)
+ void DII::loadSavegameHook(void* pThis,int saveGameSlotNumber, int b)
 {   
 	logStream << "DynItemInst::loadSavegameHook: load savegame..." << std::endl;
 	util::logInfo(&logStream);
@@ -401,7 +401,7 @@ DynItemInst::~DynItemInst()
 };
 
 
- void DynItemInst::writeSavegameHook(void* pThis,int saveGameSlotNumber, int b)
+ void DII::writeSavegameHook(void* pThis,int saveGameSlotNumber, int b)
 {   
 	logStream << "DynItemInst::writeSavegameHook: save game..." << std::endl;
 	util::logInfo(&logStream);
@@ -438,7 +438,7 @@ DynItemInst::~DynItemInst()
 };
 
 
- int DynItemInst::createInstanceHook(void* pThis, int instanceId, void* source)
+ int DII::createInstanceHook(void* pThis, int instanceId, void* source)
 {
 	zCPar_Symbol* symbol = zCParser::GetParser()->GetSymbol(instanceId);
 	if (symbol == NULL)
@@ -468,7 +468,7 @@ DynItemInst::~DynItemInst()
 	return result;
 }
 
-void DynItemInst::oCGameLoadGameHook(void* pThis, int second, zSTRING const& worldName)
+void DII::oCGameLoadGameHook(void* pThis, int second, zSTRING const& worldName)
 {
 	logStream << "DynItemInst::oCGameLoadGameHook: load..."<< std::endl;
 	util::logInfo(&logStream);
@@ -480,17 +480,17 @@ void DynItemInst::oCGameLoadGameHook(void* pThis, int second, zSTRING const& wor
 	util::logInfo(&logStream);
 }
 
-int DynItemInst::oCItemMulitSlotHook(void* pThis)
+int DII::oCItemMulitSlotHook(void* pThis)
 {
 	return oCItemMulitSlot(pThis);
 }
 
-zCVisual* DynItemInst::zCVisualLoadVisual(zSTRING const& name)
+zCVisual* DII::zCVisualLoadVisual(zSTRING const& name)
 {
 	XCALL(ZCVISUAL_LOAD_VISUAL);
 }
 
-zCListSort<oCItem>* DynItemInst::getInvItemByInstanceId(oCNpcInventory* inventory, int instanceId)
+zCListSort<oCItem>* DII::getInvItemByInstanceId(oCNpcInventory* inventory, int instanceId)
 {
 	inventory->UnpackCategory();
 	ObjectManager* manager = ObjectManager::getObjectManager();
@@ -507,7 +507,7 @@ zCListSort<oCItem>* DynItemInst::getInvItemByInstanceId(oCNpcInventory* inventor
 	return NULL;
 };
 
-oCItem* DynItemInst::getInvItemByInstanceId2(oCNpcInventory* inventory, int instanceId)
+oCItem* DII::getInvItemByInstanceId2(oCNpcInventory* inventory, int instanceId)
 {
 	inventory->UnpackCategory();
 	int itemNumber = inventory->GetNumItemsInCategory();
@@ -525,7 +525,7 @@ oCItem* DynItemInst::getInvItemByInstanceId2(oCNpcInventory* inventory, int inst
 
 
 
-std::string DynItemInst::getClearedWorldName(zSTRING const & worldName) {
+std::string DII::getClearedWorldName(zSTRING const & worldName) {
 	std::string text (const_cast<char*>(const_cast<zSTRING &>(worldName).ToChar()));
 	std::vector<std::string> splits;
 	util::split(splits, text, '/');
@@ -540,7 +540,7 @@ std::string DynItemInst::getClearedWorldName(zSTRING const & worldName) {
 	return text;
 }
 
-void DynItemInst::loadDynamicInstances(int saveGameSlotNumber)
+void DII::loadDynamicInstances(int saveGameSlotNumber)
 {
 	logStream << "DynItemInst::loadDynamicInstances: load dii instances..." << std::endl;
 	util::logInfo(&logStream);

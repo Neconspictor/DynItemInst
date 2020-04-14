@@ -119,7 +119,7 @@ public:
 	/**
 	 * Provides the version of the library.
 	 */
-	static float DII_GetLibVersion();
+	static float NECPACK_GetLibVersion();
 
 	static bool DII_UpdateInstance(int instanceIdParserSymbolIndex, oCItem* item);
 
@@ -131,33 +131,23 @@ public:
 	//Asiigns all items with instance id targetId the new id newId
 	static void DII_ChangeItemsInstanceId(int sourceInstanceParserSymbolIndex, int targetInstanceParserSymbolIndex);
 
-	static void DII_SetHeroFocusMode(int mode);
+	static bool NECPACK_Npc_CanTalk(oCNpc* npc);
 
-	static void DII_Test(oCItem* item, int mode);
-
-	static void DII_TransformationTest(zCVob* vob);
-
-	static void DII_TelekineseTest();
-
-	static bool DII_Npc_CanTalk(oCNpc* npc);
-
-	static TelekinesisInterpolator* DII_Telekinesis_createInterpolator(const zVEC3* vobPosition,
+	static TelekinesisInterpolator* TELEKINESE_CreateInterpolator(const zVEC3* vobPosition,
 		const zVEC3* npcPosition, 
 		int upMoveAmount,  // cm
 		int speed // cm / s
 	);
 
-	static void DII_Telekinesis_GetInterpolatedVec(TelekinesisInterpolator* interpolatorPtr, zVEC3* dest);
+	static void TELEKINESE_GetInterpolatedVec(TelekinesisInterpolator* interpolatorPtr, zVEC3* dest);
 
-	static void DII_Telekinesis_deleteInterpolator(TelekinesisInterpolator* interpolatorPtr);
+	static void TELEKINESE_DeleteInterpolator(TelekinesisInterpolator* interpolatorPtr);
 
-	static void DII_Telekinesis_Interpolate(TelekinesisInterpolator* interpolatorPtr, oCItem* item);
+	static void TELEKINESE_Interpolate(TelekinesisInterpolator* interpolatorPtr, oCItem* item);
 
-	static int DII_Npc_CanSeeVob(oCNpc* npc, zCVob* vob);
+	static int TELEKINESE_Npc_CanSeeVob(oCNpc* npc, zCVob* vob);
 
-	static void DII_DrobVob(oCNpc* npc, zCVob* vob);
-
-	static int DII_convertFloatToInt(float f);
+	static void NECPACK_DrobVob(oCNpc* npc, zCVob* vob);
 
 public:
 

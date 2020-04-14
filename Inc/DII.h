@@ -56,7 +56,7 @@ struct zTBBox2D
 /**
  * A module for generating gothic 2 item instances at runtime. 
  */
-class DynItemInst : public Module
+class DII : public Module
 {
 
 public:
@@ -64,12 +64,12 @@ public:
 	/**
 	 * Creates a new DynItemInst module.
 	 */
-	DynItemInst();
+	DII();
 
 	/**
 	 * Default virtual destructor.
 	 */
-	virtual ~DynItemInst();
+	virtual ~DII();
 
 	static void oCItemGetValueHookNaked();
 	static void loadSavegameHookNaked();

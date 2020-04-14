@@ -83,7 +83,7 @@ func void positionHero() {
 	
 	if (MEM_KeyState(KEY_H) == KEY_RELEASED) {
 		//Print("Toogle levitation");
-		DII_ToggleLevitation();
+		LEVITATION_Toggle();
 	};
 	
 	//if (MEM_KeyState(KEY_P) == KEY_RELEASED) {
@@ -91,7 +91,7 @@ func void positionHero() {
 	//};
 	
 	if (MEM_KeyState(KEY_P) == KEY_PRESSED) {
-		var int canTalk; canTalk = DII_Npc_CanTalk(hero);
+		var int canTalk; canTalk = NECPACK_Npc_CanTalk(hero);
 		MEM_Warn(ConcatStrings("hero can talk = ", IntToString(canTalk)));
 	};
 
@@ -227,7 +227,7 @@ func void INIT_GLOBAL()
 	
 	LeGo_Init(LeGo_All & ~LeGo_Bloodsplats);
 	
-	initLevitation();
+	NECPACK_INIT_GLOBAL();
 	
 	//InitDamage();
 	

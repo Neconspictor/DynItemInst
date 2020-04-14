@@ -33,7 +33,7 @@ CLASS DII_USER_DATA
 const int DII_SLOT_COUNT = 11;
 var string DII_SLOTS[DII_SLOT_COUNT];
 
-func void DII_InitSlots() {
+func void NECPACK_InitSlots() {
 
 	DII_SLOTS[0] = "ZS_HELMET";
 	DII_SLOTS[1] = "ZS_LEFTHAND";
@@ -69,7 +69,7 @@ FUNC STRING DII_GetSymbolName(var int symbolIndex) {
 // the current session (until gothic is terminated).
 // ************************************************************
 FUNC C_ITEM DII_CreateNewItem (var string instanceName) {
-	if (!dii_Initialized) {
+	if (!NECPACK_Initialized) {
 		MEM_Warn("DII_CreateNewItem: Library isn't initialized!");
 		return;
 	};
@@ -81,7 +81,7 @@ FUNC C_ITEM DII_CreateNewItem (var string instanceName) {
 	var int ret;
 	if (CALL_Begin(call)) {
 		var int adr;
-		adr = GetProcAddress (LoadLibrary (DII_relativeLibraryPath), "DII_CreateNewItem");
+		adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_CreateNewItem");
 		CALL_IntParam(_@(instanceParserSymbolID));
 		CALL_PutRetValTo(_@(ret));
 		CALL__cdecl(adr);
@@ -97,7 +97,7 @@ FUNC C_ITEM DII_CreateNewItem (var string instanceName) {
 // @return : The instance name of the newly created dii.
 // *********************************************************************
 FUNC STRING DII_CreateNewInstanceStr (var c_item itm) {
-    if (!dii_Initialized) {
+    if (!NECPACK_Initialized) {
         MEM_Warn("DII_CreateNewInstanceStr: Library isn't initialized!");
         return "";
     };
@@ -107,7 +107,7 @@ FUNC STRING DII_CreateNewInstanceStr (var c_item itm) {
     ptr = MEM_InstToPtr(itm);
     if (CALL_Begin(call)) {
         var int adr;
-        adr = GetProcAddress (LoadLibrary (DII_relativeLibraryPath), "DII_CreateNewInstanceStr");
+        adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_CreateNewInstanceStr");
         CALL_IntParam(_@(ptr));
         CALL_PutRetValTo(_@(ret));
         CALL__cdecl(adr);
@@ -125,7 +125,7 @@ FUNC STRING DII_CreateNewInstanceStr (var c_item itm) {
 // @return : TRUE, if the instance was successfully created. Otherwise FALSE.
 // *********************************************************************
 FUNC INT DII_CreateNewInstanceStr2 (var c_item itm, var string instanceName) {
-    if (!dii_Initialized) {
+    if (!NECPACK_Initialized) {
         MEM_Warn("DII_CreateNewInstanceStr: Library isn't initialized!");
         return 0;
     };
@@ -137,7 +137,7 @@ FUNC INT DII_CreateNewInstanceStr2 (var c_item itm, var string instanceName) {
     ptr = MEM_InstToPtr(itm);
     if (CALL_Begin(call)) {
         var int adr;
-        adr = GetProcAddress (LoadLibrary (DII_relativeLibraryPath), "DII_CreateNewInstanceStr2");
+        adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_CreateNewInstanceStr2");
 		
 		CALL_IntParam(_@(zStr.ptr));
 		CALL_IntParam(_@(ptr));
@@ -155,7 +155,7 @@ FUNC INT DII_CreateNewInstanceStr2 (var c_item itm, var string instanceName) {
 //  Deletes a dynamic item instance by its instance name.
 // ***************************************************************
 func void DII_DeleteDII (var string instanceName) {
-    if (!dii_Initialized) {
+    if (!NECPACK_Initialized) {
 		MEM_Warn("DII_IsInstanceDynamic: Library isn't initialized!");
         return;
     };
@@ -166,7 +166,7 @@ func void DII_DeleteDII (var string instanceName) {
     const int call = 0;
     if (CALL_Begin(call)) {
         var int adr;
-        adr = GetProcAddress (LoadLibrary (DII_relativeLibraryPath), "DII_DeleteDII");
+        adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_DeleteDII");
         CALL_IntParam(_@(instanceParserSymbolID));
         CALL__cdecl(adr);
         call = CALL_End();
@@ -178,7 +178,7 @@ func void DII_DeleteDII (var string instanceName) {
 //  Removes an item from the current world and deletes it.
 // ***************************************************************
 func void DII_DeleteItem (VAR C_ITEM itm) {
-    if (!dii_Initialized) {
+    if (!NECPACK_Initialized) {
 		MEM_Warn("DII_IsInstanceDynamic: Library isn't initialized!");
         return;
     };
@@ -187,7 +187,7 @@ func void DII_DeleteItem (VAR C_ITEM itm) {
     ptr = MEM_InstToPtr(itm);
     if (CALL_Begin(call)) {
         var int adr;
-        adr = GetProcAddress (LoadLibrary (DII_relativeLibraryPath), "DII_DeleteItem");
+        adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_DeleteItem");
         CALL_IntParam(_@(ptr));
         CALL__cdecl(adr);
         call = CALL_End();
@@ -201,7 +201,7 @@ func void DII_DeleteItem (VAR C_ITEM itm) {
 // be returned.
 // ************************************************************
 FUNC INT DII_IsDynamic(var c_item itm) {
-	if (!dii_Initialized) {
+	if (!NECPACK_Initialized) {
 		MEM_Warn("DII_IsDynamic: Library isn't initialized!");
 		return 0;
 	};
@@ -211,7 +211,7 @@ FUNC INT DII_IsDynamic(var c_item itm) {
 	ptr = MEM_InstToPtr(itm);
 	if (CALL_Begin(call)) {
 		var int adr;
-		adr = GetProcAddress (LoadLibrary (DII_relativeLibraryPath), "DII_IsDynamic");
+		adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_IsDynamic");
 		CALL_IntParam(_@(ptr));
 		CALL_PutRetValTo(_@(ret));
 		CALL__cdecl(adr);
@@ -225,7 +225,7 @@ FUNC INT DII_IsDynamic(var c_item itm) {
 // @param instanceName : the name of the instance.
 // ************************************************************
 FUNC INT DII_IsInstanceDynamic(var string instanceName) {
-    if (!dii_Initialized) {
+    if (!NECPACK_Initialized) {
         MEM_Warn("DII_IsInstanceDynamic: Library isn't initialized!");
         return 0;
     };
@@ -237,7 +237,7 @@ FUNC INT DII_IsInstanceDynamic(var string instanceName) {
     var int ret;
     if (CALL_Begin(call)) {
         var int adr;
-        adr = GetProcAddress (LoadLibrary (DII_relativeLibraryPath), "DII_IsInstanceDynamic");
+        adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_IsInstanceDynamic");
         CALL_IntParam(_@(instanceParserSymbolID));
         CALL_PutRetValTo(_@(ret));
         CALL__cdecl(adr);
@@ -254,8 +254,8 @@ FUNC INT DII_IsInstanceDynamic(var string instanceName) {
 // @return : True if the dii was successfully initialized.
 // ************************************************************
 func INT DII_UpdateInstance(var string instanceName, var c_item itm) {
-    if (!dii_Initialized) {
-        MEM_Warn("DII_SyncDII: Library isn't initialized!");
+    if (!NECPACK_Initialized) {
+        MEM_Warn("NECPACK_SyncDII: Library isn't initialized!");
         return FALSE;
     };
 	
@@ -266,7 +266,7 @@ func INT DII_UpdateInstance(var string instanceName, var c_item itm) {
     ptr = MEM_InstToPtr(itm);
 	var int ret;
     var int adr;
-    adr = GetProcAddress (LoadLibrary (DII_relativeLibraryPath), "DII_UpdateInstance");
+    adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_UpdateInstance");
 	
 	CALL_IntParam(ptr);
 	CALL_IntParam(instanceParserSymbolID);
@@ -284,7 +284,7 @@ func INT DII_UpdateInstance(var string instanceName, var c_item itm) {
 // **********************************************************************
 
 FUNC DII_USER_DATA DII_GetUserData (var string instanceName) {
-    if (!dii_Initialized) {
+    if (!NECPACK_Initialized) {
         MEM_Warn("DII_GetUserData: Library isn't initialized!");
         return;
     };
@@ -296,7 +296,7 @@ FUNC DII_USER_DATA DII_GetUserData (var string instanceName) {
     var int ret;
     if (CALL_Begin(call)) {
         var int adr;
-        adr = GetProcAddress (LoadLibrary (DII_relativeLibraryPath), "DII_GetUserData");
+        adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_GetUserData");
         CALL_IntParam(_@(instanceParserSymbolID));
         CALL_PutRetValTo(_@(ret));
         CALL__cdecl(adr);
@@ -306,7 +306,7 @@ FUNC DII_USER_DATA DII_GetUserData (var string instanceName) {
 };
 
 func void DII_AssignInstanceId (var c_item itm, var string instanceName) {
-    if (!dii_Initialized) {
+    if (!NECPACK_Initialized) {
         MEM_Warn("DII_AssignInstanceId: Library isn't initialized!");
         return;
     };
@@ -322,7 +322,7 @@ func void DII_AssignInstanceId (var c_item itm, var string instanceName) {
     //var int symb; symb = MEM_ReadIntArray (currSymbolTableAddress, itm);//symb = itm;
     if (CALL_Begin(call)) {
         var int adr;
-        adr = GetProcAddress (LoadLibrary (DII_relativeLibraryPath), "DII_AssignInstanceId");
+        adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_AssignInstanceId");
         CALL_IntParam(_@(instanceParserSymbolID));
         CALL_IntParam(_@(ptr));
         CALL__cdecl(adr);
@@ -332,7 +332,7 @@ func void DII_AssignInstanceId (var c_item itm, var string instanceName) {
 
 
 func void DII_GetItemByInstanceId (var int itm, var string instanceName) {
-    if (!dii_Initialized) {
+    if (!NECPACK_Initialized) {
 		MEM_Warn("DII_GetItemByInstanceId: Library isn't initialized!");
         return;
     };
@@ -344,7 +344,7 @@ func void DII_GetItemByInstanceId (var int itm, var string instanceName) {
     var int ret;
     if (CALL_Begin(call)) {
         var int adr;
-        adr = GetProcAddress (LoadLibrary (DII_relativeLibraryPath), "DII_GetItemByInstanceId");
+        adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_GetItemByInstanceId");
         CALL_IntParam(_@(instanceParserSymbolID));
         CALL_IntParam(_@(itm));
         CALL__cdecl(adr);
@@ -353,7 +353,7 @@ func void DII_GetItemByInstanceId (var int itm, var string instanceName) {
 };
 
 func void DII_ChangeItemsInstanceId (var int sourceInstanceParserSymbolID, var int targetInstanceParserSymbolID) {
-    if (!dii_Initialized) {
+    if (!NECPACK_Initialized) {
 		MEM_Warn("DII_ChangeItemsInstanceId: Library isn't initialized!");
         return;
     };
@@ -361,7 +361,7 @@ func void DII_ChangeItemsInstanceId (var int sourceInstanceParserSymbolID, var i
     var int ret;
     if (CALL_Begin(call)) {
         var int adr;
-        adr = GetProcAddress (LoadLibrary (DII_relativeLibraryPath), "DII_ChangeItemsInstanceId");
+        adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_ChangeItemsInstanceId");
         CALL_IntParam(_@(targetInstanceParserSymbolID));
         CALL_IntParam(_@(sourceInstanceParserSymbolID));
         CALL__cdecl(adr);

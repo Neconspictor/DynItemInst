@@ -4,13 +4,6 @@
 
 FUNC VOID InitPerceptions()
 {
-	
-	//MEM_InitAll();
-	//LeGo_Init(LeGo_All);
-	
-	//DII_Init();
-	
-
 	// Die Reichweite der aktiven Wahrnehmungen
 	// PERC_ASSESSPLAYER	// Spieler wird wahrgenommen
 	// PERC_ASSESSENEMY		// der nächste NSC, zu dem ich Att_Hostile habe, wird wahrgenommen! (wenn Temp_Att != Gil_Att, wird Temp_att genommen)
@@ -110,7 +103,7 @@ FUNC VOID InitPerceptions()
         
         
         MEM_InitAll();
-        DII_Init();
+        NECPACK_InitPerceptions();
 };
 
 

@@ -99,7 +99,7 @@ void Logger::writeToFile(std::string message)
 void Logger::writeTozSpy(LogLevel level, std::string message)
 {
 
-	message = "U: DII-Skript: " + message;
+	message = "U: NecPack lib: " + message;
 	zERROR* zerr = (zERROR*)0x008CDCD0;	//zERROR zerr
 	zSTRING zMessage = zSTRING(message.c_str());
 

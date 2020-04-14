@@ -3,7 +3,7 @@
 #include "CustomNpcFocus.h"
 #include <HookManager.h>
 #include <api/g2/zcparser.h>
-#include "DynItemInst.h"
+#include "DII.h"
 #include <Logger.h>
 #include "Util.h"
 

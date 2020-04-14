@@ -754,12 +754,12 @@ void Levitation::doFloorAligning(zVEC3* finalPosition, zMAT4* mat)
 bool Levitation::isLevitationActive()
 {
 	zCParser* parser; parser = zCParser::GetParser();
-	int index = parser->GetIndex("DII_LevitationIsActive");
+	int index = parser->GetIndex("LEVITATION_IsActive");
 	zCPar_Symbol* symbol = parser->GetSymbol(index);
 
 	if (!index) {
 		std::stringstream logStream;
-		logStream << "Levitation::isLevitationActive: '" << "DII_LevitationIsActive" << "' not defined!" << std::endl;
+		logStream << "Levitation::isLevitationActive: '" << "LEVITATION_IsActive" << "' not defined!" << std::endl;
 		util::logFatal(&logStream);
 	}
 

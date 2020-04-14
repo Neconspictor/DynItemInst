@@ -16,7 +16,7 @@
     <ClInclude Include="Inc\Constants.h" />
     <ClInclude Include="Inc\CustomNpcFocus.h" />
     <ClInclude Include="Inc\DllMain.h" />
-    <ClInclude Include="Inc\DynItemInst.h" />
+    <ClInclude Include="Inc\DII.h" />
     <ClInclude Include="Inc\DaedalusExports.h" />
     <ClInclude Include="Inc\HookManager.h" />
     <ClInclude Include="Inc\ISerialization.h" />
@@ -54,7 +54,7 @@
     <ClCompile Include="Src\Configuration.cpp" />
     <ClCompile Include="Src\CustomNpcFocus.cpp" />
     <ClCompile Include="Src\DllMain.cpp" />
-    <ClCompile Include="Src\DynItemInst.cpp" />
+    <ClCompile Include="Src\DII.cpp" />
     <ClCompile Include="Src\DaedalusExports.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
@@ -76,8 +76,8 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{F49E2048-15A5-46EB-9737-D31109C3DA55}</ProjectGuid>
-    <RootNamespace>DynItemInst</RootNamespace>
-    <ProjectName>DynItemInst_Ikarus</ProjectName>
+    <RootNamespace>NecPack</RootNamespace>
+    <ProjectName>NecPack</ProjectName>
     <WindowsTargetPlatformVersion>7.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -107,15 +107,15 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>.\G2ExtSDK;.\Inc;.\minhook-master\include;.\inih-master;$(IncludePath)</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
-    <TargetName>DII</TargetName>
-    <OutDir>E:\Program Files (x86)\JoWood\Gothic II Gold\System\DII\</OutDir>
+    <TargetName>NecPack</TargetName>
+    <OutDir>E:\Program Files (x86)\JoWood\Gothic II Gold\System\NecPack\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>.\G2ExtSDK;.\Inc;.\minhook-master\include;.\inih-master;$(IncludePath)</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
-    <TargetName>DII</TargetName>
-    <OutDir>E:\Program Files (x86)\JoWood\Gothic II Gold\System\DII\</OutDir>
+    <TargetName>NecPack</TargetName>
+    <OutDir>E:\Program Files (x86)\JoWood\Gothic II Gold\System\NecPack\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

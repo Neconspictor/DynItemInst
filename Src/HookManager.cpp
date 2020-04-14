@@ -35,7 +35,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 	#pragma comment (lib, "libMinHook-x86-v140_xp-mt.lib")
 #endif*/
 #include <string>
-#include <DynItemInst.h>
+#include <DII.h>
 #include <DaedalusExports.h>
 #include <sstream>
 #include <Logger.h>
@@ -240,7 +240,7 @@ void HookManager::hook()
 		return;
 	}
 
-	Module* dynItemInstModule = new DynItemInst();
+	Module* dynItemInstModule = new DII();
 	Module* externals = new DaedalusExports();
 	Module* levitation = new Levitation();
 

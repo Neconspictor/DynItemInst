@@ -10,25 +10,19 @@ EXPORTS
 	DII_IsDynamic
 	DII_IsInstanceDynamic
 	DII_GetUserData
-	DII_GetLibVersion
+	NECPACK_GetLibVersion
 	DII_UpdateInstance
 	DII_AssignInstanceId
 	DII_EquipItem
 	DII_GetItemByInstanceId
 	DII_ChangeItemsInstanceId
 
-	DII_SetHeroFocusMode
-	DII_Test
-	DII_TransformationTest
-	DII_TelekineseTest
-	DII_Npc_CanTalk
+	NECPACK_Npc_CanTalk
 
-	DII_Telekinesis_createInterpolator
-	DII_Telekinesis_GetInterpolatedVec
-	DII_Telekinesis_Interpolate
-	DII_Telekinesis_deleteInterpolator
+	TELEKINESE_CreateInterpolator
+	TELEKINESE_GetInterpolatedVec
+	TELEKINESE_Interpolate
+	TELEKINESE_DeleteInterpolator
 
-	DII_Npc_CanSeeVob
-	DII_DrobVob
-
-	DII_convertFloatToInt
+	TELEKINESE_Npc_CanSeeVob
+	NECPACK_DrobVob

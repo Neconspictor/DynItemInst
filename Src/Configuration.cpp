@@ -82,7 +82,7 @@ void Configuration::load(const string &filename)
 	string path = ss.str();
 
 	//ini couldn't be read; set standard settings
-	logFile = "DynItemInst_IkarusLog.txt";
+	logFile = "NecPack_log.txt";
 	logInfos = true;
 	logWarnings = true;
 	logErrors = true;

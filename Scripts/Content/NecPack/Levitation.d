@@ -1,51 +1,51 @@
-var int DII_LevitationIsActive;
+var int LEVITATION_IsActive;
 const int LEVITATION_HOVER_DISTANCE = 40; // hover distance (in cm/s)
 const int LEVITATION_SPEED_VERTICAL = 60; // up/down levitation speed (in cm/s)
 const int LEVITATION_SPEED_FORWARD = 500; // forward levitation speed (in cm/s)
 const int LEVITATION_SPEED_BACKWARD = 100; // backward levitation speed (in cm/s)
 const int LEVITATION_MAX_UP_MOVEMENT = 13000; // max up movement (in ms)
 const int LEVITATION_GRAVITY = 10; // levitation gravity (in cm/s)
-var int levitationBarHandle;
-var int levitationStartTime;
-var int levitationInvestedTimeUpMovement;
+var int LEVITATION_barHandle;
+var int LEVITATION_startTime;
+var int LEVITATION_investedTimeUpMovement;
 
-func void initLevitation() {
+func void LEVITATION_Init() {
 	
-	if (!levitationBarHandle) {
-		levitationBarHandle = Bar_Create(GothicBar@);
-		Bar_Hide(levitationBarHandle);
+	if (!LEVITATION_barHandle) {
+		LEVITATION_barHandle = Bar_Create(GothicBar@);
+		Bar_Hide(LEVITATION_barHandle);
 	};
 	
 };
 
-func void DII_EndLevitation() {
-	if (!dii_Initialized) {
-        MEM_Warn("DII_EndLevitation: Library isn't initialized!");
+func void LEVITATION_End() {
+	if (!NECPACK_Initialized) {
+        MEM_Warn("LEVITATION_End: Library isn't initialized!");
         return;
     };
 	
-	DII_LevitationIsActive = FALSE;
-	Bar_Hide(levitationBarHandle);
+	LEVITATION_IsActive = FALSE;
+	Bar_Hide(LEVITATION_barHandle);
 	Mdl_RemoveOverlayMDS(hero, "Humans_Levitate.mds");
-	FF_Remove(investUpMovement);
+	FF_Remove(LEVITATION_InvestUpMovement);
 };
 
-func void investUpMovement() {
+func void LEVITATION_InvestUpMovement() {
 
 	// we add 1/120 to the invested time as constant contribution.
-	levitationInvestedTimeUpMovement = addf(levitationInvestedTimeUpMovement, 
+	LEVITATION_investedTimeUpMovement = addf(LEVITATION_investedTimeUpMovement, 
 		mulf(MEM_Timer.frameTimeFloat, fracf(LEVITATION_MAX_UP_MOVEMENT, 120 * 1000)));
 
 	if (MEM_KeyState(KEY_LBRACKET) == KEY_HOLD) {
-		levitationInvestedTimeUpMovement =  addf(levitationInvestedTimeUpMovement, MEM_Timer.frameTimeFloat);
+		LEVITATION_investedTimeUpMovement =  addf(LEVITATION_investedTimeUpMovement, MEM_Timer.frameTimeFloat);
 	};
 	
 		var int barPromille; 
-		barPromille = subf(mkf(LEVITATION_MAX_UP_MOVEMENT), levitationInvestedTimeUpMovement);
+		barPromille = subf(mkf(LEVITATION_MAX_UP_MOVEMENT), LEVITATION_investedTimeUpMovement);
 		barPromille = divf(barPromille, mkf(LEVITATION_MAX_UP_MOVEMENT));
 		barPromille = mulf(barPromille, mkf(1000));
 		barPromille = truncf(barPromille);
-		//barPromille = DII_convertFloatToInt(barPromille);
+		//barPromille = NECPACK_convertFloatToInt(barPromille);
 
 
 		if (barPromille < 0) {
@@ -53,35 +53,35 @@ func void investUpMovement() {
 		};
 		
 		//barPromille = castToIntf(barPromille);
-		Bar_SetPromille(levitationBarHandle, barPromille);
-		//MEM_Warn(ConcatStrings("investUpMovement: ", IntToString(barPromille)));
+		Bar_SetPromille(LEVITATION_barHandle, barPromille);
+		//MEM_Warn(ConcatStrings("LEVITATION_InvestUpMovement: ", IntToString(barPromille)));
 	
 	if (MEM_KeyState(KEY_RETURN) == KEY_PRESSED || barPromille == 0) {
-		DII_EndLevitation();
+		LEVITATION_End();
 	};
 };
 
 
 
 
-func void DII_ToggleLevitation() {
-	if (!dii_Initialized) {
-        MEM_Warn("DII_ToggleLevitation: Library isn't initialized!");
+func void LEVITATION_Toggle() {
+	if (!NECPACK_Initialized) {
+        MEM_Warn("LEVITATION_Toggle: Library isn't initialized!");
         return;
     };
 	
-	DII_LevitationIsActive = !DII_LevitationIsActive;
+	LEVITATION_IsActive = !LEVITATION_IsActive;
 	
-	if (DII_LevitationIsActive) {
-		Bar_Show(levitationBarHandle);
-		Bar_SetPromille(levitationBarHandle, 1000);
+	if (LEVITATION_IsActive) {
+		Bar_Show(LEVITATION_barHandle);
+		Bar_SetPromille(LEVITATION_barHandle, 1000);
 		Mdl_ApplyOverlayMds	(hero, "Humans_Levitate.mds"); 
-		levitationInvestedTimeUpMovement = FLOATNULL;
-		FF_ApplyOnce(investUpMovement);
+		LEVITATION_investedTimeUpMovement = FLOATNULL;
+		FF_ApplyOnce(LEVITATION_InvestUpMovement);
 		
 	} else {
-		Bar_Hide(levitationBarHandle);
+		Bar_Hide(LEVITATION_barHandle);
 		Mdl_RemoveOverlayMDS(hero, "Humans_Levitate.mds");
-		FF_Remove(investUpMovement);
+		FF_Remove(LEVITATION_InvestUpMovement);
 	};
 };

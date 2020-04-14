@@ -15,14 +15,8 @@
     <Filter Include="Source Files\CustomNpcFocus">
       <UniqueIdentifier>{ec7ef82e-4226-408e-9822-e8fd13a18508}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\DynItemInst">
-      <UniqueIdentifier>{380edbd3-57c6-403b-834b-0f82a42271fa}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Levitation">
       <UniqueIdentifier>{597c60ab-008b-47c6-aa98-4107804efb8f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\DynItemInst">
-      <UniqueIdentifier>{91540903-ba78-421f-8c57-05bae08ffa88}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Levitation">
       <UniqueIdentifier>{59817085-0e31-4499-9577-db210a56779a}</UniqueIdentifier>
@@ -72,6 +66,12 @@
     <Filter Include="Source Files\api\g2">
       <UniqueIdentifier>{fd7826ef-698b-460c-8c7e-463ddd67bc59}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\DII">
+      <UniqueIdentifier>{91540903-ba78-421f-8c57-05bae08ffa88}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\DII">
+      <UniqueIdentifier>{380edbd3-57c6-403b-834b-0f82a42271fa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Inc\DllMain.h">
@@ -81,31 +81,28 @@
       <Filter>Header Files\CustomNpcFocuses</Filter>
     </ClInclude>
     <ClInclude Include="Inc\AdditMemory.h">
-      <Filter>Header Files\DynItemInst</Filter>
+      <Filter>Header Files\DII</Filter>
     </ClInclude>
     <ClInclude Include="Inc\Configuration.h">
-      <Filter>Header Files\DynItemInst</Filter>
+      <Filter>Header Files\DII</Filter>
     </ClInclude>
     <ClInclude Include="Inc\oCMobContainer.h">
-      <Filter>Header Files\DynItemInst</Filter>
+      <Filter>Header Files\DII</Filter>
     </ClInclude>
     <ClInclude Include="Inc\zCOptionExtended.h">
-      <Filter>Header Files\DynItemInst</Filter>
+      <Filter>Header Files\DII</Filter>
     </ClInclude>
     <ClInclude Include="Inc\zCPar_SymbolTable.h">
-      <Filter>Header Files\DynItemInst</Filter>
+      <Filter>Header Files\DII</Filter>
     </ClInclude>
     <ClInclude Include="Inc\ocgameExtended.h">
-      <Filter>Header Files\DynItemInst</Filter>
+      <Filter>Header Files\DII</Filter>
     </ClInclude>
     <ClInclude Include="Inc\ObjectManager.h">
-      <Filter>Header Files\DynItemInst</Filter>
-    </ClInclude>
-    <ClInclude Include="Inc\DynItemInst.h">
-      <Filter>Header Files\DynItemInst</Filter>
+      <Filter>Header Files\DII</Filter>
     </ClInclude>
     <ClInclude Include="Inc\DynInstance.h">
-      <Filter>Header Files\DynItemInst</Filter>
+      <Filter>Header Files\DII</Filter>
     </ClInclude>
     <ClInclude Include="Inc\Levitation.h">
       <Filter>Header Files\Levitation</Filter>
@@ -129,7 +126,7 @@
       <Filter>Header Files\Util</Filter>
     </ClInclude>
     <ClInclude Include="Inc\Constants.h">
-      <Filter>Header Files\DynItemInst</Filter>
+      <Filter>Header Files\DII</Filter>
     </ClInclude>
     <ClInclude Include="Inc\Util_Constants.h">
       <Filter>Header Files\Util</Filter>
@@ -167,6 +164,9 @@
     <ClInclude Include="Inc\LevitationData.h">
       <Filter>Header Files\Levitation</Filter>
     </ClInclude>
+    <ClInclude Include="Inc\DII.h">
+      <Filter>Header Files\DII</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\DllMain.cpp">
@@ -176,13 +176,10 @@
       <Filter>Source Files\CustomNpcFocus</Filter>
     </ClCompile>
     <ClCompile Include="Src\DynInstance.cpp">
-      <Filter>Source Files\DynItemInst</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\DynItemInst.cpp">
-      <Filter>Source Files\DynItemInst</Filter>
+      <Filter>Source Files\DII</Filter>
     </ClCompile>
     <ClCompile Include="Src\ObjectManager.cpp">
-      <Filter>Source Files\DynItemInst</Filter>
+      <Filter>Source Files\DII</Filter>
     </ClCompile>
     <ClCompile Include="Src\Levitation.cpp">
       <Filter>Source Files\Levitation</Filter>
@@ -231,6 +228,9 @@
     </ClCompile>
     <ClCompile Include="Src\LevitationData.cpp">
       <Filter>Source Files\Levitation</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\DII.cpp">
+      <Filter>Source Files\DII</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

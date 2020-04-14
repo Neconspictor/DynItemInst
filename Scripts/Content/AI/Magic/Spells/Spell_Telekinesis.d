@@ -54,8 +54,8 @@ func void _Spell_Telekinesis_MoveTarget(var int hndl) {
 	if (oCSelf.aiscriptvars[AIV_SelectSpell] != 0 ) {
 		oCSelf.aiscriptvars[AIV_SelectSpell] = 0;
 		
-		DII_DrobVob(data.pCaster, data.pTarget);
-		DII_Telekinesis_deleteInterpolator(data.pInterpolator);
+		NECPACK_DrobVob(data.pCaster, data.pTarget);
+		TELEKINESE_DeleteInterpolator(data.pInterpolator);
 		FF_RemoveData(_Spell_Telekinesis_MoveTarget, hndl);
 		delete(hndl);
 		MEM_WARN("Detected end of target move!");
@@ -65,7 +65,7 @@ func void _Spell_Telekinesis_MoveTarget(var int hndl) {
 	
 	var int vobPosition[3];
 	
-	DII_Telekinesis_Interpolate(data.pInterpolator, data.pTarget);
+	TELEKINESE_Interpolate(data.pInterpolator, data.pTarget);
 	//DII_Telekinesis_GetInterpolatedVec(data.pInterpolator, _@(vobPosition[0]));
 	
 	
@@ -116,7 +116,7 @@ func void _Spell_Telekinesis_MoveTargetStart(var int hndl) {
 	npcPosition[1] = caster._zCVob_trafoObjToWorld[7];
 	npcPosition[2] = caster._zCVob_trafoObjToWorld[11];
 	
-	data.pInterpolator = DII_Telekinesis_createInterpolator(_@(vobPosition[0]), 
+	data.pInterpolator = TELEKINESE_createInterpolator(_@(vobPosition[0]), 
 															_@(npcPosition[0]),
 															50,
 															100);
@@ -143,7 +143,7 @@ func int Spell_Logic_Telekinesis (var int manaInvested)
 	
 	if (!Hlp_IsValidItem(oCFocus)) {return SPL_DONTINVEST;};
 	
-	var int canSee; canSee = DII_Npc_CanSeeVob(_@(self), oCSelf.focus_vob);
+	var int canSee; canSee = TELEKINESE_Npc_CanSeeVob(_@(self), oCSelf.focus_vob);
 	MEM_Warn(ConcatStrings("canSee = ", IntToString(canSee)));
 	
 	if (!canSee) {

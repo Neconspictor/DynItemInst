@@ -35,7 +35,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <DaedalusExports.h>
 #include <set>
 #include <ocgameExtended.h>
-#include <DynItemInst.h>
+#include <DII.h>
 #include <Util.h>
 #include <Levitation.h>
 #include <zCPar_SymbolTable.h>
@@ -188,7 +188,7 @@ void DaedalusExports::DII_EquipItem(oCNpc* npc, int instanceId)
 	oCNpcInventory* inv = npc->GetInventory();
 	if (inv == NULL) return;
 
-	oCItem* item = DynItemInst::getInvItemByInstanceId2(inv, instanceId);
+	oCItem* item = DII::getInvItemByInstanceId2(inv, instanceId);
 	if (item == NULL) return;
 	npc->Equip(item);
 }
@@ -227,7 +227,7 @@ BYTE* DaedalusExports::DII_GetUserData(int instanceIdParserSymbolIndex) // Func 
 }
 
 
-float DaedalusExports::DII_GetLibVersion()
+float DaedalusExports::NECPACK_GetLibVersion()
 {
 	return LIB_VERSION;
 }
@@ -496,15 +496,6 @@ void DaedalusExports::DII_ChangeItemsInstanceId(int sourceInstanceParserSymbolIn
 	util::debug(&logStream);
 }
 
-void DaedalusExports::DII_SetHeroFocusMode(int mode)
-{
-	//for now ignore!
-	return;
-	typedef void(__cdecl* OCNpcFocusSetFocusMode)(int mode);
-	OCNpcFocusSetFocusMode oCNpcFocusSetFocusMode = (OCNpcFocusSetFocusMode)0x006BEC20;
-	oCNpcFocusSetFocusMode(mode);
-}
-
 //.text:006C9030 void __cdecl Game_DeleteAllPfx(class zCTree<class zCVob> *) proc near
 typedef void(__cdecl* Game_DeleteAllPfx)(void*);
 Game_DeleteAllPfx game_DeleteAllPfx = (Game_DeleteAllPfx)0x006C9030;
@@ -516,39 +507,6 @@ ZCVobRemoveVobSubtreeFromWorld zCVobRemoveVobSubtreeFromWorld = (ZCVobRemoveVobS
 //.text:00711930 public: void __thiscall oCItem::CreateVisual(void) proc near
 typedef void(__thiscall* OCItemCreateVisual)(void*);
 OCItemCreateVisual oCItemCreateVisual = (OCItemCreateVisual)0x00711930;
-
-
-void DaedalusExports::DII_Test(oCItem* item, int mode)
-{
-	typedef void(__thiscall* OCItemInitByScript)(void* pThis, int, int);
-	OCItemInitByScript oCItemInitByScript = (OCItemInitByScript)0x00711BD0;
-	zVEC3 pos = item->GetVobPosition();
-	void* pfxs = ((BYTE*)item) + 0xB8;
-
-	// remove sub tree if visual is not valid!
-	if (item->globalVobTreeNode)
-	{
-		logStream << "DaedalusExports::DII_Test(oCItem*): pfxs isn't null!" << std::endl;
-		util::debug(&logStream, Logger::Warning);
-		//game_DeleteAllPfx(item->globalVobTreeNode); //0x24
-		oCItemCreateVisual(item);
-		zCVobRemoveVobSubtreeFromWorld(item);
-		item->InitByScript(item->GetInstance(), mode);
-		item->SetPositionWorld(pos);
-		oCGame::GetGame()->GetWorld()->AddVob(item);
-		
-	} else
-	{
-		logStream << "DaedalusExports::DII_Test(oCItem*): pfxs is null!"  << std::endl;
-		util::debug(&logStream, Logger::Warning);
-		item->InitByScript(item->GetInstance(), mode);
-		item->SetPositionWorld(pos);
-		oCGame::GetGame()->GetWorld()->AddVob(item);
-	}
-
-	logStream << "DII_Test(oCItem*) Called for item: " << item->name.ToChar() << ", " << item->GetSchemeName().ToChar() << std::endl;
-	util::debug(&logStream, Logger::Warning);
-}
 
 //.text:007929F0 public: void * __cdecl zCParser::CallFunc(int, ...) proc near
 typedef void* (__cdecl* ZCParserCallFunc)(int, ...);
@@ -589,35 +547,23 @@ ZCParserDoStack zCParserDoStack = (ZCParserDoStack)0x00791960;
 //.text:006BED00 ; public: static class zSTRING __cdecl oCNpcFocus::GetFocusName(void)
 typedef zSTRING(__cdecl* OCNpcFocusGetFocusName)(); OCNpcFocusGetFocusName oCNpcFocusGetFocusName = (OCNpcFocusGetFocusName)0x006BED00;
 
-void DaedalusExports::DII_TransformationTest(zCVob* vob)
-{
-	return;
-}
 
-void DaedalusExports::DII_TelekineseTest()
-{
-	zSTRING focusName = oCNpcFocusGetFocusName();
-	logStream << "DII_TelekineseTest(): focusName = " << focusName.ToChar() << std::endl;
-	util::debug(&logStream, Logger::Warning);
-}
-
-
-bool DaedalusExports::DII_Npc_CanTalk(oCNpc* npc)
+bool DaedalusExports::NECPACK_Npc_CanTalk(oCNpc* npc)
 {
 	//.text:006BCEF0 ; public: int __thiscall oCNpc::CanTalk(void)
 	typedef bool(__thiscall* OCNpcCanTalk)(oCNpc* pThis); OCNpcCanTalk oCNpcCanTalk = (OCNpcCanTalk)0x006BCEF0;
 	return oCNpcCanTalk(npc);
 }
 
-TelekinesisInterpolator* DaedalusExports::DII_Telekinesis_createInterpolator(const zVEC3* vobPosition, const zVEC3* npcPosition,
+TelekinesisInterpolator* DaedalusExports::TELEKINESE_CreateInterpolator(const zVEC3* vobPosition, const zVEC3* npcPosition,
 	int upMoveAmount, int speed)
 {
 
-	logStream << "DII_Telekinesis_createInterpolator(): vobPosition = " << *vobPosition << std::endl;
-	logStream << "DII_Telekinesis_createInterpolator(): npcPosition = " << *npcPosition << std::endl;
-	logStream << "DII_Telekinesis_createInterpolator(): upMoveAmount = " << upMoveAmount << std::endl;
-	logStream << "DII_Telekinesis_createInterpolator(): speed = " << speed << std::endl;
-	util::logAlways(&logStream);
+	logStream << "TELEKINESE_CreateInterpolator(): vobPosition = " << *vobPosition << std::endl;
+	logStream << "TELEKINESE_CreateInterpolator(): npcPosition = " << *npcPosition << std::endl;
+	logStream << "TELEKINESE_CreateInterpolator(): upMoveAmount = " << upMoveAmount << std::endl;
+	logStream << "TELEKINESE_CreateInterpolator(): speed = " << speed << std::endl;
+	util::debug(&logStream);
 
 
 	std::unique_ptr<TelekinesisInterpolator> interpolator = TelekinesisInterpolator::createTelekinesisInterpolator(*vobPosition, *npcPosition, upMoveAmount, speed);
@@ -627,13 +573,13 @@ TelekinesisInterpolator* DaedalusExports::DII_Telekinesis_createInterpolator(con
 	return interpolators.back().get();
 }
 
-void DaedalusExports::DII_Telekinesis_GetInterpolatedVec(TelekinesisInterpolator* interpolatorPtr, zVEC3* dest)
+void DaedalusExports::TELEKINESE_GetInterpolatedVec(TelekinesisInterpolator* interpolatorPtr, zVEC3* dest)
 {
 	zVEC3 result = interpolatorPtr->interpolate(std::chrono::system_clock::now());
 	*dest = result;
 }
 
-void DaedalusExports::DII_Telekinesis_deleteInterpolator(TelekinesisInterpolator* interpolatorPtr)
+void DaedalusExports::TELEKINESE_DeleteInterpolator(TelekinesisInterpolator* interpolatorPtr)
 {
 
 	auto newEnd = std::remove_if(interpolators.begin(), interpolators.end(), [&](auto& it)
@@ -643,14 +589,14 @@ void DaedalusExports::DII_Telekinesis_deleteInterpolator(TelekinesisInterpolator
 
 	if (newEnd != interpolators.end())
 	{
-		logStream << "DII_Telekinesis_createInterpolator(): successfully removed interpolator!" << std::endl;
-		util::logAlways(&logStream);
+		logStream << "TELEKINESE_DeleteInterpolator(): successfully removed interpolator!" << std::endl;
+		util::debug(&logStream);
 	}
 
 	interpolators.erase(newEnd, interpolators.end());
 }
 
-void DaedalusExports::DII_Telekinesis_Interpolate(TelekinesisInterpolator* interpolatorPtr, oCItem* item)
+void DaedalusExports::TELEKINESE_Interpolate(TelekinesisInterpolator* interpolatorPtr, oCItem* item)
 {
 	//logStream << "DII_Telekinesis_Interpolate(): called!" << std::endl;
 	//util::logAlways(&logStream);
@@ -670,7 +616,7 @@ void DaedalusExports::DII_Telekinesis_Interpolate(TelekinesisInterpolator* inter
 	//item->SetPositionWorld(result);
 }
 
-int DaedalusExports::DII_Npc_CanSeeVob(oCNpc* npc, zCVob* vob)
+int DaedalusExports::TELEKINESE_Npc_CanSeeVob(oCNpc* npc, zCVob* vob)
 {
 	//.text:00741C10 ; public: int __thiscall oCNpc::CanSee(class zCVob *, int)
 	using OCNpcCanSee = int(__thiscall*)(void*, void*, int);
@@ -830,11 +776,11 @@ struct zCClassDef {
 	int archiveVersionSum;       //zWORD //vermutlich nutzlos
 };
 
-void DaedalusExports::DII_DrobVob(oCNpc* npc, zCVob* vob)
+void DaedalusExports::NECPACK_DrobVob(oCNpc* npc, zCVob* vob)
 {
-	logStream << "Called DII_DrobVob()!" << std::endl;
+	logStream << "Called NECPACK_DrobVob()!" << std::endl;
 	logStream << "npc = " << npc->GetName().ToChar() << std::endl;
-	util::logAlways(&logStream);
+	util::debug(&logStream);
 
 	/*
 
@@ -897,7 +843,7 @@ void DaedalusExports::DII_DrobVob(oCNpc* npc, zCVob* vob)
 	logStream << "classDef->className = " << classDef->className.ToChar() << std::endl;
 	logStream << "classDef->baseClassName = " << classDef->baseClassName.ToChar() << std::endl;
 	logStream << "classDef->classSize = " << classDef->classSize << std::endl;
-	util::logAlways(&logStream);
+	util::debug(&logStream);
 
 
 	//.text:00602930 ; public: void __thiscall zCVob::SetSleeping(int)
@@ -923,12 +869,4 @@ void DaedalusExports::DII_DrobVob(oCNpc* npc, zCVob* vob)
 	zCVobSetPhysicsEnabled(vob, 1);
 	//zCRigidBodyPtr rigidBody = zCVobGetRigidBody(vob);
 	//zCRigidBodySetVelocity(rigidBody, zVEC3(0, -1,0));
-}
-
-int DaedalusExports::DII_convertFloatToInt(float f)
-{
-	logStream << "DII_convertFloatToInt: f = " << f << std::endl;
-	util::logAlways(&logStream);
-
-	return static_cast<int>(f);
 }
