@@ -19,10 +19,10 @@ EXPORTS
 
 	NECPACK_Npc_CanTalk
 
-	TELEKINESE_CreateInterpolator
-	TELEKINESE_GetInterpolatedVec
-	TELEKINESE_Interpolate
-	TELEKINESE_DeleteInterpolator
+	TELEKINESIS_CreateInterpolator
+	TELEKINESIS_GetInterpolatedVec
+	TELEKINESIS_Interpolate
+	TELEKINESIS_DeleteInterpolator
 
-	TELEKINESE_Npc_CanSeeVob
+	TELEKINESIS_Npc_CanSeeVob
 	NECPACK_DrobVob

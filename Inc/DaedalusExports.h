@@ -133,19 +133,19 @@ public:
 
 	static bool NECPACK_Npc_CanTalk(oCNpc* npc);
 
-	static TelekinesisInterpolator* TELEKINESE_CreateInterpolator(const zVEC3* vobPosition,
+	static TelekinesisInterpolator* TELEKINESIS_CreateInterpolator(const zVEC3* vobPosition,
 		const zVEC3* npcPosition, 
 		int upMoveAmount,  // cm
 		int speed // cm / s
 	);
 
-	static void TELEKINESE_GetInterpolatedVec(TelekinesisInterpolator* interpolatorPtr, zVEC3* dest);
+	static void TELEKINESIS_GetInterpolatedVec(TelekinesisInterpolator* interpolatorPtr, zVEC3* dest);
 
-	static void TELEKINESE_DeleteInterpolator(TelekinesisInterpolator* interpolatorPtr);
+	static void TELEKINESIS_DeleteInterpolator(TelekinesisInterpolator* interpolatorPtr);
 
-	static void TELEKINESE_Interpolate(TelekinesisInterpolator* interpolatorPtr, oCItem* item);
+	static void TELEKINESIS_Interpolate(TelekinesisInterpolator* interpolatorPtr, oCItem* item);
 
-	static int TELEKINESE_Npc_CanSeeVob(oCNpc* npc, zCVob* vob);
+	static int TELEKINESIS_Npc_CanSeeVob(oCNpc* npc, zCVob* vob);
 
 	static void NECPACK_DrobVob(oCNpc* npc, zCVob* vob);
 

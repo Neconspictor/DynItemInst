@@ -555,14 +555,14 @@ bool DaedalusExports::NECPACK_Npc_CanTalk(oCNpc* npc)
 	return oCNpcCanTalk(npc);
 }
 
-TelekinesisInterpolator* DaedalusExports::TELEKINESE_CreateInterpolator(const zVEC3* vobPosition, const zVEC3* npcPosition,
+TelekinesisInterpolator* DaedalusExports::TELEKINESIS_CreateInterpolator(const zVEC3* vobPosition, const zVEC3* npcPosition,
 	int upMoveAmount, int speed)
 {
 
-	logStream << "TELEKINESE_CreateInterpolator(): vobPosition = " << *vobPosition << std::endl;
-	logStream << "TELEKINESE_CreateInterpolator(): npcPosition = " << *npcPosition << std::endl;
-	logStream << "TELEKINESE_CreateInterpolator(): upMoveAmount = " << upMoveAmount << std::endl;
-	logStream << "TELEKINESE_CreateInterpolator(): speed = " << speed << std::endl;
+	logStream << "TELEKINESIS_CreateInterpolator(): vobPosition = " << *vobPosition << std::endl;
+	logStream << "TELEKINESIS_CreateInterpolator(): npcPosition = " << *npcPosition << std::endl;
+	logStream << "TELEKINESIS_CreateInterpolator(): upMoveAmount = " << upMoveAmount << std::endl;
+	logStream << "TELEKINESIS_CreateInterpolator(): speed = " << speed << std::endl;
 	util::debug(&logStream);
 
 
@@ -573,13 +573,13 @@ TelekinesisInterpolator* DaedalusExports::TELEKINESE_CreateInterpolator(const zV
 	return interpolators.back().get();
 }
 
-void DaedalusExports::TELEKINESE_GetInterpolatedVec(TelekinesisInterpolator* interpolatorPtr, zVEC3* dest)
+void DaedalusExports::TELEKINESIS_GetInterpolatedVec(TelekinesisInterpolator* interpolatorPtr, zVEC3* dest)
 {
 	zVEC3 result = interpolatorPtr->interpolate(std::chrono::system_clock::now());
 	*dest = result;
 }
 
-void DaedalusExports::TELEKINESE_DeleteInterpolator(TelekinesisInterpolator* interpolatorPtr)
+void DaedalusExports::TELEKINESIS_DeleteInterpolator(TelekinesisInterpolator* interpolatorPtr)
 {
 
 	auto newEnd = std::remove_if(interpolators.begin(), interpolators.end(), [&](auto& it)
@@ -589,14 +589,14 @@ void DaedalusExports::TELEKINESE_DeleteInterpolator(TelekinesisInterpolator* int
 
 	if (newEnd != interpolators.end())
 	{
-		logStream << "TELEKINESE_DeleteInterpolator(): successfully removed interpolator!" << std::endl;
+		logStream << "TELEKINESIS_DeleteInterpolator(): successfully removed interpolator!" << std::endl;
 		util::debug(&logStream);
 	}
 
 	interpolators.erase(newEnd, interpolators.end());
 }
 
-void DaedalusExports::TELEKINESE_Interpolate(TelekinesisInterpolator* interpolatorPtr, oCItem* item)
+void DaedalusExports::TELEKINESIS_Interpolate(TelekinesisInterpolator* interpolatorPtr, oCItem* item)
 {
 	//logStream << "DII_Telekinesis_Interpolate(): called!" << std::endl;
 	//util::logAlways(&logStream);
@@ -616,7 +616,7 @@ void DaedalusExports::TELEKINESE_Interpolate(TelekinesisInterpolator* interpolat
 	//item->SetPositionWorld(result);
 }
 
-int DaedalusExports::TELEKINESE_Npc_CanSeeVob(oCNpc* npc, zCVob* vob)
+int DaedalusExports::TELEKINESIS_Npc_CanSeeVob(oCNpc* npc, zCVob* vob)
 {
 	//.text:00741C10 ; public: int __thiscall oCNpc::CanSee(class zCVob *, int)
 	using OCNpcCanSee = int(__thiscall*)(void*, void*, int);
