@@ -26,7 +26,7 @@ INSTANCE Spell_Telekinesis (C_Spell_Proto)
 	isMultiEffect				=	0;				// Effect Class is oCVisFX_MultiTarget if set to 1 (e.g. the effect can have multiple trajectorys (massdeath)
 	targetCollectAlgo			=	TARGET_COLLECT_FOCUS_FALLBACK_NONE; //TARGET_COLLECT_FOCUS_FALLBACK_NONE;//TARGET_COLLECT_FOCUS_FALLBACK_NONE;
 	targetCollectType			=	TARGET_TYPE_ITEMS;
-	targetCollectRange			=	10000;		
+	targetCollectRange			=	5000;		
 	targetCollectAzi			=	85;
 	targetCollectElev			=	85;
 };
@@ -148,6 +148,7 @@ func int Spell_Logic_Telekinesis (var int manaInvested)
 	
 	if (!canSee) {
 		MEM_Warn("Cannot see focus vob!!!");
+		oCNpcSetFocusVob(_@(self), 0);
 		return SPL_DONTINVEST;
 	};
 	
@@ -176,6 +177,6 @@ func int Spell_Logic_Telekinesis (var int manaInvested)
 func void Spell_Cast_Telekinesis()
 {
 	//self.attribute[ATR_MANA] = self.attribute[ATR_MANA] - SPL_Cost_Sleep;			// nicht drin, wegen Kommentar oben
-	MEM_WARN("Called _Spell_TelekinesisStopMoveTarget!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+	MEM_WARN("Called Spell_Cast_Telekinesis!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 	self.aivar[AIV_SelectSpell] += 1;
 };
