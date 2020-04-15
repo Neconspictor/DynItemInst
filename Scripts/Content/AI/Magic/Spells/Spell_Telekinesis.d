@@ -9,8 +9,7 @@ const int SPL_Damage_Telekinesis 		= 0;
 
 func int Spell_Telekinesis_focus_remover()
 {
-  var oCNpc her; her = _^(_@(hero));
-  //her.focus_vob=0;
+  //var oCNpc her; her = _^(_@(hero)); // Todo: use this for investagting ikarus undefined behaviour in MEM_PtrToInst (if ptr is 0); 
   return FALSE;
 };
 
@@ -26,7 +25,7 @@ INSTANCE Spell_Telekinesis (C_Spell_Proto)
 	isMultiEffect				=	0;				// Effect Class is oCVisFX_MultiTarget if set to 1 (e.g. the effect can have multiple trajectorys (massdeath)
 	targetCollectAlgo			=	TARGET_COLLECT_FOCUS_FALLBACK_NONE; //TARGET_COLLECT_FOCUS_FALLBACK_NONE;//TARGET_COLLECT_FOCUS_FALLBACK_NONE;
 	targetCollectType			=	TARGET_TYPE_ITEMS;
-	targetCollectRange			=	5000;		
+	targetCollectRange			=	10000;		
 	targetCollectAzi			=	85;
 	targetCollectElev			=	85;
 };
@@ -49,7 +48,7 @@ func void _Spell_Telekinesis_MoveTarget(var int hndl) {
 	var oCNpc oCSelf; oCSelf = _^(data.pCaster);
 	
 	var oCItem oCTarget; oCTarget = _^(data.pTarget);
-	MEM_WARN(ConcatStrings("oCTarget.name = ", oCTarget.name));
+	//MEM_WARN(ConcatStrings("oCTarget.name = ", oCTarget.name));
 	
 	if (oCSelf.aiscriptvars[AIV_SelectSpell] != 0 ) {
 		oCSelf.aiscriptvars[AIV_SelectSpell] = 0;
@@ -58,7 +57,7 @@ func void _Spell_Telekinesis_MoveTarget(var int hndl) {
 		TELEKINESIS_DeleteInterpolator(data.pInterpolator);
 		FF_RemoveData(_Spell_Telekinesis_MoveTarget, hndl);
 		delete(hndl);
-		MEM_WARN("Detected end of target move!");
+		MEM_WARN("_Spell_Telekinesis_MoveTarget():: Detected end of target move!");
 		
 		return;
 	};
@@ -135,6 +134,9 @@ func int Spell_Logic_Telekinesis (var int manaInvested)
 		return SPL_DONTINVEST;	
 	};
 	
+	if (!Hlp_IsValidNpc(self)) {return SPL_DONTINVEST;};
+	
+	
 	var oCNpc oCSelf; oCSelf = _^(_@(self));
 	
 	if (oCSelf.focus_vob == 0) {return SPL_DONTINVEST;};
@@ -144,11 +146,11 @@ func int Spell_Logic_Telekinesis (var int manaInvested)
 	if (!Hlp_IsValidItem(oCFocus)) {return SPL_DONTINVEST;};
 	
 	var int canSee; canSee = TELEKINESIS_Npc_CanSeeVob(_@(self), oCSelf.focus_vob);
-	MEM_Warn(ConcatStrings("canSee = ", IntToString(canSee)));
+	//MEM_Warn(ConcatStrings("canSee = ", IntToString(canSee)));
 	
-	if (!canSee) {
-		MEM_Warn("Cannot see focus vob!!!");
-		oCNpcSetFocusVob(_@(self), 0);
+	if (!canSee && (manaInvested == 0)) {
+		//MEM_Warn("Cannot see focus vob!!!");
+		//oCNpcSetFocusVob(_@(self), 0);
 		return SPL_DONTINVEST;
 	};
 	
@@ -169,14 +171,15 @@ func int Spell_Logic_Telekinesis (var int manaInvested)
 	};
 	
 	//MEM_WARN(ConcatStrings("oCFocus.name = ", oCFocus.name));
+	//MEM_Warn(ConcatStrings("AIV_SpellLevel = ", IntToString(self.aivar[AIV_SpellLevel])));
 	
 	//self.aivar[AIV_SpellLevel] = 2;
 	return SPL_NEXTLEVEL;
 };
 
-func void Spell_Cast_Telekinesis()
+func void Spell_Cast_Telekinesis(var int spellLevel)
 {
 	//self.attribute[ATR_MANA] = self.attribute[ATR_MANA] - SPL_Cost_Sleep;			// nicht drin, wegen Kommentar oben
-	MEM_WARN("Called Spell_Cast_Telekinesis!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 	self.aivar[AIV_SelectSpell] += 1;
+	MEM_WARN("Spell_Cast_Telekinesis: called.");
 };
