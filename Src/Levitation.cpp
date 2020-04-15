@@ -754,12 +754,12 @@ void Levitation::doFloorAligning(zVEC3* finalPosition, zMAT4* mat)
 bool Levitation::isLevitationActive()
 {
 	zCParser* parser; parser = zCParser::GetParser();
-	int index = parser->GetIndex("LEVITATION_IsActive");
+	int index = parser->GetIndex("_LEVITATION_IsActive");
 	zCPar_Symbol* symbol = parser->GetSymbol(index);
 
 	if (!index) {
 		std::stringstream logStream;
-		logStream << "Levitation::isLevitationActive: '" << "LEVITATION_IsActive" << "' not defined!" << std::endl;
+		logStream << "Levitation::isLevitationActive: '" << "_LEVITATION_IsActive" << "' not defined!" << std::endl;
 		util::logFatal(&logStream);
 	}
 
@@ -779,7 +779,7 @@ int Levitation::getMinHoverDistance()
 
 	return symbol->content.data_int;
 }
-float Levitation::getLevitationSpeedVertical()
+float Levitation::getSpeedVertical()
 {
 	zCParser* parser; parser = zCParser::GetParser();
 	int index = parser->GetIndex("LEVITATION_SPEED_VERTICAL");
@@ -793,7 +793,7 @@ float Levitation::getLevitationSpeedVertical()
 
 	return static_cast<float>(symbol->content.data_int);
 }
-float Levitation::getLevitationSpeedForward()
+float Levitation::getSpeedForward()
 {
 	zCParser* parser; parser = zCParser::GetParser();
 	int index = parser->GetIndex("LEVITATION_SPEED_FORWARD");
@@ -807,7 +807,7 @@ float Levitation::getLevitationSpeedForward()
 
 	return static_cast<float>(symbol->content.data_int);
 }
-float Levitation::getLevitationSpeedBackward()
+float Levitation::getSpeedBackward()
 {
 	zCParser* parser; parser = zCParser::GetParser();
 	int index = parser->GetIndex("LEVITATION_SPEED_BACKWARD");
@@ -821,7 +821,7 @@ float Levitation::getLevitationSpeedBackward()
 
 	return static_cast<float>(symbol->content.data_int);
 }
-float Levitation::getLevitationGravity()
+float Levitation::getGravity()
 {
 	zCParser* parser; parser = zCParser::GetParser();
 	int index = parser->GetIndex("LEVITATION_GRAVITY");
@@ -836,6 +836,106 @@ float Levitation::getLevitationGravity()
 	float gravity = static_cast<float>(symbol->content.data_int);
 	if (gravity < 0.0) gravity = 0.0f;
 	return gravity;
+}
+float Levitation::getTurnSpeed()
+{
+	zCParser* parser; parser = zCParser::GetParser();
+	int index = parser->GetIndex("LEVITATION_SPEED_TURN");
+	zCPar_Symbol* symbol = parser->GetSymbol(index);
+
+	if (!index) {
+		std::stringstream logStream;
+		logStream << "Levitation::getLevitationSpeedTurn: '" << "LEVITATION_SPEED_TURN" << "' not defined!" << std::endl;
+		util::logFatal(&logStream);
+	}
+
+	float speedTurn = static_cast<float>(symbol->content.data_int);
+	if (speedTurn < 0.0) speedTurn = 0.0f;
+	return speedTurn;
+}
+int Levitation::getMoveForwardKey()
+{
+	zCParser* parser; parser = zCParser::GetParser();
+	int index = parser->GetIndex("LEVITATION_CONTROL_FORWARD");
+	zCPar_Symbol* symbol = parser->GetSymbol(index);
+
+	if (!index) {
+		std::stringstream logStream;
+		logStream << "Levitation::getLevitationSpeedTurn: '" << "LEVITATION_CONTROL_FORWARD" << "' not defined!" << std::endl;
+		util::logFatal(&logStream);
+	}
+
+	return symbol->content.data_int;
+}
+int Levitation::getMoveBackwardKey()
+{
+	zCParser* parser; parser = zCParser::GetParser();
+	int index = parser->GetIndex("LEVITATION_CONTROL_BACKWARD");
+	zCPar_Symbol* symbol = parser->GetSymbol(index);
+
+	if (!index) {
+		std::stringstream logStream;
+		logStream << "Levitation::getLevitationSpeedTurn: '" << "LEVITATION_CONTROL_BACKWARD" << "' not defined!" << std::endl;
+		util::logFatal(&logStream);
+	}
+
+	return symbol->content.data_int;
+}
+int Levitation::getTurnLeftKey()
+{
+	zCParser* parser; parser = zCParser::GetParser();
+	int index = parser->GetIndex("LEVITATION_CONTROL_LEFT");
+	zCPar_Symbol* symbol = parser->GetSymbol(index);
+
+	if (!index) {
+		std::stringstream logStream;
+		logStream << "Levitation::getLevitationSpeedTurn: '" << "LEVITATION_CONTROL_LEFT" << "' not defined!" << std::endl;
+		util::logFatal(&logStream);
+	}
+
+	return symbol->content.data_int;
+}
+int Levitation::getTurnRightKey()
+{
+	zCParser* parser; parser = zCParser::GetParser();
+	int index = parser->GetIndex("LEVITATION_CONTROL_RIGHT");
+	zCPar_Symbol* symbol = parser->GetSymbol(index);
+
+	if (!index) {
+		std::stringstream logStream;
+		logStream << "Levitation::getLevitationSpeedTurn: '" << "LEVITATION_CONTROL_RIGHT" << "' not defined!" << std::endl;
+		util::logFatal(&logStream);
+	}
+
+	return symbol->content.data_int;
+}
+int Levitation::getMoveUpKey()
+{
+	zCParser* parser; parser = zCParser::GetParser();
+	int index = parser->GetIndex("LEVITATION_CONTROL_UP");
+	zCPar_Symbol* symbol = parser->GetSymbol(index);
+
+	if (!index) {
+		std::stringstream logStream;
+		logStream << "Levitation::getLevitationSpeedTurn: '" << "LEVITATION_CONTROL_UP" << "' not defined!" << std::endl;
+		util::logFatal(&logStream);
+	}
+
+	return symbol->content.data_int;
+}
+int Levitation::getMoveDownKey()
+{
+	zCParser* parser; parser = zCParser::GetParser();
+	int index = parser->GetIndex("LEVITATION_CONTROL_DOWN");
+	zCPar_Symbol* symbol = parser->GetSymbol(index);
+
+	if (!index) {
+		std::stringstream logStream;
+		logStream << "Levitation::getLevitationSpeedTurn: '" << "LEVITATION_CONTROL_DOWN" << "' not defined!" << std::endl;
+		util::logFatal(&logStream);
+	}
+
+	return symbol->content.data_int;
 }
 ;
 
@@ -854,25 +954,34 @@ zVEC3 Levitation::levitate() {
 	float angle = 0;
 
 	//Levitation::noCollision = true;
-	float speedVertical = getLevitationSpeedVertical();
-	float speedForward = getLevitationSpeedForward();
-	float speedBackward = getLevitationSpeedBackward();
-	float distanceVertical = speedVertical * float(frameTimePast) / 1000.0f;
-	float distanceForward = speedForward * float(frameTimePast) / 1000.0f;
-	float distanceBackward = speedBackward * float(frameTimePast) / 1000.0f;
-	float distanceGravity = getLevitationGravity() * float(frameTimePast) / 1000.0f;
+	const float speedVertical = getSpeedVertical();
+	const float speedForward = getSpeedForward();
+	const float speedBackward = getSpeedBackward();
+	const float distanceVertical = speedVertical * float(frameTimePast) / 1000.0f;
+	const float distanceForward = speedForward * float(frameTimePast) / 1000.0f;
+	const float distanceBackward = speedBackward * float(frameTimePast) / 1000.0f;
+	const float distanceGravity = getGravity() * float(frameTimePast) / 1000.0f;
+	const float speedTurn = getTurnSpeed();
+
+	const int moveForwardKey = getMoveForwardKey();
+	const int moveBackwardKey = getMoveBackwardKey();
+	const int turnLeftKey = getTurnLeftKey();
+	const int turnRightKey = getTurnRightKey();
+	const int moveUpKey = getMoveUpKey();
+	const int moveDownKey = getMoveDownKey();
 
 	zVEC3 oldLook = heroLevitationBean.oldLook;
 	zCInput* input = zCInput::GetInput();
-
 	hero->ResetXZRotationsLocal();
-	int arrowLeft = input->KeyPressed(203);
-	int arrowRight = input->KeyPressed(205);
-	int arrowUp = input->KeyPressed(200);
-	int moveUp = input->KeyPressed(0x1A);
-	int moveDown = input->KeyPressed(0x28);
 
-	if (!arrowLeft && !arrowRight)
+	const auto turnLeft = input->KeyPressed(turnLeftKey);
+	const auto turnRight = input->KeyPressed(turnRightKey);
+	const auto moveForward = input->KeyPressed(moveForwardKey);
+	const auto moveBackward = input->KeyPressed(moveBackwardKey);
+	const auto moveUp = input->KeyPressed(moveUpKey);
+	const auto moveDown = input->KeyPressed(moveDownKey);
+
+	if (!turnLeft && !turnRight)
 	{
 		zMAT4* mat = &hero->trafoObjToWorld;
 		mat->m[0][2] = oldLook.x;
@@ -880,15 +989,13 @@ zVEC3 Levitation::levitate() {
 		mat->m[2][2] = oldLook.z;
 	}
 
-	if (arrowLeft)
+	if (turnLeft)
 	{
-		float speed = -90.0;
-		angle += speed * float(frameTimePast) / 1000;
+		angle += -speedTurn * float(frameTimePast) / 1000.0f;
 	}
-	else if (arrowRight)
+	else if (turnRight)
 	{
-		float speed = 90.0;
-		angle += speed * float(frameTimePast) / 1000;
+		angle += speedTurn * float(frameTimePast) / 1000.0f;
 	}
 
 	// Pressed � (levitation up)
@@ -903,7 +1010,7 @@ zVEC3 Levitation::levitate() {
 	positionAdd.y -= distanceGravity;
 
 	// Pressed Arrow_Up (levitation forward)
-	if (input->KeyPressed(0xC8)) {
+	if (moveForward) {
 		zMAT4* mat = &hero->trafoObjToWorld;
 		zVEC3 look = zVEC3(mat->m[0][2], mat->m[1][2], mat->m[2][2]);
 		positionAdd.x += look.x * distanceForward;
@@ -911,7 +1018,7 @@ zVEC3 Levitation::levitate() {
 		positionAdd.z += look.z * distanceForward;
 	}
 	// Pressed Arrow_Down (levitation backward)
-	else if (input->KeyPressed(0xD0)) {
+	else if (moveBackward) {
 		zMAT4* mat = &hero->trafoObjToWorld;
 		zVEC3 look = zVEC3(mat->m[0][2], mat->m[1][2], mat->m[2][2]);
 		positionAdd.x -= look.x * distanceBackward;

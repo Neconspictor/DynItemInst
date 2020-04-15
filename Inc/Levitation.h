@@ -513,9 +513,17 @@ public:
 	static void doFloorAligning(zVEC3* finalPosition, zMAT4* mat);
 	static bool isLevitationActive();
 	static int getMinHoverDistance();
-	static float getLevitationSpeedVertical();
-	static float getLevitationSpeedForward();
-	static float getLevitationSpeedBackward();
-	static float getLevitationGravity();
+	static float getSpeedVertical();
+	static float getSpeedForward();
+	static float getSpeedBackward();
+	static float getGravity();
+	static float getTurnSpeed();
+
+	static int getMoveForwardKey();
+	static int getMoveBackwardKey();
+	static int getTurnLeftKey();
+	static int getTurnRightKey();
+	static int getMoveUpKey();
+	static int getMoveDownKey();
 
 };
