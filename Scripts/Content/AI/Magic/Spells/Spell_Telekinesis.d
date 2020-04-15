@@ -50,8 +50,13 @@ func void _Spell_Telekinesis_MoveTarget(var int hndl) {
 	var oCItem oCTarget; oCTarget = _^(data.pTarget);
 	//MEM_WARN(ConcatStrings("oCTarget.name = ", oCTarget.name));
 	
-	if (oCSelf.aiscriptvars[AIV_SelectSpell] != 0 ) {
-		oCSelf.aiscriptvars[AIV_SelectSpell] = 0;
+	var int spellLevel; spellLevel = oCSelf.aiscriptvars[AIV_SpellLevel];
+	
+	if (spellLevel > 0) {
+	
+		//MEM_Warn(ConcatStrings("name = ", oCSelf.name));
+		//MEM_Warn(ConcatStrings("AIV_SpellLevel = ", IntToString(oCSelf.aiscriptvars[AIV_SpellLevel])));
+		oCSelf.aiscriptvars[AIV_SpellLevel] = 0;
 		
 		NECPACK_DrobVob(data.pCaster, data.pTarget);
 		TELEKINESIS_DeleteInterpolator(data.pInterpolator);
@@ -180,6 +185,7 @@ func int Spell_Logic_Telekinesis (var int manaInvested)
 func void Spell_Cast_Telekinesis(var int spellLevel)
 {
 	//self.attribute[ATR_MANA] = self.attribute[ATR_MANA] - SPL_Cost_Sleep;			// nicht drin, wegen Kommentar oben
-	self.aivar[AIV_SelectSpell] += 1;
+	
+	self.aivar[AIV_SpellLevel] = 1;
 	MEM_WARN("Spell_Cast_Telekinesis: called.");
 };
