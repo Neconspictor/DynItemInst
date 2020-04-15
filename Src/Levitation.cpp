@@ -751,193 +751,88 @@ void Levitation::doFloorAligning(zVEC3* finalPosition, zMAT4* mat)
 		finalPosition->y += 50 - (collisionYDownDist - 100);
 	}
 }
+
 bool Levitation::isLevitationActive()
 {
-	zCParser* parser; parser = zCParser::GetParser();
-	int index = parser->GetIndex("_LEVITATION_IsActive");
-	zCPar_Symbol* symbol = parser->GetSymbol(index);
-
-	if (!index) {
-		std::stringstream logStream;
-		logStream << "Levitation::isLevitationActive: '" << "_LEVITATION_IsActive" << "' not defined!" << std::endl;
-		util::logFatal(&logStream);
-	}
-
+	zCPar_Symbol* symbol = util::getSymbolWithChecks("LEVITATION_IsActive", __FUNCTION__);
 	return static_cast<bool>(symbol->content.data_int);
 }
+
 int Levitation::getMinHoverDistance()
 {
-	zCParser* parser; parser = zCParser::GetParser();
-	int index = parser->GetIndex("LEVITATION_HOVER_DISTANCE");
-	zCPar_Symbol* symbol = parser->GetSymbol(index);
-
-	if (!index) {
-		std::stringstream logStream;
-		logStream << "Levitation::getMinHoverDistance: '" << "LEVITATION_HOVER_DISTANCE" << "' not defined!" << std::endl;
-		util::logFatal(&logStream);
-	}
-
+	zCPar_Symbol* symbol = util::getSymbolWithChecks("LEVITATION_HOVER_DISTANCE", __FUNCTION__);
 	return symbol->content.data_int;
 }
+
 float Levitation::getSpeedVertical()
 {
-	zCParser* parser; parser = zCParser::GetParser();
-	int index = parser->GetIndex("LEVITATION_SPEED_VERTICAL");
-	zCPar_Symbol* symbol = parser->GetSymbol(index);
-
-	if (!index) {
-		std::stringstream logStream;
-		logStream << "Levitation::getLevitationSpeed: '" << "LEVITATION_SPEED_VERTICAL" << "' not defined!" << std::endl;
-		util::logFatal(&logStream);
-	}
-
+	zCPar_Symbol* symbol = util::getSymbolWithChecks("LEVITATION_SPEED_VERTICAL", __FUNCTION__);
 	return static_cast<float>(symbol->content.data_int);
 }
+
 float Levitation::getSpeedForward()
 {
-	zCParser* parser; parser = zCParser::GetParser();
-	int index = parser->GetIndex("LEVITATION_SPEED_FORWARD");
-	zCPar_Symbol* symbol = parser->GetSymbol(index);
-
-	if (!index) {
-		std::stringstream logStream;
-		logStream << "Levitation::getLevitationSpeedForward: '" << "LEVITATION_SPEED_FORWARD" << "' not defined!" << std::endl;
-		util::logFatal(&logStream);
-	}
-
+	zCPar_Symbol* symbol = util::getSymbolWithChecks("LEVITATION_SPEED_FORWARD", __FUNCTION__);
 	return static_cast<float>(symbol->content.data_int);
 }
+
 float Levitation::getSpeedBackward()
 {
-	zCParser* parser; parser = zCParser::GetParser();
-	int index = parser->GetIndex("LEVITATION_SPEED_BACKWARD");
-	zCPar_Symbol* symbol = parser->GetSymbol(index);
-
-	if (!index) {
-		std::stringstream logStream;
-		logStream << "Levitation::getLevitationSpeedBackward: '" << "LEVITATION_SPEED_BACKWARD" << "' not defined!" << std::endl;
-		util::logFatal(&logStream);
-	}
-
+	zCPar_Symbol* symbol = util::getSymbolWithChecks("LEVITATION_SPEED_BACKWARD", __FUNCTION__);
 	return static_cast<float>(symbol->content.data_int);
 }
+
 float Levitation::getGravity()
 {
-	zCParser* parser; parser = zCParser::GetParser();
-	int index = parser->GetIndex("LEVITATION_GRAVITY");
-	zCPar_Symbol* symbol = parser->GetSymbol(index);
-
-	if (!index) {
-		std::stringstream logStream;
-		logStream << "Levitation::getLevitationGravity: '" << "LEVITATION_GRAVITY" << "' not defined!" << std::endl;
-		util::logFatal(&logStream);
-	}
-
+	zCPar_Symbol* symbol = util::getSymbolWithChecks("LEVITATION_GRAVITY", __FUNCTION__);
 	float gravity = static_cast<float>(symbol->content.data_int);
 	if (gravity < 0.0) gravity = 0.0f;
 	return gravity;
 }
+
 float Levitation::getTurnSpeed()
 {
-	zCParser* parser; parser = zCParser::GetParser();
-	int index = parser->GetIndex("LEVITATION_SPEED_TURN");
-	zCPar_Symbol* symbol = parser->GetSymbol(index);
-
-	if (!index) {
-		std::stringstream logStream;
-		logStream << "Levitation::getLevitationSpeedTurn: '" << "LEVITATION_SPEED_TURN" << "' not defined!" << std::endl;
-		util::logFatal(&logStream);
-	}
-
+	zCPar_Symbol* symbol = util::getSymbolWithChecks("LEVITATION_SPEED_TURN", __FUNCTION__);
 	float speedTurn = static_cast<float>(symbol->content.data_int);
 	if (speedTurn < 0.0) speedTurn = 0.0f;
 	return speedTurn;
 }
+
 int Levitation::getMoveForwardKey()
 {
-	zCParser* parser; parser = zCParser::GetParser();
-	int index = parser->GetIndex("LEVITATION_CONTROL_FORWARD");
-	zCPar_Symbol* symbol = parser->GetSymbol(index);
-
-	if (!index) {
-		std::stringstream logStream;
-		logStream << "Levitation::getLevitationSpeedTurn: '" << "LEVITATION_CONTROL_FORWARD" << "' not defined!" << std::endl;
-		util::logFatal(&logStream);
-	}
-
+	zCPar_Symbol* symbol = util::getSymbolWithChecks("LEVITATION_CONTROL_FORWARD", __FUNCTION__);
 	return symbol->content.data_int;
 }
+
 int Levitation::getMoveBackwardKey()
 {
-	zCParser* parser; parser = zCParser::GetParser();
-	int index = parser->GetIndex("LEVITATION_CONTROL_BACKWARD");
-	zCPar_Symbol* symbol = parser->GetSymbol(index);
-
-	if (!index) {
-		std::stringstream logStream;
-		logStream << "Levitation::getLevitationSpeedTurn: '" << "LEVITATION_CONTROL_BACKWARD" << "' not defined!" << std::endl;
-		util::logFatal(&logStream);
-	}
-
+	zCPar_Symbol* symbol = util::getSymbolWithChecks("LEVITATION_CONTROL_BACKWARD", __FUNCTION__);
 	return symbol->content.data_int;
 }
+
 int Levitation::getTurnLeftKey()
 {
-	zCParser* parser; parser = zCParser::GetParser();
-	int index = parser->GetIndex("LEVITATION_CONTROL_LEFT");
-	zCPar_Symbol* symbol = parser->GetSymbol(index);
-
-	if (!index) {
-		std::stringstream logStream;
-		logStream << "Levitation::getLevitationSpeedTurn: '" << "LEVITATION_CONTROL_LEFT" << "' not defined!" << std::endl;
-		util::logFatal(&logStream);
-	}
-
+	zCPar_Symbol* symbol = util::getSymbolWithChecks("LEVITATION_CONTROL_LEFT", __FUNCTION__);
 	return symbol->content.data_int;
 }
+
 int Levitation::getTurnRightKey()
 {
-	zCParser* parser; parser = zCParser::GetParser();
-	int index = parser->GetIndex("LEVITATION_CONTROL_RIGHT");
-	zCPar_Symbol* symbol = parser->GetSymbol(index);
-
-	if (!index) {
-		std::stringstream logStream;
-		logStream << "Levitation::getLevitationSpeedTurn: '" << "LEVITATION_CONTROL_RIGHT" << "' not defined!" << std::endl;
-		util::logFatal(&logStream);
-	}
-
+	zCPar_Symbol* symbol = util::getSymbolWithChecks("LEVITATION_CONTROL_RIGHT", __FUNCTION__);
 	return symbol->content.data_int;
 }
+
 int Levitation::getMoveUpKey()
 {
-	zCParser* parser; parser = zCParser::GetParser();
-	int index = parser->GetIndex("LEVITATION_CONTROL_UP");
-	zCPar_Symbol* symbol = parser->GetSymbol(index);
-
-	if (!index) {
-		std::stringstream logStream;
-		logStream << "Levitation::getLevitationSpeedTurn: '" << "LEVITATION_CONTROL_UP" << "' not defined!" << std::endl;
-		util::logFatal(&logStream);
-	}
-
+	zCPar_Symbol* symbol = util::getSymbolWithChecks("LEVITATION_CONTROL_UP", __FUNCTION__);
 	return symbol->content.data_int;
 }
+
 int Levitation::getMoveDownKey()
 {
-	zCParser* parser; parser = zCParser::GetParser();
-	int index = parser->GetIndex("LEVITATION_CONTROL_DOWN");
-	zCPar_Symbol* symbol = parser->GetSymbol(index);
-
-	if (!index) {
-		std::stringstream logStream;
-		logStream << "Levitation::getLevitationSpeedTurn: '" << "LEVITATION_CONTROL_DOWN" << "' not defined!" << std::endl;
-		util::logFatal(&logStream);
-	}
-
+	zCPar_Symbol* symbol = util::getSymbolWithChecks("LEVITATION_CONTROL_DOWN", __FUNCTION__);
 	return symbol->content.data_int;
 }
-;
 
 zVEC3 Levitation::levitate() {
 

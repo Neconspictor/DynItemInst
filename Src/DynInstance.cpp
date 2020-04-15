@@ -773,31 +773,13 @@ void DII_UserData::deserialize(std::stringstream* is)
 
 int DII_UserData::getIntAmount()
 {
-	zCParser* parser; parser = zCParser::GetParser();
-	int intAmountIndex = parser->GetIndex(INT_AMOUNT_DAEDALUS_VAR);
-	zCPar_Symbol* intAmountSymbol = parser->GetSymbol(intAmountIndex);
-
-	if (!intAmountSymbol) {
-		std::stringstream logStream;
-		logStream << "DII_UserData::getIntAmount: '" << INT_AMOUNT_DAEDALUS_VAR << "' not defined!" << endl;
-		util::logFatal(&logStream);
-	}
-
+	zCPar_Symbol* intAmountSymbol = util::getSymbolWithChecks(INT_AMOUNT_DAEDALUS_VAR, __FUNCTION__);
 	return intAmountSymbol->content.data_int;
 }
 
 int DII_UserData::getStringAmount()
 {
-	zCParser* parser; parser = zCParser::GetParser();
-	int strAmountIndex = parser->GetIndex(STR_AMOUNT_DAEDALUS_VAR);
-	zCPar_Symbol* strAmountSymbol = parser->GetSymbol(strAmountIndex);
-
-	if (!strAmountSymbol) {
-		std::stringstream logStream;
-		logStream << "DII_UserData::getStringAmount: '" << STR_AMOUNT_DAEDALUS_VAR <<  "' not defined!" << endl;
-		util::logFatal(&logStream);
-	}
-
+	zCPar_Symbol* strAmountSymbol = util::getSymbolWithChecks(STR_AMOUNT_DAEDALUS_VAR, __FUNCTION__);
 	return strAmountSymbol->content.data_int;
 }
 

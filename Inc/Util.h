@@ -36,6 +36,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <list>
 #include "api/g2/ztypes.h"
 #include <api/g2/macros.h>
+#include <api/g2/zcpar_symbol.h>
 
 #define LEGO_HOOKENGINE_PREAMBLE __asm      \
 /* Port output */         \
@@ -285,6 +286,15 @@ public:
 	 * \return The module handle hold by this namespace.
 	 */
 	static HMODULE getModuleHandle();
+
+    /**
+     * Provides a parser symbol by its name.
+     * A fatal gothic log error is risen if the name specifies no parser symbol.
+     * @param name : The name of the parser symbol.
+     * @param callerDescription : A descrption of the caller calling this function. This descrption will be used for the error message.
+     * @return : the parser symbol. Won't be nullptr.
+     */
+    static zCPar_Symbol* getSymbolWithChecks(const zSTRING& name, const std::string& callerDescription);
 
 	static std::string getGothicSystemDirectory();
 

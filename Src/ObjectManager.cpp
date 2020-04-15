@@ -1059,35 +1059,20 @@ int * ObjectManager::getRefCounter(oCItem * item)
 
 int SlotInfo::getSlotCount()
 {
-	auto* parser = zCParser::GetParser();
-	auto* symbol = parser->GetSymbol(DII_SLOT_COUNT);
-
-	if (!symbol) {
-		std::stringstream logStream;
-		logStream << "SlotInfo::getSlotCount(): " << DII_SLOT_COUNT << " is not defined" << endl;
-		util::logFatal(&logStream);
-	}
-
+	auto* symbol = util::getSymbolWithChecks(DII_SLOT_COUNT, __FUNCTION__);
 	return symbol->content.data_int;
 }
 
 const zSTRING& SlotInfo::getSlotName(int index)
 {
-	auto* parser = zCParser::GetParser();
-	auto* slot = parser->GetSymbol(DII_SLOTS);
-
-	if (!slot) {
-		std::stringstream logStream;
-		logStream << "SlotInfo::getSlotName(): " << DII_SLOTS << " is not defined" << endl;
-		util::logFatal(&logStream);
-	}
-
-	auto* pSlotName = slot->content.data_pstring;
+	auto* symbol = util::getSymbolWithChecks(DII_SLOTS, __FUNCTION__);
+	auto* pSlotName = symbol->content.data_pstring;
 
 	static zSTRING empty;
 	if (!pSlotName) {
 		return empty;
 	}
+
 
 	return pSlotName[index];
 }

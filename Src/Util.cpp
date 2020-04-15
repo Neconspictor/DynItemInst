@@ -103,6 +103,20 @@ HMODULE util::getModuleHandle()
 	return hModule;
 }
 
+zCPar_Symbol* util::getSymbolWithChecks(const zSTRING& name, const std::string& callerDescription)
+{
+	zCParser* parser; parser = zCParser::GetParser();
+	int index = parser->GetIndex(name);
+	
+	if (index == -1) {
+		std::stringstream logStream;
+		logStream << callerDescription << ": '" << name.ToChar() << "' not defined!" << std::endl;
+		util::logFatal(&logStream);
+	}
+
+	return parser->GetSymbol(index);
+}
+
 std::string util::getGothicSystemDirectory()
 {
 	return getCurrentWorkingDir();

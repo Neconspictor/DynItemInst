@@ -197,7 +197,7 @@ public:
 	* @return true when zSTRING is empty - false when not
 	* @usable Ingame only
 	*/
-	bool IsEmpty(void)
+	bool IsEmpty(void) const
 	{
 		XCALL(0x00674210)	
 	};
@@ -207,7 +207,7 @@ public:
 	* @return length of zSTRING
 	* @usable Ingame only
 	*/
-	int Length(void)
+	int Length(void) const
 	{
 		XCALL(0x0059D0E0)
 	};
@@ -239,7 +239,7 @@ public:
 	* @return Position of searched string. 0 if the string has not been found.
 	* @usable Ingame only
 	*/
-	int Search(char const * p1, unsigned int p2 = 1)
+	int Search(char const * p1, unsigned int p2 = 1) const
 	{
 		XCALL(0x0059D110);
 	};
@@ -250,7 +250,7 @@ public:
 	* @param  Position to start the search from
 	* @return Position of searched string. 0 if the string has not been found.
 	*/
-	int Search(class zSTRING const & p1, unsigned int p2 = 1)
+	int Search(class zSTRING const & p1, unsigned int p2 = 1) const
 	{
 		XCALL(0x00492680);
 	};
@@ -261,7 +261,7 @@ public:
 	* @param  Position to start the search from
 	* @return Position of searched string. 0 if the string has not been found.
 	*/
-	int SearchRev(class zSTRING const & p1, unsigned int p2)
+	int SearchRev(class zSTRING const & p1, unsigned int p2) const
 	{
 		XCALL(0x0046CA20);	
 	};
@@ -289,7 +289,7 @@ public:
 	* @return char* format string
 	* @usable Ingame only
 	*/
-	const char* ToChar(void)
+	const char* ToChar(void) const
 	{
 		XCALL(0x004639D0);
 	};
@@ -299,7 +299,7 @@ public:
 	* @return float value
 	* @usable Ingame only
 	*/
-	float ToFloat(void)
+	float ToFloat(void) const
 	{
 		XCALL(0x004936C0);
 	};
@@ -309,7 +309,7 @@ public:
 	* @return int value
 	* @usable Ingame only
 	*/
-	long ToInt(void)
+	long ToInt(void) const
 	{
 		XCALL(0x0059D0F0);
 	};
