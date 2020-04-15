@@ -754,37 +754,37 @@ void Levitation::doFloorAligning(zVEC3* finalPosition, zMAT4* mat)
 
 bool Levitation::isLevitationActive()
 {
-	zCPar_Symbol* symbol = util::getSymbolWithChecks("LEVITATION_IsActive", __FUNCTION__);
+	zCPar_Symbol* symbol = UTIL_GET_SYMBOL_WITH_CHECKS("_LEVITATION_IsActive");
 	return static_cast<bool>(symbol->content.data_int);
 }
 
 int Levitation::getMinHoverDistance()
 {
-	zCPar_Symbol* symbol = util::getSymbolWithChecks("LEVITATION_HOVER_DISTANCE", __FUNCTION__);
+	zCPar_Symbol* symbol = UTIL_GET_SYMBOL_WITH_CHECKS("LEVITATION_HOVER_DISTANCE");
 	return symbol->content.data_int;
 }
 
 float Levitation::getSpeedVertical()
 {
-	zCPar_Symbol* symbol = util::getSymbolWithChecks("LEVITATION_SPEED_VERTICAL", __FUNCTION__);
+	zCPar_Symbol* symbol = UTIL_GET_SYMBOL_WITH_CHECKS("LEVITATION_SPEED_VERTICAL");
 	return static_cast<float>(symbol->content.data_int);
 }
 
 float Levitation::getSpeedForward()
 {
-	zCPar_Symbol* symbol = util::getSymbolWithChecks("LEVITATION_SPEED_FORWARD", __FUNCTION__);
+	zCPar_Symbol* symbol = UTIL_GET_SYMBOL_WITH_CHECKS("LEVITATION_SPEED_FORWARD");
 	return static_cast<float>(symbol->content.data_int);
 }
 
 float Levitation::getSpeedBackward()
 {
-	zCPar_Symbol* symbol = util::getSymbolWithChecks("LEVITATION_SPEED_BACKWARD", __FUNCTION__);
+	zCPar_Symbol* symbol = UTIL_GET_SYMBOL_WITH_CHECKS("LEVITATION_SPEED_BACKWARD");
 	return static_cast<float>(symbol->content.data_int);
 }
 
 float Levitation::getGravity()
 {
-	zCPar_Symbol* symbol = util::getSymbolWithChecks("LEVITATION_GRAVITY", __FUNCTION__);
+	zCPar_Symbol* symbol = UTIL_GET_SYMBOL_WITH_CHECKS("LEVITATION_GRAVITY");
 	float gravity = static_cast<float>(symbol->content.data_int);
 	if (gravity < 0.0) gravity = 0.0f;
 	return gravity;
@@ -792,7 +792,7 @@ float Levitation::getGravity()
 
 float Levitation::getTurnSpeed()
 {
-	zCPar_Symbol* symbol = util::getSymbolWithChecks("LEVITATION_SPEED_TURN", __FUNCTION__);
+	zCPar_Symbol* symbol = UTIL_GET_SYMBOL_WITH_CHECKS("LEVITATION_SPEED_TURN");
 	float speedTurn = static_cast<float>(symbol->content.data_int);
 	if (speedTurn < 0.0) speedTurn = 0.0f;
 	return speedTurn;
@@ -800,37 +800,37 @@ float Levitation::getTurnSpeed()
 
 int Levitation::getMoveForwardKey()
 {
-	zCPar_Symbol* symbol = util::getSymbolWithChecks("LEVITATION_CONTROL_FORWARD", __FUNCTION__);
+	zCPar_Symbol* symbol = UTIL_GET_SYMBOL_WITH_CHECKS("LEVITATION_CONTROL_FORWARD");
 	return symbol->content.data_int;
 }
 
 int Levitation::getMoveBackwardKey()
 {
-	zCPar_Symbol* symbol = util::getSymbolWithChecks("LEVITATION_CONTROL_BACKWARD", __FUNCTION__);
+	zCPar_Symbol* symbol = UTIL_GET_SYMBOL_WITH_CHECKS("LEVITATION_CONTROL_BACKWARD");
 	return symbol->content.data_int;
 }
 
 int Levitation::getTurnLeftKey()
 {
-	zCPar_Symbol* symbol = util::getSymbolWithChecks("LEVITATION_CONTROL_LEFT", __FUNCTION__);
+	zCPar_Symbol* symbol = UTIL_GET_SYMBOL_WITH_CHECKS("LEVITATION_CONTROL_LEFT");
 	return symbol->content.data_int;
 }
 
 int Levitation::getTurnRightKey()
 {
-	zCPar_Symbol* symbol = util::getSymbolWithChecks("LEVITATION_CONTROL_RIGHT", __FUNCTION__);
+	zCPar_Symbol* symbol = UTIL_GET_SYMBOL_WITH_CHECKS("LEVITATION_CONTROL_RIGHT");
 	return symbol->content.data_int;
 }
 
 int Levitation::getMoveUpKey()
 {
-	zCPar_Symbol* symbol = util::getSymbolWithChecks("LEVITATION_CONTROL_UP", __FUNCTION__);
+	zCPar_Symbol* symbol = UTIL_GET_SYMBOL_WITH_CHECKS("LEVITATION_CONTROL_UP");
 	return symbol->content.data_int;
 }
 
 int Levitation::getMoveDownKey()
 {
-	zCPar_Symbol* symbol = util::getSymbolWithChecks("LEVITATION_CONTROL_DOWN", __FUNCTION__);
+	zCPar_Symbol* symbol = UTIL_GET_SYMBOL_WITH_CHECKS("LEVITATION_CONTROL_DOWN");
 	return symbol->content.data_int;
 }
 

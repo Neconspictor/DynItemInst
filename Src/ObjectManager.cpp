@@ -1059,13 +1059,13 @@ int * ObjectManager::getRefCounter(oCItem * item)
 
 int SlotInfo::getSlotCount()
 {
-	auto* symbol = util::getSymbolWithChecks(DII_SLOT_COUNT, __FUNCTION__);
+	auto* symbol = UTIL_GET_SYMBOL_WITH_CHECKS(DII_SLOT_COUNT);
 	return symbol->content.data_int;
 }
 
 const zSTRING& SlotInfo::getSlotName(int index)
 {
-	auto* symbol = util::getSymbolWithChecks(DII_SLOTS, __FUNCTION__);
+	auto* symbol = UTIL_GET_SYMBOL_WITH_CHECKS(DII_SLOTS);
 	auto* pSlotName = symbol->content.data_pstring;
 
 	static zSTRING empty;

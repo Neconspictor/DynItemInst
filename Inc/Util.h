@@ -26,8 +26,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 
 /////////////////////////////////////////////////////////////////////////////**/
 
-#ifndef __UTIL_H__
-#define __UTIL_H__
+#pragma once
 #define SAFE_DELETE(pointer) util::safeDelete(reinterpret_cast<void**>(&pointer));
 
 #include <vector>
@@ -36,7 +35,10 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <list>
 #include "api/g2/ztypes.h"
 #include <api/g2/macros.h>
+#include <api/g2/zcparser.h>
 #include <api/g2/zcpar_symbol.h>
+
+#define UTIL_GET_SYMBOL_WITH_CHECKS(x) util::getSymbolWithChecks(x, __FUNCSIG__)
 
 #define LEGO_HOOKENGINE_PREAMBLE __asm      \
 /* Port output */         \
@@ -294,7 +296,18 @@ public:
      * @param callerDescription : A descrption of the caller calling this function. This descrption will be used for the error message.
      * @return : the parser symbol. Won't be nullptr.
      */
-    static zCPar_Symbol* getSymbolWithChecks(const zSTRING& name, const std::string& callerDescription);
+    static inline zCPar_Symbol* getSymbolWithChecks(const zSTRING& name, const std::string& callerDescription) {
+        zCParser* parser; parser = zCParser::GetParser();
+        int index = parser->GetIndex(name);
+
+        if (index == -1) {
+            std::stringstream logStream;
+            logStream << callerDescription << ": '" << name.ToChar() << "' not defined!" << std::endl;
+            util::logFatal(&logStream);
+        }
+
+        return parser->GetSymbol(index);
+    }
 
 	static std::string getGothicSystemDirectory();
 
@@ -343,5 +356,3 @@ private:
 	static std::stringstream logStream;
 
 };
-
-#endif __UTIL_H__

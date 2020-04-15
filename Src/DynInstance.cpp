@@ -773,14 +773,14 @@ void DII_UserData::deserialize(std::stringstream* is)
 
 int DII_UserData::getIntAmount()
 {
-	zCPar_Symbol* intAmountSymbol = util::getSymbolWithChecks(INT_AMOUNT_DAEDALUS_VAR, __FUNCTION__);
-	return intAmountSymbol->content.data_int;
+	auto* symbol = UTIL_GET_SYMBOL_WITH_CHECKS(INT_AMOUNT_DAEDALUS_VAR);
+	return symbol->content.data_int;
 }
 
 int DII_UserData::getStringAmount()
 {
-	zCPar_Symbol* strAmountSymbol = util::getSymbolWithChecks(STR_AMOUNT_DAEDALUS_VAR, __FUNCTION__);
-	return strAmountSymbol->content.data_int;
+	auto* symbol = UTIL_GET_SYMBOL_WITH_CHECKS(STR_AMOUNT_DAEDALUS_VAR);
+	return symbol->content.data_int;
 }
 
 void DII_UserData::assertEqualAmounts()
