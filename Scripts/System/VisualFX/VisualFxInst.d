@@ -18,6 +18,36 @@
 
 
 
+
+instance SPELLFX_ICESWORD(CFX_BASE_PROTO)
+{
+	visname_s = "FIRE_SWORD_ICE";
+	visalpha = 1;
+	emtrjmode_s = "FIXED";
+	lightpresetname = "ICE";
+	emadjustshptoorigin = 1;
+};
+instance SPELLFX_FLAMESWORD(CFX_BASE_PROTO)
+{
+	visname_s = "FIRE_SWORD_FLAME";
+	visalpha = 1;
+	emtrjmode_s = "FIXED";
+	lightpresetname = "FIRESMALL";
+	emadjustshptoorigin = 1;
+};
+
+instance SPELLFX_POISONSWORD(CFX_BASE_PROTO)
+{
+	visname_s = "POISON_SWORD";
+	visalpha = 1;
+	emtrjmode_s = "FIXED";
+	lightpresetname = "POISON2";
+	emadjustshptoorigin = 1;
+};
+
+
+
+
 ///   													XXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ///   													XX  T E L E K I N E S I S  XX
 ///   													XXXXXXXXXXXXXXXXXXXXXXXXXXXXX
