@@ -289,6 +289,21 @@ public:
 	 */
 	static HMODULE getModuleHandle();
 
+
+
+    static inline int getIndexWithChecks(const zSTRING& name, const std::string& callerDescription) {
+        zCParser* parser; parser = zCParser::GetParser();
+        int index = parser->GetIndex(name);
+
+        if (index == -1) {
+            std::stringstream logStream;
+            logStream << callerDescription << ": '" << name.ToChar() << "' not defined!" << std::endl;
+            util::logFatal(&logStream);
+        }
+
+        return index;
+    }
+
     /**
      * Provides a parser symbol by its name.
      * A fatal gothic log error is risen if the name specifies no parser symbol.
@@ -307,6 +322,19 @@ public:
         }
 
         return parser->GetSymbol(index);
+    }
+
+    static inline zCPar_Symbol* getSymbolWithChecks(int index, const std::string& callerDescription) {
+        zCParser* parser; parser = zCParser::GetParser();
+        auto* symbol = parser->GetSymbol(index);
+
+        if (!symbol) {
+            std::stringstream logStream;
+            logStream << callerDescription << ": " << index << " is not an index to a parser symbol!" << std::endl;
+            util::logFatal(&logStream);
+        }
+
+        return symbol;
     }
 
 	static std::string getGothicSystemDirectory();

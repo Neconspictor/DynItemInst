@@ -67,6 +67,11 @@ public:
 	ObjectManager();
 
 	/**
+	 * Sets up a proxy from a source instance id to a target instance id.
+	 */
+	void addProxy(int sourceInstanceID, int targetInstanceID);
+
+	/**
 	 * \return the current instance of this class.
 	 */
 	static ObjectManager* getObjectManager();
@@ -307,6 +312,8 @@ private:
 	std::map<int, zCPar_Symbol*> mNewInstanceToSymbolMap;
 	std::map<std::string, zCPar_Symbol*> mNameToSymbolMap;
 	std::map<std::string, int> mNameToInstanceMap;
+
+	std::map<int, int> mProxies;
 
 	std::stringstream logStream;
 private:

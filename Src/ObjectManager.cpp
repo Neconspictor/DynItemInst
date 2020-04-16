@@ -49,6 +49,11 @@ using namespace constants;
 
 ObjectManager::ObjectManager() = default;
 
+void ObjectManager::addProxy(int sourceInstanceID, int targetInstanceID)
+{
+	mProxies.insert({ sourceInstanceID, targetInstanceID });
+}
+
 
 zCListSort<oCItem>* ObjectManager::getInvItemByInstanceId(oCNpcInventory* inventory, int instanceIdParserSymbolIndex)
 {
@@ -200,6 +205,7 @@ void ObjectManager::releaseInstances() {
 	mNewInstanceToSymbolMap.clear();
 	mNameToInstanceMap.clear();
 	mNameToSymbolMap.clear();
+	mProxies.clear();
 };
 
 bool ObjectManager::assignInstanceId(oCItem* item, int instanceIdParserSymbolIndex){
@@ -425,16 +431,36 @@ void ObjectManager::saveNewInstances(char* directoryPath, char* filename) {
 	string fullpath = dir + string(filename);
 	ofstream ofs(const_cast<char*>(fullpath.c_str()));
 
-    	// archive and stream closed when destructors are called
-	auto  it = mNewInstanceMap.begin();
-	size_t size = mNewInstanceMap.size();
-	// Save instance items
-	ofs << size << '\n';
-	for (; it != mNewInstanceMap.end(); ++it) {
-		auto& storeItem = it->second;
-		storeItem->serialize(ofs);
-		//oa << storeItem;
-		ofs << '\n';
+	try {
+		ofs.exceptions(std::ios::failbit | std::ios::badbit);
+
+		// Save instance items
+		ofs << mNewInstanceMap.size() << '\n';
+		for (auto& pair : mNewInstanceMap) {
+			auto& storeItem = pair.second;
+			storeItem->serialize(ofs);
+			//oa << storeItem;
+			ofs << '\n';
+		}
+
+		// Save proxies
+		auto* parser = zCParser::GetParser();
+		ofs << mProxies.size() << '\n';
+		for (auto& pair : mProxies) {
+			auto* symbol = util::getSymbolWithChecks(pair.first, __FUNCSIG__);
+			util::writeString(ofs, symbol->name.ToChar());
+			ofs << ' ';
+			symbol = util::getSymbolWithChecks(pair.second, __FUNCSIG__);
+			util::writeString(ofs, symbol->name.ToChar());
+			ofs << '\n';
+		}
+	}
+	catch (const std::exception & e) {
+		logStream << "exception msg: " << e.what() << std::endl;
+		util::logAlways(&logStream);
+
+		logStream << __FUNCSIG__ << ": Couldn't process " << fullpath << std::endl;
+		util::logFatal(&logStream);
 	}
 }
 
@@ -444,36 +470,73 @@ void ObjectManager::loadNewInstances(char* filename) {
 	if (ifs.fail()) {
 		return;
 	}
-	
-	// archive and stream closed when destructors are called
-	size_t size = 0;
-	std::stringstream ss;
-	std::string line, token;
-	getline(ifs, line);
-	ss << line;
-	getline(ss, token);
-	size = atoi(token.c_str());
 
-	for (size_t i = 0; i != size; ++i) {
-		ss.str("");
-		ss.clear();
+	try {
+
+		ifs.exceptions(std::ios::failbit | std::ios::badbit);
+
+		// archive and stream closed when destructors are called
+		size_t size = 0;
+		std::stringstream ss;
+		std::string line, token;
 		getline(ifs, line);
 		ss << line;
-		auto instance = std::make_unique<DynInstance>();
+		getline(ss, token);
+		size = atoi(token.c_str());
 
-		//ifs >> storeItem;
-		instance->deserialize(&ss);
-		//DynInstance* item = new DynInstance(*storeItem);
+		for (size_t i = 0; i != size; ++i) {
+			ss.str("");
+			ss.clear();
+			getline(ifs, line);
+			ss << line;
+			auto instance = std::make_unique<DynInstance>();
 
-		ParserInfo info;
-		info.newSymbolName = instance->getSymbolName().c_str();
-		info.oldSymbolName = instance->getPrototypeSymbolName().c_str();
-		info.bitfield = instance->getParserSymbolBitfield();
-		info.container = instance.get();
+			//ifs >> storeItem;
+			instance->deserialize(&ss);
+			//DynInstance* item = new DynInstance(*storeItem);
 
-		auto id = createParserSymbol(info);
-		registerInstance(id, std::move(instance));
+			ParserInfo info;
+			info.newSymbolName = instance->getSymbolName().c_str();
+			info.oldSymbolName = instance->getPrototypeSymbolName().c_str();
+			info.bitfield = instance->getParserSymbolBitfield();
+			info.container = instance.get();
+
+			auto id = createParserSymbol(info);
+			registerInstance(id, std::move(instance));
+		}
+
+
+		auto* parser = zCParser::GetParser();
+		size_t proxiesSize = 0;
+		getline(ifs, line);
+		ss << line;
+		getline(ss, token);
+		proxiesSize = atoi(token.c_str());
+
+		for (size_t i = 0; i != proxiesSize; ++i) {
+			ss.str("");
+			ss.clear();
+			getline(ifs, line);
+			ss << line;
+			std::string sourceInstanceName;
+			std::string targetInstanceName;
+			util::readAndTrim(&ss, sourceInstanceName);
+			util::readAndTrim(&ss, targetInstanceName);
+
+			int sourceID = util::getIndexWithChecks(sourceInstanceName.c_str(), __FUNCSIG__);
+			int targetID = util::getIndexWithChecks(targetInstanceName.c_str(), __FUNCSIG__);
+
+			mProxies.insert({ sourceID, targetID });
+		}
 	}
+	catch (const std::exception& e) {
+		logStream << "exception msg: " << e.what() << std::endl;
+		util::logAlways(&logStream);
+
+		logStream << __FUNCSIG__ << ": Couldn't process " << filename << std::endl;
+		util::logFatal(&logStream);
+	}
+
 };
 
 
