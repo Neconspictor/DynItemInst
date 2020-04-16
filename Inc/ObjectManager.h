@@ -303,10 +303,10 @@ public:
 private:
 
 	// <int instanceId, Item* item>
-	std::map<int, std::unique_ptr<DynInstance>> instanceMap;
-	std::map<int, zCPar_Symbol*> newInstanceToSymbolMap;
-	std::map<std::string, zCPar_Symbol*> nameToSymbolMap;
-	std::map<std::string, int> nameToInstanceMap;
+	std::map<int, std::unique_ptr<DynInstance>> mNewInstanceMap;
+	std::map<int, zCPar_Symbol*> mNewInstanceToSymbolMap;
+	std::map<std::string, zCPar_Symbol*> mNameToSymbolMap;
+	std::map<std::string, int> mNameToInstanceMap;
 
 	std::stringstream logStream;
 private:
