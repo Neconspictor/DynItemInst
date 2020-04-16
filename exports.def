@@ -2,6 +2,8 @@ LIBRARY	"NecPack"
 EXPORTS
 	Hook
 	Unhook
+	DII_AddProxy
+	DII_RemoveProxy
 	DII_CreateNewItem
 	DII_CreateNewInstanceStr
 	DII_CreateNewInstanceStr2

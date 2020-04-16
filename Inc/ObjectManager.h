@@ -67,9 +67,14 @@ public:
 	ObjectManager();
 
 	/**
-	 * Sets up a proxy from a source instance id to a target instance id.
+	 * Sets up a proxy from a source instance to a target instance.
 	 */
-	void addProxy(int sourceInstanceID, int targetInstanceID);
+	bool addProxy(const zSTRING& sourceInstance, const zSTRING& targetInstance);
+
+	/**
+	 * Removes a proxy.
+	 */
+	void removeProxy(const zSTRING& sourceInstance);
 
 	/**
 	 * \return the current instance of this class.

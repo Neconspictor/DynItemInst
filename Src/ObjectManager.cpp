@@ -49,9 +49,52 @@ using namespace constants;
 
 ObjectManager::ObjectManager() = default;
 
-void ObjectManager::addProxy(int sourceInstanceID, int targetInstanceID)
+bool ObjectManager::addProxy(const zSTRING & sourceInstance, const zSTRING & targetInstance)
 {
+	auto* parser = zCParser::GetParser();
+	auto sourceInstanceID = parser->GetIndex(sourceInstance);
+	auto targetInstanceID = parser->GetIndex(targetInstance);
+
+	if (sourceInstanceID == -1 || targetInstanceID == -1) {
+		return false;
+	}
+
+	//check, that we do not add more than one proxy for sourceInstane and that we do not add a circle in proxying
+	auto it = mProxies.find(sourceInstanceID);
+	if (it != mProxies.end() && it->second != targetInstanceID) {
+
+		auto* otherTargetSymbol = util::getSymbolWithChecks(it->second, __FUNCSIG__);
+		const auto* otherName = otherTargetSymbol->name.ToChar();
+
+		logStream << __FUNCSIG__ << ": Cannot add proxy (" << sourceInstance.ToChar() << ", " << targetInstance.ToChar()
+			<< ") since their already exists another proxy pair: (" 
+			<< sourceInstance.ToChar() << ", " << otherName << ")" << std::endl;
+		util::logWarning(&logStream);
+		return false;
+	}
+
+	//check, that we do not add a circle in proxying
+	it = mProxies.find(targetInstanceID);
+	while (it != mProxies.end()) {
+		auto target = it->second;
+		if (target == sourceInstanceID) {
+			logStream << __FUNCSIG__ << ": Cannot add proxy (" << sourceInstance.ToChar() << ", " << targetInstance.ToChar() 
+				<< ") since it would result into circle proxying!" << std::endl;
+			util::logWarning(&logStream);
+			return false;
+		}
+		it = mProxies.find(target);
+	}
+
 	mProxies.insert({ sourceInstanceID, targetInstanceID });
+	return true;
+}
+
+void ObjectManager::removeProxy(const zSTRING& sourceInstance)
+{
+	auto* parser = zCParser::GetParser();
+	auto sourceInstanceID = parser->GetIndex(sourceInstance);
+	mProxies.erase(sourceInstanceID);
 }
 
 

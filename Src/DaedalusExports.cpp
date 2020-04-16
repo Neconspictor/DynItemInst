@@ -65,6 +65,16 @@ void DaedalusExports::unHookModule()
 
 }
 
+bool DaedalusExports::DII_AddProxy(const char* sourceInstanceName, const char* targetInstanceName)
+{
+	return ObjectManager::getObjectManager()->addProxy(sourceInstanceName, targetInstanceName);
+}
+
+void DaedalusExports::DII_RemoveProxy(const char* sourceInstanceName)
+{
+	ObjectManager::getObjectManager()->removeProxy(sourceInstanceName);
+}
+
 
 oCItem* __cdecl DaedalusExports::DII_CreateNewItem(int instanceId) // Func void DII_CreateNewItem(var C_Item item, VAR INT instanceId)
 {

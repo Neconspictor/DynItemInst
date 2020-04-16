@@ -63,6 +63,17 @@ public:
 	virtual void unHookModule() override;
 
 	/**
+	 * Adds a proxy from one instance to another instance.
+	 * \return true if the proxy is successfully setup.
+	 */
+	static bool DII_AddProxy(const char* sourceInstanceName, const char* targetInstanceName);
+
+	/**
+	 * Removes a proxy.
+	 */
+	static void DII_RemoveProxy(const char* sourceInstanceName);
+
+	/**
 	 * An external for creating an item with a specific instance id.
 	 * Daedalus syntax: Func c_item DII_CreateNewItem(var int parserSymbolIndex)
 	 * \param parserSymbolIndex The instance id of the oCItem to be created.
