@@ -159,6 +159,32 @@ public:
 	static const float LIB_VERSION;
 
 	static std::vector<std::unique_ptr<TelekinesisInterpolator>> interpolators;
+
+	private:
+
+		struct UPDATE_INSTANCE_PARAMS {
+			int index;
+		};
+
+		class ItemUpdater {
+		public:
+
+			struct UpdateItemData {
+
+				/**
+				 * Only updates items having this instance id
+				 */
+				int expectedInstanceID;
+
+				/**
+				 * The new instance id for items to be updated.
+				 */
+				int newInstanceID;
+			};
+
+			static void updateItem(void* obj, void* param, oCItem* itm);
+
+		};
 };
 
 #endif __DaedalusExportsH__

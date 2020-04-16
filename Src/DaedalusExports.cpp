@@ -232,67 +232,6 @@ float DaedalusExports::NECPACK_GetLibVersion()
 	return LIB_VERSION;
 }
 
-
-struct UPDATE_INSTANCE_PARAMS {
-	int index;
-};
-
-static void updateItem(void* obj, void* param, oCItem* itm) {
-	if (itm == NULL) return;
-
-	UPDATE_INSTANCE_PARAMS* params = (UPDATE_INSTANCE_PARAMS*)param;
-	ObjectManager* manager = ObjectManager::getObjectManager();
-	int id = manager->getDynInstanceId(itm);
-	if (id == params->index)
-	{
-		//int refCtr = *(int*)((BYTE*)itm + 0x4);
-
-		constexpr int ITEM_ACTIVE = 0x40000000;
-		constexpr int ITEM_DROPPED = 1 << 10;
-		constexpr int ITEM_NFOCUS = 1 << 23;
-		bool isActive = itm->flags & ITEM_ACTIVE;
-		bool dropped = itm->flags & ITEM_DROPPED;
-		bool nfocus = itm->flags & ITEM_NFOCUS;
-
-		bool isInWorld = manager->isItemInWorld(itm);
-		if (!isInWorld && isActive)
-		{
-			//zCWorld* world = oCGame::GetGame()->GetWorld();
-			//world->AddVob(itm);
-		}
-
-		//zCWorld* world = oCGame::GetGame()->GetWorld();
-		//world->AddVob(itm);
-		
-		
-		int flags = itm->flags;
-		//manager->oCItemSaveRemoveEffect(itm);
-		//itm->effect = "SPELLFX_FIREBOW";
-		itm->InitByScript(id, itm->amount);
-
-		if (isActive) itm->flags |= ITEM_ACTIVE;
-		if (dropped) itm->flags |= ITEM_DROPPED;
-		if (nfocus) itm->flags |= ITEM_NFOCUS;
-
-		//zCVob* effectVob = (zCVob*)itm->effectVob;
-		//if (effectVob) {
-		//	effectVob->trafo = itm->trafo;
-		//}
-		//itm->effectVob
-
-		//itm->flags = flags;
-		//world->AddVob(itm);
-
-		if (isInWorld && !isActive) { //&&!isActive
-			manager->oCItemSaveRemoveEffect(itm);
-			manager->oCItemSaveInsertEffect(itm);
-
-			//zCWorld* world = oCGame::GetGame()->GetWorld();
-			//world->AddVob(itm);
-		}
-	}
-}
-
 bool DaedalusExports::DII_UpdateInstance(int instanceIdParserSymbolIndex, oCItem* item)
 {
 	ObjectManager* manager = ObjectManager::getObjectManager();
@@ -314,8 +253,8 @@ bool DaedalusExports::DII_UpdateInstance(int instanceIdParserSymbolIndex, oCItem
 
 	zCWorld* world = oCGame::GetGame()->GetWorld();
 
-	UPDATE_INSTANCE_PARAMS params = { instanceIdParserSymbolIndex };
-	manager->callForAllItems(updateItem, NULL, &params);
+	ItemUpdater::UpdateItemData params = { instanceIdParserSymbolIndex, instanceIdParserSymbolIndex };
+	manager->callForAllItems(ItemUpdater::updateItem, NULL, &params);
 
 	return true;
 }
@@ -874,4 +813,61 @@ void DaedalusExports::NECPACK_DrobVob(oCNpc* npc, zCVob* vob)
 int DaedalusExports::LEVITATION_IsGamePaused()
 {
 	return Levitation::gameIsPaused;
+}
+
+void DaedalusExports::ItemUpdater::updateItem(void* obj, void* param, oCItem* itm)
+{
+	if (itm == NULL) return;
+
+	ItemUpdater::UpdateItemData* params = (ItemUpdater::UpdateItemData*)param;
+	ObjectManager* manager = ObjectManager::getObjectManager();
+	int id = manager->getInstanceId(*itm);;
+	if (id == params->expectedInstanceID)
+	{
+		//int refCtr = *(int*)((BYTE*)itm + 0x4);
+
+		constexpr int ITEM_ACTIVE = 0x40000000;
+		constexpr int ITEM_DROPPED = 1 << 10;
+		constexpr int ITEM_NFOCUS = 1 << 23;
+		bool isActive = itm->flags & ITEM_ACTIVE;
+		bool dropped = itm->flags & ITEM_DROPPED;
+		bool nfocus = itm->flags & ITEM_NFOCUS;
+
+		bool isInWorld = manager->isItemInWorld(itm);
+		if (!isInWorld && isActive)
+		{
+			//zCWorld* world = oCGame::GetGame()->GetWorld();
+			//world->AddVob(itm);
+		}
+
+		//zCWorld* world = oCGame::GetGame()->GetWorld();
+		//world->AddVob(itm);
+
+
+		int flags = itm->flags;
+		//manager->oCItemSaveRemoveEffect(itm);
+		//itm->effect = "SPELLFX_FIREBOW";
+		itm->InitByScript(params->newInstanceID, itm->amount);
+
+		if (isActive) itm->flags |= ITEM_ACTIVE;
+		if (dropped) itm->flags |= ITEM_DROPPED;
+		if (nfocus) itm->flags |= ITEM_NFOCUS;
+
+		//zCVob* effectVob = (zCVob*)itm->effectVob;
+		//if (effectVob) {
+		//	effectVob->trafo = itm->trafo;
+		//}
+		//itm->effectVob
+
+		//itm->flags = flags;
+		//world->AddVob(itm);
+
+		if (isInWorld && !isActive) { //&&!isActive
+			manager->oCItemSaveRemoveEffect(itm);
+			manager->oCItemSaveInsertEffect(itm);
+
+			//zCWorld* world = oCGame::GetGame()->GetWorld();
+			//world->AddVob(itm);
+		}
+	}
 }
