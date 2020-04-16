@@ -155,9 +155,9 @@ void ObjectManager::deleteDII(int parserSymbolIndex)
 
 	//For now we leave the symbol as it is
 	// make the symbol unfindable 
-	auto* parser = zCParser::GetParser();
-	auto* symbol = parser->GetSymbol(parserSymbolIndex);
-	symbol->name = "";
+	//auto* parser = zCParser::GetParser();
+	//auto* symbol = parser->GetSymbol(parserSymbolIndex);
+	//symbol->name = "";
 	//Check that the symbol cannot be found anymore
 	//auto* testSymbol = parser->GetSymbol(parserSymbolIndex);
 
@@ -848,7 +848,7 @@ zCPar_Symbol* ObjectManager::getSymbolByIndex(int parserSymbolID)
 	return it->second;
 }
 
-zCPar_Symbol* ObjectManager::getSymbolByName(zSTRING symbolName)
+zCPar_Symbol* ObjectManager::getSymbolByName(const zSTRING& symbolName)
 {
 	string name = symbolName.ToChar();
 	transform(name.begin(), name.end(),name.begin(), ::toupper);
@@ -858,7 +858,7 @@ zCPar_Symbol* ObjectManager::getSymbolByName(zSTRING symbolName)
 }
 
 
-int ObjectManager::getIndexByName(zSTRING symbolName)
+int ObjectManager::getIndexByName(const zSTRING& symbolName)
 {
 	string name = symbolName.ToChar();
 	transform(name.begin(), name.end(),name.begin(), ::toupper);

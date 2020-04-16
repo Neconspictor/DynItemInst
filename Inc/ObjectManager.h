@@ -243,7 +243,7 @@ public:
 	 * \param name The name of the parser symbol.
 	 * \return The parser symbol of the given index.
 	 */
-	zCPar_Symbol* getSymbolByName(zSTRING symbolName);
+	zCPar_Symbol* getSymbolByName(const zSTRING& symbolName);
 
 	/**
 	 * Provides the index of an given symbol name if an associated zCPar_Symbol is found.
@@ -252,7 +252,7 @@ public:
 	 * \param symbolName The name of the parser symbol.
 	 * \return The index of the symbol with the provided symbol name.
 	 */
-	int getIndexByName(zSTRING symbolName);
+	int getIndexByName(const zSTRING& symbolName);
 
 	void updateIkarusSymbols();
 
