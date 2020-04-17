@@ -43,12 +43,12 @@ FUNC INT NECPACK_GetLibVersion() {
 // The return value will be float stored in an integer.
 // ****************************************************************
 FUNC INT _NECPACK_GetExpectedLibVersion() {
-    //expected lib version: 1.02
+    //expected lib version: 1.03
     var int integral;
     var int fraction;
 
     integral = mkf(1);
-    fraction = divf(2, 100);
+    fraction = divf(3, 100);
     return addf(integral, fraction);
 };
 

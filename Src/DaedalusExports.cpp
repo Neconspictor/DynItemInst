@@ -42,7 +42,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <api/g2/ocmob.h>
 
 
-const float DaedalusExports::LIB_VERSION = 1.02f;
+const float DaedalusExports::LIB_VERSION = 1.03f;
 
 std::vector<std::unique_ptr<TelekinesisInterpolator>> DaedalusExports::interpolators;
 
@@ -57,12 +57,10 @@ DaedalusExports::~DaedalusExports()
 
 void DaedalusExports::hookModule()
 {
-
 }
 
 void DaedalusExports::unHookModule()
 {
-
 }
 
 bool DaedalusExports::DII_AddProxy(const zSTRING& sourceInstanceName, const zSTRING& targetInstanceName)
@@ -316,58 +314,6 @@ void DaedalusExports::DII_GetItemByInstanceId(int itemParserSymbolIndex,  int in
 }
 
 
-//.text:006C9030 void __cdecl Game_DeleteAllPfx(class zCTree<class zCVob> *) proc near
-typedef void(__cdecl* Game_DeleteAllPfx)(void*);
-Game_DeleteAllPfx game_DeleteAllPfx = (Game_DeleteAllPfx)0x006C9030;
-
-//.text:00601C60 public: void __thiscall zCVob::RemoveVobSubtreeFromWorld(void) proc near
-typedef void(__thiscall* ZCVobRemoveVobSubtreeFromWorld)(void*);
-ZCVobRemoveVobSubtreeFromWorld zCVobRemoveVobSubtreeFromWorld = (ZCVobRemoveVobSubtreeFromWorld)0x00601C60;
-
-//.text:00711930 public: void __thiscall oCItem::CreateVisual(void) proc near
-typedef void(__thiscall* OCItemCreateVisual)(void*);
-OCItemCreateVisual oCItemCreateVisual = (OCItemCreateVisual)0x00711930;
-
-//.text:007929F0 public: void * __cdecl zCParser::CallFunc(int, ...) proc near
-typedef void* (__cdecl* ZCParserCallFunc)(int, ...);
-ZCParserCallFunc zCParserCallFunc = (ZCParserCallFunc)0x007929F0;
-
-//.text:007A4BB0 public: void __thiscall zCPar_Stack::PushString(class zSTRING &) proc near
-typedef void(__thiscall* ZCPar_StackPushString)(void* pThis, zSTRING &);
-ZCPar_StackPushString zCPar_StackPushString = (ZCPar_StackPushString)0x007A4BB0;
-
-//.text:006E2BA0 ; int __cdecl sub_006E2BA0()
-typedef int(__cdecl* PrintExternal)();
-PrintExternal printExternal = (PrintExternal)0x006E2BA0;
-
-//.text:007A4B90 public: void __thiscall zCPar_Stack::PushInt(int) proc near
-typedef void(__thiscall* ZCPar_StackPushInt)(void* pThis, int);
-ZCPar_StackPushInt zCPar_StackPushInt = (ZCPar_StackPushInt)0x007A4B90;
-
-//.text:007A5180 public: void __thiscall zCPar_DataStack::Clear(void) proc near
-typedef void(__thiscall* ZCPar_StackClear)(void* pThis);
-ZCPar_StackClear zCPar_StackClear = (ZCPar_StackClear)0x007A5180;
-
-//.text:007A4F80 public: void __thiscall zCPar_DataStack::Push(int) proc near
-typedef void(__thiscall* ZCPar_StackPush)(void* pThis, int);
-ZCPar_StackPush zCPar_StackPush = (ZCPar_StackPush)0x007A4F80;
-
-//.text:007A5070 public: int __thiscall zCPar_DataStack::Pop(void) proc near
-typedef int(__thiscall* ZCPar_DataStackPop)(void* pThis);
-ZCPar_DataStackPop zCPar_DataStackPop = (ZCPar_DataStackPop)0x007A5070;
-
-//.text:007A1E10 public: void __thiscall zCPar_Symbol::GetStackPos(int &, int) proc near
-typedef void(__thiscall* ZCPar_SymbolGetStackPos)(void* pThis, int&, int);
-ZCPar_SymbolGetStackPos zCPar_SymbolGetStackPos = (ZCPar_SymbolGetStackPos)0x007A1E10;
-
-//.text:00791960 private: void __thiscall zCParser::DoStack(int) proc near
-typedef void(__thiscall* ZCParserDoStack)(void* pThis, int);
-ZCParserDoStack zCParserDoStack = (ZCParserDoStack)0x00791960;
-
-//.text:006BED00 ; public: static class zSTRING __cdecl oCNpcFocus::GetFocusName(void)
-typedef zSTRING(__cdecl* OCNpcFocusGetFocusName)(); OCNpcFocusGetFocusName oCNpcFocusGetFocusName = (OCNpcFocusGetFocusName)0x006BED00;
-
-
 void DaedalusExports::DII_ChangeInstanceForAll(const zSTRING& sourceName, const zSTRING& targetName)
 {
 	ObjectManager* manager = ObjectManager::getObjectManager();
@@ -549,47 +495,6 @@ int DaedalusExports::TELEKINESIS_IsVobSeeable(oCNpc* npc, zCVob* vob)
 	return found;
 }
 
-struct zCAIVobMove
-{
-	//zCObject {
-	int    _vtbl;				// 4 bytes
-	int    _zCObject_refCtr;   // 4 bytes
-	char data[52];  //size = 0x3C
-};
-
-struct zCClassDef {
-
-	zSTRING className;            //zSTRING
-	zSTRING baseClassName;        //zSTRING
-	zSTRING scriptClassName;      //zSTRING
-	int baseClassDef;            //zCClassDef* //davon abgeleitet
-
-	int createNewInstance;       //zCObject* ( *) (void) //Pointer auf klassenspezifische Funktion
-	int createNewInstanceBackup; //zCObject* ( *) (void) //Pointer auf klassenspezifische Funktion
-
-									 /*
-									 enum zTClassFlags {
-									 zCLASS_FLAG_SHARED_OBJECTS      = 1<<0, //Mehrfach benutzt Objekte (wie Visuals zum Beispiel)
-									 zCLASS_FLAG_TRANSIENT           = 1<<1, //Flüchtig, soll nicht gespeichert werden.
-									 zCLASS_FLAG_RESOURCE            = 1<<2, //keine Ahnung / vermutlich irrelevant
-									 };*/
-
-	int classFlags;              //zDWORD //siehe enum
-	int classSize;               //zDWORD //Größe in Bytes
-
-	int numLivingObjects;        //Anzahl Objekte von dieser Klasse
-	int numCtorCalled;           //Konstruktor wurde sooft aufgerufen
-
-	int hashTable;               //zCObject** //Hashtabelle der Größe 1024. Objekte sind mit zCObject.hashNext verknüpft, falls mehrere auf den selben Wert hashen.
-									 //zCArray<zCObject*> objectList;    //alle benannten (!) Objekte von genau (!) dieser Klasse (!) //Ausrufezeichenanmerkungen: 1.) unbenannte sind nicht drin 2.) Objekte von Unterklassen sind nicht drin 3.) diese Eigenschaft kann sehr nützlich sein.
-	int objectList_array;       //zCObject**
-	int objectList_numAlloc;    //int
-	int objectList_numInArray;  //int
-
-	int archiveVersion;          //zWORD //vermutlich nutzlos
-	int archiveVersionSum;       //zWORD //vermutlich nutzlos
-};
-
 int DaedalusExports::LEVITATION_IsGamePaused()
 {
 	return Levitation::gameIsPaused;
@@ -614,19 +519,7 @@ void DaedalusExports::ItemUpdater::updateItem(void* obj, void* param, oCItem* it
 		bool nfocus = itm->flags & ITEM_NFOCUS;
 
 		bool isInWorld = manager->isItemInWorld(itm);
-		if (!isInWorld && isActive)
-		{
-			//zCWorld* world = oCGame::GetGame()->GetWorld();
-			//world->AddVob(itm);
-		}
-
-		//zCWorld* world = oCGame::GetGame()->GetWorld();
-		//world->AddVob(itm);
-
-
 		int flags = itm->flags;
-		//manager->oCItemSaveRemoveEffect(itm);
-		//itm->effect = "SPELLFX_FIREBOW";
 
 		auto resolvedID = manager->resolveProxying(params->newInstanceID);
 		bool notSameInstance = manager->resolveProxying(params->newInstanceID) != id;
@@ -636,7 +529,6 @@ void DaedalusExports::ItemUpdater::updateItem(void* obj, void* param, oCItem* it
 			util::logWarning(&logStream);
 		}
 
-		//manager->oCItemSaveRemoveEffect(itm);
 		manager->setInstanceId(itm, resolvedID);
 		itm->InitByScript(resolvedID, itm->amount);
 
@@ -644,26 +536,12 @@ void DaedalusExports::ItemUpdater::updateItem(void* obj, void* param, oCItem* it
 			manager->oCItemSaveRemoveEffect(itm);
 		}
 
-		//zCVob* effectVob = (zCVob*)itm->effectVob;
-		//if (effectVob) {
-		//	effectVob->trafo = itm->trafo;
-		//}
-		//itm->effectVob
-
-		//itm->flags = flags;
 		if (isActive) itm->flags |= ITEM_ACTIVE;
 		if (dropped) itm->flags |= ITEM_DROPPED;
 		if (nfocus) itm->flags |= ITEM_NFOCUS;
 
-		//world->AddVob(itm);
-
-		isInWorld = manager->isItemInWorld(itm);
-		if (isInWorld && !isActive) { //&&!isActive
-			//manager->oCItemSaveRemoveEffect(itm);
+		if (isInWorld && !isActive) {
 			manager->oCItemSaveInsertEffect(itm);
-
-			//zCWorld* world = oCGame::GetGame()->GetWorld();
-			//world->AddVob(itm);
 		}
 	}
 }
