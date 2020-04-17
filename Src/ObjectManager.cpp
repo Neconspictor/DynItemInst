@@ -270,6 +270,9 @@ int ObjectManager::createNewInstanceId(oCItem* item, const std::string& instance
 
 void ObjectManager::deleteDII(int parserSymbolIndex)
 {
+
+	//Not supported for now;
+	return;
 	if (!isDynamicInstance(parserSymbolIndex)) {
 		throw std::invalid_argument("ObjectManager::deleteDII: parserSymbolIndex isn't referring to a valid DII!");
 	}

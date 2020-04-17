@@ -188,7 +188,7 @@ func void positionHero() {
 		DII_AddProxy("Hooked_Dagger", DII_GetSymbolName(ItRw_Bow_L_01));
 		DII_DeleteDII("Hooked_Dagger");
 		//Npc_RemoveInvItems(hero, DII_GetInstanceID("Hooked_Dagger"), 20);
-		//DII_RemoveProxy("Hooked_Dagger");
+		DII_RemoveProxy("Hooked_Dagger");
 		//DII_AddProxy(DII_GetSymbolName(ItRw_Bow_L_01), "Hooked_Dagger");
 		//DII_AddProxy("Hooked_Dagger", DII_GetSymbolName(ItRw_Bow_L_01));
 		//DII_AddProxy("Hooked_Dagger", DII_GetSymbolName(ItMW_1h_vlk_dagger));
