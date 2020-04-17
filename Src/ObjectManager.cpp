@@ -1050,7 +1050,7 @@ int ObjectManager::getIndexByName(const zSTRING& symbolName)
 	string name = symbolName.ToChar();
 	transform(name.begin(), name.end(),name.begin(), ::toupper);
 	auto it = mNameToInstanceMap.find(name);
-	if (it == mNameToInstanceMap.end()) { return NULL; }
+	if (it == mNameToInstanceMap.end()) { return -1; }
 	return it->second;
 }
 

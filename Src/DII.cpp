@@ -354,11 +354,12 @@ zCPar_Symbol* DII::zCPar_SymbolTableGetSymbolHook(void* pThis, int index)
 zCPar_Symbol* DII::zCPar_SymbolTableGetSymbolStringHook(void* pThis, zSTRING const & symbolName)
 {
 	auto* manager = ObjectManager::getObjectManager();
-	zCPar_Symbol* result = manager->getSymbolByName(symbolName);
+	zCPar_Symbol* result = zCPar_SymbolTableGetSymbolString(pThis, symbolName);
 	if (result == NULL)
 	{
 		zSTRING resolvedName = manager->resolveProxying(symbolName);
-		result = zCPar_SymbolTableGetSymbolString(pThis, resolvedName);
+		
+		result = manager->getSymbolByName(resolvedName);
 	}
 
 	return result;
@@ -368,7 +369,7 @@ int DII::zCPar_SymbolTableGetIndexHook(void* pThis, zSTRING const& symbolName)
 {
 	auto* manager = ObjectManager::getObjectManager();
 	int result = zCPar_SymbolTableGetIndex(pThis, symbolName);
-	if (result == NULL)
+	if (result == -1)
 	{
 		result = manager->getIndexByName(symbolName);
 		result = manager->resolveProxying(result);
@@ -380,10 +381,10 @@ int DII::zCPar_SymbolTableGetIndexHook(void* pThis, zSTRING const& symbolName)
 int DII::zCParserGetIndexHook(void* pThis, zSTRING const& symbolName)
 {
 	auto* manager = ObjectManager::getObjectManager();
-	int result = manager->getIndexByName(symbolName);
-	if (result == NULL)
+	int result = zCParserGetIndex(pThis, symbolName);
+	if (result == -1)
 	{
-		result = zCParserGetIndex(pThis, symbolName);	
+		result = manager->getIndexByName(symbolName);
 	}
 
 	return result;
