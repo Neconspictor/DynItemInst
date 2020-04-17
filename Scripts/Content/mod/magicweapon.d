@@ -18,10 +18,13 @@ var string MAGICWEAPON_MELEE_WEAPON;
 var string MAGICWEAPON_RANGED_WEAPON;
 //var int ZAUBERART;
 
-var int weaponIsDrawn;
+class MAGICWEAPON_RemoveDesc {
+    var string instanceName;
+};
+
+instance MAGICWEAPON_RemoveDesc@(MAGICWEAPON_RemoveDesc);
 
 //.text:00731F90 ; public: class oCItem * __thiscall oCNpc::GetSlotItem(class zSTRING const &) 7544720
-
 func int oCNpcGetSlotItem (var c_npc npc, var string slotName) {
 	
 	const int oCNpcGetSlotItemAddress = 7544720;
@@ -32,13 +35,6 @@ func int oCNpcGetSlotItem (var c_npc npc, var string slotName) {
 	CALL_PutRetValTo(_@(itmPtr));
     CALL__thiscall(_@(npc), oCNpcGetSlotItemAddress);
 	return +itmPtr;
-};
-
-func void MagicWeaponUpdateEffect(var c_item itm, var string effectName) {
-	//update item's visual effect
-	oCItemRemoveEffect(itm);
-	itm.effect = effectName;
-	oCItemInsertEffect(itm);
 };
 
 
@@ -66,8 +62,6 @@ func void MAGICWEAPON_CheckEffectState() {
 		
 		
 		if (itm.effectVob != 0 && data.data[MAGICWEAPON_ENCHANTEDWEAPON]) {
-		
-			//MagicWeaponUpdateEffect(citm, "");
 			oCItemRemoveEffect(citm);
 			oCNpc_PutInSlot(hero, "ZS_SWORD", itmPtr, 1);
 		};
@@ -88,8 +82,6 @@ func void MAGICWEAPON_CheckEffectState() {
 		
 		
 		if (itm.effectVob != 0 && data.data[MAGICWEAPON_ENCHANTEDWEAPON]) {
-		
-			//MagicWeaponUpdateEffect(citm, "");
 			oCItemRemoveEffect(citm);
 			oCNpc_PutInSlot(hero, "ZS_BOW", itmPtr, 1);
 		};
@@ -110,8 +102,6 @@ func void MAGICWEAPON_CheckEffectState() {
 		
 		
 		if (itm.effectVob != 0 && data.data[MAGICWEAPON_ENCHANTEDWEAPON]) {
-		
-			//MagicWeaponUpdateEffect(citm, "");
 			oCItemRemoveEffect(citm);
 			oCNpc_PutInSlot(hero, "ZS_CROSSBOW", itmPtr, 1);
 		};
@@ -132,8 +122,6 @@ func void MAGICWEAPON_CheckEffectState() {
 		
 		
 		if (itm.effectVob != 0 && data.data[MAGICWEAPON_ENCHANTEDWEAPON]) {
-		
-			//MagicWeaponUpdateEffect(citm, "");
 			oCItemRemoveEffect(citm);
 			oCNpc_PutInSlot(hero, "ZS_LONGSWORD", itmPtr, 1);
 		};
@@ -154,7 +142,6 @@ func void MAGICWEAPON_CheckEffectState() {
 		data = DII_GetUserData(instanceName);
 		
 		if (itm.effectVob == 0 && data.data[MAGICWEAPON_ENCHANTEDWEAPON]) {
-			//MagicWeaponUpdateEffect(citm, data.magicWeaponNewEffect);
 			oCItemInsertEffect(citm);
 			oCNpc_PutInSlot(hero, "ZS_LEFTHAND", itmPtr, 1);
 		};
@@ -175,7 +162,6 @@ func void MAGICWEAPON_CheckEffectState() {
 		data = DII_GetUserData(instanceName);
 		
 		if (itm.effectVob == 0 && data.data[MAGICWEAPON_ENCHANTEDWEAPON]) {
-			//MagicWeaponUpdateEffect(citm, data.magicWeaponNewEffect);
 			oCItemInsertEffect(citm);
 			oCNpc_PutInSlot(hero, "ZS_RIGHTHAND", itmPtr, 1);
 		};
@@ -184,65 +170,11 @@ func void MAGICWEAPON_CheckEffectState() {
 };
 
 
-
-//.text:0074CC10 ; public: int __thiscall oCNpc::EV_DrawWeapon(class oCMsgWeapon *)    7654416  6
-//.text:006B2610 ; public: int __thiscall oCAniCtrl_Human::DrawWeapon1(int, int, int)  7022096  6
-//.text:006B2CF0 ; public: int __thiscall oCAniCtrl_Human::DrawWeapon2(void)   7023856    6
-//.text:006B3040 ; public: int __thiscall oCAniCtrl_Human::RemoveWeapon1(void) 7024704  6
-//.text:006B33B0 ; public: int __thiscall oCAniCtrl_Human::RemoveWeapon2(void) 7025584  6
-//.text:0074DB20 ; public: int __thiscall oCNpc::EV_RemoveWeapon(class oCMsgWeapon *) 7658272    7
-
-func void oCNpcEV_DrawWeaponHook() {
-	MEM_Warn("Called oCNpcEV_DrawWeaponHook");
-	
-	if (weaponIsDrawn) {
-		return;
-	};
-	
-	
-	
-	weaponIsDrawn = TRUE;
-};
-
-func void oCAniCtrl_Human_DrawWeapon1() {
-	MEM_Warn("Called oCAniCtrl_Human_DrawWeapon1");
-};
-
-func void oCAniCtrl_Human_DrawWeapon2() {
-	MEM_Warn("Called oCAniCtrl_Human_DrawWeapon2");
-};
-
-func void oCAniCtrl_Human_RemoveWeapon1() {
-	MEM_Warn("Called oCAniCtrl_Human_RemoveWeapon1");
-};
-
-func void oCAniCtrl_Human_RemoveWeapon2() {
-	MEM_Warn("Called oCAniCtrl_Human_RemoveWeapon2");
-};
-
-func void oCNpcEV_RemoveWeapon() {
-	MEM_Warn("Called oCNpcEV_RemoveWeapon");
-};
-
-func void MAGICWEAPON_setupHooks() {
-	HookEngineF(7654416, 6, oCNpcEV_DrawWeaponHook);
-	HookEngineF(7022096, 6, oCAniCtrl_Human_DrawWeapon1);
-	HookEngineF(7023856, 6, oCAniCtrl_Human_DrawWeapon2);
-	HookEngineF(7024704, 6, oCAniCtrl_Human_RemoveWeapon1);
-	HookEngineF(7025584, 6, oCAniCtrl_Human_RemoveWeapon2);
-	HookEngineF(7658272, 7, oCNpcEV_RemoveWeapon);
-	
-	
+func void MAGICWEAPON_init() {	
 	FF_ApplyOnce(MAGICWEAPON_CheckEffectState);
 	
 };
 
-
-class MAGICWEAPON_RemoveDesc {
-    var string instanceName;
-};
-
-instance MAGICWEAPON_RemoveDesc@(MAGICWEAPON_RemoveDesc);
 
 func int createMsgManipulate(var int vobPtr, var int msgType) {
 	var int ptr; ptr = MEM_Alloc(OCMSGMANIPULATE_BYTE_SIZE);
@@ -268,8 +200,7 @@ func void sendEV_EquipItemMessageToNpc(var c_npc npc, var c_item itm) {
 
 func void magicWeaponInit(var c_npc npc) {
 	
-	MEM_Warn("magicWeaponInit called!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-
+	
 	var c_item itm; itm = Npc_GetEquippedMeleeWeapon(npc);
 	
 	if (Hlp_IsValidItem(itm)) {
@@ -299,49 +230,24 @@ func void magicWeaponCreationDone(var c_npc npc) {
 	MAGICWEAPON_INIT_CALLED = FALSE;
 };
 
-func void MagicWeaponSetEffect(var c_item itm, var string effectName) {
-	//update item's visual effect
-	oCItemRemoveEffect(itm);
-	itm.effect = effectName;
-	oCItemInsertEffect(itm);
-    
-	//update instance
-	var int instanceId; instanceId = Hlp_GetInstanceID(itm);
-	var string instanceName; instanceName = DII_GetSymbolName(instanceId);
-	var c_item temp; temp = DII_CreateNewItem(instanceName);
-	temp.effect = itm.effect;
-	DII_UpdateInstance(instanceName, temp);
-    
-    //temp isn't needed anymore
-    DII_DeleteItem(temp);
-};
-
 
 func void SetInstanceId(var c_item itm, var int instanceId) {
 	if (!Hlp_isValidItem(itm)) {
 		return;
 	};
 	
-	var int InstancePtr; InstancePtr = _@(itm);
-	InstancePtr = InstancePtr + 816;//0x330
-	MEM_WriteInt(InstancePtr, instanceId);
-	
-	//test assignment
-	var int testId; testId = Hlp_GetInstanceID(itm);
+	var oCItem ocitm; ocitm = _^(_@(itm));
+	ocitm.instanz = instanceId;
 };
 
-func int RemoveMagicWeaponEffects(var MAGICWEAPON_RemoveDesc desc) {
-	//TODO
+func void RemoveMagicWeaponEffects(var MAGICWEAPON_RemoveDesc desc) {
 
-	MEM_Warn(desc.instanceName);
 	
-	var DII_USER_DATA data; data = DII_GetUserData(desc.instanceName); 
+	var DII_USER_DATA data; data = DII_GetUserData(desc.instanceName); 	
+	data.data[MAGICWEAPON_ENCHANTEDWEAPON] = FALSE;
+	
 	
 	var c_item temp; temp = DII_CreateNewItem(data.magicWeaponOldInstanceName);
-	
-	//temp.description = data.magicWeaponOldDesc;
-	//temp.effect = data.magicWeaponOldEffect;
-	
 	
 	DII_UpdateInstance(desc.instanceName, temp);
 	//DII_ApplyInstanceChangesToAll(desc.instanceName);
@@ -350,48 +256,6 @@ func int RemoveMagicWeaponEffects(var MAGICWEAPON_RemoveDesc desc) {
 	DII_AddProxy(desc.instanceName, data.magicWeaponOldInstanceName);
 	//DII_UpdateInstance(desc.instanceName, temp);
 	DII_DeleteItem(temp);
-	
-	/*
-	data.magicWeaponNewDesc = newDesc;
-	data.magicWeaponOldDesc = oldDesc;
-	data.magicWeaponNewEffect = newEffect;
-	data.magicWeaponOldEffect = oldEffect;
-	data.magicWeaponOldInstanceName = weaponInstanceName;
-	*/
-	
-	/*var c_item itm;
-	DII_GetItemByInstanceId(itm, instanceId);
-	
-	if (!Hlp_isValidItem(itm)) {
-		return FALSE;
-	};
-	
-	if (!DII_IsDynamic(itm)) {
-		return FALSE;
-	};
-	
-	var DII_USER_DATA data2;
-	data2 = DII_GetUserData(instanceId); 
-	
-	//get the old instance id
-	var int previousId; previousId = data2.data[MAGICWEAPON_OLDID];
-	
-	//Make sure that the dii is restored right
-	MagicWeaponSetEffect(itm, data2.magicWeaponOldEffect);
-	
-	//Restore old effect
-	itm.effect = data2.magicWeaponOldEffect;
-	oCItemRemoveEffect(itm);
-	
-	//assign right instance id and umark item from dii
-	itm.description = data2.magicWeaponOldDesc;
-	var int itmPtr; itmPtr = _@(itm);
-	var oCItem itmOC; itmOC = _^(itmPtr);
-	DII_UpdateInstance(itm);
-	itmOC.instanz = previousId;
-	//DII_MarkAsReusable(instanceId, previousId);
-	oCItemInsertEffect(itm);*/
-	return TRUE;
 };
 
 func void MagicWeapon_RemoveIceSpell(var int hndl)
@@ -449,19 +313,6 @@ func void MagicWeapon_MakeEnchantedWeapon(var string weaponInstanceName,
 	
     //temp isn't needed anymore
     DII_DeleteItem(temp);
-    
-	
-	/*var c_item itm; itm = Npc_GetEquippedMeleeWeapon(hero);
-	
-	MagicWeaponUpdateEffect(itm, newEffect);
-	var oCItem itmOC; itmOC = _^(_@(itm));
-	itmOC.instanz = newId;
-	//oCNpc_RemoveFromSlot(hero, "ZS_SWORD", _@(itm), 1);
-	oCNpc_PutInSlot(hero, "ZS_SWORD", _@(itm), 1);
-	//sendEV_EquipItemMessageToNpc(hero, itm);
-	
-	
-	return;*/
 	
 	
 	CreateInvItems(self, newId, 1);

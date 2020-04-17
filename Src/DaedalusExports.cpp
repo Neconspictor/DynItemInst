@@ -65,12 +65,18 @@ void DaedalusExports::unHookModule()
 
 }
 
-bool DaedalusExports::DII_AddProxy(const char* sourceInstanceName, const char* targetInstanceName)
+bool DaedalusExports::DII_AddProxy(const zSTRING& sourceInstanceName, const zSTRING& targetInstanceName)
 {
 	return ObjectManager::getObjectManager()->addProxy(sourceInstanceName, targetInstanceName);
 }
 
-void DaedalusExports::DII_RemoveProxy(const char* sourceInstanceName)
+void DaedalusExports::DII_ApplyInstanceChangesToAll(const zSTRING& instanceName)
+{
+	logStream << __FUNCSIG__ << ": " << instanceName.ToChar() << std::endl;
+	util::logAlways(&logStream);
+}
+
+void DaedalusExports::DII_RemoveProxy(const zSTRING& sourceInstanceName)
 {
 	ObjectManager::getObjectManager()->removeProxy(sourceInstanceName);
 }
@@ -160,13 +166,13 @@ zSTRING* DaedalusExports::DII_CreateNewInstanceStr(oCItem* item)
 	return &symbol->name;
 }
 
-int DaedalusExports::DII_CreateNewInstanceStr2(oCItem* item, const char* instanceName)
+int DaedalusExports::DII_CreateNewInstanceStr2(oCItem* item, const zSTRING& instanceName)
 {
-	if (!instanceName || !item) {
+	if (!item) {
 		return false;
 	}
 
-	std::string instanceNameStr = instanceName;
+	std::string instanceNameStr = instanceName.ToChar();
 	std::transform(instanceNameStr.begin(), instanceNameStr.end(), instanceNameStr.begin(), std::toupper);
 
 
@@ -176,9 +182,9 @@ int DaedalusExports::DII_CreateNewInstanceStr2(oCItem* item, const char* instanc
 	// Create new instance with item
 	ObjectManager* manager = ObjectManager::getObjectManager();
 
-	int parserSymbolIndex = manager->createNewInstanceId(item, instanceName);
+	int parserSymbolIndex = manager->createNewInstanceId(item, instanceNameStr);
 	if (!parserSymbolIndex) {
-		logStream << "DII_CreateNewInstanceStr2: Couldn't create new instance '" << instanceName << "'" << std::endl;
+		logStream << "DII_CreateNewInstanceStr2: Couldn't create new instance '" << instanceNameStr << "'" << std::endl;
 		util::logWarning(&logStream);
 	}
 
@@ -231,7 +237,7 @@ float DaedalusExports::NECPACK_GetLibVersion()
 	return LIB_VERSION;
 }
 
-bool DaedalusExports::DII_UpdateInstance(const char* instanceName, oCItem* item)
+bool DaedalusExports::DII_UpdateInstance(const zSTRING& instanceName, oCItem* item)
 {
 	ObjectManager* manager = ObjectManager::getObjectManager();
 
@@ -355,7 +361,7 @@ ZCParserDoStack zCParserDoStack = (ZCParserDoStack)0x00791960;
 typedef zSTRING(__cdecl* OCNpcFocusGetFocusName)(); OCNpcFocusGetFocusName oCNpcFocusGetFocusName = (OCNpcFocusGetFocusName)0x006BED00;
 
 
-void DaedalusExports::DII_ChangeItemsInstance(const char* sourceName, const char* targetName)
+void DaedalusExports::DII_ChangeItemsInstance(const zSTRING& sourceName, const zSTRING& targetName)
 {
 	ObjectManager* manager = ObjectManager::getObjectManager();
 

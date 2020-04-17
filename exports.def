@@ -3,6 +3,7 @@ EXPORTS
 	Hook
 	Unhook
 	DII_AddProxy
+	DII_ApplyInstanceChangesToAll
 	DII_RemoveProxy
 	DII_CreateNewItem
 	DII_CreateNewInstanceStr

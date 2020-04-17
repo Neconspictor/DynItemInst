@@ -71,18 +71,13 @@ FUNC INT DII_AddProxy (var string sourceInstanceName, var string targetInstanceN
         return FALSE;
     };
 	
-
     var int ret;
-	var zSTRING zSource;
-	var zSTRING zTarget;
-	zSource = _^(_@s(sourceInstanceName));
-	zTarget = _^(_@s(targetInstanceName));
-	
-
 	var int adr;
 	adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_AddProxy");
-	CALL_IntParam(zTarget.ptr);
-	CALL_IntParam(zSource.ptr);
+	
+	CALL_zStringPtrParam(targetInstanceName);
+	CALL_zStringPtrParam(sourceInstanceName);
+	
 	CALL_PutRetValTo(_@(ret));
 	CALL__cdecl(adr);
 	
@@ -98,10 +93,9 @@ func void DII_ApplyInstanceChangesToAll(var string instanceName) {
         return;
     };
 	
-	var zSTRING zName; zName = _^(_@s(instanceName));
 	var int adr; 
 	adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_ApplyInstanceChangesToAll");
-	CALL_IntParam(_@s(instanceName));
+	CALL_zStringPtrParam(instanceName);
 	CALL__cdecl(adr);
 };
 
@@ -117,11 +111,9 @@ FUNC void DII_RemoveProxy (var string sourceInstanceName) {
         return;
     };
 	
-	var zSTRING zSource;
-	zSource = _^(_@s(sourceInstanceName));
 	var int adr;
 	adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_RemoveProxy");
-	CALL_IntParam(zSource.ptr);
+	CALL_zStringPtrParam(sourceInstanceName);
 	CALL__cdecl(adr);
 };
 
@@ -191,11 +183,10 @@ FUNC INT DII_CreateNewInstanceStr2 (var c_item itm, var string instanceName) {
 
     var int ptr; ptr = _@(itm);
     var int ret;
-	var zSTRING zStr; zStr = _^(_@s(instanceName));
 	var int adr;
 	adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_CreateNewInstanceStr2");
 	
-	CALL_IntParam(zStr.ptr);
+	CALL_zStringPtrParam(instanceName);
 	CALL_IntParam(ptr);	
 	CALL_PutRetValTo(_@(ret));
 	CALL__cdecl(adr);
@@ -304,10 +295,8 @@ func INT DII_UpdateInstance(var string instanceName, var c_item itm) {
     var int adr;
     adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_UpdateInstance");
 	
-	var zSTRING zStr; zStr = _^(_@s(instanceName));
-	
 	CALL_IntParam(ptr);
-	CALL_IntParam(zStr.ptr);
+	CALL_zStringPtrParam(instanceName);
 	CALL_PutRetValTo(_@(ret));
     CALL__cdecl(adr);
 	
@@ -374,12 +363,9 @@ func void DII_ChangeItemsInstance(var string sourceInstanceName, var string targ
     };
 	
 	var int adr;
-	var zSTRING zSource; zSource = _^(_@s(sourceInstanceName));
-	var zSTRING zTarget; zTarget = _^(_@s(targetInstanceName));
-	
     adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_ChangeItemsInstance");
 	
-	CALL_IntParam(zTarget.ptr);
-	CALL_IntParam(zSource.ptr);
+	CALL_zStringPtrParam(targetInstanceName);
+	CALL_zStringPtrParam(sourceInstanceName);
     CALL__cdecl(adr);
 };

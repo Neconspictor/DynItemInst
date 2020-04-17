@@ -66,12 +66,14 @@ public:
 	 * Adds a proxy from one instance to another instance.
 	 * \return true if the proxy is successfully setup.
 	 */
-	static bool DII_AddProxy(const char* sourceInstanceName, const char* targetInstanceName);
+	static bool DII_AddProxy(const zSTRING& sourceInstanceName, const zSTRING& targetInstanceName);
+
+	static void DII_ApplyInstanceChangesToAll(const zSTRING& instanceName);
 
 	/**
 	 * Removes a proxy.
 	 */
-	static void DII_RemoveProxy(const char* sourceInstanceName);
+	static void DII_RemoveProxy(const zSTRING& sourceInstanceName);
 
 	/**
 	 * An external for creating an item with a specific instance id.
@@ -103,7 +105,7 @@ public:
 	 */
 	static int DII_CreateNewInstance(oCItem* item);
 	static zSTRING* DII_CreateNewInstanceStr(oCItem* item);
-	static int DII_CreateNewInstanceStr2(oCItem* item, const char* instanceName);
+	static int DII_CreateNewInstanceStr2(oCItem* item, const zSTRING& instanceName);
 
 	/**
 	 * An external for checking if a given c_item has a dynamic instance id.
@@ -125,7 +127,7 @@ public:
 	 */
 	static BYTE* DII_GetUserData(int instanceIdParserSymbolIndex);
 
-	static bool DII_UpdateInstance(const char* instanceName, oCItem* item);
+	static bool DII_UpdateInstance(const zSTRING& instanceName, oCItem* item);
 
 	//TODO: is this function used?
 	static void DII_AssignInstanceId(oCItem* item, int instanceIdParserSymbolIndex);
@@ -133,7 +135,7 @@ public:
 	static void DII_GetItemByInstanceId(int itemParserSymbolIndex, int instanceIdParserSymbolIndex);
 
 	//Asiigns all items with instance id targetId the new id newId
-	static void DII_ChangeItemsInstance(const char* sourceName, const char* targetName);
+	static void DII_ChangeItemsInstance(const zSTRING& sourceName, const zSTRING& targetName);
 
 	/**
 	 * Provides the version of the library.
