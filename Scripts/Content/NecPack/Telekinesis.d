@@ -70,16 +70,16 @@ func void TELEKINESIS_Interpolate(var int pTelekinesisInterpolator, var int item
     };
 };
 
-func int TELEKINESIS_Npc_CanSeeVob(var int pNpc, var int pVob) {
+func int TELEKINESIS_IsVobSeeable(var int pNpc, var int pVob) {
 	if (!NECPACK_Initialized) {
-		MEM_Warn("TELEKINESIS_Npc_CanSeeVob: Library isn't initialized!");
+		MEM_Warn("TELEKINESIS_IsVobSeeable: Library isn't initialized!");
         return 0;
     };
     const int call = 0;
     var int ret;
     if (CALL_Begin(call)) {
         var int adr;
-        adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "TELEKINESIS_Npc_CanSeeVob");
+        adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "TELEKINESIS_IsVobSeeable");
 		CALL_IntParam(_@(pVob));
 		CALL_IntParam(_@(pNpc));
         CALL_PutRetValTo(_@(ret));
@@ -109,7 +109,7 @@ func void TELEKINESIS_AdjustHeroFocusVob() {
 	var oCItem oCFocus; oCFocus = _^(oCSelf.focus_vob);
 	if (!Hlp_IsValidItem(oCFocus)) {return;};
 	
-	var int canSee; canSee = TELEKINESIS_Npc_CanSeeVob(_@(hero), oCSelf.focus_vob);
+	var int canSee; canSee = TELEKINESIS_IsVobSeeable(_@(hero), oCSelf.focus_vob);
 	
 	if (!canSee) {
 		//MEM_Warn("Cannot see focus vob!!!");

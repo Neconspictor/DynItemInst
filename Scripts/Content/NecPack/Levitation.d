@@ -12,13 +12,13 @@ const int LEVITATION_GRAVITY = 10;							// levitation gravity (in cm/s). Set it
 const string LEVITATION_OVERLAY = "Humans_Levitate.mds";	// levitation overlay
 
 // user control
-const int LEVITATION_CONTROL_FORWARD = KEY_UPARROW; 		// forward movement
-const int LEVITATION_CONTROL_BACKWARD = KEY_DOWNARROW; 		// backward movement
-const int LEVITATION_CONTROL_LEFT = KEY_LEFTARROW; 			// left turn
-const int LEVITATION_CONTROL_RIGHT = KEY_RIGHTARROW; 		// right turn
-const int LEVITATION_CONTROL_UP = KEY_LBRACKET; 			// up movement
-const int LEVITATION_CONTROL_DOWN = KEY_APOSTROPHE; 		// down movement
-const int LEVITATION_CONTROL_TERMINATE = KEY_RETURN; 		// terminates levitation state
+const int LEVITATION_CONTROL_FORWARD = KEY_UPARROW; 		// forward movement KEY_UPARROW
+const int LEVITATION_CONTROL_BACKWARD = KEY_DOWNARROW; 		// backward movement KEY_DOWNARROW
+const int LEVITATION_CONTROL_LEFT = KEY_LEFTARROW; 			// left turn KEY_LEFTARROW
+const int LEVITATION_CONTROL_RIGHT = KEY_RIGHTARROW; 		// right turn KEY_RIGHTARROW
+const int LEVITATION_CONTROL_UP = KEY_Y; 			// up movement KEY_LBRACKET
+const int LEVITATION_CONTROL_DOWN = KEY_X; 		// down movement KEY_APOSTROPHE
+const int LEVITATION_CONTROL_TERMINATE = KEY_RETURN; 		// terminates levitation state KEY_RETURN
 
 // private
 var int _LEVITATION_barHandle; 								// lifetime bar of the levitation state

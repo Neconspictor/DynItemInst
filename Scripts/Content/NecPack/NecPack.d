@@ -49,4 +49,5 @@ func void NECPACK_InitPerceptions()
 
 func void NECPACK_INIT_GLOBAL() {
 	LEVITATION_Init();
+	TELEKINESIS_Init();
 };

@@ -91,7 +91,7 @@ func void positionHero() {
 	//};
 	
 	if (MEM_KeyState(KEY_P) == KEY_PRESSED) {
-		var int canTalk; canTalk = NECPACK_Npc_CanTalk(hero);
+		var int canTalk; canTalk = oCNpcCanTalk(hero);
 		MEM_Warn(ConcatStrings("hero can talk = ", IntToString(canTalk)));
 	};
 
@@ -186,6 +186,7 @@ func void positionHero() {
 	if (MEM_KeyState(KEY_L) == KEY_PRESSED) {
 		//DII_DeleteDII("Hooked_Dagger");
 		DII_AddProxy("Hooked_Dagger", DII_GetSymbolName(ItRw_Bow_L_01));
+		//Npc_RemoveInvItems(hero, DII_GetInstanceID("Hooked_Dagger"), 20);
 		DII_DeleteDII("Hooked_Dagger");
 		//Npc_RemoveInvItems(hero, DII_GetInstanceID("Hooked_Dagger"), 20);
 		DII_RemoveProxy("Hooked_Dagger");
@@ -238,6 +239,8 @@ func void INIT_GLOBAL()
 	LeGo_Init(LeGo_All & ~LeGo_Bloodsplats);
 	
 	NECPACK_INIT_GLOBAL();
+	
+	MAGICWEAPON_setupHooks();
 	
 	//InitDamage();
 	

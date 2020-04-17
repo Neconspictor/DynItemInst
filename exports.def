@@ -12,21 +12,16 @@ EXPORTS
 	DII_IsDynamic
 	DII_IsInstanceDynamic
 	DII_GetUserData
-	NECPACK_GetLibVersion
 	DII_UpdateInstance
-	DII_AssignInstanceId
-	DII_EquipItem
 	DII_GetItemByInstanceId
 	DII_ChangeItemsInstance
 
-	NECPACK_Npc_CanTalk
+	LEVITATION_IsGamePaused
 
+	NECPACK_GetLibVersion
+
+	TELEKINESIS_IsVobSeeable
 	TELEKINESIS_CreateInterpolator
 	TELEKINESIS_GetInterpolatedVec
 	TELEKINESIS_Interpolate
 	TELEKINESIS_DeleteInterpolator
-
-	TELEKINESIS_Npc_CanSeeVob
-	NECPACK_DrobVob
-
-	LEVITATION_IsGamePaused

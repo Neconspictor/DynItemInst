@@ -52,39 +52,26 @@ FUNC INT _NECPACK_GetExpectedLibVersion() {
     return addf(integral, fraction);
 };
 
-func int NECPACK_Npc_CanTalk(var C_NPC npc) {
-if (!NECPACK_Initialized) {
-        MEM_Warn("NECPACK_Npc_CanTalk: Library isn't initialized!");
-        return 0;
-    };
-    const int call = 0;
+//.text:006BCEF0 ; public: int __thiscall oCNpc::CanTalk(void)
+func int oCNpcCanTalk(var C_NPC npc) {
+    const int adr = 7065328;
     var int ret;
-    if (CALL_Begin(call)) {
-        var int adr;
-        adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "NECPACK_Npc_CanTalk");
-		var int ptr; ptr = _@(npc);
-		CALL_IntParam(_@(ptr));
-        CALL_PutRetValTo(_@(ret));
-        CALL__cdecl(adr);
-        call = CALL_End();
-    };
+	CALL_PutRetValTo(_@(ret));
+	CALL__thiscall(_@(npc), adr);
     return +ret;
 };
 
-//void NECPACK_DrobVob(oCNpc* npc, zCVob* vob)
-func void NECPACK_DrobVob(var int pNpc, var int pVob) {
-    if (!NECPACK_Initialized) {
-		MEM_Warn("NECPACK_DrobVob: Library isn't initialized!");
-        return;
-    };
-    const int call = 0;
-    var int ret;
-    if (CALL_Begin(call)) {
-        var int adr;
-        adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "NECPACK_DrobVob");
-        CALL_IntParam(_@(pVob));
-		CALL_IntParam(_@(pNpc));
-        CALL__cdecl(adr);
-        call = CALL_End();
-    };
+//.text:00602930 ; public: void __thiscall zCVob::SetSleeping(int)
+func void zCVobSetSleeping(var int czvobPtr, var int setToSleep) {
+	const int adr = 6302000;
+	CALL_IntParam(setToSleep);
+	CALL__thiscall(czvobPtr, adr);
+};
+
+
+//.text:0061D190 ; public: void __thiscall zCVob::SetPhysicsEnabled(int)
+func void zCVobSetPhysicsEnabled(var int czvobPtr, var int enablePhysics) {
+	const int adr = 6410640;
+	CALL_IntParam(enablePhysics);
+	CALL__thiscall(czvobPtr, adr);
 };

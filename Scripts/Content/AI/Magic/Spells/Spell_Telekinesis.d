@@ -58,7 +58,9 @@ func void _Spell_Telekinesis_MoveTarget(var int hndl) {
 		//MEM_Warn(ConcatStrings("AIV_SpellLevel = ", IntToString(oCSelf.aiscriptvars[AIV_SpellLevel])));
 		oCSelf.aiscriptvars[AIV_SpellLevel] = 0;
 		
-		NECPACK_DrobVob(data.pCaster, data.pTarget);
+		zCVobSetSleeping(data.pTarget, FALSE);
+		zCVobSetPhysicsEnabled(data.pTarget, TRUE);
+		
 		TELEKINESIS_DeleteInterpolator(data.pInterpolator);
 		FF_RemoveData(_Spell_Telekinesis_MoveTarget, hndl);
 		delete(hndl);
@@ -150,7 +152,7 @@ func int Spell_Logic_Telekinesis (var int manaInvested)
 	
 	if (!Hlp_IsValidItem(oCFocus)) {return SPL_DONTINVEST;};
 	
-	var int canSee; canSee = TELEKINESIS_Npc_CanSeeVob(_@(self), oCSelf.focus_vob);
+	var int canSee; canSee = TELEKINESIS_IsVobSeeable(_@(self), oCSelf.focus_vob);
 	//MEM_Warn(ConcatStrings("canSee = ", IntToString(canSee)));
 	
 	if (!canSee && (manaInvested == 0)) {

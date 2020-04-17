@@ -192,17 +192,6 @@ int DaedalusExports::DII_CreateNewInstanceStr2(oCItem* item, const char* instanc
 	return parserSymbolIndex !=0;
 }
 
-void DaedalusExports::DII_EquipItem(oCNpc* npc, int instanceId)
-{
-	if (npc == NULL) return;
-	oCNpcInventory* inv = npc->GetInventory();
-	if (inv == NULL) return;
-
-	oCItem* item = DII::getInvItemByInstanceId2(inv, instanceId);
-	if (item == NULL) return;
-	npc->Equip(item);
-}
-
 int DaedalusExports::DII_IsDynamic(oCItem* item) // Func DII_IsDynamic(VAR C_ITEM item)
 {
 	if (item == NULL) {return FALSE;}
@@ -377,13 +366,6 @@ void DaedalusExports::DII_ChangeItemsInstance(const char* sourceName, const char
 	manager->callForAllItems(ItemUpdater::updateItemInstance, NULL, &params);
 }
 
-bool DaedalusExports::NECPACK_Npc_CanTalk(oCNpc* npc)
-{
-	//.text:006BCEF0 ; public: int __thiscall oCNpc::CanTalk(void)
-	typedef bool(__thiscall* OCNpcCanTalk)(oCNpc* pThis); OCNpcCanTalk oCNpcCanTalk = (OCNpcCanTalk)0x006BCEF0;
-	return oCNpcCanTalk(npc);
-}
-
 TelekinesisInterpolator* DaedalusExports::TELEKINESIS_CreateInterpolator(const zVEC3* vobPosition, const zVEC3* npcPosition,
 	int upMoveAmount, int speed)
 {
@@ -445,7 +427,7 @@ void DaedalusExports::TELEKINESIS_Interpolate(TelekinesisInterpolator* interpola
 	//item->SetPositionWorld(result);
 }
 
-int DaedalusExports::TELEKINESIS_Npc_CanSeeVob(oCNpc* npc, zCVob* vob)
+int DaedalusExports::TELEKINESIS_IsVobSeeable(oCNpc* npc, zCVob* vob)
 {
 	//.text:00741C10 ; public: int __thiscall oCNpc::CanSee(class zCVob *, int)
 	using OCNpcCanSee = int(__thiscall*)(void*, void*, int);
@@ -545,14 +527,6 @@ int DaedalusExports::TELEKINESIS_Npc_CanSeeVob(oCNpc* npc, zCVob* vob)
 
 			bool hasStaticCollision = foundVob->bitfield[0] & zCVob_bitfield0_collDetectionStatic;
 			bool hasDynamicCollision = foundVob->bitfield[0] & zCVob_bitfield0_collDetectionDynamic;
-
-			//logStream << "foundVob has static collision detection on: " << hasStaticCollision << std::endl;
-			//logStream << "foundVob has dynamic collision detection on: " << hasDynamicCollision << std::endl;
-			//util::logAlways(&logStream);
-
-			//int testCanSee = oCNpcCanSee(npc, vob, 0);
-			//logStream << "testCanSee: " << testCanSee << std::endl;
-			//util::logAlways(&logStream);
 		}
 
 		if (!found)
@@ -560,8 +534,6 @@ int DaedalusExports::TELEKINESIS_Npc_CanSeeVob(oCNpc* npc, zCVob* vob)
 	}
 
 	return found;
-
-	//return oCNpcCanSee(npc, vob, 0);
 }
 
 struct zCAIVobMove
@@ -604,101 +576,6 @@ struct zCClassDef {
 	int archiveVersion;          //zWORD //vermutlich nutzlos
 	int archiveVersionSum;       //zWORD //vermutlich nutzlos
 };
-
-void DaedalusExports::NECPACK_DrobVob(oCNpc* npc, zCVob* vob)
-{
-	logStream << "Called NECPACK_DrobVob()!" << std::endl;
-	logStream << "npc = " << npc->GetName().ToChar() << std::endl;
-	util::debug(&logStream);
-
-	/*
-
-	//.text:00565F50 ; void *__cdecl operator new(size_t)
-	using GothicNewOperator = void* (__cdecl*)(std::size_t size);
-	GothicNewOperator gothicNewOperator = (GothicNewOperator)0x00565F50;
-
-	//.data:00AAD720; private: static class zCClassDef oCAIVobMove::classDef
-	using ClassDefPtr = void*; 
-
-	//.text:005AAEB0 ; public: static void __cdecl zCClassDef::ObjectCreated(class zCObject *, class zCClassDef *)
-	using ZCClassDefObjectCreated = void(__cdecl*)(void* object, ClassDefPtr classDef);
-	ZCClassDefObjectCreated zCClassDefObjectCreated = (ZCClassDefObjectCreated)0x005AAEB0;
-
-	//.text:0069F220 ; public: __thiscall oCAIVobMove::oCAIVobMove(void)
-	using OCAIVobMoveConstructor = void(__thiscall*)(zCAIVobMove* aiVobMove);
-	OCAIVobMoveConstructor oCAIVobMoveConstructor = (OCAIVobMoveConstructor)0x0069F220;
-
-	using zCAIBase = void*;
-
-	//.text:005FE8F0 ; public: void __thiscall zCVob::SetAI(class zCAIBase *)
-	using ZCVobSetAI = void(__thiscall*)(zCVob* vob, zCAIBase* base);
-	ZCVobSetAI zCVobSetAI = (ZCVobSetAI)0x005FE8F0;
-
-	//.text:0069F540 ; public: virtual void __thiscall oCAIVobMove::Init(class zCVob *, class zCVob *, class zVEC3 &, float, float, class zMAT4 *)
-	using OCAIVobMoveInit = void(__thiscall*)(zCAIVobMove* pThis, zCVob* target, zCVob* parent, zVEC3& vec, float val1, float val2, zMAT4* matrix);
-	OCAIVobMoveInit oCAIVobMoveInit = (OCAIVobMoveInit)0x0069F540;
-
-
-	zVEC3 oldPosition = vob->GetVobPosition();
-
-	zCAIVobMove* aiVobMove = (zCAIVobMove*)gothicNewOperator(60);
-	ClassDefPtr oCAIVobMoveclassDef = (ClassDefPtr)0x00AAD720;
-	zCClassDefObjectCreated(aiVobMove, oCAIVobMoveclassDef);
-	oCAIVobMoveConstructor(aiVobMove);
-	zCVobSetAI(vob, (zCAIBase*)aiVobMove);
-
-	aiVobMove->_zCObject_refCtr -= 1;
-
-	zVEC3 vec;
-	zMAT4 matrix(1,0,0,0,
-		0,1,0,0,
-		0,0,1,0,
-		0,0,0,1);
-	oCAIVobMoveInit(aiVobMove, vob, npc, vec, 0.0f, 100.0f, &npc->trafoObjToWorld);
-
-	vob->SetPositionWorld(oldPosition);
-	vob->trafoObjToWorld.m[0][3] = oldPosition.x;
-	vob->trafoObjToWorld.m[1][3] = oldPosition.y;
-	vob->trafoObjToWorld.m[2][3] = oldPosition.z;
-
-
-	return;
-	*/
-
-
-	//.data:00AAD840 ; private: static class zCClassDef oCAIDrop::classDef
-	zCClassDef* classDef = (zCClassDef*)0x00AAD840;
-
-	logStream << "classDef->className = " << classDef->className.ToChar() << std::endl;
-	logStream << "classDef->baseClassName = " << classDef->baseClassName.ToChar() << std::endl;
-	logStream << "classDef->classSize = " << classDef->classSize << std::endl;
-	util::debug(&logStream);
-
-
-	//.text:00602930 ; public: void __thiscall zCVob::SetSleeping(int)
-	using ZCVobSetSleeping = void(__thiscall*)(void* pThis, int);
-	ZCVobSetSleeping zCVobSetSleeping = (ZCVobSetSleeping)0x00602930;
-
-	//.text:0061D190 ; public: void __thiscall zCVob::SetPhysicsEnabled(int)
-	using ZCVobSetPhysicsEnabled = void(__thiscall*)(void* pThis, int);
-	ZCVobSetPhysicsEnabled zCVobSetPhysicsEnabled = (ZCVobSetPhysicsEnabled)0x0061D190;
-
-	//.text:005FE960; public: class zCRigidBody * __thiscall zCVob::GetRigidBody(void)
-	using zCRigidBodyPtr = void*;
-	using ZCVobGetRigidBody = zCRigidBodyPtr(__thiscall*)(void* pThis);
-	ZCVobGetRigidBody zCVobGetRigidBody = (ZCVobGetRigidBody)0x005FE960;
-
-	//.text:005B66D0 ; public: void __thiscall zCRigidBody::SetVelocity(class zVEC3 const &)
-	using ZCRigidBodySetVelocity = void(__thiscall*)(zCRigidBodyPtr pThis, zVEC3 const& velocity);
-	ZCRigidBodySetVelocity zCRigidBodySetVelocity = (ZCRigidBodySetVelocity)0x005B66D0;
-	
-
-
-	zCVobSetSleeping(vob, 0);
-	zCVobSetPhysicsEnabled(vob, 1);
-	//zCRigidBodyPtr rigidBody = zCVobGetRigidBody(vob);
-	//zCRigidBodySetVelocity(rigidBody, zVEC3(0, -1,0));
-}
 
 int DaedalusExports::LEVITATION_IsGamePaused()
 {

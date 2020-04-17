@@ -105,8 +105,6 @@ public:
 	static zSTRING* DII_CreateNewInstanceStr(oCItem* item);
 	static int DII_CreateNewInstanceStr2(oCItem* item, const char* instanceName);
 
-	static void DII_EquipItem(oCNpc* npc, int parserSymbolIndex);
-
 	/**
 	 * An external for checking if a given c_item has a dynamic instance id.
 	 * Daedalus syntax: Func int DII_IsDynamic(C_Item item)
@@ -127,11 +125,6 @@ public:
 	 */
 	static BYTE* DII_GetUserData(int instanceIdParserSymbolIndex);
 
-	/**
-	 * Provides the version of the library.
-	 */
-	static float NECPACK_GetLibVersion();
-
 	static bool DII_UpdateInstance(const char* instanceName, oCItem* item);
 
 	//TODO: is this function used?
@@ -142,7 +135,12 @@ public:
 	//Asiigns all items with instance id targetId the new id newId
 	static void DII_ChangeItemsInstance(const char* sourceName, const char* targetName);
 
-	static bool NECPACK_Npc_CanTalk(oCNpc* npc);
+	/**
+	 * Provides the version of the library.
+	 */
+	static float NECPACK_GetLibVersion();
+
+	static int TELEKINESIS_IsVobSeeable(oCNpc* npc, zCVob* vob);
 
 	static TelekinesisInterpolator* TELEKINESIS_CreateInterpolator(const zVEC3* vobPosition,
 		const zVEC3* npcPosition, 
@@ -155,10 +153,6 @@ public:
 	static void TELEKINESIS_DeleteInterpolator(TelekinesisInterpolator* interpolatorPtr);
 
 	static void TELEKINESIS_Interpolate(TelekinesisInterpolator* interpolatorPtr, oCItem* item);
-
-	static int TELEKINESIS_Npc_CanSeeVob(oCNpc* npc, zCVob* vob);
-
-	static void NECPACK_DrobVob(oCNpc* npc, zCVob* vob);
 
 	static int LEVITATION_IsGamePaused();
 
