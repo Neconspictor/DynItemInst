@@ -73,6 +73,10 @@ public:
 	 */
 	bool addProxy(const zSTRING& sourceInstance, const zSTRING& targetInstance);
 
+	bool isProxied(const zSTRING& instanceName) const;
+
+	int getUnProxiedInstanceID(const zSTRING& instanceName) const;
+
 	/**
 	 * Removes a proxy.
 	 */

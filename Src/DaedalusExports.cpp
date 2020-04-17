@@ -242,9 +242,12 @@ float DaedalusExports::NECPACK_GetLibVersion()
 	return LIB_VERSION;
 }
 
-bool DaedalusExports::DII_UpdateInstance(int instanceIdParserSymbolIndex, oCItem* item)
+bool DaedalusExports::DII_UpdateInstance(const char* instanceName, oCItem* item)
 {
 	ObjectManager* manager = ObjectManager::getObjectManager();
+
+	auto instanceIdParserSymbolIndex = manager->getUnProxiedInstanceID(instanceName);
+
 	DynInstance* dynInstance = manager->getInstanceItem(instanceIdParserSymbolIndex);
 
 	if (!item) {

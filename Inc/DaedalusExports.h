@@ -132,7 +132,7 @@ public:
 	 */
 	static float NECPACK_GetLibVersion();
 
-	static bool DII_UpdateInstance(int instanceIdParserSymbolIndex, oCItem* item);
+	static bool DII_UpdateInstance(const char* instanceName, oCItem* item);
 
 	//TODO: is this function used?
 	static void DII_AssignInstanceId(oCItem* item, int instanceIdParserSymbolIndex);

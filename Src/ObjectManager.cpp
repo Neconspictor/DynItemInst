@@ -128,6 +128,17 @@ bool ObjectManager::addProxy(const zSTRING & sourceInstance, const zSTRING & tar
 	return true;
 }
 
+bool ObjectManager::isProxied(const zSTRING& instanceName) const
+{
+	return mProxiesNames.find(instanceName.ToChar()) != mProxiesNames.end();
+}
+
+int ObjectManager::getUnProxiedInstanceID(const zSTRING& instanceName) const
+{
+	if (!isProxied(instanceName)) return zCParser::GetParser()->GetIndex(instanceName);
+	return mUnresolvedNamesToInstances.at(instanceName.ToChar());
+}
+
 void ObjectManager::removeProxy(const zSTRING& sourceInstance)
 {
 	std::string name = sourceInstance.ToChar();
