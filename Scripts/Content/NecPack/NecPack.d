@@ -37,8 +37,6 @@ func void NECPACK_InitPerceptions()
         };
         return;
     };
-	
-	NECPACK_InitSlots();
 
     var int adr;
     adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "Hook");

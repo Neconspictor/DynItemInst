@@ -30,22 +30,18 @@ CLASS DII_USER_DATA
 	var string magicWeaponOldInstanceName;
 };
 
-const int DII_SLOT_COUNT = 11;
-var string DII_SLOTS[DII_SLOT_COUNT];
-
-func void NECPACK_InitSlots() {
-
-	DII_SLOTS[0] = "ZS_HELMET";
-	DII_SLOTS[1] = "ZS_LEFTHAND";
-	DII_SLOTS[2] = "ZS_LEFTARM";
-	DII_SLOTS[3] = "ZS_RIGHTHAND";
-	DII_SLOTS[4] = "ZS_CROSSBOW";
-	DII_SLOTS[5] = "ZS_LONGSWORD";
-	DII_SLOTS[6] = "ZS_SHIELD";
-	DII_SLOTS[7] = "ZS_BOW";
-	DII_SLOTS[8] = "ZS_SWORD";
+const int DII_SLOT_COUNT = 9;
+const string DII_SLOTS[DII_SLOT_COUNT] = {
+	"ZS_HELMET",
+	"ZS_LEFTHAND",
+	"ZS_LEFTARM",
+	"ZS_RIGHTHAND",
+	"ZS_CROSSBOW",
+	"ZS_LONGSWORD",
+	"ZS_SHIELD",
+	"ZS_BOW",
+	"ZS_SWORD"
 };
-
 
 // ************************************************************
 // Provides the instance id for an instance given by its string representation.
@@ -75,24 +71,38 @@ FUNC INT DII_AddProxy (var string sourceInstanceName, var string targetInstanceN
         return FALSE;
     };
 	
-    const int call = 0;
+
     var int ret;
 	var zSTRING zSource;
 	var zSTRING zTarget;
 	zSource = _^(_@s(sourceInstanceName));
 	zTarget = _^(_@s(targetInstanceName));
 	
-    if (CALL_Begin(call)) {
-        var int adr;
-        adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_AddProxy");
-		CALL_IntParam(_@(zTarget.ptr));
-        CALL_IntParam(_@(zSource.ptr));
-		CALL_PutRetValTo(_@(ret));
-        CALL__cdecl(adr);
-        call = CALL_End();
-    };
+
+	var int adr;
+	adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_AddProxy");
+	CALL_IntParam(zTarget.ptr);
+	CALL_IntParam(zSource.ptr);
+	CALL_PutRetValTo(_@(ret));
+	CALL__cdecl(adr);
 	
 	return +ret;
+};
+
+
+//DII_ApplyInstanceChangesToAll(desc.instanceName);
+func void DII_ApplyInstanceChangesToAll(var string instanceName) {
+	
+	if (!NECPACK_Initialized) {
+        MEM_Warn("DII_ApplyInstanceChangesToAll: Library isn't initialized!");
+        return;
+    };
+	
+	var zSTRING zName; zName = _^(_@s(instanceName));
+	var int adr; 
+	adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_ApplyInstanceChangesToAll");
+	CALL_IntParam(_@s(instanceName));
+	CALL__cdecl(adr);
 };
 
 
@@ -107,17 +117,12 @@ FUNC void DII_RemoveProxy (var string sourceInstanceName) {
         return;
     };
 	
-    const int call = 0;
 	var zSTRING zSource;
 	zSource = _^(_@s(sourceInstanceName));
-	
-    if (CALL_Begin(call)) {
-        var int adr;
-        adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_RemoveProxy");
-        CALL_IntParam(_@(zSource.ptr));
-        CALL__cdecl(adr);
-        call = CALL_End();
-    };
+	var int adr;
+	adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_RemoveProxy");
+	CALL_IntParam(zSource.ptr);
+	CALL__cdecl(adr);
 };
 
 
@@ -137,16 +142,13 @@ FUNC C_ITEM DII_CreateNewItem (var string instanceName) {
 	var int instanceParserSymbolID;
 	instanceParserSymbolID = DII_GetInstanceID(instanceName);
 	
-	const int call = 0;
 	var int ret;
-	if (CALL_Begin(call)) {
-		var int adr;
-		adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_CreateNewItem");
-		CALL_IntParam(_@(instanceParserSymbolID));
-		CALL_PutRetValTo(_@(ret));
-		CALL__cdecl(adr);
-		call = CALL_End();
-	};
+	var int adr;
+	adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_CreateNewItem");
+	CALL_IntParam(instanceParserSymbolID);
+	CALL_PutRetValTo(_@(ret));
+	CALL__cdecl(adr);
+	
 	MEM_PtrToInst(ret);
 };
 
@@ -161,18 +163,15 @@ FUNC STRING DII_CreateNewInstanceStr (var c_item itm) {
         MEM_Warn("DII_CreateNewInstanceStr: Library isn't initialized!");
         return "";
     };
-    const int call = 0;
-    var int ptr;
+	
+    var int ptr; ptr = _@(itm);
     var int ret;
-    ptr = MEM_InstToPtr(itm);
-    if (CALL_Begin(call)) {
-        var int adr;
-        adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_CreateNewInstanceStr");
-        CALL_IntParam(_@(ptr));
-        CALL_PutRetValTo(_@(ret));
-        CALL__cdecl(adr);
-        call = CALL_End();
-    };
+
+	var int adr;
+	adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_CreateNewInstanceStr");
+	CALL_IntParam(ptr);
+	CALL_PutRetValTo(_@(ret));
+	CALL__cdecl(adr);
 	
 	return MEM_ReadString(ret);
 };
@@ -189,23 +188,17 @@ FUNC INT DII_CreateNewInstanceStr2 (var c_item itm, var string instanceName) {
         MEM_Warn("DII_CreateNewInstanceStr: Library isn't initialized!");
         return 0;
     };
-    const int call = 0;
-    var int ptr;
+
+    var int ptr; ptr = _@(itm);
     var int ret;
-	var zSTRING zStr;
-	zStr = _^(_@s(instanceName));
-    ptr = MEM_InstToPtr(itm);
-    if (CALL_Begin(call)) {
-        var int adr;
-        adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_CreateNewInstanceStr2");
-		
-		CALL_IntParam(_@(zStr.ptr));
-		CALL_IntParam(_@(ptr));
-        
-		CALL_PutRetValTo(_@(ret));
-        CALL__cdecl(adr);
-        call = CALL_End();
-    };
+	var zSTRING zStr; zStr = _^(_@s(instanceName));
+	var int adr;
+	adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_CreateNewInstanceStr2");
+	
+	CALL_IntParam(zStr.ptr);
+	CALL_IntParam(ptr);	
+	CALL_PutRetValTo(_@(ret));
+	CALL__cdecl(adr);
 	
 	return +ret;
 };
@@ -223,14 +216,10 @@ func void DII_DeleteDII (var string instanceName) {
 	var int instanceParserSymbolID;
 	instanceParserSymbolID = DII_GetInstanceID(instanceName);
 	
-    const int call = 0;
-    if (CALL_Begin(call)) {
-        var int adr;
-        adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_DeleteDII");
-        CALL_IntParam(_@(instanceParserSymbolID));
-        CALL__cdecl(adr);
-        call = CALL_End();
-    };
+	var int adr;
+	adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_DeleteDII");
+	CALL_IntParam(instanceParserSymbolID);
+	CALL__cdecl(adr);
 };
 
 
@@ -242,16 +231,12 @@ func void DII_DeleteItem (VAR C_ITEM itm) {
 		MEM_Warn("DII_DeleteItem: Library isn't initialized!");
         return;
     };
-    const int call = 0;
-    var int ptr;
-    ptr = MEM_InstToPtr(itm);
-    if (CALL_Begin(call)) {
-        var int adr;
-        adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_DeleteItem");
-        CALL_IntParam(_@(ptr));
-        CALL__cdecl(adr);
-        call = CALL_End();
-    };
+
+    var int ptr; ptr = _@(itm);
+	var int adr;
+	adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_DeleteItem");
+	CALL_IntParam(ptr);
+	CALL__cdecl(adr);
 };
 
 
@@ -265,18 +250,16 @@ FUNC INT DII_IsDynamic(var c_item itm) {
 		MEM_Warn("DII_IsDynamic: Library isn't initialized!");
 		return 0;
 	};
-	const int call = 0;
-	var int ptr;
+
+	var int ptr; ptr = _@(itm);
 	var int ret;
-	ptr = MEM_InstToPtr(itm);
-	if (CALL_Begin(call)) {
-		var int adr;
-		adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_IsDynamic");
-		CALL_IntParam(_@(ptr));
-		CALL_PutRetValTo(_@(ret));
-		CALL__cdecl(adr);
-		call = CALL_End();
-	};
+
+	var int adr;
+	adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_IsDynamic");
+	CALL_IntParam(ptr);
+	CALL_PutRetValTo(_@(ret));
+	CALL__cdecl(adr);
+
 	return +ret;
 };
 
@@ -293,16 +276,13 @@ FUNC INT DII_IsInstanceDynamic(var string instanceName) {
 	var int instanceParserSymbolID;
 	instanceParserSymbolID = DII_GetInstanceID(instanceName);
 	
-    const int call = 0;
     var int ret;
-    if (CALL_Begin(call)) {
-        var int adr;
-        adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_IsInstanceDynamic");
-        CALL_IntParam(_@(instanceParserSymbolID));
-        CALL_PutRetValTo(_@(ret));
-        CALL__cdecl(adr);
-        call = CALL_End();
-    };
+	var int adr;
+	adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_IsInstanceDynamic");
+	CALL_IntParam(instanceParserSymbolID);
+	CALL_PutRetValTo(_@(ret));
+	CALL__cdecl(adr);
+	
     return +ret;
 };
 
@@ -319,17 +299,12 @@ func INT DII_UpdateInstance(var string instanceName, var c_item itm) {
         return FALSE;
     };
 	
-	//var int instanceParserSymbolID;
-	//instanceParserSymbolID = DII_GetInstanceID(instanceName);
-	
-    var int ptr;
-    ptr = MEM_InstToPtr(itm);
+    var int ptr; ptr = _@(itm);
 	var int ret;
     var int adr;
-	var zSTRING zStr;
-	zStr = _^(_@s(instanceName));
-	
     adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_UpdateInstance");
+	
+	var zSTRING zStr; zStr = _^(_@s(instanceName));
 	
 	CALL_IntParam(ptr);
 	CALL_IntParam(zStr.ptr);
@@ -355,16 +330,13 @@ FUNC DII_USER_DATA DII_GetUserData (var string instanceName) {
 	var int instanceParserSymbolID;
 	instanceParserSymbolID = DII_GetInstanceID(instanceName);
 	
-    const int call = 0;
     var int ret;
-    if (CALL_Begin(call)) {
-        var int adr;
-        adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_GetUserData");
-        CALL_IntParam(_@(instanceParserSymbolID));
-        CALL_PutRetValTo(_@(ret));
-        CALL__cdecl(adr);
-        call = CALL_End();
-    };
+	var int adr;
+	adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_GetUserData");
+	CALL_IntParam(instanceParserSymbolID);
+	CALL_PutRetValTo(_@(ret));
+	CALL__cdecl(adr);
+		
     MEM_PtrToInst(ret);
 };
 
