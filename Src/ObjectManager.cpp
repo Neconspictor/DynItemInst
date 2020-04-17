@@ -1118,9 +1118,9 @@ void ObjectManager::callForAllNpcItems(void(*func)(void* obj, void* param, oCIte
 			continue;
 		}
 
-		if (std::string(npc->name->ToChar()) == "Ich") {
-			bool test = true;
-		}
+		//if (std::string(npc->name->ToChar()) == "Ich") {
+		//	bool test = true;
+		//}
 
 		oCNpcInventory* inventory = npc->GetInventory();
 		if (inventory == NULL) {
@@ -1143,7 +1143,17 @@ void ObjectManager::callForAllNpcItems(void(*func)(void* obj, void* param, oCIte
 		for (int i = 0; i < slotCount; ++i) {
 			auto& slotName = SlotInfo::getSlotName(i);
 			auto* vob = oCNpcGetSlotVob(npc, slotName);
+			
+			if (vob && vob->type == VOB_TYPE_ITEM) {
+				oCItem* itm = (oCItem*)vob;
+				//zCWorld* world = oCGame::GetGame()->GetWorld();
+				//world->AddVob(itm);
+				//oCItemSaveRemoveEffect(itm);
+				//oCItemSaveInsertEffect(itm);
+			}
+			
 			oCNpcPutInSlot(npc, slotName, vob, 1);
+
 		}
 
 	}

@@ -831,7 +831,7 @@ void DaedalusExports::ItemUpdater::updateItem(void* obj, void* param, oCItem* it
 
 	ItemUpdater::UpdateItemData* params = (ItemUpdater::UpdateItemData*)param;
 	ObjectManager* manager = ObjectManager::getObjectManager();
-	int id = manager->getInstanceId(*itm);;
+	int id = manager->getDynInstanceId(itm);;
 	if (id == params->expectedInstanceID)
 	{
 		//int refCtr = *(int*)((BYTE*)itm + 0x4);
@@ -857,11 +857,13 @@ void DaedalusExports::ItemUpdater::updateItem(void* obj, void* param, oCItem* it
 		int flags = itm->flags;
 		//manager->oCItemSaveRemoveEffect(itm);
 		//itm->effect = "SPELLFX_FIREBOW";
+
+		//manager->oCItemSaveRemoveEffect(itm);
 		itm->InitByScript(params->newInstanceID, itm->amount);
 
-		if (isActive) itm->flags |= ITEM_ACTIVE;
-		if (dropped) itm->flags |= ITEM_DROPPED;
-		if (nfocus) itm->flags |= ITEM_NFOCUS;
+		if (itm->effect.ToChar() == std::string("")) {
+			manager->oCItemSaveRemoveEffect(itm);
+		}
 
 		//zCVob* effectVob = (zCVob*)itm->effectVob;
 		//if (effectVob) {
@@ -870,10 +872,15 @@ void DaedalusExports::ItemUpdater::updateItem(void* obj, void* param, oCItem* it
 		//itm->effectVob
 
 		//itm->flags = flags;
+		if (isActive) itm->flags |= ITEM_ACTIVE;
+		if (dropped) itm->flags |= ITEM_DROPPED;
+		if (nfocus) itm->flags |= ITEM_NFOCUS;
+
 		//world->AddVob(itm);
 
+		isInWorld = manager->isItemInWorld(itm);
 		if (isInWorld && !isActive) { //&&!isActive
-			manager->oCItemSaveRemoveEffect(itm);
+			//manager->oCItemSaveRemoveEffect(itm);
 			manager->oCItemSaveInsertEffect(itm);
 
 			//zCWorld* world = oCGame::GetGame()->GetWorld();
