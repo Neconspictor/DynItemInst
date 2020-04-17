@@ -12,18 +12,10 @@
 
 var int teleportedHero;
 
-func int max2(var C_Item a, var C_Item b) {
-	if (a.value > b.value) {
-		return +a.value;
-	};
-	
-	return +b.value;
-};
-
 
 func void debugPrintUserData(var DII_USER_DATA userData) {
-	MEM_Warn(ConcatStrings("userData.data[0] = ", IntToString(userData.data[0])));
-	MEM_Warn(ConcatStrings("userData.data[1] = ", IntToString(userData.data[1])));
+	MEM_Warn(ConcatStrings("userData.ints[0] = ", IntToString(userData.ints[0])));
+	MEM_Warn(ConcatStrings("userData.ints[1] = ", IntToString(userData.ints[1])));
 	
 	MEM_Warn(ConcatStrings("userData.magicWeaponNewDesc = ", userData.magicWeaponNewDesc));
 	MEM_Warn(ConcatStrings("userData.magicWeaponOldDesc = ", userData.magicWeaponOldDesc));
@@ -36,48 +28,6 @@ func void positionHero() {
 		if (Hlp_IsValidNpc(hero)) {
 			teleportedHero = TRUE;
 			AI_Teleport(hero, "HAFEN");
-			
-			var C_Item a;
-			var C_Item b;
-			var C_Item c;
-			var C_Item d;
-			
-			
-			a = DII_CreateNewItem(DII_GetSymbolName(ItMw_1h_Vlk_Dagger));
-			b = DII_CreateNewItem(DII_GetSymbolName(ItBE_Addon_MC));
-			c = DII_CreateNewItem(DII_GetSymbolName(ItMw_1H_Mace_L_01));
-			d = DII_CreateNewItem(DII_GetSymbolName(ItMw_1h_Bau_Axe));
-			
-			a.value = 4;
-			b.value = 7;
-			c.value = 5;
-			d.value = 3;
-			
-			// create a new dynamic instance!
-			var int sum;
-			sum = max2(a, b) + max2(c, d);
-			MEM_Warn(ConcatStrings("sum = ", IntToString(sum)));
-			sum = max2(a, b) + max2(d, c);
-			MEM_Warn(ConcatStrings("sum = ", IntToString(sum)));
-			sum = max2(b, a) + max2(c, d);
-			MEM_Warn(ConcatStrings("sum = ", IntToString(sum)));
-			sum = max2(b, a) + max2(d, c);
-			MEM_Warn(ConcatStrings("sum = ", IntToString(sum)));
-			
-			
-			
-			sum = max2(a, b);
-			sum += max2(c, d);
-			
-			var int sub;
-			sub = max(4, 7) - max(5, 3);
-			MEM_Warn(ConcatStrings("sub = ", IntToString(sub)));
-			sub = max(4, 7) - max(3, 5);
-			MEM_Warn(ConcatStrings("sub = ", IntToString(sub)));
-			sub = max(7, 4) - max(5, 3);
-			MEM_Warn(ConcatStrings("sub = ", IntToString(sub)));
-			sub = max(7, 4) - max(3, 5);
-			MEM_Warn(ConcatStrings("sub = ", IntToString(sub)));
 		};
 	};
 	
@@ -116,9 +66,8 @@ func void positionHero() {
 		test.description = "hooked";
 		test.name = "I didn't imagine a proper name...";
 
-		//instanceName = DII_CreateNewInstanceStr(test);
 		instanceName = "hooked_dagger";
-		instanceCouldBeCreated = DII_CreateNewInstanceStr2(test, instanceName);
+		instanceCouldBeCreated = DII_CreateNewInstanceStr(test, instanceName);
 		
 		if (instanceCouldBeCreated) {
 			MEM_Warn(ConcatStrings("instance name : ", instanceName));
@@ -127,7 +76,7 @@ func void positionHero() {
 			userData = DII_GetUserData(instanceName);
 			debugPrintUserData(userData);
 			
-			userData.data[1] = 666;
+			userData.ints[1] = 666;
 			userData.magicWeaponNewDesc = "new desc";
 			userData.magicWeaponOldDesc = "old desc";
 			
@@ -144,6 +93,9 @@ func void positionHero() {
 		
 		var int instance2; instance2 = DII_GetInstanceID("HOOKED_daGger");
 		MEM_Warn(IntToString(instance2));
+		
+		
+		DII_ApplyInstanceChangesToAll("A dynamic instance name...");
 	
 	};
 	
@@ -160,8 +112,7 @@ func void positionHero() {
 		test.description = "hooked";
 		test.name = "I didn't imagine a proper name...";
 
-		//instanceName = DII_CreateNewInstanceStr(test);
-		instanceName = DII_CreateNewInstanceStr(test);
+		instanceName = DII_CreateNewInstance(test);
 		MEM_Warn(ConcatStrings("instance name : ", instanceName));
 		CreateInvItems(hero, DII_GetInstanceID(instanceName), 20);
 		
@@ -209,20 +160,9 @@ func void positionHero() {
 		test.effect	= "SPELLFX_FIREBOW";
 	
 		DII_UpdateInstance("HOOKED_DAGGER", test);
+		DII_ApplyInstanceChangesToAll("HOOKED_DAGGER");
 		DII_DeleteItem(test);
 	};
-};
-
-func void myTest()
-{
-	// wird fuer jede Welt aufgerufen (vor STARTUP_<LevelName>)
-	Game_InitGerman();
-};
-
-func void myTest2()
-{
-	// wird fuer jede Welt aufgerufen (vor STARTUP_<LevelName>)
-	Game_InitGerman();
 };
 
 func void STARTUP_GLOBAL()
@@ -240,7 +180,7 @@ func void INIT_GLOBAL()
 	
 	NECPACK_INIT_GLOBAL();
 	
-	MAGICWEAPON_setupHooks();
+	MAGICWEAPON_init();
 	
 	//InitDamage();
 	

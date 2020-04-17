@@ -74,6 +74,18 @@ void DaedalusExports::DII_ApplyInstanceChangesToAll(const zSTRING& instanceName)
 {
 	logStream << __FUNCSIG__ << ": " << instanceName.ToChar() << std::endl;
 	util::logAlways(&logStream);
+
+	auto* manager = ObjectManager::getObjectManager();
+	auto* parser = zCParser::GetParser();
+	auto symbolIndex = parser->GetIndex(instanceName);
+	if (!manager->isDynamicInstance(symbolIndex)) {
+		logStream << __FUNCSIG__ << ": " << instanceName.ToChar() << " is not a  DII" << std::endl;
+		util::logWarning(&logStream);
+		return;
+	}
+
+	ItemUpdater::UpdateItemData params = { symbolIndex, symbolIndex };
+	manager->callForAllItems(ItemUpdater::updateItem, NULL, &params);	
 }
 
 void DaedalusExports::DII_RemoveProxy(const zSTRING& sourceInstanceName)
@@ -123,7 +135,7 @@ void DaedalusExports::DII_DeleteItem(oCItem* item)
 }
 
 
-int DaedalusExports::DII_CreateNewInstance(oCItem* item) //Func int DII_CreateNewInstance(var C_Item item)
+int DaedalusExports::DII_CreateNewInstanceInt(oCItem* item) //Func int DII_CreateNewInstance(var C_Item item)
 {
 	if (item == NULL) {return NULL;}
 
@@ -159,14 +171,14 @@ int DaedalusExports::DII_CreateNewInstance(oCItem* item) //Func int DII_CreateNe
 	return parserSymbolIndex;
 }
 
-zSTRING* DaedalusExports::DII_CreateNewInstanceStr(oCItem* item)
+zSTRING* DaedalusExports::DII_CreateNewInstance(oCItem* item)
 {
-	const auto parserSymbolIndex = DII_CreateNewInstance(item);
+	const auto parserSymbolIndex = DII_CreateNewInstanceInt(item);
 	auto* symbol = zCParser::GetParser()->GetSymbol(parserSymbolIndex);
 	return &symbol->name;
 }
 
-int DaedalusExports::DII_CreateNewInstanceStr2(oCItem* item, const zSTRING& instanceName)
+int DaedalusExports::DII_CreateNewInstanceStr(oCItem* item, const zSTRING& instanceName)
 {
 	if (!item) {
 		return false;
@@ -258,11 +270,6 @@ bool DaedalusExports::DII_UpdateInstance(const zSTRING& instanceName, oCItem* it
 		return false;
 	}
 	dynInstance->store(*item);
-
-	zCWorld* world = oCGame::GetGame()->GetWorld();
-
-	ItemUpdater::UpdateItemData params = { instanceIdParserSymbolIndex, instanceIdParserSymbolIndex };
-	manager->callForAllItems(ItemUpdater::updateItem, NULL, &params);
 
 	return true;
 }
@@ -361,7 +368,7 @@ ZCParserDoStack zCParserDoStack = (ZCParserDoStack)0x00791960;
 typedef zSTRING(__cdecl* OCNpcFocusGetFocusName)(); OCNpcFocusGetFocusName oCNpcFocusGetFocusName = (OCNpcFocusGetFocusName)0x006BED00;
 
 
-void DaedalusExports::DII_ChangeItemsInstance(const zSTRING& sourceName, const zSTRING& targetName)
+void DaedalusExports::DII_ChangeInstanceForAll(const zSTRING& sourceName, const zSTRING& targetName)
 {
 	ObjectManager* manager = ObjectManager::getObjectManager();
 

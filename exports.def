@@ -6,16 +6,15 @@ EXPORTS
 	DII_ApplyInstanceChangesToAll
 	DII_RemoveProxy
 	DII_CreateNewItem
+	DII_CreateNewInstance
 	DII_CreateNewInstanceStr
-	DII_CreateNewInstanceStr2
 	DII_DeleteDII
 	DII_DeleteItem
 	DII_IsDynamic
 	DII_IsInstanceDynamic
 	DII_GetUserData
 	DII_UpdateInstance
-	DII_GetItemByInstanceId
-	DII_ChangeItemsInstance
+	DII_ChangeInstanceForAll
 
 	LEVITATION_IsGamePaused
 

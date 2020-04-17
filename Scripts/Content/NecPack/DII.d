@@ -19,10 +19,12 @@ const int MAGICWEAPON_TYPE = 1;
 CLASS DII_USER_DATA
 {
 	// At first the integer members
-	var int data [DII_USER_DATA_INTEGER_AMOUNT];
+	var int ints [DII_USER_DATA_INTEGER_AMOUNT];
 	
 	//next the string members
-	//string arrays don't work properly;
+	// string arrays don't work properly; 
+	// you cannot pass string array members (like myStrings[2])to functions or 
+	// use it in an assignment expression on the right side.
 	var string magicWeaponNewDesc;
 	var string magicWeaponOldDesc;
 	var string magicWeaponNewEffect;
@@ -150,9 +152,9 @@ FUNC C_ITEM DII_CreateNewItem (var string instanceName) {
 // Objects having this new dii will have identic properties like itm.
 // @return : The instance name of the newly created dii.
 // *********************************************************************
-FUNC STRING DII_CreateNewInstanceStr (var c_item itm) {
+FUNC STRING DII_CreateNewInstance (var c_item itm) {
     if (!NECPACK_Initialized) {
-        MEM_Warn("DII_CreateNewInstanceStr: Library isn't initialized!");
+        MEM_Warn("DII_CreateNewInstance: Library isn't initialized!");
         return "";
     };
 	
@@ -160,7 +162,7 @@ FUNC STRING DII_CreateNewInstanceStr (var c_item itm) {
     var int ret;
 
 	var int adr;
-	adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_CreateNewInstanceStr");
+	adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_CreateNewInstance");
 	CALL_IntParam(ptr);
 	CALL_PutRetValTo(_@(ret));
 	CALL__cdecl(adr);
@@ -175,7 +177,7 @@ FUNC STRING DII_CreateNewInstanceStr (var c_item itm) {
 // Objects having this new dii will have identic properties like itm.
 // @return : TRUE, if the instance was successfully created. Otherwise FALSE.
 // *********************************************************************
-FUNC INT DII_CreateNewInstanceStr2 (var c_item itm, var string instanceName) {
+FUNC INT DII_CreateNewInstanceStr (var c_item itm, var string instanceName) {
     if (!NECPACK_Initialized) {
         MEM_Warn("DII_CreateNewInstanceStr: Library isn't initialized!");
         return 0;
@@ -184,7 +186,7 @@ FUNC INT DII_CreateNewInstanceStr2 (var c_item itm, var string instanceName) {
     var int ptr; ptr = _@(itm);
     var int ret;
 	var int adr;
-	adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_CreateNewInstanceStr2");
+	adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_CreateNewInstanceStr");
 	
 	CALL_zStringPtrParam(instanceName);
 	CALL_IntParam(ptr);	
@@ -355,15 +357,15 @@ FUNC DII_USER_DATA DII_GetUserData (var string instanceName) {
 };*/
 
 
-func void DII_ChangeItemsInstance(var string sourceInstanceName, var string targetInstanceName) {
+func void DII_ChangeInstanceForAll(var string sourceInstanceName, var string targetInstanceName) {
 	
 	if (!NECPACK_Initialized) {
-		MEM_Warn("DII_ChangeItemsInstance: Library isn't initialized!");
+		MEM_Warn("DII_ChangeInstanceForAll: Library isn't initialized!");
         return;
     };
 	
 	var int adr;
-    adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_ChangeItemsInstance");
+    adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_ChangeInstanceForAll");
 	
 	CALL_zStringPtrParam(targetInstanceName);
 	CALL_zStringPtrParam(sourceInstanceName);

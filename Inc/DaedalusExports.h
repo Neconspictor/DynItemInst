@@ -103,9 +103,9 @@ public:
 	 * \return The id of the created instance. If no instance id
 	 * could be created, NULL will be returned.
 	 */
-	static int DII_CreateNewInstance(oCItem* item);
-	static zSTRING* DII_CreateNewInstanceStr(oCItem* item);
-	static int DII_CreateNewInstanceStr2(oCItem* item, const zSTRING& instanceName);
+	static int DII_CreateNewInstanceInt(oCItem* item);
+	static zSTRING* DII_CreateNewInstance(oCItem* item);
+	static int DII_CreateNewInstanceStr(oCItem* item, const zSTRING& instanceName);
 
 	/**
 	 * An external for checking if a given c_item has a dynamic instance id.
@@ -135,7 +135,7 @@ public:
 	static void DII_GetItemByInstanceId(int itemParserSymbolIndex, int instanceIdParserSymbolIndex);
 
 	//Asiigns all items with instance id targetId the new id newId
-	static void DII_ChangeItemsInstance(const zSTRING& sourceName, const zSTRING& targetName);
+	static void DII_ChangeInstanceForAll(const zSTRING& sourceName, const zSTRING& targetName);
 
 	/**
 	 * Provides the version of the library.

@@ -61,7 +61,7 @@ func void MAGICWEAPON_CheckEffectState() {
 		data = DII_GetUserData(instanceName);
 		
 		
-		if (itm.effectVob != 0 && data.data[MAGICWEAPON_ENCHANTEDWEAPON]) {
+		if (itm.effectVob != 0 && data.ints[MAGICWEAPON_ENCHANTEDWEAPON]) {
 			oCItemRemoveEffect(citm);
 			oCNpc_PutInSlot(hero, "ZS_SWORD", itmPtr, 1);
 		};
@@ -81,7 +81,7 @@ func void MAGICWEAPON_CheckEffectState() {
 		data = DII_GetUserData(instanceName);
 		
 		
-		if (itm.effectVob != 0 && data.data[MAGICWEAPON_ENCHANTEDWEAPON]) {
+		if (itm.effectVob != 0 && data.ints[MAGICWEAPON_ENCHANTEDWEAPON]) {
 			oCItemRemoveEffect(citm);
 			oCNpc_PutInSlot(hero, "ZS_BOW", itmPtr, 1);
 		};
@@ -101,7 +101,7 @@ func void MAGICWEAPON_CheckEffectState() {
 		data = DII_GetUserData(instanceName);
 		
 		
-		if (itm.effectVob != 0 && data.data[MAGICWEAPON_ENCHANTEDWEAPON]) {
+		if (itm.effectVob != 0 && data.ints[MAGICWEAPON_ENCHANTEDWEAPON]) {
 			oCItemRemoveEffect(citm);
 			oCNpc_PutInSlot(hero, "ZS_CROSSBOW", itmPtr, 1);
 		};
@@ -121,7 +121,7 @@ func void MAGICWEAPON_CheckEffectState() {
 		data = DII_GetUserData(instanceName);
 		
 		
-		if (itm.effectVob != 0 && data.data[MAGICWEAPON_ENCHANTEDWEAPON]) {
+		if (itm.effectVob != 0 && data.ints[MAGICWEAPON_ENCHANTEDWEAPON]) {
 			oCItemRemoveEffect(citm);
 			oCNpc_PutInSlot(hero, "ZS_LONGSWORD", itmPtr, 1);
 		};
@@ -141,7 +141,7 @@ func void MAGICWEAPON_CheckEffectState() {
 		instanceName = DII_GetSymbolName(instanceID);
 		data = DII_GetUserData(instanceName);
 		
-		if (itm.effectVob == 0 && data.data[MAGICWEAPON_ENCHANTEDWEAPON]) {
+		if (itm.effectVob == 0 && data.ints[MAGICWEAPON_ENCHANTEDWEAPON]) {
 			oCItemInsertEffect(citm);
 			oCNpc_PutInSlot(hero, "ZS_LEFTHAND", itmPtr, 1);
 		};
@@ -161,7 +161,7 @@ func void MAGICWEAPON_CheckEffectState() {
 		instanceName = DII_GetSymbolName(instanceID);
 		data = DII_GetUserData(instanceName);
 		
-		if (itm.effectVob == 0 && data.data[MAGICWEAPON_ENCHANTEDWEAPON]) {
+		if (itm.effectVob == 0 && data.ints[MAGICWEAPON_ENCHANTEDWEAPON]) {
 			oCItemInsertEffect(citm);
 			oCNpc_PutInSlot(hero, "ZS_RIGHTHAND", itmPtr, 1);
 		};
@@ -244,17 +244,13 @@ func void RemoveMagicWeaponEffects(var MAGICWEAPON_RemoveDesc desc) {
 
 	
 	var DII_USER_DATA data; data = DII_GetUserData(desc.instanceName); 	
-	data.data[MAGICWEAPON_ENCHANTEDWEAPON] = FALSE;
-	
+	data.ints[MAGICWEAPON_ENCHANTEDWEAPON] = FALSE;
 	
 	var c_item temp; temp = DII_CreateNewItem(data.magicWeaponOldInstanceName);
-	
 	DII_UpdateInstance(desc.instanceName, temp);
-	//DII_ApplyInstanceChangesToAll(desc.instanceName);
-	//DII_ChangeInstanceForAll(desc.instanceName, data.magicWeaponOldInstanceName);
-	DII_ChangeItemsInstance(desc.instanceName, data.magicWeaponOldInstanceName);
+	DII_ApplyInstanceChangesToAll(desc.instanceName);
+	DII_ChangeInstanceForAll(desc.instanceName, data.magicWeaponOldInstanceName);
 	DII_AddProxy(desc.instanceName, data.magicWeaponOldInstanceName);
-	//DII_UpdateInstance(desc.instanceName, temp);
 	DII_DeleteItem(temp);
 };
 
@@ -308,7 +304,7 @@ func void MagicWeapon_MakeEnchantedWeapon(var string weaponInstanceName,
 	var string newInstanceName;
 	
 	//Create new instance id and new item
-	newInstanceName = DII_CreateNewInstanceStr(temp);
+	newInstanceName = DII_CreateNewInstance(temp);
 	newId = DII_GetInstanceID(newInstanceName);
 	
     //temp isn't needed anymore
@@ -328,8 +324,8 @@ func void MagicWeapon_MakeEnchantedWeapon(var string weaponInstanceName,
 	data.magicWeaponOldInstanceName = weaponInstanceName;
 	
 	//sign newId as an enchanted weapon
-	data.data[MAGICWEAPON_ENCHANTEDWEAPON] = TRUE;
-	data.data[MAGICWEAPON_TYPE] = type;
+	data.ints[MAGICWEAPON_ENCHANTEDWEAPON] = TRUE;
+	data.ints[MAGICWEAPON_TYPE] = type;
 	Npc_RemoveInvItems (self, scrollToRemove, 1);
 	
 	//Equip weapon
