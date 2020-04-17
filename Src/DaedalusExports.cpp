@@ -71,7 +71,7 @@ bool DaedalusExports::DII_AddProxy(const zSTRING& sourceInstanceName, const zSTR
 void DaedalusExports::DII_ApplyInstanceChangesToAll(const zSTRING& instanceName)
 {
 	logStream << __FUNCSIG__ << ": " << instanceName.ToChar() << std::endl;
-	util::logAlways(&logStream);
+	util::debug(&logStream);
 
 	auto* manager = ObjectManager::getObjectManager();
 	auto* parser = zCParser::GetParser();
@@ -97,8 +97,8 @@ oCItem* __cdecl DaedalusExports::DII_CreateNewItem(int instanceId) // Func void 
 
 	oCItem* item = oCObjectFactory::GetFactory()->CreateItem(instanceId);
 
-	logStream << "DII_CreateNewItem: called! " << instanceId;
-	util::logWarning(&logStream);
+	logStream << "DII_CreateNewItem: " << instanceId;
+	util::debug(&logStream);
 
 	return item;
 }
@@ -122,7 +122,7 @@ void DaedalusExports::DII_DeleteItem(oCItem* item)
 
 	int* refCtr = (int*)((BYTE*)item + 0x4);
 	logStream << "DII_DeleteItem:  refCtr: " << *refCtr;
-	util::logWarning(&logStream);
+	util::debug(&logStream);
 
 	if (*refCtr >= 0)
 	{
@@ -137,7 +137,7 @@ int DaedalusExports::DII_CreateNewInstanceInt(oCItem* item) //Func int DII_Creat
 {
 	if (item == NULL) {return NULL;}
 
-	logStream << "Param: " << item->name.ToChar();
+	logStream << __FUNCSIG__ << ": Param: " << item->name.ToChar();
 	util::debug(&logStream);
 
 	// Create new instance with item
@@ -152,19 +152,19 @@ int DaedalusExports::DII_CreateNewInstanceInt(oCItem* item) //Func int DII_Creat
 #undef min
 #undef max
 
-		const std::string instanceName = "DII_*" + std::to_string(util::generateRandom(std::numeric_limits<int>::min(), std::numeric_limits<int>::max()));
+		const std::string instanceName = "DII_*" + std::to_string(util::generateRandom(std::numeric_limits<int>::min(), std::numeric_limits<int>::max())) + "*";
 
 #pragma pop_macro("max")
 #pragma pop_macro("min")
 
 		parserSymbolIndex = manager->createNewInstanceId(item, instanceName);
 		if (!parserSymbolIndex) {
-			logStream << "DII_CreateNewInstanceStr2: Couldn't create new instance '" << instanceName << "'" << std::endl;
+			logStream << __FUNCSIG__ << ": Couldn't create new instance '" << instanceName << "'" << std::endl;
 			util::logWarning(&logStream);
 		}
 	}
 
-	logStream << "CreateNewInstance::key: " << parserSymbolIndex << std::endl;
+	logStream << __FUNCSIG__ << ": key = " << parserSymbolIndex << std::endl;
 	util::debug(&logStream);
 	return parserSymbolIndex;
 }
@@ -194,16 +194,16 @@ int DaedalusExports::DII_CreateNewInstanceStr(oCItem* item, const zSTRING& insta
 
 	int parserSymbolIndex = manager->createNewInstanceId(item, instanceNameStr);
 	if (!parserSymbolIndex) {
-		logStream << "DII_CreateNewInstanceStr2: Couldn't create new instance '" << instanceNameStr << "'" << std::endl;
+		logStream << __FUNCSIG__ << ": Couldn't create new instance '" << instanceNameStr << "'" << std::endl;
 		util::logWarning(&logStream);
 	}
 
 
 	int index = manager->getDynInstanceId(item);
-	logStream << "Index: " << index << std::endl;
+	logStream << __FUNCSIG__ << "Index: " << index << std::endl;
 	util::debug(&logStream);
 
-	logStream << "DII_CreateNewInstanceStr2: parser symbol index for instance = " << parserSymbolIndex << std::endl;
+	logStream << __FUNCSIG__ << ": parser symbol index for instance = " << parserSymbolIndex << std::endl;
 	util::debug(&logStream);
 	return parserSymbolIndex !=0;
 }
@@ -232,8 +232,8 @@ BYTE* DaedalusExports::DII_GetUserData(int instanceIdParserSymbolIndex) // Func 
 
 	if (!manager->isDynamicInstance(instanceIdParserSymbolIndex))
 	{
-		logStream << "DaedalusExports::DII_GetUserData: instanceId isn't dynamic" << std::endl;
-		util::debug(&logStream, Logger::Warning);
+		logStream << __FUNCSIG__ << ": instanceId isn't dynamic" << std::endl;
+		util::logWarning(&logStream);
 		return NULL;
 	}
 
@@ -256,14 +256,14 @@ bool DaedalusExports::DII_UpdateInstance(const zSTRING& instanceName, oCItem* it
 	DynInstance* dynInstance = manager->getInstanceItem(instanceIdParserSymbolIndex);
 
 	if (!item) {
-		logStream << "DII_UpdateInstance: item mustn't be null " << std::endl;
+		logStream << __FUNCSIG__ << ": item mustn't be null " << std::endl;
 		util::logWarning(&logStream);
 		return false;
 	}
 
 	if (!dynInstance)
 	{
-		logStream << "DII_UpdateInstance: dynInstance not found for instance id " << instanceIdParserSymbolIndex  << std::endl;
+		logStream << __FUNCSIG__ << ": dynInstance not found for instance id " << instanceIdParserSymbolIndex  << std::endl;
 		util::logWarning(&logStream);
 		return false;
 	}
@@ -290,7 +290,7 @@ void DaedalusExports::DII_GetItemByInstanceId(int itemParserSymbolIndex,  int in
 
 	if (!instanceSym)
 	{
-		logStream << "DaedalusExports::DII_GetItemByInstanceId instanceSym is Null! No item will be searched!" << std::endl;
+		logStream << __FUNCSIG__<< ": instanceSym is Null! No item will be searched!" << std::endl;
 		util::logWarning(&logStream);
 		return;
 	}
@@ -301,11 +301,11 @@ void DaedalusExports::DII_GetItemByInstanceId(int itemParserSymbolIndex,  int in
 
 	if (!item)
 	{
-		logStream << "DaedalusExports::DII_GetItemByInstanceId item is null!" << std::endl;
+		logStream << __FUNCSIG__ << ": item is null!" << std::endl;
 		util::logWarning(&logStream);
 	} else
 	{
-		logStream << "DaedalusExports::callForAllItems: item found..." << std::endl;
+		logStream << __FUNCSIG__ << ": item found..." << std::endl;
 		util::debug(&logStream);
 	};
 
@@ -328,18 +328,15 @@ void DaedalusExports::DII_ChangeInstanceForAll(const zSTRING& sourceName, const 
 TelekinesisInterpolator* DaedalusExports::TELEKINESIS_CreateInterpolator(const zVEC3* vobPosition, const zVEC3* npcPosition,
 	int upMoveAmount, int speed)
 {
-
-	logStream << "TELEKINESIS_CreateInterpolator(): vobPosition = " << *vobPosition << std::endl;
-	logStream << "TELEKINESIS_CreateInterpolator(): npcPosition = " << *npcPosition << std::endl;
-	logStream << "TELEKINESIS_CreateInterpolator(): upMoveAmount = " << upMoveAmount << std::endl;
-	logStream << "TELEKINESIS_CreateInterpolator(): speed = " << speed << std::endl;
+	logStream << __FUNCSIG__ << ": vobPosition = " << *vobPosition << std::endl;
+	logStream << __FUNCSIG__ << ": npcPosition = " << *npcPosition << std::endl;
+	logStream << __FUNCSIG__ << ": upMoveAmount = " << upMoveAmount << std::endl;
+	logStream << __FUNCSIG__ << ": speed = " << speed << std::endl;
 	util::debug(&logStream);
 
 
 	std::unique_ptr<TelekinesisInterpolator> interpolator = TelekinesisInterpolator::createTelekinesisInterpolator(*vobPosition, *npcPosition, upMoveAmount, speed);
-
 	interpolators.emplace_back(std::move(interpolator));
-
 	return interpolators.back().get();
 }
 
@@ -359,7 +356,7 @@ void DaedalusExports::TELEKINESIS_DeleteInterpolator(TelekinesisInterpolator* in
 
 	if (newEnd != interpolators.end())
 	{
-		logStream << "TELEKINESIS_DeleteInterpolator(): successfully removed interpolator!" << std::endl;
+		logStream << __FUNCSIG__ << ": successfully removed interpolator!" << std::endl;
 		util::debug(&logStream);
 	}
 
@@ -368,22 +365,10 @@ void DaedalusExports::TELEKINESIS_DeleteInterpolator(TelekinesisInterpolator* in
 
 void DaedalusExports::TELEKINESIS_Interpolate(TelekinesisInterpolator* interpolatorPtr, oCItem* item)
 {
-	//logStream << "DII_Telekinesis_Interpolate(): called!" << std::endl;
-	//util::logAlways(&logStream);
 	zVEC3 result = interpolatorPtr->interpolate(std::chrono::system_clock::now());
 	zVEC3 current = item->GetVobPosition();
-
 	zVEC3 diff = result - current;
-
-	//logStream << "DII_Telekinesis_Interpolate(): diff = " << diff << std::endl;
-	//util::logAlways(&logStream);
-
-
-	//item->SetCollDet(1);
-	//item->SetCollDetDyn(1);
-	//item->SetCollDetStat(1);
 	item->Move(diff.x, diff.y, diff.z);
-	//item->SetPositionWorld(result);
 }
 
 int DaedalusExports::TELEKINESIS_IsVobSeeable(oCNpc* npc, zCVob* vob)
@@ -412,24 +397,18 @@ int DaedalusExports::TELEKINESIS_IsVobSeeable(oCNpc* npc, zCVob* vob)
 	int found = oCNpcCanSee(npc, vob, 0);
 
 	zCWorld* world = oCGame::GetGame()->GetWorld();
-	int traceFlags = zTraceRay_vob_ignore_no_cd_dyn
+	const int traceFlags = zTraceRay_vob_ignore_no_cd_dyn
 					//| zTRACERAY_VOB_IGNORE
 					| zTRACERAY_VOB_IGNORE_CHARACTER
 					| zTraceRay_poly_ignore_transp 
 					| zTraceRay_vob_ignore_projectiles 
 					| zTraceRay_poly_test_water;
 
-	zVEC3 direction = vob->GetVobPosition() - npc->GetPosition();
-	float length = direction.Length();
-	if (length > 0.001)
-	{
-		//direction /= length;
-	}
-
-	zVEC3 npcPosition = npc->GetPosition();
+	const zVEC3 direction = vob->GetVobPosition() - npc->GetPosition();
+	const zVEC3 npcPosition = npc->GetPosition();
 
 
-	int result = zCWorldTraceRayNearestHit(world, npcPosition, direction, npc, traceFlags);
+	const int result = zCWorldTraceRayNearestHit(world, npcPosition, direction, npc, traceFlags);
 
 	for(int i = 0; i < world->traceRayVobList.GetSize(); ++i)
 	{
@@ -441,22 +420,22 @@ int DaedalusExports::TELEKINESIS_IsVobSeeable(oCNpc* npc, zCVob* vob)
 			case VOB_TYPE_MOB:
 				{
 					oCMob * mob = (oCMob*)vob;
-					//logStream << "vob is mob: " << mob->name.ToChar() << std::endl;
-					//util::logAlways(&logStream);
+					logStream << __FUNCSIG__ << ": vob is mob: " << mob->name.ToChar() << std::endl;
+					util::debug(&logStream);
 					break;
 				}
 			case VOB_TYPE_ITEM:
 				{
 					oCItem * item = (oCItem*)vob;
-					//logStream << "vob is item: " << item->name.ToChar() << std::endl;
-					//util::logAlways(&logStream);
+					logStream << __FUNCSIG__ << ": vob is item: " << item->name.ToChar() << std::endl;
+					util::debug(&logStream);
 					break;
 				}
 			case VOB_TYPE_NPC:
 				{
-					oCNpc * npc2 = (oCNpc*)vob;
-					//logStream << "vob is npc: " << npc2->name[0].ToChar() << std::endl;
-					//util::logAlways(&logStream);
+					oCNpc * focusNpc = (oCNpc*)vob;
+					logStream << __FUNCSIG__ << ": vob is npc: " << focusNpc->name[0].ToChar() << std::endl;
+					util::debug(&logStream);
 					break;
 				}
 			default: ;
@@ -465,7 +444,6 @@ int DaedalusExports::TELEKINESIS_IsVobSeeable(oCNpc* npc, zCVob* vob)
 		}
 	}
 
-	//int found = !result;
 
 	if (result && !found)
 	{
@@ -473,9 +451,6 @@ int DaedalusExports::TELEKINESIS_IsVobSeeable(oCNpc* npc, zCVob* vob)
 		float VobLength = direction.Length();
 
 		zCVob* foundVob = world->foundVob;
-
-		//found = (intersectLength + 20 < VobLength) ? 0 : 1;
-
 		found = (world->foundVob == vob) ? 1 : 0;
 
 		if (!found && foundVob != nullptr)
