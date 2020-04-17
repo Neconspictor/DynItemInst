@@ -17,7 +17,7 @@ EXPORTS
 	DII_AssignInstanceId
 	DII_EquipItem
 	DII_GetItemByInstanceId
-	DII_ChangeItemsInstanceId
+	DII_ChangeItemsInstance
 
 	NECPACK_Npc_CanTalk
 

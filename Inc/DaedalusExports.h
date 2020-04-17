@@ -140,7 +140,7 @@ public:
 	static void DII_GetItemByInstanceId(int itemParserSymbolIndex, int instanceIdParserSymbolIndex);
 
 	//Asiigns all items with instance id targetId the new id newId
-	static void DII_ChangeItemsInstanceId(int sourceInstanceParserSymbolIndex, int targetInstanceParserSymbolIndex);
+	static void DII_ChangeItemsInstance(const char* sourceName, const char* targetName);
 
 	static bool NECPACK_Npc_CanTalk(oCNpc* npc);
 
@@ -194,6 +194,8 @@ public:
 			};
 
 			static void updateItem(void* obj, void* param, oCItem* itm);
+
+			static void updateItemInstance(void* obj, void* param, oCItem* itm);
 
 		};
 };

@@ -314,140 +314,6 @@ void DaedalusExports::DII_GetItemByInstanceId(int itemParserSymbolIndex,  int in
 }
 
 
-void DaedalusExports::DII_ChangeItemsInstanceId(int sourceInstanceParserSymbolIndex, int targetInstanceParserSymbolIndex)
-{
-	ObjectManager* manager = ObjectManager::getObjectManager();
-	zCWorld* world = oCGame::GetGame()->GetWorld();
-	oCWorld* gameWorld = oCGame::GetGame()->GetGameWorld();
-	oCObjectFactory* factory = oCObjectFactory::GetFactory();
-	std::list<oCItem*> targetList;
-
-	zCListSort<oCItem>* itemList = world->GetItemList();
-	while (itemList != NULL) {
-		oCItem* item = itemList->GetData();
-		if (item != NULL)
-		{
-			if (item->GetInstance() == sourceInstanceParserSymbolIndex)
-			{
-				targetList.push_back(item);
-			}
-		}
-		itemList = itemList->GetNext();
-	}
-
-
-	//.text:0073ABE0 public: class oCVob * __thiscall oCNpc::GetLeftHand(void) proc near
-	typedef oCVob*(__thiscall* OCNpcGetLeftHand)(oCNpc*);
-	OCNpcGetLeftHand oCNpcGetLeftHand = (OCNpcGetLeftHand)0x0073ABE0;
-
-	// don't consider items located in an npc's inventory
-	zCListSort<oCNpc>* npcList = world->GetNpcList();
-
-	while (npcList != NULL) {
-		oCNpc* npc = npcList->GetData();
-		if (npc == NULL) {
-			npcList = npcList->GetNext();
-			continue;
-		}
-
-		oCVob* leftHanfVob = oCNpcGetLeftHand(npc);
-		oCItem* item = dynamic_cast<oCItem*>(leftHanfVob);
-		if (item)
-		{
-			std::list<oCItem*>::iterator findIter = find(targetList.begin(), targetList.end(), item);
-			if (findIter != targetList.end())
-			{
-				logStream << "Found item in npc's left hand that should not be considered!" << std::endl;
-				util::debug(&logStream);
-				targetList.erase(findIter);
-			}
-		}
-
-		oCNpcInventory* inventory = npc->GetInventory();
-		if (inventory == NULL) {
-			npcList = npcList->GetNext();
-			continue;
-		}
-
-		inventory->UnpackAllItems();
-		zCListSort<oCItem>* list = reinterpret_cast<zCListSort<oCItem>*>(inventory->inventory_data);
-		while (list != NULL) {
-			oCItem* item = list->GetData();
-			if (item != NULL)
-			{
-				std::list<oCItem*>::iterator findIter = find(targetList.begin(), targetList.end(), item);
-				if (findIter != targetList.end())
-				{
-					logStream << "Found item in npc's inventory that should not be considered!" << std::endl;
-					util::debug(&logStream);
-					targetList.erase(findIter);
-				}
-			}
-
-			list = list->GetNext();
-		}
-		npcList = npcList->GetNext();
-	}
-
-
-	typedef void(__thiscall* ZCVobRemoveVobSubtreeFromWorld)(void*);
-	ZCVobRemoveVobSubtreeFromWorld zCVobRemoveVobSubtreeFromWorld = (ZCVobRemoveVobSubtreeFromWorld) 0x00601C60;
-
-	typedef void(__thiscall* ZCObjectSetObjectName)(void*, zSTRING const &);
-	ZCObjectSetObjectName zCObjectSetObjectName = (ZCObjectSetObjectName)0x005A9CE0;
-
-	//.text:0077D0E0 public: void __thiscall oCVob::SetOnFloor(class zVEC3 &) proc near
-	//typedef void(__thiscall* OCVobSetOnFloor)(void*, zVEC3 &);
-	//OCVobSetOnFloor oCVobSetOnFloor = (OCVobSetOnFloor)0x0077D0E0;
-
-	//.text:0077D130 public: int __thiscall oCVob::GetFloorPosition(class zVEC3 &) proc near
-	typedef int (__thiscall* OCVobGetFloorPosition)(void*, zVEC3 &);
-	OCVobGetFloorPosition oCVobGetFloorPosition = (OCVobGetFloorPosition)0x0077D130;
-
-	while(!targetList.empty())
-	{
-		oCItem* item = targetList.front();
-		targetList.pop_front();
-		float x, y, z; 
-		item->GetPositionWorld(x,y,z);
-		zVEC3 pos(x,y,z);
-		zVEC3 posForFloor(x, y + 200, z);
-		//manager->setInstanceId(item, newId);
-		int flags = item->flags;
-		int amount = item->amount;
-
-		oCItem* item2 = factory->CreateItem(targetInstanceParserSymbolIndex);
-		//memcpy(item2->);
-		item2->trafoObjToWorld = item->trafoObjToWorld;
-		item2->trafoObjToWorld.m[0][3] = 0;
-		item2->trafoObjToWorld.m[1][3] = 0;
-		item2->trafoObjToWorld.m[2][3] = 0;
-
-		zCVobRemoveVobSubtreeFromWorld(item);
-		gameWorld->RemoveVob(item);
-		item2->SetPositionWorld(pos);
-		//item2->Move(pos.x, pos.y, pos.z);
-		world->AddVob(item2);
-		manager->oCItemSaveRemoveEffect(item2);
-		manager->oCItemSaveInsertEffect(item2);
-		//item2->SetPositionWorld(pos);
-		//item2->SetPositionWorld(posForFloor);
-		//oCVobGetFloorPosition(item2, pos);
-		//item2->SetPositionWorld(pos);
-		
-		//item2->SetCollDetStat(1);
-		//item2->SetCollDetDyn(1);
-		item2->flags = flags;
-		item2->amount = amount;
-		zCObjectSetObjectName(item2, zSTRING("ITLSTORCHBURNING"));
-		logStream << "exchanged item with id " << sourceInstanceParserSymbolIndex << " with new item with id " << targetInstanceParserSymbolIndex << std::endl;
-		util::debug(&logStream);		
-	};
-
-	logStream << "DaedalusExports::DII_ChangeItemsInstanceId: done."<< std::endl;
-	util::debug(&logStream);
-}
-
 //.text:006C9030 void __cdecl Game_DeleteAllPfx(class zCTree<class zCVob> *) proc near
 typedef void(__cdecl* Game_DeleteAllPfx)(void*);
 Game_DeleteAllPfx game_DeleteAllPfx = (Game_DeleteAllPfx)0x006C9030;
@@ -499,6 +365,17 @@ ZCParserDoStack zCParserDoStack = (ZCParserDoStack)0x00791960;
 //.text:006BED00 ; public: static class zSTRING __cdecl oCNpcFocus::GetFocusName(void)
 typedef zSTRING(__cdecl* OCNpcFocusGetFocusName)(); OCNpcFocusGetFocusName oCNpcFocusGetFocusName = (OCNpcFocusGetFocusName)0x006BED00;
 
+
+void DaedalusExports::DII_ChangeItemsInstance(const char* sourceName, const char* targetName)
+{
+	ObjectManager* manager = ObjectManager::getObjectManager();
+
+	auto sourceID = manager->getUnProxiedInstanceID(sourceName);
+	auto targetID = manager->getUnProxiedInstanceID(targetName);
+
+	ItemUpdater::UpdateItemData params = { sourceID, targetID };
+	manager->callForAllItems(ItemUpdater::updateItemInstance, NULL, &params);
+}
 
 bool DaedalusExports::NECPACK_Npc_CanTalk(oCNpc* npc)
 {
@@ -834,7 +711,7 @@ void DaedalusExports::ItemUpdater::updateItem(void* obj, void* param, oCItem* it
 
 	ItemUpdater::UpdateItemData* params = (ItemUpdater::UpdateItemData*)param;
 	ObjectManager* manager = ObjectManager::getObjectManager();
-	int id = manager->getDynInstanceId(itm);;
+	int id = manager->getInstanceId(*itm);;
 	if (id == params->expectedInstanceID)
 	{
 		//int refCtr = *(int*)((BYTE*)itm + 0x4);
@@ -861,8 +738,17 @@ void DaedalusExports::ItemUpdater::updateItem(void* obj, void* param, oCItem* it
 		//manager->oCItemSaveRemoveEffect(itm);
 		//itm->effect = "SPELLFX_FIREBOW";
 
+		auto resolvedID = manager->resolveProxying(params->newInstanceID);
+		bool notSameInstance = manager->resolveProxying(params->newInstanceID) != id;
+
+		if (notSameInstance) {
+			logStream << __FUNCSIG__ << ": setting another instance Id causes item effects not to vanish!" << std::endl;
+			util::logWarning(&logStream);
+		}
+
 		//manager->oCItemSaveRemoveEffect(itm);
-		itm->InitByScript(params->newInstanceID, itm->amount);
+		manager->setInstanceId(itm, resolvedID);
+		itm->InitByScript(resolvedID, itm->amount);
 
 		if (itm->effect.ToChar() == std::string("")) {
 			manager->oCItemSaveRemoveEffect(itm);
@@ -889,5 +775,19 @@ void DaedalusExports::ItemUpdater::updateItem(void* obj, void* param, oCItem* it
 			//zCWorld* world = oCGame::GetGame()->GetWorld();
 			//world->AddVob(itm);
 		}
+	}
+}
+
+void DaedalusExports::ItemUpdater::updateItemInstance(void* obj, void* param, oCItem* itm)
+{
+	if (itm == NULL) return;
+
+	ItemUpdater::UpdateItemData* params = (ItemUpdater::UpdateItemData*)param;
+	ObjectManager* manager = ObjectManager::getObjectManager();
+	int id = manager->getInstanceId(*itm);;
+	if (id == params->expectedInstanceID)
+	{
+		auto resolvedID = manager->resolveProxying(params->newInstanceID);
+		manager->setInstanceId(itm, resolvedID);
 	}
 }

@@ -775,7 +775,6 @@ bool ObjectManager::createNewInstanceWithoutExistingId(oCItem* item, int instanc
 
 	instanceItem->setParserSymbolBitfield(symbol->bitfield);
 	instanceItem->setSymbolName(symbol->name.ToChar());
-	instanceItem->setInstanceID(instanceParserSymbolID);
 
 	mNewInstanceToSymbolMap.insert(pair<int, zCPar_Symbol*>(instanceParserSymbolID, symbol));
 
@@ -856,7 +855,6 @@ void ObjectManager::updateContainerItem(const ObjectManager::ParserInfo* info)
 
 	zCParser* parser = zCParser::GetParser();
 	int newIndex = parser->GetIndex(info->newSymbolName);
-	item->setInstanceID(newIndex);
 	item->setSymbolName(info->newSymbolName);
 	item->setParserSymbolBitfield(info->bitfield);
 }
@@ -1209,7 +1207,7 @@ int* ObjectManager::getParserInstanceCount()
 bool ObjectManager::isItemInWorld(oCItem* item)
 {
 	zCWorld* world = oCGame::GetGame()->GetWorld();
-	zCListSort<oCItem>* list = world->GetItemList();
+	auto* list = world->GetVobList();
 	return list->IsInList(item);
 }
 

@@ -197,27 +197,13 @@ public:
 	int 	inv_animate;							//  rotate the item
 
 	int amount;
-	int instanz;						//int Symbolindex
+	//int instanz;						//int Symbolindex
 	int c_manipulation;					//int ?
 	int last_manipulation;				//zREAL ?
 	int magic_value;					//int ?
-	int effectVob;						//oCVisualFX*
-	int next;							//138
+	//int next;							//138
 	DII_UserData dii_userData;
 
-	/**
-	 * Provides the Item's instance id.
-	 */
-	int getInstanceID() const {
-		return instanz;	
-	}
-
-	/**
-	 * Sets the this' instance id to the given one.
-	 */
-	void setInstanceID(int instanceParserSymbolID) {
-		instanz = instanceParserSymbolID;
-	}
 
 	/**
 	 * Initializes this dynamic instance with the given oCItem.

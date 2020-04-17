@@ -31,7 +31,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <sstream>
 #include <Util.h>
 #include <ObjectManager.h>
-#include <api/g2/ocgame.h>
+#include <ocgameExtended.h>
 #include <api/g2/zcworld.h>
 
 using namespace std;
@@ -186,12 +186,12 @@ void DynInstance::store(oCItem& item) {
 	inv_rotz= item.inv_rotz;								//  rotation around z-axis (in degrees)
 	inv_animate= item.inv_animate;							//  rotate the item
 	amount = item.amount;
-	instanz= item.instanz;						//int Symbolindex
+	//instanz= item.instanz;						//int Symbolindex
 	c_manipulation = item.c_manipulation;					//int ?
 	last_manipulation= item.last_manipulation;				//zREAL ?
 	magic_value = item.magic_value;					//int ?
-	effectVob= item.effectVob;						//oCVisualFX*
-	next = item.next;	
+
+	//next = item.next;	
 	//int address = reinterpret_cast<int>(&item);
 	//address += 0x330;
 	//int* instance = reinterpret_cast<int*>(address);
@@ -320,16 +320,20 @@ void DynInstance::init(oCItem* item, int instanceParserSymbolID) {
 	item->c_manipulation=c_manipulation;					//int ?
 	item->last_manipulation=last_manipulation;				//zREAL ?
 	item->magic_value=magic_value;					//int ?
+	
+	//item->effectVob = 0;
+
+	//manager->oCItemSaveRemoveEffect(item);
+	//manager->oCItemSaveInsertEffect(item);
+	
 	//item->effectVob=effectVob;						//oCVisualFX*
-	item->next = next;	
+	//item->next = 0;	
 	int address = reinterpret_cast<int>(item);
 	address += 0x330;
 	int* instance = reinterpret_cast<int*>(address);
 
 	//Get current symbol index and set it as the item's instance id
 	*instance = instanceParserSymbolID;
-
-	//manager->oCItemSaveInsertEffect(item);
 };
 
 
@@ -477,12 +481,9 @@ void DynInstance::serialize(std::ostream& os) const
 	os << inv_animate << ' ';							//  rotate the item
 
 	os << amount << ' ';
-	os << instanz << ' ';						//    ar & Symbolindex
 	os << c_manipulation << ' ';					//int ?
 	os << last_manipulation << ' ';				//zREAL ?
 	os << magic_value << ' ';					//int ?
-	os << effectVob << ' ';						//oCVisualFX*
-	os << next << ' ';
 
 	dii_userData.serialize(os);
 }
@@ -599,12 +600,9 @@ void DynInstance::deserialize(std::stringstream* is)
 	util::getInt(*is, inv_animate);
 
 	util::getInt(*is, amount);
-	util::getInt(*is, instanz);
 	util::getInt(*is, c_manipulation);
 	util::getInt(*is, last_manipulation);
 	util::getInt(*is, magic_value);
-	util::getInt(*is, effectVob);
-	util::getInt(*is, next);
 
 	dii_userData.deserialize(is);
 }
