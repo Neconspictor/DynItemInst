@@ -82,9 +82,17 @@ bool ObjectManager::addProxy(const zSTRING & sourceInstance, const zSTRING & tar
 	}
 
 	// We don't want to proxy invalid parser symbol indices
-	if (targetInstanceID == -1) {
+	if (sourceInstanceID == -1) {
 		logStream << __FUNCSIG__ << ": Cannot add proxy (" << sourceInstance.ToChar() << ", " << targetInstance.ToChar()
 			<< ") since source instance index is not a valid parser symbol index!" << std::endl;
+		util::logWarning(&logStream);
+		return false;
+	}
+
+
+	if (targetInstanceID == -1) {
+		logStream << __FUNCSIG__ << ": Cannot add proxy (" << sourceInstance.ToChar() << ", " << targetInstance.ToChar()
+			<< ") since target instance index is not a valid parser symbol index!" << std::endl;
 		util::logWarning(&logStream);
 		return false;
 	}
@@ -110,10 +118,10 @@ bool ObjectManager::addProxy(const zSTRING & sourceInstance, const zSTRING & tar
 		it = mProxies.find(target);
 	}
 
-	mUnresolvedNamesToInstances.insert({std::string(sourceInstance.ToChar()), sourceInstanceID });
 	mProxiesNames.insert({sourceInstance2, targetInstance2});
-
+	
 	if (sourceInstanceID != -1) {
+		mUnresolvedNamesToInstances.insert({ std::string(sourceInstance.ToChar()), sourceInstanceID });
 		mProxies.insert({ sourceInstanceID, targetInstanceID });
 	}
 
@@ -275,7 +283,6 @@ void ObjectManager::deleteDII(int parserSymbolIndex)
 	//auto* testSymbol = parser->GetSymbol(parserSymbolIndex);
 
 	std::string name = symbol->name.ToChar();
-	//symbol->name = "****";
 
 	auto* dii = mNewInstanceMap[parserSymbolIndex].get();
 	dii->setDoNotStore(true);
@@ -650,7 +657,18 @@ void ObjectManager::loadNewInstances(char* filename) {
 			util::readAndTrim(&ss, sourceInstanceName);
 			util::readAndTrim(&ss, targetInstanceName);
 
-			addProxy(sourceInstanceName.c_str(), targetInstanceName.c_str());
+
+			zSTRING source(sourceInstanceName.c_str());
+			zSTRING target(targetInstanceName.c_str());
+
+			auto* symbol = createNewInstanceSymbol(parser->GetIndex(source), parser->GetSymbol(target), sourceInstanceName);
+			if (symbol) {
+				addSymbolToSymbolTable(symbol);
+			}
+			if (!addProxy(source, target)) {
+				logStream << __FUNCSIG__ << ": Couldn't load proxy (" << sourceInstanceName << ", " << targetInstanceName << ")" << std::endl;
+				util::logFatal(&logStream);
+			}
 		}
 	}
 	catch (const std::exception& e) {
@@ -919,8 +937,15 @@ zCPar_Symbol* ObjectManager::createNewInstanceSymbol(int instanceParserSymbolID,
 	zSTRING nameZString(name.c_str());
 	symbol->name = nameZString;
 	const char* charRep = nameZString.ToChar();
-	symbol->parent = prototype->parent;
-	symbol->bitfield = prototype->bitfield;
+
+	if (prototype) {
+		symbol->parent = prototype->parent;
+		symbol->bitfield = prototype->bitfield;
+	}
+	else {
+		symbol->parent = nullptr;
+		symbol->bitfield = 0;
+	}
 	symbol->offset = 0;
 	symbol->content.data_ptr = 0;
 
