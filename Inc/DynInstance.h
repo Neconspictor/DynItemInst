@@ -283,9 +283,14 @@ public:
 	 */
 	//void copyUserData(DynInstance& source);
 
+	bool getDoNotStore() const;
+	void setDoNotStore(bool doNotStore);
+
 
 private:
 	static std::stringstream logStream;
+
+	bool mDoNotStore = false;
 };
 
 #endif __DYN_INSTANCE_H__

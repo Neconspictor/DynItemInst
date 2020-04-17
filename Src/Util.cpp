@@ -280,6 +280,15 @@ void util::logFatal(std::stringstream* ss)
 
 
 
+bool util::areEqualIgnoringCases(const std::string& a, const std::string& b)
+{
+	std::string aUpper = a;
+	std::string bUpper = b;
+	std::transform(aUpper.begin(), aUpper.end(), aUpper.begin(), std::toupper);
+	std::transform(bUpper.begin(), bUpper.end(), bUpper.begin(), std::toupper);
+	return aUpper == bUpper;
+}
+
 bool util::existsDir(const std::string& path)
 {
 	DWORD attributes = GetFileAttributes(path.c_str());

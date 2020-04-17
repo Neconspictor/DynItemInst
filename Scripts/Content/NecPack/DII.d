@@ -10,7 +10,7 @@
  */
  
 const int DII_USER_DATA_INTEGER_AMOUNT = 2;
-const int DII_USER_DATA_STRING_AMOUNT = 4;
+const int DII_USER_DATA_STRING_AMOUNT = 5;
 
 //indices used for magic weapons
 const int MAGICWEAPON_OLDID = 0;
@@ -28,6 +28,7 @@ CLASS DII_USER_DATA
 	var string magicWeaponOldDesc;
 	var string magicWeaponNewEffect;
 	var string magicWeaponOldEffect;
+	var string magicWeaponOldInstanceName;
 };
 
 const int DII_SLOT_COUNT = 11;
@@ -60,6 +61,64 @@ FUNC STRING DII_GetSymbolName(var int symbolIndex) {
 	symb = _^(MEM_GetSymbolByIndex(symbolIndex));
 	return symb.name;
 };
+
+
+// *********************************************************************
+// Adds a new proxy. All newly created items with instance 'sourceInstance' will have instance 'targetInstance'
+// after calling this function.
+// @return : TRUE, if the proxy is successfully setup. Otherwise FALSE.
+// *********************************************************************
+FUNC INT DII_AddProxy (var string sourceInstanceName, var string targetInstanceName) {
+    if (!NECPACK_Initialized) {
+        MEM_Warn("DII_AddProxy: Library isn't initialized!");
+        return FALSE;
+    };
+	
+    const int call = 0;
+    var int ret;
+	var zSTRING zSource;
+	var zSTRING zTarget;
+	zSource = _^(_@s(sourceInstanceName));
+	zTarget = _^(_@s(targetInstanceName));
+	
+    if (CALL_Begin(call)) {
+        var int adr;
+        adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_AddProxy");
+		CALL_IntParam(_@(zTarget.ptr));
+        CALL_IntParam(_@(zSource.ptr));
+		CALL_PutRetValTo(_@(ret));
+        CALL__cdecl(adr);
+        call = CALL_End();
+    };
+	
+	return +ret;
+};
+
+
+// *********************************************************************
+// Adds a new proxy. All newly created items with instance 'sourceInstance' will have instance 'targetInstance'
+// after calling this function.
+// @return : TRUE, if the proxy is successfully setup. Otherwise FALSE.
+// *********************************************************************
+FUNC void DII_RemoveProxy (var string sourceInstanceName) {
+    if (!NECPACK_Initialized) {
+        MEM_Warn("DII_RemoveProxy: Library isn't initialized!");
+        return;
+    };
+	
+    const int call = 0;
+	var zSTRING zSource;
+	zSource = _^(_@s(sourceInstanceName));
+	
+    if (CALL_Begin(call)) {
+        var int adr;
+        adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_RemoveProxy");
+        CALL_IntParam(_@(zSource.ptr));
+        CALL__cdecl(adr);
+        call = CALL_End();
+    };
+};
+
 
 // ************************************************************
 // Creates a new item.
@@ -156,7 +215,7 @@ FUNC INT DII_CreateNewInstanceStr2 (var c_item itm, var string instanceName) {
 // ***************************************************************
 func void DII_DeleteDII (var string instanceName) {
     if (!NECPACK_Initialized) {
-		MEM_Warn("DII_IsInstanceDynamic: Library isn't initialized!");
+		MEM_Warn("DII_DeleteDII: Library isn't initialized!");
         return;
     };
 	
@@ -179,7 +238,7 @@ func void DII_DeleteDII (var string instanceName) {
 // ***************************************************************
 func void DII_DeleteItem (VAR C_ITEM itm) {
     if (!NECPACK_Initialized) {
-		MEM_Warn("DII_IsInstanceDynamic: Library isn't initialized!");
+		MEM_Warn("DII_DeleteItem: Library isn't initialized!");
         return;
     };
     const int call = 0;

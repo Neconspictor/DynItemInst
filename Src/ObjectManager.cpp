@@ -48,33 +48,57 @@ using namespace std;
 using namespace constants;
 
 ObjectManager::ObjectManager() = default;
+std::unique_ptr<ObjectManager> ObjectManager::mInstance = std::make_unique<ObjectManager>();
 
 bool ObjectManager::addProxy(const zSTRING & sourceInstance, const zSTRING & targetInstance)
 {
-	auto* parser = zCParser::GetParser();
-	auto sourceInstanceID = parser->GetIndex(sourceInstance);
-	auto targetInstanceID = parser->GetIndex(targetInstance);
+	std::string sourceInstance2 = sourceInstance.ToChar();
+	std::string targetInstance2 = targetInstance.ToChar();
 
-	if (sourceInstanceID == -1 || targetInstanceID == -1) {
+
+	//We only add a proxy if sourceInstance isn't proxied yet
+	auto sourceAlreadyThereIT = mProxiesNames.find(sourceInstance2);
+	if (sourceAlreadyThereIT != mProxiesNames.end()) {
+		logStream << __FUNCSIG__ << ": Cannot add proxy (" << sourceInstance.ToChar() << ", " << targetInstance.ToChar()
+			<< ") since their already exists another proxy path: ("
+			<< sourceAlreadyThereIT->first << ", " << sourceAlreadyThereIT->second << ")" << std::endl;
+
+		util::logWarning(&logStream);
 		return false;
 	}
 
-	//check, that we do not add more than one proxy for sourceInstane and that we do not add a circle in proxying
-	auto it = mProxies.find(sourceInstanceID);
-	if (it != mProxies.end() && it->second != targetInstanceID) {
+	auto* parser = zCParser::GetParser();
 
-		auto* otherTargetSymbol = util::getSymbolWithChecks(it->second, __FUNCSIG__);
-		const auto* otherName = otherTargetSymbol->name.ToChar();
+	// Note: source instance id cannot be a resolved proxy anymore.
+	const auto sourceInstanceID = parser->GetIndex(sourceInstance);
 
+	// Note: target instance id could be a resolved proxy!
+	auto targetInstanceID = parser->GetIndex(targetInstance);
+	{
+		auto it = mUnresolvedNamesToInstances.find(targetInstance2);
+		if (it != mUnresolvedNamesToInstances.end()) {
+			targetInstanceID = it->second;
+		}
+	}
+
+	// We don't want to proxy invalid parser symbol indices
+	if (targetInstanceID == -1) {
 		logStream << __FUNCSIG__ << ": Cannot add proxy (" << sourceInstance.ToChar() << ", " << targetInstance.ToChar()
-			<< ") since their already exists another proxy pair: (" 
-			<< sourceInstance.ToChar() << ", " << otherName << ")" << std::endl;
+			<< ") since source instance index is not a valid parser symbol index!" << std::endl;
+		util::logWarning(&logStream);
+		return false;
+	}
+	
+	// We don't want self proxying
+	if (targetInstanceID == sourceInstanceID) {
+		logStream << __FUNCSIG__ << ": Cannot add proxy (" << sourceInstance.ToChar() << ", " << targetInstance.ToChar()
+			<< ") since self proxying isn't allowed!" << std::endl;
 		util::logWarning(&logStream);
 		return false;
 	}
 
 	//check, that we do not add a circle in proxying
-	it = mProxies.find(targetInstanceID);
+	auto it = mProxies.find(targetInstanceID);
 	while (it != mProxies.end()) {
 		auto target = it->second;
 		if (target == sourceInstanceID) {
@@ -86,15 +110,52 @@ bool ObjectManager::addProxy(const zSTRING & sourceInstance, const zSTRING & tar
 		it = mProxies.find(target);
 	}
 
-	mProxies.insert({ sourceInstanceID, targetInstanceID });
+	mUnresolvedNamesToInstances.insert({std::string(sourceInstance.ToChar()), sourceInstanceID });
+	mProxiesNames.insert({sourceInstance2, targetInstance2});
+
+	if (sourceInstanceID != -1) {
+		mProxies.insert({ sourceInstanceID, targetInstanceID });
+	}
+
 	return true;
 }
 
 void ObjectManager::removeProxy(const zSTRING& sourceInstance)
 {
-	auto* parser = zCParser::GetParser();
-	auto sourceInstanceID = parser->GetIndex(sourceInstance);
+	std::string name = sourceInstance.ToChar();
+	auto it = mUnresolvedNamesToInstances.find(name);
+	if (it == mUnresolvedNamesToInstances.end()) return;
+	auto sourceInstanceID = it->second;
+
 	mProxies.erase(sourceInstanceID);
+	mProxiesNames.erase(name);
+	mUnresolvedNamesToInstances.erase(name);
+}
+
+int ObjectManager::resolveProxying(int instanceID) const
+{
+	int resolvedInstanceID = instanceID;
+	auto it = mProxies.find(instanceID);
+	while (it != mProxies.end()) {
+		auto target = it->second;
+		resolvedInstanceID = target;
+		it = mProxies.find(target);
+	}
+
+	return resolvedInstanceID;
+}
+
+const char* ObjectManager::resolveProxying(const zSTRING& symbolName) const
+{
+	const char* resolvedName = symbolName.ToChar();
+	auto it = mProxiesNames.find(resolvedName);
+	while (it != mProxiesNames.end()) {
+		const auto& target = it->second;
+		resolvedName = target.c_str();
+		it = mProxiesNames.find(target);
+	}
+
+	return resolvedName;
 }
 
 
@@ -157,10 +218,14 @@ g2ext_extended::zCPar_SymbolTable* ObjectManager::zCParserGetSymbolTable(void* p
 
 
 ObjectManager* ObjectManager::getObjectManager() {
-	static std::unique_ptr<ObjectManager> instance = std::make_unique<ObjectManager>();
+	return mInstance.get();
+}
 
-	return instance.get();
-};
+void ObjectManager::release()
+{
+	mInstance.reset();
+}
+
 
 int ObjectManager::createNewInstanceId(oCItem* item, const std::string& instanceName) {
 	if (item == NULL) {
@@ -203,14 +268,23 @@ void ObjectManager::deleteDII(int parserSymbolIndex)
 
 	//For now we leave the symbol as it is
 	// make the symbol unfindable 
-	//auto* parser = zCParser::GetParser();
-	//auto* symbol = parser->GetSymbol(parserSymbolIndex);
-	//symbol->name = "";
+	auto* parser = zCParser::GetParser();
+	auto* symbol = parser->GetSymbol(parserSymbolIndex);
+	
 	//Check that the symbol cannot be found anymore
 	//auto* testSymbol = parser->GetSymbol(parserSymbolIndex);
 
+	std::string name = symbol->name.ToChar();
+	//symbol->name = "****";
+
+	auto* dii = mNewInstanceMap[parserSymbolIndex].get();
+	dii->setDoNotStore(true);
+
 	// remove the DII
 	auto deleteCount = mNewInstanceMap.erase(parserSymbolIndex);
+	mNewInstanceToSymbolMap.erase(parserSymbolIndex);
+	mNameToSymbolMap.erase(name);
+	mNameToInstanceMap.erase(name);
 
 	// Note: We expect that exactly one entry was deleted.
 	if (deleteCount != 1) {
@@ -239,16 +313,19 @@ void ObjectManager::releaseInstances() {
 	int* symTableSize = getParserInstanceCount();
 	*symTableSize = *symTableSize - allocatedSize;
 	logStream << "ObjectManager::releaseInstances(): allocatedSize = " << allocatedSize << endl;
-	util::debug(&logStream);
+	util::logAlways(&logStream);
 	logStream << "ObjectManager::releaseInstances(): symTableSize = " << *symTableSize << endl;
-	util::debug(&logStream);
+	util::logAlways(&logStream);
 
 	// clear all data structures
 	mNewInstanceMap.clear();
 	mNewInstanceToSymbolMap.clear();
 	mNameToInstanceMap.clear();
 	mNameToSymbolMap.clear();
+
+	mProxiesNames.clear();
 	mProxies.clear();
+	mUnresolvedNamesToInstances.clear();
 };
 
 bool ObjectManager::assignInstanceId(oCItem* item, int instanceIdParserSymbolIndex){
@@ -477,24 +554,29 @@ void ObjectManager::saveNewInstances(char* directoryPath, char* filename) {
 	try {
 		ofs.exceptions(std::ios::failbit | std::ios::badbit);
 
-		// Save instance items
-		ofs << mNewInstanceMap.size() << '\n';
+		std::vector<DynInstance*> instances;
 		for (auto& pair : mNewInstanceMap) {
-			auto& storeItem = pair.second;
-			storeItem->serialize(ofs);
+			auto* instance = pair.second.get();
+			
+			if (!instance->getDoNotStore())
+				instances.push_back(instance);
+		}
+
+		// Save instance items
+		ofs << instances.size() << '\n';
+		for (auto* instance : instances) {
+			instance->serialize(ofs);
 			//oa << storeItem;
 			ofs << '\n';
 		}
 
 		// Save proxies
 		auto* parser = zCParser::GetParser();
-		ofs << mProxies.size() << '\n';
-		for (auto& pair : mProxies) {
-			auto* symbol = util::getSymbolWithChecks(pair.first, __FUNCSIG__);
-			util::writeString(ofs, symbol->name.ToChar());
+		ofs << mProxiesNames.size() << '\n';
+		for (auto& pair : mProxiesNames) {
+			util::writeString(ofs, pair.first);
 			ofs << ' ';
-			symbol = util::getSymbolWithChecks(pair.second, __FUNCSIG__);
-			util::writeString(ofs, symbol->name.ToChar());
+			util::writeString(ofs, pair.second);
 			ofs << '\n';
 		}
 	}
@@ -552,6 +634,8 @@ void ObjectManager::loadNewInstances(char* filename) {
 		auto* parser = zCParser::GetParser();
 		size_t proxiesSize = 0;
 		getline(ifs, line);
+		ss.str("");
+		ss.clear();
 		ss << line;
 		getline(ss, token);
 		proxiesSize = atoi(token.c_str());
@@ -566,10 +650,7 @@ void ObjectManager::loadNewInstances(char* filename) {
 			util::readAndTrim(&ss, sourceInstanceName);
 			util::readAndTrim(&ss, targetInstanceName);
 
-			int sourceID = util::getIndexWithChecks(sourceInstanceName.c_str(), __FUNCSIG__);
-			int targetID = util::getIndexWithChecks(targetInstanceName.c_str(), __FUNCSIG__);
-
-			mProxies.insert({ sourceID, targetID });
+			addProxy(sourceInstanceName.c_str(), targetInstanceName.c_str());
 		}
 	}
 	catch (const std::exception& e) {
@@ -949,7 +1030,7 @@ bool ObjectManager::isDynamicInstance(int instanceParserSymbolID)
 
 zCPar_Symbol* ObjectManager::getSymbolByIndex(int parserSymbolID)
 {
-	map<int, zCPar_Symbol*>::iterator it = mNewInstanceToSymbolMap.find(parserSymbolID);
+	auto it = mNewInstanceToSymbolMap.find(parserSymbolID);
 	if (it == mNewInstanceToSymbolMap.end()) { return NULL; }
 	return it->second;
 }
@@ -958,7 +1039,7 @@ zCPar_Symbol* ObjectManager::getSymbolByName(const zSTRING& symbolName)
 {
 	string name = symbolName.ToChar();
 	transform(name.begin(), name.end(),name.begin(), ::toupper);
-	map<string, zCPar_Symbol*>::iterator it = mNameToSymbolMap.find(name);
+	auto it = mNameToSymbolMap.find(name);
 	if (it == mNameToSymbolMap.end()) { return NULL; }
 	return it->second;
 }
@@ -968,7 +1049,7 @@ int ObjectManager::getIndexByName(const zSTRING& symbolName)
 {
 	string name = symbolName.ToChar();
 	transform(name.begin(), name.end(),name.begin(), ::toupper);
-	map<string, int>::iterator it = mNameToInstanceMap.find(name);
+	auto it = mNameToInstanceMap.find(name);
 	if (it == mNameToInstanceMap.end()) { return NULL; }
 	return it->second;
 }

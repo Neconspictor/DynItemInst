@@ -14,6 +14,18 @@ const int zCVobGetEMAddress = 6290960;//005FFE10
 const int EV_EQUIPITEM_MSGTYPE = 14; //0x0E
 const int OCMSGMANIPULATE_BYTE_SIZE = 124;//0x7C
 
+var int ZAUBERART;
+var C_Item FEUERZAUBERWAFFE;
+var C_Item EISZAUBERWAFFE;
+var C_Item POISONMAGICWEAPON;
+
+//magic weapon stuff
+const int MAGICWEAPON_BonusDamage = 30;
+const int MAGICWEAPON_NONE = 0;
+const int MAGICWEAPON_FIRE = 1;
+const int MAGICWEAPON_ICE = 2;
+const int MAGICWEAPON_POISON = 3;
+
 //functions
 
 //.text:00712C00 public: void __thiscall oCItem::RemoveEffect(void) proc near

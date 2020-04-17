@@ -37,6 +37,8 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include "zCPar_SymbolTable.h"
 #include <functional>
 #include "api/g2/ocnpcinventory.h"
+#include <unordered_map>
+#include <memory>
 
 /**
  * This class is responsible for managing DynInstance and AdditMemory objects.
@@ -77,9 +79,21 @@ public:
 	void removeProxy(const zSTRING& sourceInstance);
 
 	/**
+	 * Resolves proxying of an instance id.
+	 */
+	int resolveProxying(int instanceID) const;
+
+	/**
+	 * Resolves proxying for symbol names.
+	 */
+	const char* resolveProxying(const zSTRING& symbolName) const;
+
+	/**
 	 * \return the current instance of this class.
 	 */
 	static ObjectManager* getObjectManager();
+
+	static void release();
 
 	/**
 	 * Calls oCItem::InitByScript(int, int), which initializes the given oCItem by its instance id.
@@ -313,14 +327,18 @@ public:
 private:
 
 	// <int instanceId, Item* item>
-	std::map<int, std::unique_ptr<DynInstance>> mNewInstanceMap;
-	std::map<int, zCPar_Symbol*> mNewInstanceToSymbolMap;
-	std::map<std::string, zCPar_Symbol*> mNameToSymbolMap;
-	std::map<std::string, int> mNameToInstanceMap;
+	std::unordered_map<int, std::unique_ptr<DynInstance>> mNewInstanceMap;
+	std::unordered_map<int, zCPar_Symbol*> mNewInstanceToSymbolMap;
+	std::unordered_map<std::string, zCPar_Symbol*> mNameToSymbolMap;
+	std::unordered_map<std::string, int> mNameToInstanceMap;
 
 	std::map<int, int> mProxies;
+	std::unordered_map<std::string, std::string> mProxiesNames;
+	std::unordered_map<std::string, int> mUnresolvedNamesToInstances;
 
 	std::stringstream logStream;
+
+	static std::unique_ptr<ObjectManager> mInstance;
 private:
 
 	static zCPar_Symbol* createNewInstanceSymbol(const ParserInfo* old);

@@ -76,8 +76,6 @@ STORY\B_Content\B_PlayerFindItem.d
 
 
 mod\MagicWeapon_EngineAddresses.d
-mod\magicweapon.d
-
 
 ITEMS\Tuning_*.d
 ITEMS\Einhand_EquipBonus.d

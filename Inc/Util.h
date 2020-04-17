@@ -201,6 +201,9 @@ class util {
 public:
 
 
+    static bool areEqualIgnoringCases(const std::string& a, const std::string& b);
+
+
 	/**
 	 * Checks if the specified path is an directory and exists.
 	 * \param path The directory path to check.

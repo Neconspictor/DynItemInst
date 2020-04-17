@@ -624,6 +624,16 @@ BYTE* DynInstance::getUserData()
 	return dii_userData.userData.pMemory;
 }
 
+bool DynInstance::getDoNotStore() const
+{
+	return mDoNotStore;
+}
+
+void DynInstance::setDoNotStore(bool doNotStore)
+{
+	mDoNotStore = doNotStore;
+}
+
 //void DynInstance::copyUserData(DynInstance& source)
 //{
 	/*for (int i = 0; i < dii_userData.userData.intAmount; ++i)

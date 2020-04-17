@@ -339,10 +339,13 @@ int DII::oCItemGetValueHook(void* pThis) {
 
 zCPar_Symbol* DII::zCPar_SymbolTableGetSymbolHook(void* pThis, int index)
 {
+	auto* manager = ObjectManager::getObjectManager();
+	index = manager->resolveProxying(index);
+	
 	zCPar_Symbol* result = zCPar_SymbolTableGetSymbol(pThis, index);
 	if (result == NULL)
 	{
-		result = ObjectManager::getObjectManager()->getSymbolByIndex(index);
+		result = manager->getSymbolByIndex(index);
 	}
 
 	return result;
@@ -350,31 +353,39 @@ zCPar_Symbol* DII::zCPar_SymbolTableGetSymbolHook(void* pThis, int index)
 
 zCPar_Symbol* DII::zCPar_SymbolTableGetSymbolStringHook(void* pThis, zSTRING const & symbolName)
 {
-	zCPar_Symbol* result = ObjectManager::getObjectManager()->getSymbolByName(symbolName);
+	auto* manager = ObjectManager::getObjectManager();
+	zCPar_Symbol* result = manager->getSymbolByName(symbolName);
 	if (result == NULL)
 	{
-		result = zCPar_SymbolTableGetSymbolString(pThis, symbolName);
+		zSTRING resolvedName = manager->resolveProxying(symbolName);
+		result = zCPar_SymbolTableGetSymbolString(pThis, resolvedName);
 	}
+
 	return result;
 }
 
 int DII::zCPar_SymbolTableGetIndexHook(void* pThis, zSTRING const& symbolName)
 {
+	auto* manager = ObjectManager::getObjectManager();
 	int result = zCPar_SymbolTableGetIndex(pThis, symbolName);
 	if (result == NULL)
 	{
-		result = ObjectManager::getObjectManager()->getIndexByName(symbolName);
+		result = manager->getIndexByName(symbolName);
+		result = manager->resolveProxying(result);
 	} 
+
 	return result;
 }
 
 int DII::zCParserGetIndexHook(void* pThis, zSTRING const& symbolName)
 {
-	int result = ObjectManager::getObjectManager()->getIndexByName(symbolName);
+	auto* manager = ObjectManager::getObjectManager();
+	int result = manager->getIndexByName(symbolName);
 	if (result == NULL)
 	{
 		result = zCParserGetIndex(pThis, symbolName);	
 	}
+
 	return result;
 }
 
@@ -386,6 +397,7 @@ DII::DII()
 
 DII::~DII()
 {
+	ObjectManager::release();
 }
 
 
@@ -438,8 +450,12 @@ DII::~DII()
 };
 
 
- int DII::createInstanceHook(void* pThis, int instanceId, void* source)
+ int DII::createInstanceHook(void* pThis, int symolIndex, void* source)
 {
+	 ObjectManager* manager = ObjectManager::getObjectManager();
+	 
+	 int instanceId = manager->resolveProxying(symolIndex);
+
 	zCPar_Symbol* symbol = zCParser::GetParser()->GetSymbol(instanceId);
 	if (symbol == NULL)
 	{
@@ -456,11 +472,10 @@ DII::~DII()
 
 	int result = createInstance(pThis, instanceId, source);
 
-	auto isDynamic = ObjectManager::getObjectManager()->isDynamicInstance(instanceId);
+	auto isDynamic = manager->isDynamicInstance(instanceId);
 	if (isDynamic)
 	{
 		oCItem* item = (oCItem*)source;
-		ObjectManager* manager = ObjectManager::getObjectManager();
 		manager->InitItemWithDynInstance(item, instanceId);	
 		result = manager->getDynInstanceId(item);
 	}
