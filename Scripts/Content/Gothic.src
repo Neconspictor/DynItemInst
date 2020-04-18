@@ -6,7 +6,7 @@ _INTERN\Ikarus.d
 _INTERN\float.d
 
 LeGo\Header.src
-NecPack\Header.src
+Nec\Header.src
 
 
 mod\modConfig.d
@@ -76,6 +76,7 @@ STORY\B_Content\B_PlayerFindItem.d
 
 
 mod\MagicWeapon_EngineAddresses.d
+mod\magicweapon.d
 
 ITEMS\Tuning_*.d
 ITEMS\Einhand_EquipBonus.d

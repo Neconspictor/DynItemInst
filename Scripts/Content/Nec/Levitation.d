@@ -1,5 +1,5 @@
 // public
-// Note: You can change the variables values but do not change their names - they are partially needed by NecPack library
+// Note: You can change the variables values but do not change their names - they are partially needed by NEC library
 
 const int LEVITATION_HOVER_DISTANCE = 50; 					// hover distance (in cm/s)
 const int LEVITATION_SPEED_VERTICAL = 60; 					// up/down levitation speed (in cm/s)
@@ -23,7 +23,7 @@ const int LEVITATION_CONTROL_TERMINATE = KEY_RETURN; 		// terminates levitation 
 // private
 var int _LEVITATION_barHandle; 								// lifetime bar of the levitation state
 var int _LEVITATION_consumedLifetme; 						// spend lifetime of the levitation state (in ms)
-var int _LEVITATION_IsActive; 								// indicates that the NecPack library should activate levitation state for hero
+var int _LEVITATION_IsActive; 								// indicates that the NEC library should activate levitation state for hero
 
 
 /**
@@ -41,7 +41,7 @@ func int LEVITATION_IsGamePaused() {
     var int ret;
     if (CALL_Begin(call)) {
         var int adr;
-        adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "LEVITATION_IsGamePaused");
+        adr = GetProcAddress (LoadLibrary (NEC_relativeLibraryPath), "LEVITATION_IsGamePaused");
         CALL_PutRetValTo(_@(ret));
         CALL__cdecl(adr);
         call = CALL_End();

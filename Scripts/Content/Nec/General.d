@@ -1,5 +1,5 @@
-const int NECPACK_SILENT = 0;
-const string NECPACK_relativeLibraryPath = ".\NecPack\NecPack.DLL";
+const int NEC_SILENT = 0;
+const string NEC_relativeLibraryPath = ".\NEC\NEC.DLL";
 
 // flags for lib config
 const int NEC_DII = 1 << 0;
@@ -17,11 +17,11 @@ const int NEC_Init_Modules = 0;
 // as an integer. Therefore you should use this function along with
 // e.g. the float package of Ikarus.
 // *****************************************************************
-FUNC INT NECPACK_GetLibVersion() {
+FUNC INT NEC_GetLibVersion() {
     var int adr;
-    adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "NECPACK_GetLibVersion");
+    adr = GetProcAddress (LoadLibrary (NEC_relativeLibraryPath), "GetLibVersion");
 
-    //DII library couldn't be found?
+    //library couldn't be found?
     if (!adr) {
         return 0;
     };
@@ -37,7 +37,7 @@ FUNC INT NECPACK_GetLibVersion() {
 // Returns the expected version of the used DynItemInst_Ikarus.dll.
 // The return value will be float stored in an integer.
 // ****************************************************************
-FUNC INT _NECPACK_GetExpectedLibVersion() {
+FUNC INT _NEC_GetExpectedLibVersion() {
     //expected lib version: 1.03
     var int integral;
     var int fraction;

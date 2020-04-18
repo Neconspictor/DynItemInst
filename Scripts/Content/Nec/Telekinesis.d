@@ -7,7 +7,7 @@ func int TELEKINESIS_CreateInterpolator(var int pVobPosition, var int pNpcPositi
     var int ret;
     if (CALL_Begin(call)) {
         var int adr;
-        adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "TELEKINESIS_CreateInterpolator");
+        adr = GetProcAddress (LoadLibrary (NEC_relativeLibraryPath), "TELEKINESIS_CreateInterpolator");
 		CALL_IntParam(_@(speed));
 		CALL_IntParam(_@(upMoveAmount));
 		CALL_IntParam(_@(pNpcPosition));
@@ -28,7 +28,7 @@ func void TELEKINESIS_GetInterpolatedVec(var int pTelekinesisInterpolator, var i
     var int ret;
     if (CALL_Begin(call)) {
         var int adr;
-        adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "TELEKINESIS_GetInterpolatedVec");
+        adr = GetProcAddress (LoadLibrary (NEC_relativeLibraryPath), "TELEKINESIS_GetInterpolatedVec");
 		CALL_IntParam(_@(pDestVec3));
         CALL_IntParam(_@(pTelekinesisInterpolator));
         CALL__cdecl(adr);
@@ -45,7 +45,7 @@ func void TELEKINESIS_DeleteInterpolator(var int pTelekinesisInterpolator) {
     var int ret;
     if (CALL_Begin(call)) {
         var int adr;
-        adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "TELEKINESIS_DeleteInterpolator");
+        adr = GetProcAddress (LoadLibrary (NEC_relativeLibraryPath), "TELEKINESIS_DeleteInterpolator");
         CALL_IntParam(_@(pTelekinesisInterpolator));
         CALL__cdecl(adr);
         call = CALL_End();
@@ -62,7 +62,7 @@ func void TELEKINESIS_Interpolate(var int pTelekinesisInterpolator, var int item
     var int ret;
     if (CALL_Begin(call)) {
         var int adr;
-        adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "TELEKINESIS_Interpolate");
+        adr = GetProcAddress (LoadLibrary (NEC_relativeLibraryPath), "TELEKINESIS_Interpolate");
         CALL_IntParam(_@(itemPtr));
 		CALL_IntParam(_@(pTelekinesisInterpolator));
         CALL__cdecl(adr);
@@ -79,7 +79,7 @@ func int TELEKINESIS_IsVobSeeable(var int pNpc, var int pVob) {
     var int ret;
     if (CALL_Begin(call)) {
         var int adr;
-        adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "TELEKINESIS_IsVobSeeable");
+        adr = GetProcAddress (LoadLibrary (NEC_relativeLibraryPath), "TELEKINESIS_IsVobSeeable");
 		CALL_IntParam(_@(pVob));
 		CALL_IntParam(_@(pNpc));
         CALL_PutRetValTo(_@(ret));

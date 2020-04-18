@@ -3,27 +3,27 @@
 const int _NEC_FLAGS = 0;
 
 // **********************************************************************************
-// Loads and inits the NecPack library. If the loaded library version
+// Loads and inits the NEC library. If the loaded library version
 // doesn't conform to the expected one, no initialization will be performed and a
 // error message will be appear to the user in form of a message box.
 // NOTE: This function has to be called in InitPerceptions() !
 // **********************************************************************************
 
-func void NECPACK_InitPerceptions(var int flags)
+func void NEC_InitPerceptions(var int flags)
 {
     var int expectedLibVersion;
     var int libVersion;
     var string msg;
-    expectedLibVersion = _NECPACK_GetExpectedLibVersion();
-    libVersion = NECPACK_GetLibVersion();
+    expectedLibVersion = _NEC_GetExpectedLibVersion();
+    libVersion = NEC_GetLibVersion();
 
     //Library couldn't be loaded?
     if (!libVersion) {
         NEC_Init_Modules = false;
-        if (!NECPACK_SILENT) {
-            MEMINT_HandleError(zERR_TYPE_FATAL, ConcatStrings(NECPACK_relativeLibraryPath, " couldn't be loaded!"));
+        if (!NEC_SILENT) {
+            MEMINT_HandleError(zERR_TYPE_FATAL, ConcatStrings(NEC_relativeLibraryPath, " couldn't be loaded!"));
         } else {
-            msg = ConcatStrings("NECPACK_Init: ", NECPACK_relativeLibraryPath);
+            msg = ConcatStrings("NEC_Init: ", NEC_relativeLibraryPath);
             msg = ConcatStrings(msg, " couldn't be loaded!");
             MEM_Error(msg);
         };
@@ -35,7 +35,7 @@ func void NECPACK_InitPerceptions(var int flags)
         msg = ConcatStrings(msg, toStringf(libVersion));
         msg = ConcatStrings(msg, "; Library version doesn't conform to expected one! No initialization will be performed and DII won't work!");
         NEC_Init_Modules = false;
-        if (!NECPACK_SILENT) {
+        if (!NEC_SILENT) {
             MEMINT_HandleError(zERR_TYPE_FATAL, msg);
         } else {
             MEM_Error(msg);
@@ -44,20 +44,20 @@ func void NECPACK_InitPerceptions(var int flags)
     };
 
     var int adr;
-    adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "Hook");
+    adr = GetProcAddress (LoadLibrary (NEC_relativeLibraryPath), "Hook");
 	CALL_IntParam(flags);
 	CALL_PutRetValTo(_@(_NEC_FLAGS));
     CALL__cdecl(adr);
 	
-	// NOTE: the other flags are set in NECPACK_INIT_GLOBAL
+	// NOTE: the other flags are set in NEC_INIT_GLOBAL
 	NEC_Init_Modules = _NEC_FLAGS & NEC_DII;
 	
 };
 
 // **********************************************************************************
-// Initialization function for NecPack that has to be called in INIT_GLOBAL.
+// Initialization function for NEC that has to be called in INIT_GLOBAL.
 // **********************************************************************************
-func void NECPACK_INIT_GLOBAL() {
+func void NEC_INIT_GLOBAL() {
 
 	if (_NEC_FLAGS & NEC_LEVITATION) {
 		NEC_Init_Modules = NEC_Init_Modules | NEC_LEVITATION;

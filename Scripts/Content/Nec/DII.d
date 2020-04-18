@@ -34,7 +34,7 @@ CLASS DII_USER_DATA
 // slot number for DII 
 const int DII_SLOT_COUNT = 9;
 
-// Defines the animation slots that will be tested for dii item changes by NecPack library.
+// Defines the animation slots that will be tested for dii item changes by NEC library.
 // Default are the slots of HUM_BODY_NAKED0.ASC, but change it, if you need more. Also slots for other 
 // models are supported.
 const string DII_SLOTS[DII_SLOT_COUNT] = {
@@ -82,7 +82,7 @@ FUNC INT DII_AddProxy (var string sourceInstanceName, var string targetInstanceN
 	
     var int ret;
 	var int adr;
-	adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_AddProxy");
+	adr = GetProcAddress (LoadLibrary (NEC_relativeLibraryPath), "DII_AddProxy");
 	
 	CALL_zStringPtrParam(targetInstanceName);
 	CALL_zStringPtrParam(sourceInstanceName);
@@ -108,7 +108,7 @@ func void DII_ApplyInstanceChangesToAll(var string instanceName) {
     };
 	
 	var int adr; 
-	adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_ApplyInstanceChangesToAll");
+	adr = GetProcAddress (LoadLibrary (NEC_relativeLibraryPath), "DII_ApplyInstanceChangesToAll");
 	CALL_zStringPtrParam(instanceName);
 	CALL__cdecl(adr);
 };
@@ -126,7 +126,7 @@ FUNC void DII_RemoveProxy (var string sourceInstanceName) {
     };
 	
 	var int adr;
-	adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_RemoveProxy");
+	adr = GetProcAddress (LoadLibrary (NEC_relativeLibraryPath), "DII_RemoveProxy");
 	CALL_zStringPtrParam(sourceInstanceName);
 	CALL__cdecl(adr);
 };
@@ -150,7 +150,7 @@ FUNC C_ITEM DII_CreateNewItem (var string instanceName) {
 	
 	var int ret;
 	var int adr;
-	adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_CreateNewItem");
+	adr = GetProcAddress (LoadLibrary (NEC_relativeLibraryPath), "DII_CreateNewItem");
 	CALL_IntParam(instanceParserSymbolID);
 	CALL_PutRetValTo(_@(ret));
 	CALL__cdecl(adr);
@@ -174,7 +174,7 @@ FUNC STRING DII_CreateNewInstance (var c_item itm) {
     var int ret;
 
 	var int adr;
-	adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_CreateNewInstance");
+	adr = GetProcAddress (LoadLibrary (NEC_relativeLibraryPath), "DII_CreateNewInstance");
 	CALL_IntParam(ptr);
 	CALL_PutRetValTo(_@(ret));
 	CALL__cdecl(adr);
@@ -198,7 +198,7 @@ FUNC INT DII_CreateNewInstanceStr (var c_item itm, var string instanceName) {
     var int ptr; ptr = _@(itm);
     var int ret;
 	var int adr;
-	adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_CreateNewInstanceStr");
+	adr = GetProcAddress (LoadLibrary (NEC_relativeLibraryPath), "DII_CreateNewInstanceStr");
 	
 	CALL_zStringPtrParam(instanceName);
 	CALL_IntParam(ptr);	
@@ -222,7 +222,7 @@ func void DII_DeleteDII (var string instanceName) {
 	instanceParserSymbolID = DII_GetInstanceID(instanceName);
 	
 	var int adr;
-	adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_DeleteDII");
+	adr = GetProcAddress (LoadLibrary (NEC_relativeLibraryPath), "DII_DeleteDII");
 	CALL_IntParam(instanceParserSymbolID);
 	CALL__cdecl(adr);
 };
@@ -239,7 +239,7 @@ func void DII_DeleteItem (VAR C_ITEM itm) {
 
     var int ptr; ptr = _@(itm);
 	var int adr;
-	adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_DeleteItem");
+	adr = GetProcAddress (LoadLibrary (NEC_relativeLibraryPath), "DII_DeleteItem");
 	CALL_IntParam(ptr);
 	CALL__cdecl(adr);
 };
@@ -260,7 +260,7 @@ FUNC INT DII_IsDynamic(var c_item itm) {
 	var int ret;
 
 	var int adr;
-	adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_IsDynamic");
+	adr = GetProcAddress (LoadLibrary (NEC_relativeLibraryPath), "DII_IsDynamic");
 	CALL_IntParam(ptr);
 	CALL_PutRetValTo(_@(ret));
 	CALL__cdecl(adr);
@@ -283,7 +283,7 @@ FUNC INT DII_IsInstanceDynamic(var string instanceName) {
 	
     var int ret;
 	var int adr;
-	adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_IsInstanceDynamic");
+	adr = GetProcAddress (LoadLibrary (NEC_relativeLibraryPath), "DII_IsInstanceDynamic");
 	CALL_IntParam(instanceParserSymbolID);
 	CALL_PutRetValTo(_@(ret));
 	CALL__cdecl(adr);
@@ -307,7 +307,7 @@ func INT DII_UpdateInstance(var string instanceName, var c_item itm) {
     var int ptr; ptr = _@(itm);
 	var int ret;
     var int adr;
-    adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_UpdateInstance");
+    adr = GetProcAddress (LoadLibrary (NEC_relativeLibraryPath), "DII_UpdateInstance");
 	
 	CALL_IntParam(ptr);
 	CALL_zStringPtrParam(instanceName);
@@ -335,7 +335,7 @@ FUNC DII_USER_DATA DII_GetUserData (var string instanceName) {
 	
     var int ret;
 	var int adr;
-	adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_GetUserData");
+	adr = GetProcAddress (LoadLibrary (NEC_relativeLibraryPath), "DII_GetUserData");
 	CALL_IntParam(instanceParserSymbolID);
 	CALL_PutRetValTo(_@(ret));
 	CALL__cdecl(adr);
@@ -356,7 +356,7 @@ func void DII_ChangeInstanceForAll(var string sourceInstanceName, var string tar
     };
 	
 	var int adr;
-    adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_ChangeInstanceForAll");
+    adr = GetProcAddress (LoadLibrary (NEC_relativeLibraryPath), "DII_ChangeInstanceForAll");
 	
 	CALL_zStringPtrParam(targetInstanceName);
 	CALL_zStringPtrParam(sourceInstanceName);
