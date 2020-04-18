@@ -120,8 +120,6 @@ Open the file 'extracted neclib.zip'/Telekinesis/IT_Runen-add.d and copy the con
 
 Open the file 'extracted neclib.zip'/Telekinesis/IT_Scrolls-add.d and copy the content to the file _work/data/Scripts/Content/Items/IT_Scrolls.d
 
-Open the file 'extracted neclib.zip'/Telekinesis/PfxInstMagic-add.d and copy the content to the file _work/data/Scripts/System/PFX/PfxInstMagic.d		//TODO: needed?
-
 Open the file 'extracted neclib.zip'/Telekinesis/VisualFxInst-add.d and copy the content to the file _work/data/Scripts/System/VisualFX/VisualFxInst.d
 			
 
