@@ -39,7 +39,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
  * Hooks needed target functions.
  * This function is exported to use it external (e.g. via Ikarus Script package).
  */
-void Hook();
+int Hook(int flags);
 
 /**
  * Unhooks needed target functions.

@@ -31,10 +31,12 @@ var int _LEVITATION_IsActive; 								// indicates that the NecPack library shou
  * @return : TRUE if the game is paused otherwise FALSE.
  */
 func int LEVITATION_IsGamePaused() {
-	if (!NECPACK_Initialized) {
-		MEM_Warn("LEVITATION_IsGamePaused: Library isn't initialized!");
+	if (!(NEC_Init_Modules & NEC_LEVITATION)) {
+		MEM_Warn("LEVITATION_IsGamePaused: Levitation module isn't initialized!");
         return FALSE;
     };
+	
+	
     const int call = 0;
     var int ret;
     if (CALL_Begin(call)) {
@@ -51,6 +53,11 @@ func int LEVITATION_IsGamePaused() {
  * Initializes the levitation module.
  */
 func void LEVITATION_Init() {
+
+	if (!(NEC_Init_Modules & NEC_LEVITATION)) {
+        MEM_Warn("LEVITATION_Init: Levitation module isn't specified to be initialized!");
+        return;
+    };
 	
 	if (!_LEVITATION_barHandle) {
 		_LEVITATION_barHandle = Bar_Create(GothicBar@);
@@ -62,8 +69,8 @@ func void LEVITATION_Init() {
  * Starts the levitation state.
  */
 func void LEVITATION_Begin() {
-	if (!NECPACK_Initialized) {
-        MEM_Warn("LEVITATION_Begin: Library isn't initialized!");
+	if (!(NEC_Init_Modules & NEC_LEVITATION)) {
+        MEM_Warn("LEVITATION_Begin: Levitation module isn't initialized!");
         return;
     };
 	
@@ -79,8 +86,8 @@ func void LEVITATION_Begin() {
  * Ends the levitation state.
  */
 func void LEVITATION_End() {
-	if (!NECPACK_Initialized) {
-        MEM_Warn("LEVITATION_End: Library isn't initialized!");
+	if (!(NEC_Init_Modules & NEC_LEVITATION)) {
+        MEM_Warn("LEVITATION_End: Levitation module isn't initialized!");
         return;
     };
 	
@@ -94,8 +101,8 @@ func void LEVITATION_End() {
  * Toggles the levitation state.
  */
 func void LEVITATION_Toggle() {
-	if (!NECPACK_Initialized) {
-        MEM_Warn("LEVITATION_Toggle: Library isn't initialized!");
+	if (!(NEC_Init_Modules & NEC_LEVITATION)) {
+        MEM_Warn("LEVITATION_Toggle: Levitation module isn't initialized!");
         return;
     };
 		

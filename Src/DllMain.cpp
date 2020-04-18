@@ -38,9 +38,9 @@ std::stringstream logStream;
  * Hooks needed target functions.
  * This function is exported to use it external (e.g. via Ikarus Script package).
 */
-void Hook()
+int Hook(int flags)
 {
-	HookManager::hook();
+	return HookManager::hook(flags);
 }
 
 /**

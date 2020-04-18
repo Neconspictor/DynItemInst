@@ -75,8 +75,8 @@ FUNC STRING DII_GetSymbolName(var int symbolIndex) {
 // @return : TRUE, if the proxy is successfully setup. Otherwise FALSE.
 // *********************************************************************
 FUNC INT DII_AddProxy (var string sourceInstanceName, var string targetInstanceName) {
-    if (!NECPACK_Initialized) {
-        MEM_Warn("DII_AddProxy: Library isn't initialized!");
+    if (!(NEC_Init_Modules & NEC_DII)) {
+        MEM_Warn("DII_AddProxy: DII Module isn't initialized!");
         return FALSE;
     };
 	
@@ -102,8 +102,8 @@ FUNC INT DII_AddProxy (var string sourceInstanceName, var string targetInstanceN
 // *********************************************************************
 func void DII_ApplyInstanceChangesToAll(var string instanceName) {
 	
-	if (!NECPACK_Initialized) {
-        MEM_Warn("DII_ApplyInstanceChangesToAll: Library isn't initialized!");
+	if (!(NEC_Init_Modules & NEC_DII)) {
+        MEM_Warn("DII_ApplyInstanceChangesToAll: DII Module isn't initialized!");
         return;
     };
 	
@@ -120,8 +120,8 @@ func void DII_ApplyInstanceChangesToAll(var string instanceName) {
 // @return : TRUE, if the proxy is successfully setup. Otherwise FALSE.
 // *********************************************************************
 FUNC void DII_RemoveProxy (var string sourceInstanceName) {
-    if (!NECPACK_Initialized) {
-        MEM_Warn("DII_RemoveProxy: Library isn't initialized!");
+    if (!(NEC_Init_Modules & NEC_DII)) {
+        MEM_Warn("DII_RemoveProxy: DII Module isn't initialized!");
         return;
     };
 	
@@ -140,10 +140,10 @@ FUNC void DII_RemoveProxy (var string sourceInstanceName) {
 // the current session (until gothic is terminated).
 // ************************************************************
 FUNC C_ITEM DII_CreateNewItem (var string instanceName) {
-	if (!NECPACK_Initialized) {
-		MEM_Warn("DII_CreateNewItem: Library isn't initialized!");
-		return;
-	};
+	if (!(NEC_Init_Modules & NEC_DII)) {
+        MEM_Warn("DII_CreateNewItem: DII Module isn't initialized!");
+        return;
+    };
 	
 	var int instanceParserSymbolID;
 	instanceParserSymbolID = DII_GetInstanceID(instanceName);
@@ -165,8 +165,8 @@ FUNC C_ITEM DII_CreateNewItem (var string instanceName) {
 // @return : The instance name of the newly created dii.
 // *********************************************************************
 FUNC STRING DII_CreateNewInstance (var c_item itm) {
-    if (!NECPACK_Initialized) {
-        MEM_Warn("DII_CreateNewInstance: Library isn't initialized!");
+    if (!(NEC_Init_Modules & NEC_DII)) {
+        MEM_Warn("DII_CreateNewInstance: DII Module isn't initialized!");
         return "";
     };
 	
@@ -190,9 +190,9 @@ FUNC STRING DII_CreateNewInstance (var c_item itm) {
 // @return : TRUE, if the instance was successfully created. Otherwise FALSE.
 // *********************************************************************
 FUNC INT DII_CreateNewInstanceStr (var c_item itm, var string instanceName) {
-    if (!NECPACK_Initialized) {
-        MEM_Warn("DII_CreateNewInstanceStr: Library isn't initialized!");
-        return 0;
+    if (!(NEC_Init_Modules & NEC_DII)) {
+        MEM_Warn("DII_CreateNewInstanceStr: DII Module isn't initialized!");
+        return FALSE;
     };
 
     var int ptr; ptr = _@(itm);
@@ -213,8 +213,8 @@ FUNC INT DII_CreateNewInstanceStr (var c_item itm, var string instanceName) {
 //  Deletes a dynamic item instance by its instance name.
 // ***************************************************************
 func void DII_DeleteDII (var string instanceName) {
-    if (!NECPACK_Initialized) {
-		MEM_Warn("DII_DeleteDII: Library isn't initialized!");
+    if (!(NEC_Init_Modules & NEC_DII)) {
+        MEM_Warn("DII_DeleteDII: DII Module isn't initialized!");
         return;
     };
 	
@@ -232,8 +232,8 @@ func void DII_DeleteDII (var string instanceName) {
 //  Removes an item from the current world and deletes it.
 // ***************************************************************
 func void DII_DeleteItem (VAR C_ITEM itm) {
-    if (!NECPACK_Initialized) {
-		MEM_Warn("DII_DeleteItem: Library isn't initialized!");
+    if (!(NEC_Init_Modules & NEC_DII)) {
+        MEM_Warn("DII_DeleteItem: DII Module isn't initialized!");
         return;
     };
 
@@ -251,10 +251,10 @@ func void DII_DeleteItem (VAR C_ITEM itm) {
 // be returned.
 // ************************************************************
 FUNC INT DII_IsDynamic(var c_item itm) {
-	if (!NECPACK_Initialized) {
-		MEM_Warn("DII_IsDynamic: Library isn't initialized!");
-		return 0;
-	};
+	if (!(NEC_Init_Modules & NEC_DII)) {
+        MEM_Warn("DII_IsDynamic: DII Module isn't initialized!");
+        return FALSE;
+    };
 
 	var int ptr; ptr = _@(itm);
 	var int ret;
@@ -273,9 +273,9 @@ FUNC INT DII_IsDynamic(var c_item itm) {
 // @param instanceName : the name of the instance.
 // ************************************************************
 FUNC INT DII_IsInstanceDynamic(var string instanceName) {
-    if (!NECPACK_Initialized) {
-        MEM_Warn("DII_IsInstanceDynamic: Library isn't initialized!");
-        return 0;
+    if (!(NEC_Init_Modules & NEC_DII)) {
+        MEM_Warn("DII_IsInstanceDynamic: DII Module isn't initialized!");
+        return FALSE;
     };
 	
 	var int instanceParserSymbolID;
@@ -299,8 +299,8 @@ FUNC INT DII_IsInstanceDynamic(var string instanceName) {
 // @return : True if the dii was successfully initialized.
 // ************************************************************
 func INT DII_UpdateInstance(var string instanceName, var c_item itm) {
-    if (!NECPACK_Initialized) {
-        MEM_Warn("NECPACK_SyncDII: Library isn't initialized!");
+    if (!(NEC_Init_Modules & NEC_DII)) {
+        MEM_Warn("DII_UpdateInstance: DII Module isn't initialized!");
         return FALSE;
     };
 	
@@ -325,8 +325,8 @@ func INT DII_UpdateInstance(var string instanceName, var c_item itm) {
 // **********************************************************************
 
 FUNC DII_USER_DATA DII_GetUserData (var string instanceName) {
-    if (!NECPACK_Initialized) {
-        MEM_Warn("DII_GetUserData: Library isn't initialized!");
+    if (!(NEC_Init_Modules & NEC_DII)) {
+        MEM_Warn("DII_GetUserData: DII Module isn't initialized!");
         return;
     };
 	
@@ -343,31 +343,6 @@ FUNC DII_USER_DATA DII_GetUserData (var string instanceName) {
     MEM_PtrToInst(ret);
 };
 
-/*func void DII_AssignInstanceId (var c_item itm, var string instanceName) {
-    if (!NECPACK_Initialized) {
-        MEM_Warn("DII_AssignInstanceId: Library isn't initialized!");
-        return;
-    };
-	
-	var int instanceParserSymbolID;
-	instanceParserSymbolID = DII_GetInstanceID(instanceName);
-	
-	var int ptr;
-    ptr = MEM_InstToPtr(itm);
-	
-    const int call = 0;
-    var int ret;
-    //var int symb; symb = MEM_ReadIntArray (currSymbolTableAddress, itm);//symb = itm;
-    if (CALL_Begin(call)) {
-        var int adr;
-        adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "DII_AssignInstanceId");
-        CALL_IntParam(_@(instanceParserSymbolID));
-        CALL_IntParam(_@(ptr));
-        CALL__cdecl(adr);
-        call = CALL_End();
-    };
-};*/
-
 // **********************************************************************
 // Changes the instance of all items that have instance are assigned to 'sourceInstanceName'.
 // @param sourceInstanceName : Items having this instance will be changed.
@@ -375,8 +350,8 @@ FUNC DII_USER_DATA DII_GetUserData (var string instanceName) {
 // **********************************************************************
 func void DII_ChangeInstanceForAll(var string sourceInstanceName, var string targetInstanceName) {
 	
-	if (!NECPACK_Initialized) {
-		MEM_Warn("DII_ChangeInstanceForAll: Library isn't initialized!");
+	if (!(NEC_Init_Modules & NEC_DII)) {
+        MEM_Warn("DII_ChangeInstanceForAll: DII Module isn't initialized!");
         return;
     };
 	

@@ -1,6 +1,15 @@
-const int NECPACK_Initialized = 0;
 const int NECPACK_SILENT = 0;
 const string NECPACK_relativeLibraryPath = ".\NecPack\NecPack.DLL";
+
+// flags for lib config
+const int NEC_DII = 1 << 0;
+const int NEC_LEVITATION = 1 << 1;
+const int NEC_TELEKINESIS = 1 << 2;
+const int NEC_ALL = NEC_DII | NEC_LEVITATION | NEC_TELEKINESIS;
+
+// Keeps track of initialized modules
+const int NEC_Init_Modules = 0;
+
 
 // *****************************************************************
 // Provides the version number of the DynItemInst_Ikarus library.
@@ -17,14 +26,10 @@ FUNC INT NECPACK_GetLibVersion() {
         return 0;
     };
 
-    const int call = 0;
     var int ret;
-    if (CALL_Begin(call)) {
-        CALL_RetValIsFloat();
-        CALL_PutRetValTo(_@(ret));
-        CALL__cdecl(adr);
-        call = CALL_End();
-    };
+	CALL_RetValIsFloat();
+	CALL_PutRetValTo(_@(ret));
+	CALL__cdecl(adr);
     return +ret;
 };
 

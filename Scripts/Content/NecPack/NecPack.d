@@ -1,3 +1,7 @@
+
+
+const int _NEC_FLAGS = 0;
+
 // **********************************************************************************
 // Loads and inits the NecPack library. If the loaded library version
 // doesn't conform to the expected one, no initialization will be performed and a
@@ -5,7 +9,7 @@
 // NOTE: This function has to be called in InitPerceptions() !
 // **********************************************************************************
 
-func void NECPACK_InitPerceptions()
+func void NECPACK_InitPerceptions(var int flags)
 {
     var int expectedLibVersion;
     var int libVersion;
@@ -15,7 +19,7 @@ func void NECPACK_InitPerceptions()
 
     //Library couldn't be loaded?
     if (!libVersion) {
-        NECPACK_Initialized = false;
+        NEC_Init_Modules = false;
         if (!NECPACK_SILENT) {
             MEMINT_HandleError(zERR_TYPE_FATAL, ConcatStrings(NECPACK_relativeLibraryPath, " couldn't be loaded!"));
         } else {
@@ -30,7 +34,7 @@ func void NECPACK_InitPerceptions()
         msg = ConcatStrings(msg, " , loadded lib version: ");
         msg = ConcatStrings(msg, toStringf(libVersion));
         msg = ConcatStrings(msg, "; Library version doesn't conform to expected one! No initialization will be performed and DII won't work!");
-        NECPACK_Initialized = false;
+        NEC_Init_Modules = false;
         if (!NECPACK_SILENT) {
             MEMINT_HandleError(zERR_TYPE_FATAL, msg);
         } else {
@@ -41,15 +45,27 @@ func void NECPACK_InitPerceptions()
 
     var int adr;
     adr = GetProcAddress (LoadLibrary (NECPACK_relativeLibraryPath), "Hook");
-    CALL__stdcall(adr);
+	CALL_IntParam(flags);
+	CALL_PutRetValTo(_@(_NEC_FLAGS));
+    CALL__cdecl(adr);
 	
-    NECPACK_Initialized = true;
+	// NOTE: the other flags are set in NECPACK_INIT_GLOBAL
+	NEC_Init_Modules = _NEC_FLAGS & NEC_DII;
+	
 };
 
 // **********************************************************************************
 // Initialization function for NecPack that has to be called in INIT_GLOBAL.
 // **********************************************************************************
 func void NECPACK_INIT_GLOBAL() {
-	LEVITATION_Init();
-	TELEKINESIS_Init();
+
+	if (_NEC_FLAGS & NEC_LEVITATION) {
+		NEC_Init_Modules = NEC_Init_Modules | NEC_LEVITATION;
+		LEVITATION_Init();
+	};
+	
+	if (_NEC_FLAGS & NEC_TELEKINESIS) {
+		NEC_Init_Modules = NEC_Init_Modules | NEC_TELEKINESIS;
+		TELEKINESIS_Init();
+	};
 };

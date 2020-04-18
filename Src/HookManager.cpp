@@ -43,33 +43,21 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <Levitation.h>
 #include <CustomNpcFocus.h>
 
-HookManager* HookManager::instance = NULL;
+std::unique_ptr<HookManager> HookManager::mInstance;
 std::stringstream HookManager::logStream;
 
 HookManager* HookManager::getHookManager()
 {
-	if (instance == NULL)
+	if (!mInstance)
 	{
-		instance = new HookManager();
+		mInstance = std::make_unique<HookManager>();
 	}
-	return instance;
+	return mInstance.get();
 }
 
 void HookManager::release()
 {
-	if (instance == NULL) return;
-
-	std::list<Module*>::iterator it;
-	it = instance->modules.begin();
-
-	while(it != instance->modules.end()) {
-		Module* module = *it;
-		instance->modules.erase(it);
-		it = instance->modules.begin();
-		delete module;
-	}
-	
-	SAFE_DELETE(instance);
+	mInstance.reset();
 }
 
 void HookManager::registerHook(LPVOID original, LPVOID hook)
@@ -110,23 +98,21 @@ LPVOID HookManager::getHookAddress(LPVOID original)
 
 void HookManager::hookModules()
 {
-	std::list<Module*>::iterator it = modules.begin();
-	for (;it != modules.end(); ++it) {
-		(*it)->hookModule();		
+	for (auto& module : mModules) {
+		module->hookModule();		
 	}
 }
 
 void HookManager::unHookModules()
 {
-	std::list<Module*>::iterator it = modules.begin();
-	for (;it != modules.end(); ++it) {
-		(*it)->unHookModule();		
+	for (auto& module : mModules) {
+		module->unHookModule();
 	}
 };
 
-void HookManager::addModule(Module* module)
+void HookManager::addModule(std::unique_ptr<Module> module)
 {
-	this->modules.push_back(module);
+	mModules.emplace_back(std::move(module));
 }
 
 void HookManager::addFunctionHook(LPVOID* source, LPVOID destination, std::string description)
@@ -197,22 +183,18 @@ void HookManager::removeFunctionHook(LPVOID* source, LPVOID destination, std::st
 	unregisterHook(original, destination);
 };
 
-HookManager::~HookManager()
-{
-};
-
 
 HookManager::HookManager()
 {
-	called = false;
-	this->instance = NULL;
+	mCalled = false;
+	mFlags = 0;
 };
 
-void HookManager::hook()
+int HookManager::hook(int flags)
 {
 	HookManager* manager = getHookManager();
-	if (instance->called) return;
-	instance->called = true;
+	if (mInstance->mCalled) return mInstance->mFlags;
+	mInstance->mCalled = true;
 
 	// init Logger since Configuration file is initialized there
 	Logger::getLogger();
@@ -237,28 +219,41 @@ void HookManager::hook()
 		logStream << "HookManager::hook: Couldn't initialize hook engine!"<< std::endl;
 		util::logFatal(&logStream);
 		unhook();
-		return;
+		return 0;
 	}
 
-	Module* dynItemInstModule = new DII();
-	Module* externals = new DaedalusExports();
-	Module* levitation = new Levitation();
+	manager->addModule(std::make_unique<DaedalusExports>());
 
-	manager->addModule(dynItemInstModule);
-	manager->addModule(externals);
-	manager->addModule(levitation);
+
+	if (flags &  static_cast<int>(ConfigFlags::DII)) {
+		manager->addModule(std::make_unique <DII>() );
+		mInstance->mFlags |= static_cast<int>(ConfigFlags::DII);
+	}
+
+	if (flags & static_cast<int>(ConfigFlags::LEVITATION)) {
+		manager->addModule(std::make_unique <Levitation>());
+		mInstance->mFlags |= static_cast<int>(ConfigFlags::LEVITATION);
+	}
+
+	if (flags & static_cast<int>(ConfigFlags::TELEKINESIS)) {
+		manager->addModule(std::make_unique<Telekinesis>());
+		mInstance->mFlags |= static_cast<int>(ConfigFlags::TELEKINESIS);
+	}
+
 	manager->hookModules();
 
 	logStream << "HookManager::hook: done." << std::endl;
 	Logger::getLogger()->logAlways(&logStream);
+
+	return mInstance->mFlags;
 };
 
 
 void HookManager::unhook()
 {
-	if (instance == NULL) return;
+	if (!mInstance) return;
 	logStream << "HookManager::unHook: Unhook functions..." << std::endl;
-	instance->unHookModules();
+	mInstance->unHookModules();
 	release();
 	logStream << "HookManager::unHook: Unhook done."<< std::endl;
 	util::logInfo(&logStream);

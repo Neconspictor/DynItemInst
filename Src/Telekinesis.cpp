@@ -130,6 +130,7 @@ Interpolator::milliseconds TelekinesisInterpolator::calcPitStopDuration(const zV
 
 Telekinesis::Telekinesis()
 {
+	moduleDesc = "Telekinesis";
 }
 
 void Telekinesis::hookModule()

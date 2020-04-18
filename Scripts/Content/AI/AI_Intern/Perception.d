@@ -103,7 +103,7 @@ FUNC VOID InitPerceptions()
         
         
         MEM_InitAll();
-        NECPACK_InitPerceptions();
+        NECPACK_InitPerceptions(NEC_ALL);
 };
 
 

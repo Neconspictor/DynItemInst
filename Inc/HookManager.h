@@ -42,6 +42,12 @@ extern bool debug;
 class zCPar_Symbol;
 class zSTRING;
 
+enum class ConfigFlags {
+	DII = 1 << 0,
+	LEVITATION = 1 << 1,
+	TELEKINESIS = 1 << 2,
+};
+
 /**
  * A hook manager is responsible for managing all modules. Part of its job is to collect and storing
  * all function hooks of all registered modules and hooking and unhooking them.
@@ -49,16 +55,18 @@ class zSTRING;
 class HookManager {
 public:
 
+	HookManager();
+
 	/**
 	 * Default destructor.
 	 */
-	~HookManager();
+	~HookManager() = default;
 
 	/**
 	 * Initializes internal hook engine and hooks all registered modules afterwards.
 	 * After this function call all hooks of the registered modules are enabled.
 	 */
-	static void hook();
+	static int hook(int flags);
 
 	/**
 	 * Uninitializes internal hook engine, unhooks all registered modules and removes them.
@@ -86,7 +94,7 @@ public:
 	/**
 	 * Registers a module.
 	 */
-	void addModule(Module* module);
+	void addModule(std::unique_ptr<Module> module);
 
 	/**
 	 * Replaces a function the pointer 'source' is pointing at with the the function located at 
@@ -107,18 +115,14 @@ public:
 	void removeFunctionHook(LPVOID* source, LPVOID destination, std::string description = "");
 
 private:
-	static HookManager* instance;
+	static std::unique_ptr<HookManager> mInstance;
 	static std::stringstream logStream;
 
-	std::list<Module*> modules;
+	std::vector<std::unique_ptr<Module>> mModules;
 	std::multimap<LPVOID,LPVOID> originalToHookAddress;
 	std::map<LPVOID, LPVOID> hookToOriginalAddress;
-	bool called;
-
-	/**
-	 * Private constructor, because this class is a singleton.
-	 */
-	HookManager();
+	bool mCalled = false;
+	int mFlags = 0;
 
 	/**
 	 * Unhooks all registered modules and releases allocated memory.

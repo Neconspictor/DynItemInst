@@ -1,6 +1,6 @@
 func int TELEKINESIS_CreateInterpolator(var int pVobPosition, var int pNpcPosition, var int upMoveAmount, var int speed) {
-	if (!NECPACK_Initialized) {
-        MEM_Warn("TELEKINESIS_CreateInterpolator: Library isn't initialized!");
+	if (!(NEC_Init_Modules & NEC_TELEKINESIS)) {
+        MEM_Warn("TELEKINESIS_CreateInterpolator: Telekinesis module isn't initialized!");
         return 0;
     };
     const int call = 0;
@@ -20,8 +20,8 @@ func int TELEKINESIS_CreateInterpolator(var int pVobPosition, var int pNpcPositi
 };
 
 func void TELEKINESIS_GetInterpolatedVec(var int pTelekinesisInterpolator, var int pDestVec3) {
-    if (!NECPACK_Initialized) {
-		MEM_Warn("TELEKINESIS_GetInterpolatedVec: Library isn't initialized!");
+    if (!(NEC_Init_Modules & NEC_TELEKINESIS)) {
+		MEM_Warn("TELEKINESIS_GetInterpolatedVec: Telekinesis module isn't initialized!");
         return;
     };
     const int call = 0;
@@ -37,8 +37,8 @@ func void TELEKINESIS_GetInterpolatedVec(var int pTelekinesisInterpolator, var i
 };
 
 func void TELEKINESIS_DeleteInterpolator(var int pTelekinesisInterpolator) {
-    if (!NECPACK_Initialized) {
-		MEM_Warn("TELEKINESIS_DeleteInterpolator: Library isn't initialized!");
+    if (!(NEC_Init_Modules & NEC_TELEKINESIS)) {
+		MEM_Warn("TELEKINESIS_DeleteInterpolator: Telekinesis module isn't initialized!");
         return;
     };
     const int call = 0;
@@ -54,8 +54,8 @@ func void TELEKINESIS_DeleteInterpolator(var int pTelekinesisInterpolator) {
 
 //void TELEKINESIS_Interpolate(TelekinesisInterpolator* interpolatorPtr, oCItem* item);
 func void TELEKINESIS_Interpolate(var int pTelekinesisInterpolator, var int itemPtr) {
-    if (!NECPACK_Initialized) {
-		MEM_Warn("TELEKINESIS_Interpolate: Library isn't initialized!");
+    if (!(NEC_Init_Modules & NEC_TELEKINESIS)) {
+		MEM_Warn("TELEKINESIS_Interpolate: Telekinesis module isn't initialized!");
         return;
     };
     const int call = 0;
@@ -71,8 +71,8 @@ func void TELEKINESIS_Interpolate(var int pTelekinesisInterpolator, var int item
 };
 
 func int TELEKINESIS_IsVobSeeable(var int pNpc, var int pVob) {
-	if (!NECPACK_Initialized) {
-		MEM_Warn("TELEKINESIS_IsVobSeeable: Library isn't initialized!");
+	if (!(NEC_Init_Modules & NEC_TELEKINESIS)) {
+		MEM_Warn("TELEKINESIS_IsVobSeeable: Telekinesis module isn't initialized!");
         return 0;
     };
     const int call = 0;
