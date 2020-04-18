@@ -140,7 +140,7 @@ public:
 	/**
 	 * Provides the version of the library.
 	 */
-	static float NECPACK_GetLibVersion();
+	static float GetLibVersion();
 
 	static int TELEKINESIS_IsVobSeeable(oCNpc* npc, zCVob* vob);
 

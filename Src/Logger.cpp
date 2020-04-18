@@ -59,8 +59,8 @@ Logger* Logger::getLogger()
 	if (instance == NULL)
 	{
 		instance = new Logger();
-		Configuration::load("DII_Configuration.ini");
-		Configuration::save("DII_Configuration.ini");
+		Configuration::load("Nec.ini");
+		Configuration::save("Nec.ini");
 		logFileName = Configuration::getLogFile();
 		instance->logInfos = Configuration::getLogInfos();
 		instance->logWarnings = Configuration::getLogWarnings();
@@ -99,7 +99,7 @@ void Logger::writeToFile(std::string message)
 void Logger::writeTozSpy(LogLevel level, std::string message)
 {
 
-	message = "U: NecPack lib: " + message;
+	message = "U: neclib: " + message;
 	zERROR* zerr = (zERROR*)0x008CDCD0;	//zERROR zerr
 	zSTRING zMessage = zSTRING(message.c_str());
 

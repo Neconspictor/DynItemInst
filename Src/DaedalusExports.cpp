@@ -242,7 +242,7 @@ BYTE* DaedalusExports::DII_GetUserData(int instanceIdParserSymbolIndex) // Func 
 }
 
 
-float DaedalusExports::NECPACK_GetLibVersion()
+float DaedalusExports::GetLibVersion()
 {
 	return LIB_VERSION;
 }

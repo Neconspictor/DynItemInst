@@ -82,7 +82,7 @@ void Configuration::load(const string &filename)
 	string path = ss.str();
 
 	//ini couldn't be read; set standard settings
-	logFile = "NecPack_log.txt";
+	logFile = "Nec_log.txt";
 	logInfos = true;
 	logWarnings = true;
 	logErrors = true;
@@ -92,15 +92,16 @@ void Configuration::load(const string &filename)
 	logToZSpy = true;
 	logToFile = true;
 	logToConsole = true;
-
-	configuration config;
-	if (ini_parse("test.ini", handler, &config) < 0) {
-		printf("Can't load '%s'\n", path.c_str());
-	}
 }
 
 void Configuration::save(const string &filename)
 {
+
+	/*configuration config;
+	if (ini_load("test.ini", handler, &config) < 0) {
+		printf("Can't load '%s'\n", path.c_str());
+	}*/
+
 	/*stringstream ss;
 	ss << util::getModuleDirectory(util::getModuleHandle()) << "\\" << filename;
 	using boost::property_tree::ptree;
