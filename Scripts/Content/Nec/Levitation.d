@@ -9,6 +9,9 @@ const int LEVITATION_SPEED_TURN = 90;						// turn speed (in degree angles/s)
 const int LEVITATION_MAX_LIFETIME = 13000; 					// maximum lifetime of the levitation state (in ms)
 const int LEVITATION_GRAVITY = 10;							// levitation gravity (in cm/s). Set it to 0 for no gravity.
 
+const int LEVITATION_CONTINOUS_SUBSTRACTION_TIME = 120;		// specifies the time (in seconds) it takes for the continous lifetime substraction 
+															// to consume the whole levitation lifetime.
+
 const string LEVITATION_OVERLAY = "Humans_Levitate.mds";	// levitation overlay
 
 // user control
@@ -123,13 +126,10 @@ func void LEVITATION_ConsumeLifetime() {
 	
 	const int THOUSAND = 1000;
 	
-	// specifies the time (in seconds) it takes for the continous lifetime substraction 
-	// to consume the whole levitation lifetime.
-	const int CONTINOUS_LIFETIME_SUBSTRACTION_TIME = 120;
 
-	// we add 1/CONTINOUS_LIFETIME_SUBSTRACTION_TIME to the invested time as a continous contribution.
+	// we add 1/LEVITATION_CONTINOUS_SUBSTRACTION_TIME to the invested time as a continous contribution.
 	_LEVITATION_consumedLifetme = addf(_LEVITATION_consumedLifetme, 
-		mulf(MEM_Timer.frameTimeFloat, fracf(LEVITATION_MAX_LIFETIME, CONTINOUS_LIFETIME_SUBSTRACTION_TIME * THOUSAND)));
+		mulf(MEM_Timer.frameTimeFloat, fracf(LEVITATION_MAX_LIFETIME, LEVITATION_CONTINOUS_SUBSTRACTION_TIME * THOUSAND)));
 
 	// if levitation up movement is active we substract more lifetime.
 	if (MEM_KeyState(LEVITATION_CONTROL_UP) == KEY_HOLD) {
