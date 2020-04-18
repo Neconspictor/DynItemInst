@@ -5,6 +5,9 @@
 const int SPL_Cost_Telekinesis		= 1;
 const int STEP_Telekinesis			= 1;
 const int SPL_Damage_Telekinesis 		= 0;
+const int TELEKINESIS_UPMOVEMENT = 50; // (in cm) the focus item is moved upwards when starting the spell.
+const int TELEKINESIS_SPEED = 150; // (in cm/s) the traveling speed of the focus item.
+const int TELEKINESIS_MOVEMENT_DELAY = 2000; // (in ms) time to wait before the focus item travels
 
 
 func int Spell_Telekinesis_focus_remover()
@@ -124,8 +127,8 @@ func void _Spell_Telekinesis_MoveTargetStart(var int hndl) {
 	
 	data.pInterpolator = TELEKINESIS_createInterpolator(_@(vobPosition[0]), 
 															_@(npcPosition[0]),
-															50,
-															100);
+															TELEKINESIS_UPMOVEMENT,
+															TELEKINESIS_SPEED);
 																				
 	
 	FF_ApplyData(_Spell_Telekinesis_MoveTarget, hndl);
@@ -174,7 +177,7 @@ func int Spell_Logic_Telekinesis (var int manaInvested)
 		data.pCaster = _@(oCSelf);
 		data.pTarget = oCSelf.focus_vob;
 		
-		FF_ApplyExtData(_Spell_Telekinesis_MoveTargetStart, 2000, 1, hndl);
+		FF_ApplyExtData(_Spell_Telekinesis_MoveTargetStart, TELEKINESIS_MOVEMENT_DELAY, 1, hndl);
 	};
 	
 	//MEM_WARN(ConcatStrings("oCFocus.name = ", oCFocus.name));
