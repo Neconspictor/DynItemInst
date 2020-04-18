@@ -45,15 +45,6 @@
     <Filter Include="MinHook\src\hde">
       <UniqueIdentifier>{492eac8b-3ea1-4614-a8b3-ea4664c8a44b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="inih">
-      <UniqueIdentifier>{6d1de53b-b363-4c0a-b046-537c3c0d870f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="inih\include">
-      <UniqueIdentifier>{ccf82d85-0fc6-4664-9970-ddc77bb18348}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="inih\src">
-      <UniqueIdentifier>{0141e6ff-9ae3-4d8c-8e93-30824c231b11}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Telekinesis">
       <UniqueIdentifier>{198519d7-5802-4928-b37d-1074be721bd1}</UniqueIdentifier>
     </Filter>
@@ -155,9 +146,6 @@
     <ClInclude Include="minhook-master\src\hde\table64.h">
       <Filter>MinHook\src\hde</Filter>
     </ClInclude>
-    <ClInclude Include="inih-master\ini.h">
-      <Filter>inih\include</Filter>
-    </ClInclude>
     <ClInclude Include="Inc\Telekinesis.hpp">
       <Filter>Header Files\Telekinesis</Filter>
     </ClInclude>
@@ -216,9 +204,6 @@
     </ClCompile>
     <ClCompile Include="minhook-master\src\hde\hde64.c">
       <Filter>MinHook\src\hde</Filter>
-    </ClCompile>
-    <ClCompile Include="inih-master\ini.c">
-      <Filter>inih\src</Filter>
     </ClCompile>
     <ClCompile Include="Src\Telekinesis.cpp">
       <Filter>Source Files\Telekinesis</Filter>

@@ -33,7 +33,6 @@
     <ClInclude Include="Inc\Util_Constants.h" />
     <ClInclude Include="Inc\zCOptionExtended.h" />
     <ClInclude Include="Inc\zCPar_SymbolTable.h" />
-    <ClInclude Include="inih-master\ini.h" />
     <ClInclude Include="minhook-master\include\MinHook.h" />
     <ClInclude Include="minhook-master\src\buffer.h" />
     <ClInclude Include="minhook-master\src\hde\hde32.h" />
@@ -44,7 +43,6 @@
     <ClInclude Include="minhook-master\src\trampoline.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="inih-master\ini.c" />
     <ClCompile Include="minhook-master\src\buffer.c" />
     <ClCompile Include="minhook-master\src\hde\hde32.c" />
     <ClCompile Include="minhook-master\src\hde\hde64.c" />
@@ -105,14 +103,14 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>.\G2ExtSDK;.\Inc;.\minhook-master\include;.\inih-master;C:\Development\Repositories\NecPack\boost-1.67.0;$(IncludePath)</IncludePath>
+    <IncludePath>.\G2ExtSDK;.\Inc;.\minhook-master\include;C:\Development\Repositories\NecPack\boost-1.67.0;$(IncludePath)</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
     <TargetName>Nec</TargetName>
     <OutDir>E:\Program Files (x86)\JoWood\Gothic II Gold\System\Nec\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>.\G2ExtSDK;.\Inc;.\minhook-master\include;.\inih-master;C:\Development\Repositories\NecPack\boost-1.67.0;$(IncludePath)</IncludePath>
+    <IncludePath>.\G2ExtSDK;.\Inc;.\minhook-master\include;C:\Development\Repositories\NecPack\boost-1.67.0;$(IncludePath)</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
     <TargetName>Nec</TargetName>
     <OutDir>E:\Program Files (x86)\JoWood\Gothic II Gold\System\Nec\</OutDir>
