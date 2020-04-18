@@ -2,16 +2,6 @@ const int NECPACK_Initialized = 0;
 const int NECPACK_SILENT = 0;
 const string NECPACK_relativeLibraryPath = ".\NecPack\NecPack.DLL";
 
-// Callback function before oCNpc::EquipWeapon(oCItem*) is called.
-// Important: The specified function must have exact two int params and must be of return type 'void' (no return value!).
-const string OCNPC_EQUIP_CALLBACK_NAME = "oCNpcEquip_Callback";
-
-//Callback function for zCParser::CreateInstance(int, void*); needs one int param
-const string ZCPARSER_CREATE_INSTANCE_CALLBACK = "zCParserCreateInstance_Callback";
-
-//Callback function for oCNpc::IsMunitionAvailable(oCItem*); needs two int params
-const string OCNPC_ISMUNITIONAVAILABLE_CALLBACK_NAME = "oCNpcIsMunitionAvailable_Callback";
-
 // *****************************************************************
 // Provides the version number of the DynItemInst_Ikarus library.
 // Important: The version number is a float digit, that is returned

@@ -1,7 +1,8 @@
 // **********************************************************************************
-// Loads and inits the library DynItemInst_Ikarus.DLL. If the loaded library version
+// Loads and inits the NecPack library. If the loaded library version
 // doesn't conform to the expected one, no initialization will be performed and a
 // error message will be appear to the user in form of a message box.
+// NOTE: This function has to be called in InitPerceptions() !
 // **********************************************************************************
 
 func void NECPACK_InitPerceptions()
@@ -45,6 +46,9 @@ func void NECPACK_InitPerceptions()
     NECPACK_Initialized = true;
 };
 
+// **********************************************************************************
+// Initialization function for NecPack that has to be called in INIT_GLOBAL.
+// **********************************************************************************
 func void NECPACK_INIT_GLOBAL() {
 	LEVITATION_Init();
 	TELEKINESIS_Init();

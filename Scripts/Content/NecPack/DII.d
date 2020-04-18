@@ -8,11 +8,10 @@
  * Define as many integers and strings as you like, but keep in mind that integers have to be defined before
  * the string members. DII will load the members assuming that order!
  */
- 
 const int DII_USER_DATA_INTEGER_AMOUNT = 2;
 const int DII_USER_DATA_STRING_AMOUNT = 5;
 
-//indices used for magic weapons
+//indices used for magic weapons example
 const int MAGICWEAPON_ENCHANTEDWEAPON = 0;
 const int MAGICWEAPON_TYPE = 1;
 
@@ -32,7 +31,12 @@ CLASS DII_USER_DATA
 	var string magicWeaponOldInstanceName;
 };
 
+// slot number for DII 
 const int DII_SLOT_COUNT = 9;
+
+// Defines the animation slots that will be tested for dii item changes by NecPack library.
+// Default are the slots of HUM_BODY_NAKED0.ASC, but change it, if you need more. Also slots for other 
+// models are supported.
 const string DII_SLOTS[DII_SLOT_COUNT] = {
 	"ZS_HELMET",
 	"ZS_LEFTHAND",
@@ -53,6 +57,9 @@ FUNC INT DII_GetInstanceID(var string instanceName) {
 	return MEM_GetSymbolIndex(instanceName);
 };
 
+// ************************************************************
+// Convenient function for retrieving the name of an instance id
+// ************************************************************
 FUNC STRING DII_GetSymbolName(var int symbolIndex) {
 	var zCPar_Symbol symb;
 	var int ptr; ptr = MEM_GetSymbolByIndex(symbolIndex);
@@ -87,7 +94,12 @@ FUNC INT DII_AddProxy (var string sourceInstanceName, var string targetInstanceN
 };
 
 
-//DII_ApplyInstanceChangesToAll(desc.instanceName);
+// *********************************************************************
+// If an dii was updated (using DII_UpdateInstance), the items in the world do not have been changed.
+// This function can be used for applying the changes to all items in the world (and containers, npcs)
+// that have the specified instance id.
+// @param instanceName : The name of the instance id.
+// *********************************************************************
 func void DII_ApplyInstanceChangesToAll(var string instanceName) {
 	
 	if (!NECPACK_Initialized) {
@@ -356,7 +368,11 @@ FUNC DII_USER_DATA DII_GetUserData (var string instanceName) {
     };
 };*/
 
-
+// **********************************************************************
+// Changes the instance of all items that have instance are assigned to 'sourceInstanceName'.
+// @param sourceInstanceName : Items having this instance will be changed.
+// @param targetInstanceName : the instance the items should assigned to.
+// **********************************************************************
 func void DII_ChangeInstanceForAll(var string sourceInstanceName, var string targetInstanceName) {
 	
 	if (!NECPACK_Initialized) {
