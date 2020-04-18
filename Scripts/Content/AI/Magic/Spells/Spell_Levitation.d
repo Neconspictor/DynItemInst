@@ -2,14 +2,15 @@
 // Levitation Spell
 // *********************
 
-const int SPL_Cost_Levitation			= 5;
+const int SPL_Cost_Levitation			= 10;
 
 
 INSTANCE Spell_Levitation (C_Spell_Proto)
 {
 	time_per_mana			= 0;
 	spelltype 				= SPELL_NEUTRAL;
-	targetCollectAlgo		= TARGET_COLLECT_NONE;
+	targetCollectAlgo		= TARGET_COLLECT_CASTER;
+	canTurnDuringInvest		= 0;
 	//canTurnDuringInvest		= 0;
 };
 

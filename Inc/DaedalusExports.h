@@ -154,7 +154,7 @@ public:
 
 	static void TELEKINESIS_DeleteInterpolator(TelekinesisInterpolator* interpolatorPtr);
 
-	static void TELEKINESIS_Interpolate(TelekinesisInterpolator* interpolatorPtr, oCItem* item);
+	static void TELEKINESIS_Interpolate(TelekinesisInterpolator* interpolatorPtr, zCVob* item);
 
 	static int LEVITATION_IsGamePaused();
 

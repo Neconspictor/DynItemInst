@@ -363,12 +363,12 @@ void DaedalusExports::TELEKINESIS_DeleteInterpolator(TelekinesisInterpolator* in
 	interpolators.erase(newEnd, interpolators.end());
 }
 
-void DaedalusExports::TELEKINESIS_Interpolate(TelekinesisInterpolator* interpolatorPtr, oCItem* item)
+void DaedalusExports::TELEKINESIS_Interpolate(TelekinesisInterpolator* interpolatorPtr, zCVob* vob)
 {
 	zVEC3 result = interpolatorPtr->interpolate(std::chrono::system_clock::now());
-	zVEC3 current = item->GetVobPosition();
+	zVEC3 current = vob->GetVobPosition();
 	zVEC3 diff = result - current;
-	item->Move(diff.x, diff.y, diff.z);
+	vob->Move(diff.x, diff.y, diff.z);
 }
 
 int DaedalusExports::TELEKINESIS_IsVobSeeable(oCNpc* npc, zCVob* vob)
