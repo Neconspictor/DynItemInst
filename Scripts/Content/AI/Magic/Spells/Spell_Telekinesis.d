@@ -2,19 +2,13 @@
 // SPL_Telekinesis
 // ***************
 
-const int SPL_Cost_Telekinesis		= 1;
+const int SPL_Cost_Telekinesis		= 10;
 const int STEP_Telekinesis			= 1;
 const int SPL_Damage_Telekinesis 		= 0;
 const int TELEKINESIS_UPMOVEMENT = 50; // (in cm) the focus item is moved upwards when starting the spell.
 const int TELEKINESIS_SPEED = 150; // (in cm/s) the traveling speed of the focus item.
 const int TELEKINESIS_MOVEMENT_DELAY = 2000; // (in ms) time to wait before the focus item travels
 
-
-func int Spell_Telekinesis_focus_remover()
-{
-  //var oCNpc her; her = _^(_@(hero)); // Todo: use this for investagting ikarus undefined behaviour in MEM_PtrToInst (if ptr is 0); 
-  return FALSE;
-};
 
 INSTANCE Spell_Telekinesis (C_Spell_Proto)
 {
@@ -24,8 +18,8 @@ INSTANCE Spell_Telekinesis (C_Spell_Proto)
 	damageType				= DAM_MAGIC;				
 	canTurnDuringInvest     = FALSE;
 	
-	canChangeTargetDuringInvest	=	Spell_Telekinesis_focus_remover();
-	isMultiEffect				=	0;				// Effect Class is oCVisFX_MultiTarget if set to 1 (e.g. the effect can have multiple trajectorys (massdeath)
+	canChangeTargetDuringInvest	=	FALSE;
+	isMultiEffect				=	FALSE;
 	targetCollectAlgo			=	TARGET_COLLECT_FOCUS_FALLBACK_NONE; //TARGET_COLLECT_FOCUS_FALLBACK_NONE;//TARGET_COLLECT_FOCUS_FALLBACK_NONE;
 	targetCollectType			=	TARGET_TYPE_ITEMS;
 	targetCollectRange			=	10000;		
@@ -33,26 +27,26 @@ INSTANCE Spell_Telekinesis (C_Spell_Proto)
 	targetCollectElev			=	85;
 };
 
+/**
+ * Holds data needed for the telekinese interpolation.
+ */
 class Spell_Telekinesis_Data {
-    var int pCaster;
-	var int pTarget;
-	var int pInterpolator;
+    var int pCaster; // the spell caster
+	var int pTarget; // the target item
+	var int pInterpolator; // pointer to the telekinese Interpolator
 };
+
 instance Spell_Telekinesis_Data@(Spell_Telekinesis_Data);
 
 
-//.text:0061BB70 ; public: void __thiscall zCVob::SetPositionWorld(class zVEC3 const &)
-const int zCVob__SetPositionWorld = 6404976; //0x5EE650  //0x0061BB70
-
-
-
+/**
+ * Checks the state of the telekinesis interpolator and stops the spell.
+ */
 func void _Spell_Telekinesis_MoveTarget(var int hndl) {
+
 	var Spell_Telekinesis_Data data; data = get(hndl);
-	var oCNpc oCSelf; oCSelf = _^(data.pCaster);
-	
-	var oCItem oCTarget; oCTarget = _^(data.pTarget);
-	//MEM_WARN(ConcatStrings("oCTarget.name = ", oCTarget.name));
-	
+	var oCNpc oCSelf; oCSelf = _^(data.pCaster);	
+	var oCItem oCTarget; oCTarget = _^(data.pTarget);	
 	var int spellLevel; spellLevel = oCSelf.aiscriptvars[AIV_SpellLevel];
 	
 	if (spellLevel > 0) {
@@ -75,41 +69,13 @@ func void _Spell_Telekinesis_MoveTarget(var int hndl) {
 	var int vobPosition[3];
 	
 	TELEKINESIS_Interpolate(data.pInterpolator, data.pTarget);
-	//DII_Telekinesis_GetInterpolatedVec(data.pInterpolator, _@(vobPosition[0]));
-	
-	
-	//oCTarget._zCVob_bitfield[0] = oCTarget._zCVob_bitfield[0] & ~zCVob_bitfield0_physicsEnabled;
-	//oCTarget._zCVob_bitfield[0] = oCTarget._zCVob_bitfield[0] & ~zCVob_bitfield0_collDetectionStatic;
-	//oCTarget._zCVob_bitfield[0] = oCTarget._zCVob_bitfield[0] & ~zCVob_bitfield0_collDetectionDynamic;
-	
-	//oCTarget._zCVob_trafoObjToWorld[3] = vobPosition[0];
-	//oCTarget._zCVob_trafoObjToWorld[7] = vobPosition[1];
-	//oCTarget._zCVob_trafoObjToWorld[11] = vobPosition[2];
-	
-	/*var int posPtr; posPtr = _@(vobPosition[0]);
-	
-	
-	// Reposition the vob
-	const int call = 0;
-	if (CALL_Begin(call)) {
-		//CALL_PtrParam(_@(vobPosition));
-		CALL_IntParam(_@(posPtr));
-		CALL__thiscall(_@(data.pTarget), zCVob__SetPositionWorld);
-		call = CALL_End();
-	};*/
 };
 
+/**
+ * Starts the focus item to move.
+ */
 func void _Spell_Telekinesis_MoveTargetStart(var int hndl) {
 
-	//var int hndlCopy; hndlCopy = new(Spell_Telekinesis_Data@);
-	//var Spell_Telekinesis_Data data; data = get(hndl);
-	//var Spell_Telekinesis_Data dataCopy; dataCopy = get(hndlCopy);
-	//dataCopy.pCaster = data.pCaster;
-	//dataCopy.pTarget = data.pTarget;
-	
-	
-	//int DII_Telekinesis_createInterpolator(var int pVobPosition, var int pNpcPosition, var int upMoveAmount, var int speed)
-	//DII_Telekinesis_GetInterpolatedVec(var int pTelekinesisInterpolator, var int pDestVec3)
 	
 	var Spell_Telekinesis_Data data; data = get(hndl);
 	var zCVob target; target = _^(data.pTarget);
@@ -159,8 +125,6 @@ func int Spell_Logic_Telekinesis (var int manaInvested)
 	//MEM_Warn(ConcatStrings("canSee = ", IntToString(canSee)));
 	
 	if (!canSee && (manaInvested == 0)) {
-		//MEM_Warn("Cannot see focus vob!!!");
-		//oCNpcSetFocusVob(_@(self), 0);
 		return SPL_DONTINVEST;
 	};
 	
@@ -180,17 +144,11 @@ func int Spell_Logic_Telekinesis (var int manaInvested)
 		FF_ApplyExtData(_Spell_Telekinesis_MoveTargetStart, TELEKINESIS_MOVEMENT_DELAY, 1, hndl);
 	};
 	
-	//MEM_WARN(ConcatStrings("oCFocus.name = ", oCFocus.name));
-	//MEM_Warn(ConcatStrings("AIV_SpellLevel = ", IntToString(self.aivar[AIV_SpellLevel])));
-	
-	//self.aivar[AIV_SpellLevel] = 2;
 	return SPL_NEXTLEVEL;
 };
 
 func void Spell_Cast_Telekinesis(var int spellLevel)
-{
-	//self.attribute[ATR_MANA] = self.attribute[ATR_MANA] - SPL_Cost_Sleep;			// nicht drin, wegen Kommentar oben
-	
+{	
 	self.aivar[AIV_SpellLevel] = 1;
 	MEM_WARN("Spell_Cast_Telekinesis: called.");
 };
