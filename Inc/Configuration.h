@@ -7,7 +7,7 @@ public:
 	static void load(const std::string &filename);
 	static void save(const std::string &filename);
 
-	static std::string getLogFile();
+	static const std::string& getLogFile();
 	static bool getLogInfos();
 	static bool getLogWarnings();
 	static bool getLogErrors();
@@ -17,13 +17,19 @@ public:
 	static bool getLogTozSpy();
 	static bool getLogToConsole();
 private:
-	static std::string logFile;
-	static bool logInfos;
-	static bool logWarnings;
-	static bool logErrors;
-	static bool logFatals;
-	static bool logToConsole;
-	static bool logToZSpy;
-	static bool logToFile;
-	static bool debugisEnabled;
+
+	struct _Config
+	{
+		std::string logFile = "Nec_log.txt";
+		bool logInfos = false;
+		bool logWarnings = false;
+		bool logErrors = true;
+		bool logFatals = true;
+		bool logToConsole = false;
+		bool logToZSpy = false;
+		bool logToFile = true;
+		bool debugEnabled = false;
+	};
+
+	static _Config mConfig;
 };

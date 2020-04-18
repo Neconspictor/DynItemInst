@@ -140,9 +140,21 @@ void Logger::logAlways(std::stringstream* stream)
 
 	std::string message = util.str();
 
-	writeToFile(message);
-	writeToConsole(Info, message);
-	writeTozSpy(Warning, message);
+
+	if (toConsole)
+	{
+		writeToConsole(Info, message);
+	}
+
+	if (toFile)
+	{
+		writeToFile(message);
+	}
+
+	if (tozSpy)
+	{
+		writeTozSpy(Warning, message);
+	}
 
 	// Clear again
 	util.clear();

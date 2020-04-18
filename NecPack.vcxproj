@@ -105,14 +105,14 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>.\G2ExtSDK;.\Inc;.\minhook-master\include;.\inih-master;$(IncludePath)</IncludePath>
+    <IncludePath>.\G2ExtSDK;.\Inc;.\minhook-master\include;.\inih-master;C:\Development\Repositories\NecPack\boost-1.67.0;$(IncludePath)</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
     <TargetName>Nec</TargetName>
     <OutDir>E:\Program Files (x86)\JoWood\Gothic II Gold\System\Nec\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>.\G2ExtSDK;.\Inc;.\minhook-master\include;.\inih-master;$(IncludePath)</IncludePath>
+    <IncludePath>.\G2ExtSDK;.\Inc;.\minhook-master\include;.\inih-master;C:\Development\Repositories\NecPack\boost-1.67.0;$(IncludePath)</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
     <TargetName>Nec</TargetName>
     <OutDir>E:\Program Files (x86)\JoWood\Gothic II Gold\System\Nec\</OutDir>
