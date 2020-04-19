@@ -1,8 +1,0 @@
-- fixed loading of possible obsolete dii files
-- fixed bug, where quicksave folder wasn't supported for saving dii items
-- equipped items and drawn weapons are right placed, now
-- Runes don't vanish after saving
-- fixed issue with equip and unequip function call while saving and loading
-- spellfxs for items are restored after loading
-- removed double creation of spell effect visuals
-- fixed bug: If two dii items with same instance id are equipped, both will be unequipped!

@@ -1,4 +1,0 @@
--Add an external for deleting a dynamic instance; 
-- add possibility that items that are assigned to the dii to be deleted, can be reassigned to another 
-instance specified by the user.
-- Add external for retrieving the instance name a dii was initialized with (the so-called 'previous' instance)

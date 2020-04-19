@@ -75,7 +75,6 @@ func void TELEKINESIS_Interpolate(var int pTelekinesisInterpolator, var int vobP
         return;
     };
 
-    var int ret;
 	var int adr;
 	adr = GetProcAddress (LoadLibrary (NEC_relativeLibraryPath), "TELEKINESIS_Interpolate");
 	CALL_IntParam(vobPtr);
@@ -106,9 +105,28 @@ func int TELEKINESIS_IsVobSeeable(var int pNpc, var int pVob) {
     return +ret;
 };
 
+
+/**
+ * Clears any not deleted interpoaltors.
+ */
+func void TELEKINESIS_ClearInterpolators() {
+    if (!(NEC_Init_Modules & NEC_TELEKINESIS)) {
+		MEM_Warn("TELEKINESIS_ClearInterpolators: Telekinesis module isn't initialized!");
+        return;
+    };
+
+	var int adr;
+	adr = GetProcAddress (LoadLibrary (NEC_relativeLibraryPath), "TELEKINESIS_ClearInterpolators");
+	CALL__cdecl(adr);
+	
+	MEM_Warn("TELEKINESIS_ClearInterpolators called.");
+};
+
+
 /**
  * Inits the telekinesis module.
  */ 
 func void TELEKINESIS_Init() 
 {
+	TELEKINESIS_ClearInterpolators();
 };
