@@ -27,7 +27,7 @@ If you don't use that module you can skip this section.
 
 Copy the content of the 'extracted neclib.zip'/Levitation/Anims/_compiled folder to _work/data/Anims/_compiled 
 Copy the content of the 'extracted neclib.zip'/Levitation/Anims/Levitation folder to _work/data/Anims/Levitation
-Copy Spell_Levitation.d from 'extracted neclib.zip'/Levitation/Spells to _work/data/Scripts/Content/AI/Magic/Spells
+Copy Spell_Levitation.d from 'extracted neclib.zip'/Levitation to _work/data/Scripts/Content/AI/Magic/Spells
 
 Open _work/data/Scripts/Content/_intern/Constants.d :
 	Increase MAX_SPELL by one
@@ -76,7 +76,7 @@ The levitation spell should be fully funcional, now. Fell free to change the spe
 
 If you don't use that module you can skip this section.
 
-Copy Spell_Telekinesis.d from 'extracted neclib.zip'/Telekinesis/Spells to _work/data/Scripts/Content/AI/Magic/Spells
+Copy Spell_Telekinesis.d from 'extracted neclib.zip'/Telekinesis to _work/data/Scripts/Content/AI/Magic/Spells
 
 
 Open _work/data/Scripts/Content/_intern/Constants.d :
