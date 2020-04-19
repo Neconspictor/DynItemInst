@@ -1312,9 +1312,9 @@ bool checkCollision(oCNpc* hero, const zMAT4& mat)
 
 					const char* materialName = material->GetName().ToChar();
 					bool isGhostOccluder = strcmp(materialName, "GHOSTOCCLUDER") == 0;
-					bool isNW_MISC_FULLALPHA_01 = strcmp(materialName, "NW_MISC_FULLALPHA_01") == 0;
+					//bool isNW_MISC_FULLALPHA_01 = strcmp(materialName, "NW_MISC_FULLALPHA_01") == 0;
 
-					if (isGhostOccluder || isNW_MISC_FULLALPHA_01) {
+					if (isGhostOccluder) {
 						//*bitflag = *bitflag | (1 << 4);
 					}
 
@@ -1325,11 +1325,6 @@ bool checkCollision(oCNpc* hero, const zMAT4& mat)
 						//util::logWarning(&logStream);
 						continue;
 					}
-					else {
-						std::stringstream logStream;
-						logStream << "checkCollision(): collision detected!" << std::endl;
-						util::logWarning(&logStream);
-					}
 
 					if (isGhostOccluder)
 					{
@@ -1339,19 +1334,17 @@ bool checkCollision(oCNpc* hero, const zMAT4& mat)
 						continue;
 					}
 
-					if (isNW_MISC_FULLALPHA_01)
+					/*if (isNW_MISC_FULLALPHA_01)
 					{
-						bool test = false;
-
 						//std::stringstream logStream;
 						//logStream << "checkCollision(): ignore poly with NW_MISC_FULLALPHA_01 material" << std::endl;
 						//util::logWarning(&logStream);
 						continue;
-					}
+					}*/
 
 				
 
-					if (!intersected && !hasNoCollision && !isGhostOccluder && !isNW_MISC_FULLALPHA_01) {
+					if (!intersected && !hasNoCollision && !isGhostOccluder) {
 						intersected = true;
 
 						//std::stringstream logStream;
