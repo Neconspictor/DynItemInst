@@ -1,10 +1,8 @@
 /*////////////////////////////////////////////////////////////////////////////
 
-This file is part of DynItemInst. 
-This file is an extension of the G2ExtSdk file api/g2/zcoption.h
-It had been added the function zCOption::GetDirString() and the enum zTOptionPaths.
+This file is part of neclib.
 
-Copyright © 2015 David Goeth
+Copyright © 2015-2020 David Goeth
 
 All Rights reserved.
 
@@ -26,6 +24,7 @@ SUCH TERMS AND CONDITIONS.
 
 Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 
+/////////////////////////////////////////////////////////////////////////////**/
 /////////////////////////////////////////////////////////////////////////////**/
 
 #ifndef __API_G2_ZCOPTION_H__

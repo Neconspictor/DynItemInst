@@ -1,8 +1,8 @@
 /*////////////////////////////////////////////////////////////////////////////
 
-This file is part of DynItemInst.
+This file is part of neclib.
 
-Copyright © 2015 David Goeth
+Copyright © 2015-2020 David Goeth
 
 All Rights reserved.
 
@@ -40,16 +40,12 @@ public:
 	/**
 	 * Default constructor.
 	 */
-	Module()
-	{	
-	};
+	Module(std::string desc) : mModuleDesc(std::move(desc)){}
 
 	/**
 	 * Default virtual destructor.
 	 */
-	virtual ~Module()
-	{
-	};
+	virtual ~Module() = default;
 
 	/**
 	 * Initializes and hooks target functions needed by this module. 
@@ -66,12 +62,12 @@ protected:
 	/**
 	 *  A description of this module. Should be unique per module.
 	 */
-	std::string moduleDesc;
+	std::string mModuleDesc;
 
 	/**
 	 * This stream is intended to be used for logging purposes.
 	 */
-	static std::stringstream logStream;
+	static std::stringstream mLogStream;
 };
 
 #endif __MODULE_H

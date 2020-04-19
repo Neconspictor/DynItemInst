@@ -1,3 +1,31 @@
+/*////////////////////////////////////////////////////////////////////////////
+
+This file is part of neclib.
+
+Copyright © 2015-2020 David Goeth
+
+All Rights reserved.
+
+THE WORK (AS DEFINED BELOW) IS PROVIDED
+UNDER THE TERMS OF THIS CREATIVE COMMONS
+PUBLIC LICENSE ("CCPL" OR "LICENSE").
+THE WORK IS PROTECTED BY COPYRIGHT AND/OR
+OTHER APPLICABLE LAW. ANY USE OF THE WORK
+OTHER THAN AS AUTHORIZED UNDER THIS LICENSE
+OR COPYRIGHT LAW IS PROHIBITED.
+
+BY EXERCISING ANY RIGHTS TO THE WORK PROVIDED
+HERE, YOU ACCEPT AND AGREE TO BE BOUND BY THE
+TERMS OF THIS LICENSE. TO THE EXTENT THIS
+LICENSE MAY BE CONSIDERED TO BE A CONTRACT,
+THE LICENSOR GRANTS YOU THE RIGHTS CONTAINED
+HERE IN CONSIDERATION OF YOUR ACCEPTANCE OF
+SUCH TERMS AND CONDITIONS.
+
+Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
+
+/////////////////////////////////////////////////////////////////////////////**/
+
 #include <Levitation.h>
 #include <HookManager.h>
 #include <api/g2/zcworld.h>
@@ -136,10 +164,8 @@ int frameTimePast;
 
 
 
-Levitation::Levitation()
-	:Module()
+Levitation::Levitation() :Module("Levitation")
 {
-	moduleDesc = "Levitation";
 }
 
 Levitation::~Levitation()
@@ -178,26 +204,31 @@ void Levitation::hookModule()
 	zCCollObjectCharacterCalcSlideVector = (ZCCollObjectCharacterCalcSlideVector)ZCCOLL_OBJECT_CHARACTER_CALC_SLIDE_VECTOR_ADDRESS;
 
 	HookManager* hookManager = HookManager::getHookManager();
-	hookManager->addFunctionHook((LPVOID*)&zCVobDoFrameActivity, zCVobDoFrameActivityHook, moduleDesc);
-	hookManager->addFunctionHook((LPVOID*)&oCGamePause, oCGamePauseHook, moduleDesc);
-	hookManager->addFunctionHook((LPVOID*)&oCGameUnpause, oCGameUnpauseHook, moduleDesc);	
+	hookManager->addFunctionHook((LPVOID*)&zCVobDoFrameActivity, zCVobDoFrameActivityHook, mModuleDesc);
+	hookManager->addFunctionHook((LPVOID*)&oCGamePause, oCGamePauseHook, mModuleDesc);
+	hookManager->addFunctionHook((LPVOID*)&oCGameUnpause, oCGameUnpauseHook, mModuleDesc);	
 	
-	hookManager->addFunctionHook((LPVOID*)&zCVobUpdatePhysics, zCVobUpdatePhysicsHook, moduleDesc);
-	hookManager->addFunctionHook((LPVOID*)&oCAIHumanPC_ActionMove, oCAIHumanPC_ActionMoveHook, moduleDesc);
+	hookManager->addFunctionHook((LPVOID*)&zCVobUpdatePhysics, zCVobUpdatePhysicsHook, mModuleDesc);
+	hookManager->addFunctionHook((LPVOID*)&oCAIHumanPC_ActionMove, oCAIHumanPC_ActionMoveHook, mModuleDesc);
 }
 
 void Levitation::unHookModule()
 {
 	HookManager* hookManager = HookManager::getHookManager();
-	hookManager->removeFunctionHook((LPVOID*)&zCVobDoFrameActivity, zCVobDoFrameActivityHook, moduleDesc);
-	hookManager->removeFunctionHook((LPVOID*)&oCGamePause, oCGamePauseHook, moduleDesc);
-	hookManager->removeFunctionHook((LPVOID*)&oCGameUnpause, oCGameUnpauseHook, moduleDesc);
-	hookManager->removeFunctionHook((LPVOID*)&zCVobUpdatePhysics, zCVobUpdatePhysicsHook, moduleDesc);
-	hookManager->removeFunctionHook((LPVOID*)&oCAIHumanPC_ActionMove, oCAIHumanPC_ActionMoveHook, moduleDesc);
+	hookManager->removeFunctionHook((LPVOID*)&zCVobDoFrameActivity, zCVobDoFrameActivityHook, mModuleDesc);
+	hookManager->removeFunctionHook((LPVOID*)&oCGamePause, oCGamePauseHook, mModuleDesc);
+	hookManager->removeFunctionHook((LPVOID*)&oCGameUnpause, oCGameUnpauseHook, mModuleDesc);
+	hookManager->removeFunctionHook((LPVOID*)&zCVobUpdatePhysics, zCVobUpdatePhysicsHook, mModuleDesc);
+	hookManager->removeFunctionHook((LPVOID*)&oCAIHumanPC_ActionMove, oCAIHumanPC_ActionMoveHook, mModuleDesc);
 }
 
 zVEC3 levitatePosition;
 bool doHardTests = false;
+
+int Levitation::LEVITATION_IsGamePaused()
+{
+	return gameIsPaused;
+}
 
 void Levitation::zCVobDoFrameActivityHook(void* pThis)
 {
@@ -270,16 +301,16 @@ void Levitation::zCVobSetPhysicsEnabledHook(void* pThis, int second)
 
 void Levitation::oCGamePauseHook(void* pThis, int second)
 {
-	logStream << "Paused Game!" << std::endl;
-	util::logAlways(&logStream);
+	mLogStream << "Paused Game!" << std::endl;
+	util::logAlways(&mLogStream);
 	Levitation::gameIsPaused = true;
 	oCGamePause(pThis, second);
 }
 
 void Levitation::oCGameUnpauseHook(void* pThis)
 {
-	logStream << "Unpaused Game!" << std::endl;
-	util::logAlways(&logStream);
+	mLogStream << "Unpaused Game!" << std::endl;
+	util::logAlways(&mLogStream);
 	Levitation::gameIsPaused = false;
 	oCGameUnpause(pThis);
 }
@@ -326,9 +357,9 @@ void Levitation::zCVobCheckAndResolveCollisionsHook(void* pThis)
 	{
 		zMAT4* mat = (zMAT4*)((char*)collisionObject + 0x44);
 		zVEC3 translation(mat->_14, mat->_24, mat->_34);
-		logStream << "zCVobCheckAndResolveCollisionsHook (before):" << std::endl;
-		logStream << "\ttranslation = " << translation << std::endl;
-		util::logWarning(&logStream);
+		mLogStream << "zCVobCheckAndResolveCollisionsHook (before):" << std::endl;
+		mLogStream << "\ttranslation = " << translation << std::endl;
+		util::logWarning(&mLogStream);
 	}
 	zCVobCheckAndResolveCollisions(pThis);
 
@@ -336,17 +367,17 @@ void Levitation::zCVobCheckAndResolveCollisionsHook(void* pThis)
 	{
 		zMAT4* mat = (zMAT4*)((char*)collisionObject + 0x44);
 		zVEC3 translation(mat->_14, mat->_24, mat->_34);
-		logStream << "zCVobCheckAndResolveCollisionsHook (after):" << std::endl;
-		logStream << "\ttranslation = " << translation << std::endl;
-		util::logWarning(&logStream);
+		mLogStream << "zCVobCheckAndResolveCollisionsHook (after):" << std::endl;
+		mLogStream << "\ttranslation = " << translation << std::endl;
+		util::logWarning(&mLogStream);
 	}
 }
 
 void Levitation::zCTriggerOnTouchHook(void* pThis, zCVob* vob)
 {
 	if (vob == oCNpc::GetHero()) {
-		logStream << "zCTriggerOnTouch() called on hero!!" << std::endl;
-		util::debug(&logStream);
+		mLogStream << "zCTriggerOnTouch() called on hero!!" << std::endl;
+		util::debug(&mLogStream);
 		zCTriggerOnTouch(pThis, vob);
 	}
 }
@@ -355,8 +386,8 @@ int Levitation::zCVobHasEnoughSpaceHook(void* pThis, zVEC3& second)
 {
 	int result = zCVobHasEnoughSpace(pThis, second);
 	if (pThis == oCNpc::GetHero()) {
-		logStream << "called for hero!: " << result << std::endl;
-		util::debug(&logStream);
+		mLogStream << "called for hero!: " << result << std::endl;
+		util::debug(&mLogStream);
 	}
 	return result;
 }
@@ -387,14 +418,14 @@ int Levitation::zCCollObjectCharacterCalcSlideVectorHook(void* pThis, zVEC3 cons
 	{
 		zMAT4* mat = (zMAT4*)((char*)collisionObject + 0x44);
 		zVEC3 translation(mat->_14, mat->_24, mat->_34);
-		logStream << "zCCollObjectCharacterCalcSlideVectorHook (before):" << std::endl;
-		logStream << "\ttranslation = " << translation << std::endl;
-		logStream << "\tvec1 = " << vec1 << std::endl;
-		logStream << "\tvec2 = " << vec2 << std::endl;
-		logStream << "\tvec3 = " << vec3 << std::endl;
-		logStream << "\tvec4 = " << vec4 << std::endl;
-		logStream << "\tfloatValue = " << floatValue << std::endl;
-		util::logWarning(&logStream);
+		mLogStream << "zCCollObjectCharacterCalcSlideVectorHook (before):" << std::endl;
+		mLogStream << "\ttranslation = " << translation << std::endl;
+		mLogStream << "\tvec1 = " << vec1 << std::endl;
+		mLogStream << "\tvec2 = " << vec2 << std::endl;
+		mLogStream << "\tvec3 = " << vec3 << std::endl;
+		mLogStream << "\tvec4 = " << vec4 << std::endl;
+		mLogStream << "\tfloatValue = " << floatValue << std::endl;
+		util::logWarning(&mLogStream);
 	}
 
 	int result = zCCollObjectCharacterCalcSlideVector(pThis, vec1, vec2, vec3, vec4, floatValue);
@@ -403,15 +434,15 @@ int Levitation::zCCollObjectCharacterCalcSlideVectorHook(void* pThis, zVEC3 cons
 	{
 		zMAT4* mat = (zMAT4*)((char*)collisionObject + 0x44);
 		zVEC3 translation(mat->_14, mat->_24, mat->_34);
-		logStream << "zCCollObjectCharacterCalcSlideVectorHook (after):" << std::endl;
-		logStream << "\ttranslation = " << translation << std::endl;
-		logStream << "\tvec1 = " << vec1 << std::endl;
-		logStream << "\tvec2 = " << vec2 << std::endl;
-		logStream << "\tvec3 = " << vec3 << std::endl;
-		logStream << "\tvec4 = " << vec4 << std::endl;
-		logStream << "\tfloatValue = " << floatValue << std::endl;
-		util::logWarning(&logStream);
-		util::logWarning(&logStream);
+		mLogStream << "zCCollObjectCharacterCalcSlideVectorHook (after):" << std::endl;
+		mLogStream << "\ttranslation = " << translation << std::endl;
+		mLogStream << "\tvec1 = " << vec1 << std::endl;
+		mLogStream << "\tvec2 = " << vec2 << std::endl;
+		mLogStream << "\tvec3 = " << vec3 << std::endl;
+		mLogStream << "\tvec4 = " << vec4 << std::endl;
+		mLogStream << "\tfloatValue = " << floatValue << std::endl;
+		util::logWarning(&mLogStream);
+		util::logWarning(&mLogStream);
 	}
 
 	return result;
@@ -424,9 +455,9 @@ zMAT4& Levitation::zMAT4SetTranslationHook(zMAT4* pThis, zVEC3 const& translatio
 	if (activatezMAT4Logging)
 	{
 		zVEC3 trans(pThis->_14, pThis->_24, pThis->_34);
-		logStream << "zMAT4SetTranslationHook (before):" << std::endl;
-		logStream << "\ttrans = " << trans << std::endl;
-		util::logWarning(&logStream);
+		mLogStream << "zMAT4SetTranslationHook (before):" << std::endl;
+		mLogStream << "\ttrans = " << trans << std::endl;
+		util::logWarning(&mLogStream);
 	}
 
 	zMAT4& result = zMAT4SetTranslation(pThis, translation);
@@ -434,9 +465,9 @@ zMAT4& Levitation::zMAT4SetTranslationHook(zMAT4* pThis, zVEC3 const& translatio
 	if (activatezMAT4Logging)
 	{
 		zVEC3 trans(pThis->_14, pThis->_24, pThis->_34);
-		logStream << "zMAT4SetTranslationHook (after):" << std::endl;
-		logStream << "\ttrans = " << trans << std::endl;
-		util::logWarning(&logStream);
+		mLogStream << "zMAT4SetTranslationHook (after):" << std::endl;
+		mLogStream << "\ttrans = " << trans << std::endl;
+		util::logWarning(&mLogStream);
 	}
 
 	return result;
@@ -455,9 +486,9 @@ void Levitation::zCVobCalcGroundPolyHook(void* pThis)
 	{
 		zMAT4* mat = (zMAT4*)((char*)collisionObject + 0x44);
 		zVEC3 translation(mat->_14, mat->_24, mat->_34);
-		logStream << "zCVobCalcGroundPolyHook (before):" << std::endl;
-		logStream << "\ttranslation = " << translation << std::endl;
-		util::logWarning(&logStream);
+		mLogStream << "zCVobCalcGroundPolyHook (before):" << std::endl;
+		mLogStream << "\ttranslation = " << translation << std::endl;
+		util::logWarning(&mLogStream);
 	}
 	zCVobCalcGroundPoly(pThis);
 
@@ -465,9 +496,9 @@ void Levitation::zCVobCalcGroundPolyHook(void* pThis)
 	{
 		zMAT4* mat = (zMAT4*)((char*)collisionObject + 0x44);
 		zVEC3 translation(mat->_14, mat->_24, mat->_34);
-		logStream << "zCVobCalcGroundPolyHook (after):" << std::endl;
-		logStream << "\ttranslation = " << translation << std::endl;
-		util::logWarning(&logStream);
+		mLogStream << "zCVobCalcGroundPolyHook (after):" << std::endl;
+		mLogStream << "\ttranslation = " << translation << std::endl;
+		util::logWarning(&mLogStream);
 	}
 }
 
@@ -523,9 +554,9 @@ void Levitation::zCVobEndMovementHook(void* pThis, int arg0)
 	{
 		zMAT4* mat = (zMAT4*)((char*)collisionObject + 0x44);
 		zVEC3 translation(mat->_14, mat->_24, mat->_34);
-		logStream << "zCVobEndMovementHook (before):" << std::endl;
-		logStream << "\ttranslation = " << translation << std::endl;
-		util::logWarning(&logStream);
+		mLogStream << "zCVobEndMovementHook (before):" << std::endl;
+		mLogStream << "\ttranslation = " << translation << std::endl;
+		util::logWarning(&mLogStream);
 	}
 	zCVobEndMovement(pThis, arg0);
 
@@ -533,9 +564,9 @@ void Levitation::zCVobEndMovementHook(void* pThis, int arg0)
 	{
 		zMAT4* mat = (zMAT4*)((char*)collisionObject + 0x44);
 		zVEC3 translation(mat->_14, mat->_24, mat->_34);
-		logStream << "zCVobEndMovementHook (after):" << std::endl;
-		logStream << "\ttranslation = " << translation << std::endl;
-		util::logWarning(&logStream);
+		mLogStream << "zCVobEndMovementHook (after):" << std::endl;
+		mLogStream << "\ttranslation = " << translation << std::endl;
+		util::logWarning(&mLogStream);
 	}
 }
 
@@ -628,9 +659,9 @@ void Levitation::zCCollObjectCharacterDetectCollisionsSelfHook(void* pThis, void
 	{
 		zMAT4* mat = (zMAT4*)((char*)pThis + 0x44);
 		zVEC3 translation (mat->_14, mat->_24, mat->_34);
-		logStream << "zCCollObjectCharacterDetectCollisionsSelfHook (before):" << std::endl;
-		logStream << "\ttranslation = " << translation << std::endl;
-		util::logWarning(&logStream);
+		mLogStream << "zCCollObjectCharacterDetectCollisionsSelfHook (before):" << std::endl;
+		mLogStream << "\ttranslation = " << translation << std::endl;
+		util::logWarning(&mLogStream);
 
 
 	}
@@ -641,9 +672,9 @@ void Levitation::zCCollObjectCharacterDetectCollisionsSelfHook(void* pThis, void
 	{
 		zMAT4* mat = (zMAT4*)((char*)pThis + 0x44);
 		zVEC3 translation(mat->_14, mat->_24, mat->_34);
-		logStream << "zCCollObjectCharacterDetectCollisionsSelfHook (after):" << std::endl;
-		logStream << "\ttranslation = " << translation << std::endl;
-		util::logWarning(&logStream);
+		mLogStream << "zCCollObjectCharacterDetectCollisionsSelfHook (after):" << std::endl;
+		mLogStream << "\ttranslation = " << translation << std::endl;
+		util::logWarning(&mLogStream);
 	}
 }
 
@@ -665,10 +696,10 @@ void Levitation::zCCollObjectCharacterFindFloorWaterCeilingHook(void* pThis, zVE
 	{
 		zMAT4* mat = (zMAT4*)((char*)pThis + 0x44);
 		zVEC3 translation(mat->_14, mat->_24, mat->_34);
-		logStream << "zCCollObjectCharacterFindFloorWaterCeilingHook (before):" << std::endl;
-		logStream << "\ttranslation = " << translation << std::endl;
-		logStream << "\tzTSpatialState = " << *zTSpatialState << std::endl;
-		util::logWarning(&logStream);
+		mLogStream << "zCCollObjectCharacterFindFloorWaterCeilingHook (before):" << std::endl;
+		mLogStream << "\ttranslation = " << translation << std::endl;
+		mLogStream << "\tzTSpatialState = " << *zTSpatialState << std::endl;
+		util::logWarning(&mLogStream);
 	}
 	zCCollObjectCharacterFindFloorWaterCeiling(pThis, vec1, zTSpatialState);
 
@@ -676,10 +707,10 @@ void Levitation::zCCollObjectCharacterFindFloorWaterCeilingHook(void* pThis, zVE
 	{
 		zMAT4* mat = (zMAT4*)((char*)pThis + 0x44);
 		zVEC3 translation(mat->_14, mat->_24, mat->_34);
-		logStream << "zCCollObjectCharacterFindFloorWaterCeilingHook (after):" << std::endl;
-		logStream << "\ttranslation = " << translation << std::endl;
-		logStream << "\tzTSpatialState = " << *zTSpatialState << std::endl;
-		util::logWarning(&logStream);
+		mLogStream << "zCCollObjectCharacterFindFloorWaterCeilingHook (after):" << std::endl;
+		mLogStream << "\ttranslation = " << translation << std::endl;
+		mLogStream << "\tzTSpatialState = " << *zTSpatialState << std::endl;
+		util::logWarning(&mLogStream);
 	}
 }
 
@@ -703,8 +734,8 @@ int Levitation::zCAIPlayerCheckEnoughSpaceMoveDirHook(void* pThis, zVEC3 const& 
 	int result = zCAIPlayerCheckEnoughSpaceMoveDir(pThis, vec, second);
 	oCNpc* hero = oCNpc::GetHero();
 	if (result && hero != NULL && (pThis == hero) && isLevitationActive()) {
-		logStream << "zCAIPlayerCheckEnoughSpaceMoveDirHook: called!"  << std::endl;
-		util::logInfo(&logStream);
+		mLogStream << "zCAIPlayerCheckEnoughSpaceMoveDirHook: called!"  << std::endl;
+		util::logInfo(&mLogStream);
 		return 0;
 	}
 
@@ -841,7 +872,7 @@ zVEC3 Levitation::levitate() {
 	if (!isLevitationActive()) return positionAdd;
 	if (Levitation::gameIsPaused) return positionAdd;
 
-	std::stringstream logStream;
+	std::stringstream mLogStream;
 
 	oCNpc* hero = oCNpc::GetHero();
 	//if (oCNpcIsMovLock(hero)) return positionAdd;
@@ -1095,21 +1126,21 @@ bool checkVobCollision__checkVob(zCVob* vob, const zTBBox3D& boundingBox)
 {
 	if (vob == nullptr) return false;
 
-	std::stringstream logStream;
+	std::stringstream mLogStream;
 	zCArray<void*>* leafObjects = &vob->vobLeafList;
 	zCPolygon** polys;
 	//int third;
-	logStream << "checkVobCollision__checkVob(): Check object with leaf number: " << leafObjects->GetSize() << std::endl;
-	logStream << "checkVobCollision__checkVob(): visual name: " << vob->GetObjectName().ToChar() << std::endl;
-	util::logWarning(&logStream);
+	mLogStream << "checkVobCollision__checkVob(): Check object with leaf number: " << leafObjects->GetSize() << std::endl;
+	mLogStream << "checkVobCollision__checkVob(): visual name: " << vob->GetObjectName().ToChar() << std::endl;
+	util::logWarning(&mLogStream);
 
 	for (unsigned int i = 0; i < leafObjects->GetSize(); ++i)
 	{
 		zCBspBase_Small* leaf = (zCBspBase_Small*)leafObjects->GetItem(i);
 		//Levitation::zCBspBaseCollectPolysInBBox3D(leaf, boundingBox, polys, third);
-		logStream << "checkVobCollision__checkVob(): leave has poly count: " << leaf->numPolys << std::endl;
+		mLogStream << "checkVobCollision__checkVob(): leave has poly count: " << leaf->numPolys << std::endl;
 		//logStream << "checkVobCollision__checkBspLeaf(): Found polys: " << third << std::endl;
-		util::logWarning(&logStream);
+		util::logWarning(&mLogStream);
 
 		zCPolygon** polyList = (zCPolygon**)leaf->polyList;
 
@@ -1122,8 +1153,8 @@ bool checkVobCollision__checkVob(zCVob* vob, const zTBBox3D& boundingBox)
 			//util::logWarning(&logStream);
 			if (poly->CheckBBoxPolyIntersection(boundingBox))
 			{
-				logStream << "checkVobCollision__checkVob(): Intersection found! " << std::endl;
-				util::logWarning(&logStream);
+				mLogStream << "checkVobCollision__checkVob(): Intersection found! " << std::endl;
+				util::logWarning(&mLogStream);
 				return true;
 			}
 		}
@@ -1140,14 +1171,14 @@ bool Levitation::checkVobCollision(void* zCBspBaseObject, zCVob* testedVob, cons
 
 	if (collectedVobs.GetSize() > 0)
 	{
-		std::stringstream logStream;
-		logStream << "checkVobCollision(): Found vobs!: " << collectedVobs.GetSize() << std::endl;
-		util::logWarning(&logStream);
+		std::stringstream mLogStream;
+		mLogStream << "checkVobCollision(): Found vobs!: " << collectedVobs.GetSize() << std::endl;
+		util::logWarning(&mLogStream);
 
 		for (unsigned int i = 0; i < collectedVobs.GetSize(); ++i)
 		{
-			logStream << "checkVobCollision(): test vob with number: " << i << std::endl;
-			util::logWarning(&logStream);
+			mLogStream << "checkVobCollision(): test vob with number: " << i << std::endl;
+			util::logWarning(&mLogStream);
 
 			zCVob* vob = collectedVobs.GetItem(i);
 			if (vob != testedVob && vob != nullptr)
@@ -1277,7 +1308,7 @@ bool checkCollision(oCNpc* hero, const zMAT4& mat)
 
 void Levitation::doCustomCollisionCheck(oCNpc* npc) {
 
-	std::stringstream logStream;
+	std::stringstream mLogStream;
 	zTBBox3D bBox = LevitationData::zCModelGetBBox3D(npc->GetModel());// ->GetBBox3D();
 	zVEC3 pos = npc->GetPosition();
 	zMAT4* mat = &(npc->trafoObjToWorld);

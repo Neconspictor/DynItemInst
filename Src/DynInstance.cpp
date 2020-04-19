@@ -1,8 +1,8 @@
 /*////////////////////////////////////////////////////////////////////////////
 
-This file is part of DynItemInst.
+This file is part of neclib.
 
-Copyright © 2015 David Goeth
+Copyright © 2015-2020 David Goeth
 
 All Rights reserved.
 
@@ -24,7 +24,7 @@ SUCH TERMS AND CONDITIONS.
 
 Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 
-/////////////////////////////////////////////////////////////////////////////*/
+/////////////////////////////////////////////////////////////////////////////**/
 
 #include "DynInstance.h"
 #include "api/g2/zcparser.h"
@@ -35,7 +35,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <api/g2/zcworld.h>
 
 using namespace std;
-std::stringstream DynInstance::logStream;
+std::stringstream DynInstance::mLogStream;
 
 DynInstance::DynInstance()
 {
@@ -51,7 +51,7 @@ DynInstance::~DynInstance()
 }
 
 struct RESTORE_PREVIOUS_ID_PARAMS {
-	std::stringstream* logStream;
+	std::stringstream* mLogStream;
 	int instanceID;
 	int previousID;
 };
@@ -64,8 +64,8 @@ static void restorePreviousId(void* obj, void* param, oCItem* itm) {
 
 	if (itm && (itm->GetInstance() == instanceID))
 	{
-		*params->logStream << "item has instanceId marked as reusable: " << itm->description.ToChar() << endl;
-		util::debug(params->logStream);
+		*params->mLogStream << "item has instanceId marked as reusable: " << itm->description.ToChar() << endl;
+		util::debug(params->mLogStream);
 
 		ObjectManager* manager = ObjectManager::getObjectManager();
 		manager->setInstanceId(itm, params->previousID);
@@ -798,18 +798,18 @@ void DII_UserData::assertEqualAmounts()
 
 	if (expectedIntAmount != userData.intAmount) {
 
-		std::stringstream logStream;
-		logStream << "DII_UserData::assertEqualAmounts: int amount (" << userData.intAmount <<
+		std::stringstream mLogStream;
+		mLogStream << "DII_UserData::assertEqualAmounts: int amount (" << userData.intAmount <<
 				") doesn't match defined int amount (" << expectedIntAmount << ")"<< endl;
-		util::logFatal(&logStream);
+		util::logFatal(&mLogStream);
 	}
 
 	if (expectedStrAmount != userData.strAmount) {
 
-		std::stringstream logStream;
-		logStream << "DII_UserData::assertEqualAmounts: string amount (" << userData.strAmount <<
+		std::stringstream mLogStream;
+		mLogStream << "DII_UserData::assertEqualAmounts: string amount (" << userData.strAmount <<
 			") doesn't match defined string amount (" << expectedStrAmount << ")" << endl;
-		util::logFatal(&logStream);
+		util::logFatal(&mLogStream);
 	}
 }
 

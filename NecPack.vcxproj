@@ -14,10 +14,9 @@
     <ClInclude Include="Inc\AdditMemory.h" />
     <ClInclude Include="Inc\Configuration.h" />
     <ClInclude Include="Inc\Constants.h" />
-    <ClInclude Include="Inc\CustomNpcFocus.h" />
     <ClInclude Include="Inc\DllMain.h" />
     <ClInclude Include="Inc\DII.h" />
-    <ClInclude Include="Inc\DaedalusExports.h" />
+    <ClInclude Include="Inc\General.h" />
     <ClInclude Include="Inc\HookManager.h" />
     <ClInclude Include="Inc\ISerialization.h" />
     <ClInclude Include="Inc\DynInstance.h" />
@@ -50,12 +49,9 @@
     <ClCompile Include="minhook-master\src\trampoline.c" />
     <ClCompile Include="Src\api\g2\zcpar_symbol.cpp" />
     <ClCompile Include="Src\Configuration.cpp" />
-    <ClCompile Include="Src\CustomNpcFocus.cpp" />
     <ClCompile Include="Src\DllMain.cpp" />
     <ClCompile Include="Src\DII.cpp" />
-    <ClCompile Include="Src\DaedalusExports.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-    </ClCompile>
+    <ClCompile Include="Src\General.cpp" />
     <ClCompile Include="Src\HookManager.cpp" />
     <ClCompile Include="Src\DynInstance.cpp" />
     <ClCompile Include="Src\Levitation.cpp" />
@@ -67,7 +63,6 @@
     <ClCompile Include="Src\Util.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="doc\notes.txt" />
     <None Include="exports.def">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
     </None>

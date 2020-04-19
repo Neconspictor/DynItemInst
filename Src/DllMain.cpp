@@ -1,8 +1,8 @@
 /*////////////////////////////////////////////////////////////////////////////
 
-This file is part of DynItemInst.
+This file is part of neclib.
 
-Copyright © 2015 David Goeth
+Copyright © 2015-2020 David Goeth
 
 All Rights reserved.
 
@@ -24,7 +24,7 @@ SUCH TERMS AND CONDITIONS.
 
 Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 
-/////////////////////////////////////////////////////////////////////////////*/
+/////////////////////////////////////////////////////////////////////////////**/
 
 #include <DllMain.h>
 #include <HookManager.h>
@@ -32,7 +32,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <Util.h>
 #include <iostream>
 
-std::stringstream logStream;
+std::stringstream mLogStream;
 
 /**
  * Hooks needed target functions.
@@ -64,12 +64,12 @@ BOOL APIENTRY DllMain( HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpRese
     case DLL_PROCESS_ATTACH: 
 		std::cout << "You should always see me!" << std::endl;
 		util::setModuleHandle(hModule);
-		logStream<< "DLL_Process_Attach called."<< std::endl;
-		Logger::getLogger()->logAlways(&logStream);
+		mLogStream<< "DLL_Process_Attach called."<< std::endl;
+		Logger::getLogger()->logAlways(&mLogStream);
 		break;
 	case DLL_PROCESS_DETACH:
-		logStream<< "DLL_Process_Detach called."<< std::endl;
-		Logger::getLogger()->logAlways(&logStream);
+		mLogStream<< "DLL_Process_Detach called."<< std::endl;
+		Logger::getLogger()->logAlways(&mLogStream);
 		Unhook();
 		Logger::release();
 		break;

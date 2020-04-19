@@ -1,8 +1,8 @@
 /*////////////////////////////////////////////////////////////////////////////
 
-This file is part of DynItemInst.
+This file is part of neclib.
 
-Copyright © 2015 David Goeth
+Copyright © 2015-2020 David Goeth
 
 All Rights reserved.
 
@@ -24,7 +24,7 @@ SUCH TERMS AND CONDITIONS.
 
 Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 
-/////////////////////////////////////////////////////////////////////////////*/
+/////////////////////////////////////////////////////////////////////////////**/
 
 #include <zCOptionExtended.h>
 #include "ObjectManager.h"
@@ -42,7 +42,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <api/g2/oCObjectFactory.h>
 #include <api/g2/oCItemExtended.h>
 #include <Constants.h>
-#include <DaedalusExports.h>
+#include <DII.h>
 
 using namespace std;
 using namespace constants;
@@ -59,11 +59,11 @@ bool ObjectManager::addProxy(const zSTRING & sourceInstance, const zSTRING & tar
 	//We only add a proxy if sourceInstance isn't proxied yet
 	auto sourceAlreadyThereIT = mProxiesNames.find(sourceInstance2);
 	if (sourceAlreadyThereIT != mProxiesNames.end()) {
-		logStream << __FUNCSIG__ << ": Cannot add proxy (" << sourceInstance.ToChar() << ", " << targetInstance.ToChar()
+		mLogStream << __FUNCSIG__ << ": Cannot add proxy (" << sourceInstance.ToChar() << ", " << targetInstance.ToChar()
 			<< ") since their already exists another proxy path: ("
 			<< sourceAlreadyThereIT->first << ", " << sourceAlreadyThereIT->second << ")" << std::endl;
 
-		util::logWarning(&logStream);
+		util::logWarning(&mLogStream);
 		return false;
 	}
 
@@ -83,25 +83,25 @@ bool ObjectManager::addProxy(const zSTRING & sourceInstance, const zSTRING & tar
 
 	// We don't want to proxy invalid parser symbol indices
 	if (sourceInstanceID == -1) {
-		logStream << __FUNCSIG__ << ": Cannot add proxy (" << sourceInstance.ToChar() << ", " << targetInstance.ToChar()
+		mLogStream << __FUNCSIG__ << ": Cannot add proxy (" << sourceInstance.ToChar() << ", " << targetInstance.ToChar()
 			<< ") since source instance index is not a valid parser symbol index!" << std::endl;
-		util::logWarning(&logStream);
+		util::logWarning(&mLogStream);
 		return false;
 	}
 
 
 	if (targetInstanceID == -1) {
-		logStream << __FUNCSIG__ << ": Cannot add proxy (" << sourceInstance.ToChar() << ", " << targetInstance.ToChar()
+		mLogStream << __FUNCSIG__ << ": Cannot add proxy (" << sourceInstance.ToChar() << ", " << targetInstance.ToChar()
 			<< ") since target instance index is not a valid parser symbol index!" << std::endl;
-		util::logWarning(&logStream);
+		util::logWarning(&mLogStream);
 		return false;
 	}
 	
 	// We don't want self proxying
 	if (targetInstanceID == sourceInstanceID) {
-		logStream << __FUNCSIG__ << ": Cannot add proxy (" << sourceInstance.ToChar() << ", " << targetInstance.ToChar()
+		mLogStream << __FUNCSIG__ << ": Cannot add proxy (" << sourceInstance.ToChar() << ", " << targetInstance.ToChar()
 			<< ") since self proxying isn't allowed!" << std::endl;
-		util::logWarning(&logStream);
+		util::logWarning(&mLogStream);
 		return false;
 	}
 
@@ -110,9 +110,9 @@ bool ObjectManager::addProxy(const zSTRING & sourceInstance, const zSTRING & tar
 	while (it != mProxies.end()) {
 		auto target = it->second;
 		if (target == sourceInstanceID) {
-			logStream << __FUNCSIG__ << ": Cannot add proxy (" << sourceInstance.ToChar() << ", " << targetInstance.ToChar() 
+			mLogStream << __FUNCSIG__ << ": Cannot add proxy (" << sourceInstance.ToChar() << ", " << targetInstance.ToChar() 
 				<< ") since it would result into circle proxying!" << std::endl;
-			util::logWarning(&logStream);
+			util::logWarning(&mLogStream);
 			return false;
 		}
 		it = mProxies.find(target);
@@ -248,8 +248,8 @@ void ObjectManager::release()
 
 int ObjectManager::createNewInstanceId(oCItem* item, const std::string& instanceName) {
 	if (item == NULL) {
-		logStream << "ObjectManager::createNewInstanceId: item is null!" << std::endl;
-		util::logWarning(&logStream);
+		mLogStream << "ObjectManager::createNewInstanceId: item is null!" << std::endl;
+		util::logWarning(&mLogStream);
 		return 0;
 	}
 
@@ -261,8 +261,8 @@ int ObjectManager::createNewInstanceId(oCItem* item, const std::string& instance
 
 
 	if (prototypeSymbol == NULL) {
-		logStream << "ObjectManager::createNewInstanceId: item parser symbol is null!" << std::endl;
-		util::logWarning(&logStream);
+		mLogStream << "ObjectManager::createNewInstanceId: item parser symbol is null!" << std::endl;
+		util::logWarning(&mLogStream);
 		return 0;
 	}
 
@@ -272,7 +272,7 @@ int ObjectManager::createNewInstanceId(oCItem* item, const std::string& instance
 	int instanceParserSymbolID = *indexCount;
 
 	if (!createNewInstanceWithoutExistingId(item, instanceParserSymbolID, instanceName)) {
-		logStream << "ObjectManager::createNewInstanceId: Couldn't create new instance '" << instanceName << "'" << endl;
+		mLogStream << "ObjectManager::createNewInstanceId: Couldn't create new instance '" << instanceName << "'" << endl;
 		return 0;
 	}
 
@@ -309,8 +309,8 @@ void ObjectManager::deleteDII(int parserSymbolIndex)
 
 	// Note: We expect that exactly one entry was deleted.
 	if (deleteCount != 1) {
-		logStream << "ObjectManager::deleteDII: Assertion error: deleteCount is '" << deleteCount << "' but we expected 1" << endl;
-		util::logFatal(&logStream);
+		mLogStream << "ObjectManager::deleteDII: Assertion error: deleteCount is '" << deleteCount << "' but we expected 1" << endl;
+		util::logFatal(&mLogStream);
 	}
 }
 
@@ -319,8 +319,8 @@ void ObjectManager::registerInstance(int instanceIdParserSymbolIndex, std::uniqu
 	auto it = mNewInstanceMap.find(instanceIdParserSymbolIndex);
 	if (it != mNewInstanceMap.end())
 	{
-		logStream << "Instance id already exists! Nothing will be created." << endl;
-		util::debug(&logStream, Logger::Warning);
+		mLogStream << "Instance id already exists! Nothing will be created." << endl;
+		util::debug(&mLogStream, Logger::Warning);
 		return;
 	}
 
@@ -333,10 +333,10 @@ void ObjectManager::releaseInstances() {
 	int allocatedSize = mNewInstanceMap.size();
 	int* symTableSize = getParserInstanceCount();
 	*symTableSize = *symTableSize - allocatedSize;
-	logStream << "ObjectManager::releaseInstances(): allocatedSize = " << allocatedSize << endl;
-	util::logAlways(&logStream);
-	logStream << "ObjectManager::releaseInstances(): symTableSize = " << *symTableSize << endl;
-	util::logAlways(&logStream);
+	mLogStream << "ObjectManager::releaseInstances(): allocatedSize = " << allocatedSize << endl;
+	util::logAlways(&mLogStream);
+	mLogStream << "ObjectManager::releaseInstances(): symTableSize = " << *symTableSize << endl;
+	util::logAlways(&mLogStream);
 
 	// clear all data structures
 	mNewInstanceMap.clear();
@@ -353,8 +353,8 @@ bool ObjectManager::assignInstanceId(oCItem* item, int instanceIdParserSymbolInd
 	auto it = mNewInstanceMap.find(instanceIdParserSymbolIndex);
 	if (it == mNewInstanceMap.end())
 	{
-		logStream<< "ObjectManager::assignInstanceId: instance id wasn't found: " << instanceIdParserSymbolIndex << std::endl;
-		util::debug(&logStream, Logger::Warning);
+		mLogStream<< "ObjectManager::assignInstanceId: instance id wasn't found: " << instanceIdParserSymbolIndex << std::endl;
+		util::debug(&mLogStream, Logger::Warning);
 		return false;
 	}
 	
@@ -362,8 +362,8 @@ bool ObjectManager::assignInstanceId(oCItem* item, int instanceIdParserSymbolInd
 
 	if(!initByNewInstanceId(item))
 	{
-		logStream << "ObjectManager::assignInstanceId: Item Initialisation failed!" << std::endl;
-		util::debug(&logStream, Logger::Warning);
+		mLogStream << "ObjectManager::assignInstanceId: Item Initialisation failed!" << std::endl;
+		util::debug(&mLogStream, Logger::Warning);
 		return false;
 	};
 	return true;
@@ -510,7 +510,7 @@ bool ObjectManager::assignInstanceId2(oCItem* item, int instanceIdParserSymbolIn
 	//oCItemSaveInsertEffect(item);
 
 	//TODO: Verify!!!
-	DaedalusExports::DII_DeleteItem(copy);
+	DII::DII_DeleteItem(copy);
 
 	return true;
 };
@@ -545,8 +545,8 @@ void ObjectManager::setDynInstanceId(oCItem* item, int instanceIdParserSymbolInd
 		setInstanceId(item, instanceIdParserSymbolIndex);
 	} else
 	{
-		logStream << "ObjectManager::setInstanceId: parameter id has no assigned index. Nothing will be done." << endl;
-		util::debug(&logStream, Logger::Warning);
+		mLogStream << "ObjectManager::setInstanceId: parameter id has no assigned index. Nothing will be done." << endl;
+		util::debug(&mLogStream, Logger::Warning);
 	}
 };
 
@@ -602,11 +602,11 @@ void ObjectManager::saveNewInstances(char* directoryPath, char* filename) {
 		}
 	}
 	catch (const std::exception & e) {
-		logStream << "exception msg: " << e.what() << std::endl;
-		util::logAlways(&logStream);
+		mLogStream << "exception msg: " << e.what() << std::endl;
+		util::logAlways(&mLogStream);
 
-		logStream << __FUNCSIG__ << ": Couldn't process " << fullpath << std::endl;
-		util::logFatal(&logStream);
+		mLogStream << __FUNCSIG__ << ": Couldn't process " << fullpath << std::endl;
+		util::logFatal(&mLogStream);
 	}
 }
 
@@ -680,17 +680,17 @@ void ObjectManager::loadNewInstances(char* filename) {
 				addSymbolToSymbolTable(symbol);
 			}
 			if (!addProxy(source, target)) {
-				logStream << __FUNCSIG__ << ": Couldn't load proxy (" << sourceInstanceName << ", " << targetInstanceName << ")" << std::endl;
-				util::logFatal(&logStream);
+				mLogStream << __FUNCSIG__ << ": Couldn't load proxy (" << sourceInstanceName << ", " << targetInstanceName << ")" << std::endl;
+				util::logFatal(&mLogStream);
 			}
 		}
 	}
 	catch (const std::exception& e) {
-		logStream << "exception msg: " << e.what() << std::endl;
-		util::logAlways(&logStream);
+		mLogStream << "exception msg: " << e.what() << std::endl;
+		util::logAlways(&mLogStream);
 
-		logStream << __FUNCSIG__ << ": Couldn't process " << filename << std::endl;
-		util::logFatal(&logStream);
+		mLogStream << __FUNCSIG__ << ": Couldn't process " << filename << std::endl;
+		util::logFatal(&mLogStream);
 	}
 
 };
@@ -740,8 +740,8 @@ bool ObjectManager::createNewInstanceWithoutExistingId(oCItem* item, int instanc
 	zCPar_Symbol* old = parser->GetSymbol(parentId);
 
 	if (old == NULL) {
-		std::stringstream logStream;
-		logStream << "ObjectManager::createNewInstanceWithoutExistingId: Couldn't create new instance since parent instance symbol couldn't be found! instanceName = " << instanceName << endl;
+		std::stringstream mLogStream;
+		mLogStream << "ObjectManager::createNewInstanceWithoutExistingId: Couldn't create new instance since parent instance symbol couldn't be found! instanceName = " << instanceName << endl;
 		return false;
 	}
 
@@ -749,8 +749,8 @@ bool ObjectManager::createNewInstanceWithoutExistingId(oCItem* item, int instanc
 	zCPar_Symbol* symbol = createNewInstanceSymbol(instanceParserSymbolID, old, instanceName);
 
 	if (!symbol) {
-		std::stringstream logStream;
-		logStream << "ObjectManager::createNewInstanceWithoutExistingId: Couldn't create symbol '" << instanceName << "'" << endl;
+		std::stringstream mLogStream;
+		mLogStream << "ObjectManager::createNewInstanceWithoutExistingId: Couldn't create symbol '" << instanceName << "'" << endl;
 		return false;
 	}
 
@@ -783,10 +783,10 @@ bool ObjectManager::createNewInstanceWithoutExistingId(oCItem* item, int instanc
 	mNameToSymbolMap.insert(pair<string, zCPar_Symbol*>(symbolName, symbol));
 	mNameToInstanceMap.insert(pair<string, int>(symbolName, instanceParserSymbolID));
 
-	logStream << "ObjectManager::createNewInstanceWithoutExistingId(): indexCount = " << *indexCount << endl;
-	util::debug(&logStream);
-	logStream << "ObjectManager::createNewInstanceWithoutExistingId(): parser symbol index = " << instanceParserSymbolID << endl;
-	util::debug(&logStream);
+	mLogStream << "ObjectManager::createNewInstanceWithoutExistingId(): indexCount = " << *indexCount << endl;
+	util::debug(&mLogStream);
+	mLogStream << "ObjectManager::createNewInstanceWithoutExistingId(): parser symbol index = " << instanceParserSymbolID << endl;
+	util::debug(&mLogStream);
 
 	return true;
 }
@@ -824,11 +824,11 @@ bool ObjectManager::addSymbolToSymbolTable(zCPar_Symbol* symbol)
 	int countBefore = *indexCount;
 	g2ext_extended::zCPar_SymbolTable* symbolTable = zCParserGetSymbolTable(parser);
 	symbolTable->Insert(symbol);
-	logStream << "ObjectManager::addSymbolToSymbolTable(): Name = " << symbol->name.ToChar() << endl;
-	logStream << "ObjectManager::addSymbolToSymbolTable(): Index = " << parser->GetIndex(symbol->name) << endl;
-	logStream << "ObjectManager::addSymbolToSymbolTable(): countBefore = " << countBefore << endl;
-	logStream << "ObjectManager::addSymbolToSymbolTable(): index count = " << *indexCount << endl;
-	util::debug(&logStream);
+	mLogStream << "ObjectManager::addSymbolToSymbolTable(): Name = " << symbol->name.ToChar() << endl;
+	mLogStream << "ObjectManager::addSymbolToSymbolTable(): Index = " << parser->GetIndex(symbol->name) << endl;
+	mLogStream << "ObjectManager::addSymbolToSymbolTable(): countBefore = " << countBefore << endl;
+	mLogStream << "ObjectManager::addSymbolToSymbolTable(): index count = " << *indexCount << endl;
+	util::debug(&mLogStream);
 
 	// Some Ikarus functions need the correct length of the current symbol table.
 	updateIkarusSymbols();
@@ -861,26 +861,26 @@ void ObjectManager::updateContainerItem(const ObjectManager::ParserInfo* info)
 
 void ObjectManager::logSymbolData(zCPar_Symbol* sym)
 {
-	logStream << sym->name.ToChar() << endl;
-	util::logInfo(&logStream);
-	logStream << sym->parent->name.ToChar() << endl;
-	util::logInfo(&logStream);
-	logStream<< sym->bitfield << endl;
-	util::logInfo(&logStream);
-	logStream << sym->filenr << endl;
-	util::logInfo(&logStream);
-	logStream << sym->line << endl;
-	util::logInfo(&logStream);
-	logStream << sym->line_anz << endl;
-	util::logInfo(&logStream);
-	logStream << sym->next << endl;
-	util::logInfo(&logStream);
-	logStream << sym->offset << endl;
-	util::logInfo(&logStream);
-	logStream << sym->pos_beg << endl;
-	util::logInfo(&logStream);
-	logStream << sym->pos_anz << endl;
-	util::logInfo(&logStream);
+	mLogStream << sym->name.ToChar() << endl;
+	util::logInfo(&mLogStream);
+	mLogStream << sym->parent->name.ToChar() << endl;
+	util::logInfo(&mLogStream);
+	mLogStream<< sym->bitfield << endl;
+	util::logInfo(&mLogStream);
+	mLogStream << sym->filenr << endl;
+	util::logInfo(&mLogStream);
+	mLogStream << sym->line << endl;
+	util::logInfo(&mLogStream);
+	mLogStream << sym->line_anz << endl;
+	util::logInfo(&mLogStream);
+	mLogStream << sym->next << endl;
+	util::logInfo(&mLogStream);
+	mLogStream << sym->offset << endl;
+	util::logInfo(&mLogStream);
+	mLogStream << sym->pos_beg << endl;
+	util::logInfo(&mLogStream);
+	mLogStream << sym->pos_anz << endl;
+	util::logInfo(&mLogStream);
 };
 
 int ObjectManager::createParserSymbol(const ParserInfo& info)
@@ -889,19 +889,19 @@ int ObjectManager::createParserSymbol(const ParserInfo& info)
 	zCParser* parser = zCParser::GetParser();
 	if (!addSymbolToSymbolTable(symbol))
 	{
-		logStream << "ObjectManager::createParserSymbols: Adding wasn't successful: " << symbol->name.ToChar() << endl;
+		mLogStream << "ObjectManager::createParserSymbols: Adding wasn't successful: " << symbol->name.ToChar() << endl;
 		g2ext_extended::zCPar_SymbolTable* currSymbolTable = zCParserGetSymbolTable(parser);
 		int index = currSymbolTable->GetIndex(info.newSymbolName);
 		int* symTableSize = getParserInstanceCount();
-		logStream << "index: " << index << endl;
-		logStream << "symTableSize: " << *symTableSize << endl;
-		util::debug(&logStream, Logger::Warning);
+		mLogStream << "index: " << index << endl;
+		mLogStream << "symTableSize: " << *symTableSize << endl;
+		util::debug(&mLogStream, Logger::Warning);
 		if (index >= *symTableSize)
 		{
 			*symTableSize = index + 1;
 			updateIkarusSymbols();
-			logStream << "ObjectManager::createParserSymbols(): resized symbol table. symTableSize = " << *symTableSize << endl;
-			util::logInfo(&logStream);
+			mLogStream << "ObjectManager::createParserSymbols(): resized symbol table. symTableSize = " << *symTableSize << endl;
+			util::logInfo(&mLogStream);
 		}
 	}
 
@@ -928,17 +928,17 @@ zCPar_Symbol* ObjectManager::createNewInstanceSymbol(int instanceParserSymbolID,
 
 	// Symbol already exists?
 	if (symbol) {
-		stringstream logStream;
-		logStream << "ObjectManager::createNewSymbol: Symbol for instance id '" << instanceParserSymbolID << "' already exists!" << endl;
-		util::logWarning(&logStream);
+		stringstream mLogStream;
+		mLogStream << "ObjectManager::createNewSymbol: Symbol for instance id '" << instanceParserSymbolID << "' already exists!" << endl;
+		util::logWarning(&mLogStream);
 		return nullptr;
 	}
 
 	//We have to check that the symbol name doesn't refer to an existing symbol
 	if (parser->GetSymbol(symbolName.c_str())) {
-		stringstream logStream;
-		logStream << "ObjectManager::createNewSymbol: Symbol with name '" << symbolName << "' already exists!" << endl;
-		util::logWarning(&logStream);
+		stringstream mLogStream;
+		mLogStream << "ObjectManager::createNewSymbol: Symbol with name '" << symbolName << "' already exists!" << endl;
+		util::logWarning(&mLogStream);
 		return nullptr;
 	}
 
@@ -989,9 +989,9 @@ int ObjectManager::getInstanceId(oCItem& item) {
 void ObjectManager::setPrototypeSymbolName(int instanceParserSymbolID, const std::string& protoInstanceSymbolName) {
 	auto instanceIT = mNewInstanceMap.find(instanceParserSymbolID);
 	if (instanceIT == mNewInstanceMap.end()) {
-		std::stringstream logStream;
-		logStream << "ObjectManager::setParentInstanceId: instanceID not registered: " << instanceParserSymbolID << endl;
-		util::logFatal(&logStream);
+		std::stringstream mLogStream;
+		mLogStream << "ObjectManager::setParentInstanceId: instanceID not registered: " << instanceParserSymbolID << endl;
+		util::logFatal(&mLogStream);
 	}
 
 	auto& instanceItem = instanceIT->second;
@@ -1046,8 +1046,8 @@ bool ObjectManager::InitItemWithDynInstance(oCItem* item, int index)
 	// only init item if an instance id exists
 	if (index == NULL)
 	{
-		logStream << "ObjectManager::InitItemWithDynInstance: instanceId wasn't found!" << std::endl;
-		util::logWarning(&logStream);
+		mLogStream << "ObjectManager::InitItemWithDynInstance: instanceId wasn't found!" << std::endl;
+		util::logWarning(&mLogStream);
 		return false;
 	}
 	return assignInstanceId(item, index);
@@ -1093,8 +1093,8 @@ int ObjectManager::getIndexByName(const zSTRING& symbolName)
 
 void ObjectManager::updateIkarusSymbols()
 {
-	logStream << "ObjectManager::updateIkarusSymbols: update Ikarus symbols..." << endl;
-	util::logInfo(&logStream);
+	mLogStream << "ObjectManager::updateIkarusSymbols: update Ikarus symbols..." << endl;
+	util::logInfo(&mLogStream);
 
 	// Some Ikarus functions need the correct length of the current symbol table.
 	// MEM_Reinit_Parser() updates all involved references.

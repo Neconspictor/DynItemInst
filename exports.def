@@ -24,3 +24,4 @@ EXPORTS
 	TELEKINESIS_GetInterpolatedVec
 	TELEKINESIS_Interpolate
 	TELEKINESIS_DeleteInterpolator
+	TELEKINESIS_ClearInterpolators

@@ -1,8 +1,8 @@
 /*////////////////////////////////////////////////////////////////////////////
 
-This file is part of DynItemInst.
+This file is part of neclib.
 
-Copyright © 2015 David Goeth
+Copyright © 2015-2020 David Goeth
 
 All Rights reserved.
 
@@ -116,7 +116,7 @@ public:
 
 private:
 	static std::unique_ptr<HookManager> mInstance;
-	static std::stringstream logStream;
+	static std::stringstream mLogStream;
 
 	std::vector<std::unique_ptr<Module>> mModules;
 	std::multimap<LPVOID,LPVOID> originalToHookAddress;

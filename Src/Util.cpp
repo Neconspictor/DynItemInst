@@ -1,8 +1,8 @@
 /*////////////////////////////////////////////////////////////////////////////
 
-This file is part of DynItemInst.
+This file is part of neclib.
 
-Copyright © 2015 David Goeth
+Copyright © 2015-2020 David Goeth
 
 All Rights reserved.
 
@@ -24,7 +24,7 @@ SUCH TERMS AND CONDITIONS.
 
 Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 
-/////////////////////////////////////////////////////////////////////////////*/
+/////////////////////////////////////////////////////////////////////////////**/
 
 #include "Util.h"
 #include <Windows.h>
@@ -48,7 +48,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 
 
 HMODULE util::hModule = 0;
-std::stringstream util::logStream;
+std::stringstream util::mLogStream;
 
 void util::safeDelete(void** pointer)
 {
@@ -112,8 +112,8 @@ void util::assertDIIRequirements(bool expression, std::string errorMessage)
 {
 	if (!expression)
 	{
-		logStream << "DII-Assertion failed: " << errorMessage << std::endl;
-		Logger::getLogger()->log(Logger::Fatal, &logStream);
+		mLogStream << "DII-Assertion failed: " << errorMessage << std::endl;
+		Logger::getLogger()->log(Logger::Fatal, &mLogStream);
 	}
 }
 
@@ -299,8 +299,8 @@ bool util::existsDir(const std::string& path)
 
 	if (!(attributes & FILE_ATTRIBUTE_DIRECTORY))
 	{
-		logStream << "util::existsDir: " << path << " exists but isn't a directory!" << std::endl;
-		logFault(&logStream);
+		mLogStream << "util::existsDir: " << path << " exists but isn't a directory!" << std::endl;
+		logFault(&mLogStream);
 	}
 
 	return true;
@@ -393,16 +393,16 @@ void util::copyContentTo(std::string source, std::string dest, std::string patte
 
 	if (error)
 	{
-		logStream << "util::copyContentTo: Couldn't copy files from " << source << " to "
+		mLogStream << "util::copyContentTo: Couldn't copy files from " << source << " to "
 			<< dest << std::endl;
-		logFault(&logStream);
+		logFault(&mLogStream);
 	}
 
 	if (s.fAnyOperationsAborted)
 	{
-		logStream << "util::copyContentTo: Any operation was aborted while copying " << source << " to "
+		mLogStream << "util::copyContentTo: Any operation was aborted while copying " << source << " to "
 			<< dest << std::endl;
-		logFault(&logStream);
+		logFault(&mLogStream);
 	}
 }
 
@@ -419,16 +419,16 @@ void util::deleteAllFiles(std::string folder, std::string pattern)
 
 	if (error)
 	{
-		logStream << "util::deleteAllFiles: Couldn't delete files from " << folder << " with pattern "
+		mLogStream << "util::deleteAllFiles: Couldn't delete files from " << folder << " with pattern "
 			<< pattern << std::endl;
-		logFault(&logStream);
+		logFault(&mLogStream);
 	}
 
 	if (s.fAnyOperationsAborted)
 	{
-		logStream << "util::deleteAllFiles: Any operation was aborted while deleting files from " << folder << " with pattern "
+		mLogStream << "util::deleteAllFiles: Any operation was aborted while deleting files from " << folder << " with pattern "
 			<< pattern << std::endl;
-		logFault(&logStream);
+		logFault(&mLogStream);
 	}
 };
 
@@ -437,10 +437,10 @@ void util::copyFileTo(std::string from, std::string to){
 	//do not copy if source and destination are equal
 	if (from.compare(to) == 0)
 	{
-		logStream << "util::copyFileTo: No copying is done, as source and destination are equal:" << std::endl;
-		logStream << "\tsource: " << from << std::endl;
-		logStream << "\tdestination: " << to << std::endl;
-		logWarning(&logStream);
+		mLogStream << "util::copyFileTo: No copying is done, as source and destination are equal:" << std::endl;
+		mLogStream << "\tsource: " << from << std::endl;
+		mLogStream << "\tdestination: " << to << std::endl;
+		logWarning(&mLogStream);
 		return;
 	}
 
@@ -469,9 +469,9 @@ void util::copyFileTo(std::string from, std::string to){
 
 		if (NULL != errorText)
 		{
-			logStream << "util::copyFileTo: While copying from " << from << " to " << to << 
+			mLogStream << "util::copyFileTo: While copying from " << from << " to " << to << 
 				" an error occured: " << errorText << std::endl;
-			logFault(&logStream);
+			logFault(&mLogStream);
 
 			// release memory allocated by FormatMessage()
 			LocalFree(errorText);

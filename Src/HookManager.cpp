@@ -1,8 +1,8 @@
 /*////////////////////////////////////////////////////////////////////////////
 
-This file is part of DynItemInst.
+This file is part of neclib.
 
-Copyright © 2015 David Goeth
+Copyright © 2015-2020 David Goeth
 
 All Rights reserved.
 
@@ -24,7 +24,7 @@ SUCH TERMS AND CONDITIONS.
 
 Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 
-/////////////////////////////////////////////////////////////////////////////*/
+/////////////////////////////////////////////////////////////////////////////**/
 
 #include "HookManager.h"
 #include "Util.h"
@@ -36,15 +36,14 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #endif*/
 #include <string>
 #include <DII.h>
-#include <DaedalusExports.h>
+#include <General.h>
 #include <sstream>
 #include <Logger.h>
 #include <Configuration.h>
 #include <Levitation.h>
-#include <CustomNpcFocus.h>
 
 std::unique_ptr<HookManager> HookManager::mInstance;
-std::stringstream HookManager::logStream;
+std::stringstream HookManager::mLogStream;
 
 HookManager* HookManager::getHookManager()
 {
@@ -68,9 +67,9 @@ void HookManager::registerHook(LPVOID original, LPVOID hook)
 	// Was the address previously hooked?
 	if (it != originalToHookAddress.end())
 	{
-		logStream << "HookManager::registerHook: Warning: Address was previously hooked! Hook count = " 
+		mLogStream << "HookManager::registerHook: Warning: Address was previously hooked! Hook count = " 
 			<< originalToHookAddress.count(original) + 1 << std::endl;
-		util::logWarning(&logStream);
+		util::logWarning(&mLogStream);
 	}
 	originalToHookAddress.insert(std::pair<LPVOID,LPVOID>(original, hook));
 	hookToOriginalAddress.insert(std::pair<LPVOID,LPVOID>(hook, original));
@@ -123,21 +122,21 @@ void HookManager::addFunctionHook(LPVOID* source, LPVOID destination, std::strin
 	//LONG error = 0;
 	if (status != MH_OK)
 	{
-		logStream.setf(std::ios::hex, std::ios::basefield);
-		logStream << "HookManager::addFunctionHook: Error: Couldn't hook function at address 0x"<< address
+		mLogStream.setf(std::ios::hex, std::ios::basefield);
+		mLogStream << "HookManager::addFunctionHook: Error: Couldn't hook function at address 0x"<< address
 			<< " for module " << description<< std::endl;
-		logStream.unsetf(std::ios::hex);
-		util::logFatal(&logStream);
+		mLogStream.unsetf(std::ios::hex);
+		util::logFatal(&mLogStream);
 		return;
 	}
 
 	MH_EnableHook(address);
 
-	logStream.setf(std::ios::hex, std::ios::basefield);
-	logStream << "HookManager::addFunctionHook: " << "Function at address 0x"<< address 
+	mLogStream.setf(std::ios::hex, std::ios::basefield);
+	mLogStream << "HookManager::addFunctionHook: " << "Function at address 0x"<< address 
 		<< " for module "<< description <<" was successfully hooked."<< std::endl;
-	logStream.unsetf(std::ios::hex);
-	util::logAlways(&logStream);
+	mLogStream.unsetf(std::ios::hex);
+	util::logAlways(&mLogStream);
 
 	registerHook(address, destination);
 }
@@ -147,11 +146,11 @@ void HookManager::removeFunctionHook(LPVOID* source, LPVOID destination, std::st
 	LPVOID original = getOriginalAddress(destination);
 	if (original == NULL)
 	{
-		logStream.setf(std::ios::hex, std::ios::basefield);
-		logStream << "HookManager::removeFunctionHook: Error: Couldn't find original function for function hook 0x"<< destination
+		mLogStream.setf(std::ios::hex, std::ios::basefield);
+		mLogStream << "HookManager::removeFunctionHook: Error: Couldn't find original function for function hook 0x"<< destination
 			<< " for module " << description<< std::endl;
-		logStream.unsetf(std::ios::hex);
-		util::logFatal(&logStream);
+		mLogStream.unsetf(std::ios::hex);
+		util::logFatal(&mLogStream);
 		return;
 	}
 
@@ -164,21 +163,21 @@ void HookManager::removeFunctionHook(LPVOID* source, LPVOID destination, std::st
 
 	if (status != MH_OK)
 	{
-		logStream.setf(std::ios::hex, std::ios::basefield);
-		logStream << "HookManager::removeFunctionHook: Fault: Couldn't remove hook function at address 0x"<< destination 
+		mLogStream.setf(std::ios::hex, std::ios::basefield);
+		mLogStream << "HookManager::removeFunctionHook: Fault: Couldn't remove hook function at address 0x"<< destination 
 			<<" for module " << description<< std::endl;
-		logStream.unsetf(std::ios::hex);
-		util::logFatal(&logStream);
+		mLogStream.unsetf(std::ios::hex);
+		util::logFatal(&mLogStream);
 		return;
 	}
 
 	*source = original;
 
-	logStream.setf(std::ios::hex, std::ios::basefield);
-	logStream << "HookManager::removeFunctionHook: Function hook at address 0x"<< original <<" for module " << description
+	mLogStream.setf(std::ios::hex, std::ios::basefield);
+	mLogStream << "HookManager::removeFunctionHook: Function hook at address 0x"<< original <<" for module " << description
 		<< " was successfully removed."<< std::endl;
-	util::logAlways(&logStream);
-	logStream.unsetf(std::ios::hex);
+	util::logAlways(&mLogStream);
+	mLogStream.unsetf(std::ios::hex);
 
 	unregisterHook(original, destination);
 };
@@ -199,30 +198,30 @@ int HookManager::hook(int flags)
 	// init Logger since Configuration file is initialized there
 	Logger::getLogger();
 
-	logStream << "HookManager::hook: read Configuration: " << std::endl;
-	logStream << "debugEnabled = " << Configuration::debugEnabled() << std::endl;
-	logStream << "logToFile = " << Configuration::getLogToFile() << std::endl;
-	logStream << "logTozSpy = " << Configuration::getLogTozSpy() << std::endl;
-	logStream << "logToConsole = " << Configuration::getLogToConsole() << std::endl;
-	logStream << "logInfos = " << Configuration::getLogInfos()<< std::endl;
-	logStream << "logWarnings = " << Configuration::getLogWarnings() << std::endl;
-	logStream << "logErrors = " << Configuration::getLogErrors() << std::endl;
-	logStream << "logFatals = " << Configuration::getLogFatals() << std::endl;
-	logStream << "HookManager::hook: finished read." << std::endl;
+	mLogStream << "HookManager::hook: read Configuration: " << std::endl;
+	mLogStream << "debugEnabled = " << Configuration::debugEnabled() << std::endl;
+	mLogStream << "logToFile = " << Configuration::getLogToFile() << std::endl;
+	mLogStream << "logTozSpy = " << Configuration::getLogTozSpy() << std::endl;
+	mLogStream << "logToConsole = " << Configuration::getLogToConsole() << std::endl;
+	mLogStream << "logInfos = " << Configuration::getLogInfos()<< std::endl;
+	mLogStream << "logWarnings = " << Configuration::getLogWarnings() << std::endl;
+	mLogStream << "logErrors = " << Configuration::getLogErrors() << std::endl;
+	mLogStream << "logFatals = " << Configuration::getLogFatals() << std::endl;
+	mLogStream << "HookManager::hook: finished read." << std::endl;
 
-	util::logAlways(&logStream);
+	util::logAlways(&mLogStream);
 
-	logStream << "HookManager::hook: Hook target functions..."<< std::endl;
-	util::logAlways(&logStream);
+	mLogStream << "HookManager::hook: Hook target functions..."<< std::endl;
+	util::logAlways(&mLogStream);
 
 	if (MH_Initialize() != MH_OK) {
-		logStream << "HookManager::hook: Couldn't initialize hook engine!"<< std::endl;
-		util::logFatal(&logStream);
+		mLogStream << "HookManager::hook: Couldn't initialize hook engine!"<< std::endl;
+		util::logFatal(&mLogStream);
 		unhook();
 		return 0;
 	}
 
-	manager->addModule(std::make_unique<DaedalusExports>());
+	manager->addModule(std::make_unique<General>());
 
 
 	if (flags &  static_cast<int>(ConfigFlags::DII)) {
@@ -242,8 +241,8 @@ int HookManager::hook(int flags)
 
 	manager->hookModules();
 
-	logStream << "HookManager::hook: done." << std::endl;
-	Logger::getLogger()->logAlways(&logStream);
+	mLogStream << "HookManager::hook: done." << std::endl;
+	Logger::getLogger()->logAlways(&mLogStream);
 
 	return mInstance->mFlags;
 };
@@ -252,9 +251,9 @@ int HookManager::hook(int flags)
 void HookManager::unhook()
 {
 	if (!mInstance) return;
-	logStream << "HookManager::unHook: Unhook functions..." << std::endl;
+	mLogStream << "HookManager::unHook: Unhook functions..." << std::endl;
 	mInstance->unHookModules();
 	release();
-	logStream << "HookManager::unHook: Unhook done."<< std::endl;
-	util::logInfo(&logStream);
+	mLogStream << "HookManager::unHook: Unhook done."<< std::endl;
+	util::logInfo(&mLogStream);
 }

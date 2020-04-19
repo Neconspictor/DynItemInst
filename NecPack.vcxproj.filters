@@ -9,23 +9,11 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
-    <Filter Include="Header Files\CustomNpcFocuses">
-      <UniqueIdentifier>{922bb644-97d6-4b6e-a2be-1879a109da90}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\CustomNpcFocus">
-      <UniqueIdentifier>{ec7ef82e-4226-408e-9822-e8fd13a18508}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Levitation">
       <UniqueIdentifier>{597c60ab-008b-47c6-aa98-4107804efb8f}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Levitation">
       <UniqueIdentifier>{59817085-0e31-4499-9577-db210a56779a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\DaedalusExports">
-      <UniqueIdentifier>{f247ea7f-5fd0-4c99-b807-d68e1b4c9510}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\DaedalusExports">
-      <UniqueIdentifier>{1ea2cab2-50c1-47a9-89c9-b68d8c8782c0}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\Util">
       <UniqueIdentifier>{acf21ede-2547-427e-90dc-81c6b36c6e49}</UniqueIdentifier>
@@ -63,13 +51,16 @@
     <Filter Include="Header Files\DII">
       <UniqueIdentifier>{380edbd3-57c6-403b-834b-0f82a42271fa}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\General">
+      <UniqueIdentifier>{1ea2cab2-50c1-47a9-89c9-b68d8c8782c0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\General">
+      <UniqueIdentifier>{f247ea7f-5fd0-4c99-b807-d68e1b4c9510}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Inc\DllMain.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Inc\CustomNpcFocus.h">
-      <Filter>Header Files\CustomNpcFocuses</Filter>
     </ClInclude>
     <ClInclude Include="Inc\AdditMemory.h">
       <Filter>Header Files\DII</Filter>
@@ -97,9 +88,6 @@
     </ClInclude>
     <ClInclude Include="Inc\Levitation.h">
       <Filter>Header Files\Levitation</Filter>
-    </ClInclude>
-    <ClInclude Include="Inc\DaedalusExports.h">
-      <Filter>Header Files\DaedalusExports</Filter>
     </ClInclude>
     <ClInclude Include="Inc\Util.h">
       <Filter>Header Files\Util</Filter>
@@ -155,13 +143,13 @@
     <ClInclude Include="Inc\DII.h">
       <Filter>Header Files\DII</Filter>
     </ClInclude>
+    <ClInclude Include="Inc\General.h">
+      <Filter>Header Files\General</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\DllMain.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\CustomNpcFocus.cpp">
-      <Filter>Source Files\CustomNpcFocus</Filter>
     </ClCompile>
     <ClCompile Include="Src\DynInstance.cpp">
       <Filter>Source Files\DII</Filter>
@@ -171,9 +159,6 @@
     </ClCompile>
     <ClCompile Include="Src\Levitation.cpp">
       <Filter>Source Files\Levitation</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\DaedalusExports.cpp">
-      <Filter>Source Files\DaedalusExports</Filter>
     </ClCompile>
     <ClCompile Include="Src\Configuration.cpp">
       <Filter>Source Files\Util</Filter>
@@ -217,9 +202,11 @@
     <ClCompile Include="Src\DII.cpp">
       <Filter>Source Files\DII</Filter>
     </ClCompile>
+    <ClCompile Include="Src\General.cpp">
+      <Filter>Source Files\General</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />
-    <None Include="doc\notes.txt" />
   </ItemGroup>
 </Project>

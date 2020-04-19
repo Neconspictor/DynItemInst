@@ -1,11 +1,11 @@
 /*////////////////////////////////////////////////////////////////////////////
 
-This file is part of DynItemInst. 
+This file is part of neclib. 
 This file is an extension of the G2ExtSdk file api/g2/ocgame.h
 It had been added the function oCGame::GetGameWorld(), which was uncommented in the original file.
 Additionally was added the definition of the class oCWorld.
 
-Copyright © 2015 David Goeth
+Copyright © 2015-2020 David Goeth
 
 All Rights reserved.
 

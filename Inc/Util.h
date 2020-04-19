@@ -1,8 +1,8 @@
 /*////////////////////////////////////////////////////////////////////////////
 
-This file is part of DynItemInst.
+This file is part of neclib.
 
-Copyright © 2015 David Goeth
+Copyright © 2015-2020 David Goeth
 
 All Rights reserved.
 
@@ -299,9 +299,9 @@ public:
         int index = parser->GetIndex(name);
 
         if (index == -1) {
-            std::stringstream logStream;
-            logStream << callerDescription << ": '" << name.ToChar() << "' not defined!" << std::endl;
-            util::logFatal(&logStream);
+            std::stringstream mLogStream;
+            mLogStream << callerDescription << ": '" << name.ToChar() << "' not defined!" << std::endl;
+            util::logFatal(&mLogStream);
         }
 
         return index;
@@ -319,9 +319,9 @@ public:
         int index = parser->GetIndex(name);
 
         if (index == -1) {
-            std::stringstream logStream;
-            logStream << callerDescription << ": '" << name.ToChar() << "' not defined!" << std::endl;
-            util::logFatal(&logStream);
+            std::stringstream mLogStream;
+            mLogStream << callerDescription << ": '" << name.ToChar() << "' not defined!" << std::endl;
+            util::logFatal(&mLogStream);
         }
 
         return parser->GetSymbol(index);
@@ -332,9 +332,9 @@ public:
         auto* symbol = parser->GetSymbol(index);
 
         if (!symbol) {
-            std::stringstream logStream;
-            logStream << callerDescription << ": " << index << " is not an index to a parser symbol!" << std::endl;
-            util::logFatal(&logStream);
+            std::stringstream mLogStream;
+            mLogStream << callerDescription << ": " << index << " is not an index to a parser symbol!" << std::endl;
+            util::logFatal(&mLogStream);
         }
 
         return symbol;
@@ -384,6 +384,6 @@ private:
 	~util() {};
 
 	static HMODULE hModule;
-	static std::stringstream logStream;
+	static std::stringstream mLogStream;
 
 };

@@ -26,18 +26,43 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 
 /////////////////////////////////////////////////////////////////////////////**/
 
-#include <api/g2/zcpar_symbol.h>
+
+#include <api/g2/zcparser.h>
+#include <api/g2/oCItemExtended.h>
+#include <ObjectManager.h>
+#include <api/g2/oCObjectFactory.h>
+#include <Logger.h>
+#include <General.h>
+#include <set>
+#include <ocgameExtended.h>
+#include <DII.h>
 #include <Util.h>
+#include <Levitation.h>
+#include <zCPar_SymbolTable.h>
+#include <api/g2/ocmob.h>
 
 
-zCPar_Symbol* zCPar_Symbol::create()
+const float General::LIB_VERSION = 1.03f;
+
+General::General() : Module("DaedalusExports")
 {
-	typedef DWORD(__thiscall* ZCPAR_SYMBOL_CONSTRUCTOR)(void* thizz);
-	static ZCPAR_SYMBOL_CONSTRUCTOR zCPar_SymbolConstructor = (ZCPAR_SYMBOL_CONSTRUCTOR)0x007A1690;
+	mModuleDesc = "DaedalusExports";
+}
 
-	// The symbol will be managed by the Gothic 2 exe and thus the appropriate new operator has to be called!
-	void* memory = util::gothic2OperatorNew(0x3C); //sizeof(zCPar_Symbol) = 0x3C (-> see gothic 2 exe, address 0x0078DD02)
-	ZeroMemory(memory, 0x3C);
-	zCPar_SymbolConstructor(memory);
-	return (zCPar_Symbol*)memory;
+General::~General()
+{
+}
+
+void General::hookModule()
+{
+}
+
+void General::unHookModule()
+{
+}
+
+
+float General::GetLibVersion()
+{
+	return LIB_VERSION;
 }

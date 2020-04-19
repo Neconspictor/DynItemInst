@@ -1,8 +1,9 @@
+#pragma once
 /*////////////////////////////////////////////////////////////////////////////
 
-This file is part of DynItemInst.
+This file is part of neclib.
 
-Copyright © 2015 David Goeth
+Copyright © 2015-2020 David Goeth
 
 All Rights reserved.
 
@@ -26,10 +27,6 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 
 /////////////////////////////////////////////////////////////////////////////**/
 
-
-
-#ifndef __DYN_ITEM_INST_H
-#define __DYN_ITEM_INST_H
 
 #include "Module.h"
 #include "api/g2/ztypes.h"
@@ -246,6 +243,86 @@ public:
 	 */
 	virtual void unHookModule() override;
 
+
+
+
+
+	/**
+	 * Adds a proxy from one instance to another instance.
+	 * \return true if the proxy is successfully setup.
+	 */
+	static bool DII_AddProxy(const zSTRING& sourceInstanceName, const zSTRING& targetInstanceName);
+
+	static void DII_ApplyInstanceChangesToAll(const zSTRING& instanceName);
+
+	/**
+	 * Removes a proxy.
+	 */
+	static void DII_RemoveProxy(const zSTRING& sourceInstanceName);
+
+	/**
+	 * An external for creating an item with a specific instance id.
+	 * Daedalus syntax: Func c_item DII_CreateNewItem(var int parserSymbolIndex)
+	 * \param parserSymbolIndex The instance id of the oCItem to be created.
+	 * \return The created item. If no item could be created, NULL will be returned.
+	 */
+	static oCItem* __cdecl  DII_CreateNewItem(int parserSymbolIndex);
+
+	/**
+	 * An external for deleting a dynamic instance by its parser symbol table index.
+	 * Daedalus syntax: Func void DII_DeleteDII(var string instanceName)
+	 * \param parserSymbolIndex The instance id to be deleted.
+	 */
+	static void __cdecl DII_DeleteDII(int parserSymbolIndex);
+
+	/**
+	 * An external for deleting an oCItem object by its pointer.
+	 * Daedalus syntax: Func void DII_DeleteItem(var oCItem itm)
+	 * \param item The oCItem to be deleted.
+	 */
+	static void __cdecl DII_DeleteItem(oCItem* item);
+	/**
+	 * An external for creating a new instance id from a given c_item.
+	 * Daedalus syntax: Func int DII_CreateNewInstance(C_Item item)
+	 * \param item The oCItem to use as reference for creating a new dynamic instance.
+	 * \return The id of the created instance. If no instance id
+	 * could be created, NULL will be returned.
+	 */
+	static int DII_CreateNewInstanceInt(oCItem* item);
+	static zSTRING* DII_CreateNewInstance(oCItem* item);
+	static int DII_CreateNewInstanceStr(oCItem* item, const zSTRING& instanceName);
+
+	/**
+	 * An external for checking if a given c_item has a dynamic instance id.
+	 * Daedalus syntax: Func int DII_IsDynamic(C_Item item)
+	 * \param item The oCItem to check
+	 * \return Is the instance id of the provided item dynamic?
+	 */
+	static int DII_IsDynamic(oCItem* item);
+
+	static int DII_IsInstanceDynamic(int parserSymbolIndex);
+
+	/**
+	 * An external for getting additional memory of the instance of the given c_item.
+	 * Only for dynamic instances such a memory will be created. If the provided c_item
+	 * hasn't a dynamic instance id, NULL will be set as return result.
+	 * Daedalus syntax: Func DII_UserData DII_GetUserData(C_Item item)
+	 * \param instanceId The instance id to get the DII_UserData from
+	 * \return The user data of the provided instance id
+	 */
+	static BYTE* DII_GetUserData(int instanceIdParserSymbolIndex);
+
+	static bool DII_UpdateInstance(const zSTRING& instanceName, oCItem* item);
+
+	//TODO: is this function used?
+	static void DII_AssignInstanceId(oCItem* item, int instanceIdParserSymbolIndex);
+
+	static void DII_GetItemByInstanceId(int itemParserSymbolIndex, int instanceIdParserSymbolIndex);
+
+	//Asiigns all items with instance id targetId the new id newId
+	static void DII_ChangeInstanceForAll(const zSTRING& sourceName, const zSTRING& targetName);
+
+
 public:
 	static const std::string SAVE_ITEM_FILE_EXT;
 	static const std::string SAVE_ITEM_INSTANCES;
@@ -292,6 +369,32 @@ private:
 		const char *what() const throw() { return this->err_msg.c_str(); };
 	};
 
-};
 
-#endif __DYN_ITEM_INST_H
+
+	struct UPDATE_INSTANCE_PARAMS {
+		int index;
+	};
+
+	class ItemUpdater {
+	public:
+
+		struct UpdateItemData {
+
+			/**
+			 * Only updates items having this instance id
+			 */
+			int expectedInstanceID;
+
+			/**
+			 * The new instance id for items to be updated.
+			 */
+			int newInstanceID;
+		};
+
+		static void updateItem(void* obj, void* param, oCItem* itm);
+
+		static void updateItemInstance(void* obj, void* param, oCItem* itm);
+
+	};
+
+};
