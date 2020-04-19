@@ -61,11 +61,12 @@ func void MAGICWEAPON_CheckEffectState() {
 		data = DII_GetUserData(instanceName);
 		
 		
-		if (itm.effectVob != 0 && data.ints[MAGICWEAPON_ENCHANTEDWEAPON]) {
-			itm.effect = "";
+		if (!Hlp_StrCmp(itm.effect, data.magicWeaponOldEffect) && data.ints[MAGICWEAPON_ENCHANTEDWEAPON]) {
+			itm.effect = data.magicWeaponOldEffect;
 			oCItemRemoveEffect(citm);
+			oCItemInsertEffect(citm);
 			oCNpc_PutInSlot(hero, "ZS_SWORD", itmPtr, 1);
-			itm.effect = data.magicWeaponNewEffect;
+			itm.effect = data.magicWeaponOldEffect;
 		};
 		
 	};
@@ -82,12 +83,12 @@ func void MAGICWEAPON_CheckEffectState() {
 		instanceName = DII_GetSymbolName(instanceID);
 		data = DII_GetUserData(instanceName);
 		
-		
-		if (itm.effectVob != 0 && data.ints[MAGICWEAPON_ENCHANTEDWEAPON]) {
-			itm.effect = "";
+		if (!Hlp_StrCmp(itm.effect, data.magicWeaponOldEffect) && data.ints[MAGICWEAPON_ENCHANTEDWEAPON]) {
+			itm.effect = data.magicWeaponOldEffect;
 			oCItemRemoveEffect(citm);
+			oCItemInsertEffect(citm);
 			oCNpc_PutInSlot(hero, "ZS_BOW", itmPtr, 1);
-			itm.effect = data.magicWeaponNewEffect;
+			itm.effect = data.magicWeaponOldEffect;
 		};
 		
 	};
@@ -105,11 +106,12 @@ func void MAGICWEAPON_CheckEffectState() {
 		data = DII_GetUserData(instanceName);
 		
 		
-		if (itm.effectVob != 0 && data.ints[MAGICWEAPON_ENCHANTEDWEAPON]) {
-			itm.effect = "";
+		if (!Hlp_StrCmp(itm.effect, data.magicWeaponOldEffect) && data.ints[MAGICWEAPON_ENCHANTEDWEAPON]) {
+			itm.effect = data.magicWeaponOldEffect;
 			oCItemRemoveEffect(citm);
+			oCItemInsertEffect(citm);
 			oCNpc_PutInSlot(hero, "ZS_CROSSBOW", itmPtr, 1);
-			itm.effect = data.magicWeaponNewEffect;
+			itm.effect = data.magicWeaponOldEffect;
 		};
 		
 	};
@@ -127,11 +129,12 @@ func void MAGICWEAPON_CheckEffectState() {
 		data = DII_GetUserData(instanceName);
 		
 		
-		if (itm.effectVob != 0 && data.ints[MAGICWEAPON_ENCHANTEDWEAPON]) {
-			itm.effect = "";
+		if (!Hlp_StrCmp(itm.effect, data.magicWeaponOldEffect) && data.ints[MAGICWEAPON_ENCHANTEDWEAPON]) {
+			itm.effect = data.magicWeaponOldEffect;
 			oCItemRemoveEffect(citm);
+			oCItemInsertEffect(citm);
 			oCNpc_PutInSlot(hero, "ZS_LONGSWORD", itmPtr, 1);
-			itm.effect = data.magicWeaponNewEffect;
+			itm.effect = data.magicWeaponOldEffect;
 		};
 		
 	};
@@ -149,9 +152,12 @@ func void MAGICWEAPON_CheckEffectState() {
 		instanceName = DII_GetSymbolName(instanceID);
 		data = DII_GetUserData(instanceName);
 		
-		if (itm.effectVob == 0 && data.ints[MAGICWEAPON_ENCHANTEDWEAPON]) {
+		if (!Hlp_StrCmp(itm.effect, data.magicWeaponNewEffect) && data.ints[MAGICWEAPON_ENCHANTEDWEAPON]) {
+			itm.effect = data.magicWeaponNewEffect;
+			oCItemRemoveEffect(citm);
 			oCItemInsertEffect(citm);
 			oCNpc_PutInSlot(hero, "ZS_LEFTHAND", itmPtr, 1);
+			
 		};
 	
 	};
@@ -169,9 +175,12 @@ func void MAGICWEAPON_CheckEffectState() {
 		instanceName = DII_GetSymbolName(instanceID);
 		data = DII_GetUserData(instanceName);
 		
-		if (itm.effectVob == 0 && data.ints[MAGICWEAPON_ENCHANTEDWEAPON]) {
+		if (!Hlp_StrCmp(itm.effect, data.magicWeaponNewEffect) && data.ints[MAGICWEAPON_ENCHANTEDWEAPON]) {
+			itm.effect = data.magicWeaponNewEffect;
+			oCItemRemoveEffect(citm);
 			oCItemInsertEffect(citm);
 			oCNpc_PutInSlot(hero, "ZS_RIGHTHAND", itmPtr, 1);
+			
 		};
 	};
 	
