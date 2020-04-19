@@ -284,10 +284,10 @@ public:
 
 	void updateIkarusSymbols();
 
-	void callForAllItems(void(*func)(void* obj, void* param, oCItem*), void* obj, void* param);
-	void callForAllNpcItems(void(*func)(void* obj, void* param, oCItem*), void* obj, void* param);
-	void callForAllContainerItems(void(*func)(void* obj, void* param, oCItem*), void* obj, void* param);
-	void callForAllWorldItems(void(*func)(void* obj, void* param, oCItem*), void* obj, void* param);
+	void callForAllItems(bool(*func)(void* obj, void* param, oCItem*), void* obj, void* param);
+	void callForAllNpcItems(bool(*func)(void* obj, void* param, oCItem*), void* obj, void* param);
+	void callForAllContainerItems(bool(*func)(void* obj, void* param, oCItem*), void* obj, void* param);
+	void callForAllWorldItems(bool(*func)(void* obj, void* param, oCItem*), void* obj, void* param);
 
 	static int * getParserInstanceCount();
 

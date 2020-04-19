@@ -833,9 +833,9 @@ void DII::loadDynamicInstances(int saveGameSlotNumber)
 }
 
 
-void DII::ItemUpdater::updateItem(void* obj, void* param, oCItem* itm)
+bool DII::ItemUpdater::updateItem(void* obj, void* param, oCItem* itm)
 {
-	if (itm == NULL) return;
+	if (itm == NULL) return false;
 
 	ItemUpdater::UpdateItemData* params = (ItemUpdater::UpdateItemData*)param;
 	ObjectManager* manager = ObjectManager::getObjectManager();
@@ -865,23 +865,22 @@ void DII::ItemUpdater::updateItem(void* obj, void* param, oCItem* itm)
 		manager->setInstanceId(itm, resolvedID);
 		itm->InitByScript(resolvedID, itm->amount);
 
-		if (itm->effect.ToChar() == std::string("")) {
-			manager->oCItemSaveRemoveEffect(itm);
-		}
-
 		if (isActive) itm->flags |= ITEM_ACTIVE;
 		if (dropped) itm->flags |= ITEM_DROPPED;
 		if (nfocus) itm->flags |= ITEM_NFOCUS;
 
-		if (isInWorld && !isActive) {
-			manager->oCItemSaveInsertEffect(itm);
-		}
+		manager->oCItemSaveRemoveEffect(itm);
+		manager->oCItemSaveInsertEffect(itm);
+
+		return true;
 	}
+
+	return false;
 }
 
-void DII::ItemUpdater::updateItemInstance(void* obj, void* param, oCItem* itm)
+bool DII::ItemUpdater::updateItemInstance(void* obj, void* param, oCItem* itm)
 {
-	if (itm == NULL) return;
+	if (itm == NULL) return false;
 
 	ItemUpdater::UpdateItemData* params = (ItemUpdater::UpdateItemData*)param;
 	ObjectManager* manager = ObjectManager::getObjectManager();
@@ -890,5 +889,8 @@ void DII::ItemUpdater::updateItemInstance(void* obj, void* param, oCItem* itm)
 	{
 		auto resolvedID = manager->resolveProxying(params->newInstanceID);
 		manager->setInstanceId(itm, resolvedID);
+		return true;
 	}
+
+	return false;
 }

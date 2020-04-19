@@ -391,9 +391,9 @@ private:
 			int newInstanceID;
 		};
 
-		static void updateItem(void* obj, void* param, oCItem* itm);
+		static bool updateItem(void* obj, void* param, oCItem* itm);
 
-		static void updateItemInstance(void* obj, void* param, oCItem* itm);
+		static bool updateItemInstance(void* obj, void* param, oCItem* itm);
 
 	};
 

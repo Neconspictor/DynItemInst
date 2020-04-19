@@ -1104,15 +1104,15 @@ void ObjectManager::updateIkarusSymbols()
 	zCParser::GetParser()->CallFunc(arg.Upper());
 }
 
-void ObjectManager::callForAllItems(void(*func)(void* obj, void* param, oCItem*), void* obj, void* param)
+void ObjectManager::callForAllItems(bool(*func)(void* obj, void* param, oCItem*), void* obj, void* param)
 {
-	callForAllNpcItems(func, obj, param);
 	callForAllContainerItems(func, obj, param);
 	callForAllWorldItems(func, obj, param);
+	callForAllNpcItems(func, obj, param);
 }
 
 
-void ObjectManager::callForAllNpcItems(void(*func)(void* obj, void* param, oCItem*), void* obj, void* param)
+void ObjectManager::callForAllNpcItems(bool(*func)(void* obj, void* param, oCItem*), void* obj, void* param)
 {
 	zCWorld* world = oCGame::GetGame()->GetWorld();
 	zCListSort<oCNpc>* npcList = world->GetNpcList();
@@ -1158,17 +1158,21 @@ void ObjectManager::callForAllNpcItems(void(*func)(void* obj, void* param, oCIte
 				//zCWorld* world = oCGame::GetGame()->GetWorld();
 				//world->AddVob(itm);
 				//oCItemSaveRemoveEffect(itm);
-				//oCItemSaveInsertEffect(itm);
+				if (func(obj, param, itm)) {
+					//oCItemSaveRemoveEffect(itm);
+					//oCNpcPutInSlot(npc, slotName, nullptr, 1);
+					//oCItemSaveInsertEffect(itm);
+					oCNpcPutInSlot(npc, slotName, vob, 1);
+				}
 			}
 			
-			oCNpcPutInSlot(npc, slotName, vob, 1);
 
 		}
 
 	}
 }
 
-void ObjectManager::callForAllContainerItems(void(*func)(void *obj, void *param, oCItem *), void * obj, void * param)
+void ObjectManager::callForAllContainerItems(bool(*func)(void *obj, void *param, oCItem *), void * obj, void * param)
 {
 	auto containerList = getMobContainers();
 
@@ -1186,7 +1190,7 @@ void ObjectManager::callForAllContainerItems(void(*func)(void *obj, void *param,
 	}
 }
 
-void ObjectManager::callForAllWorldItems(void(*func)(void* obj, void* param, oCItem*), void* obj, void* param)
+void ObjectManager::callForAllWorldItems(bool(*func)(void* obj, void* param, oCItem*), void* obj, void* param)
 {
 	zCWorld* world = oCGame::GetGame()->GetWorld();
 	zCListSort<oCItem>* itemList = world->GetItemList();
@@ -1216,18 +1220,21 @@ struct TEST2_PARAMS {
 	int instanceID;
 };
 
-static void test2(void* obj, void* param, oCItem* itm) {
-	if (itm == NULL) return;
+static bool test2(void* obj, void* param, oCItem* itm) {
+	if (itm == NULL) return false;
 
 	TEST2_PARAMS* params = (TEST2_PARAMS*)param;
-	if (params->result != NULL) return;
+	if (params->result != NULL) return false;
 
 	if (itm->GetInstance() == params->instanceID)
 	{
 		params->result = itm;
 		//logStream << "ObjectManager::getItemByInstanceId: result found" << endl;
 		//util::debug(&logStream);
+		return true;
 	}
+
+	return false;
 }
 
 oCItem* ObjectManager::getItemByInstanceId(int instanceIdParserSymbolIndex)
