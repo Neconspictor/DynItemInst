@@ -49,6 +49,10 @@ const string DII_SLOTS[DII_SLOT_COUNT] = {
 	"ZS_SWORD"
 };
 
+
+
+INSTANCE DII_Item(C_Item);
+
 // ************************************************************
 // Provides the instance id for an instance given by its string representation.
 // The instance id is an index into the parser symbol table.
@@ -327,7 +331,8 @@ func INT DII_UpdateInstance(var string instanceName, var c_item itm) {
 FUNC DII_USER_DATA DII_GetUserData (var string instanceName) {
     if (!(NEC_Init_Modules & NEC_DII)) {
         MEM_Warn("DII_GetUserData: DII Module isn't initialized!");
-        return;
+        MEM_NullToInst();
+		return;
     };
 	
 	var int instanceParserSymbolID;
@@ -339,8 +344,14 @@ FUNC DII_USER_DATA DII_GetUserData (var string instanceName) {
 	CALL_IntParam(instanceParserSymbolID);
 	CALL_PutRetValTo(_@(ret));
 	CALL__cdecl(adr);
+	
+	if (!ret) {
+	 MEM_NullToInst();
+	 return;
+	};
 		
     MEM_PtrToInst(ret);
+	return;
 };
 
 // **********************************************************************

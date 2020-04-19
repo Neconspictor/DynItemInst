@@ -341,7 +341,7 @@ BYTE* DII::DII_GetUserData(int instanceIdParserSymbolIndex) // Func DII_UserData
 	if (!manager->isDynamicInstance(instanceIdParserSymbolIndex))
 	{
 		mLogStream << __FUNCSIG__ << ": instanceId isn't dynamic" << std::endl;
-		util::logWarning(&mLogStream);
+		util::debug(&mLogStream);
 		return NULL;
 	}
 

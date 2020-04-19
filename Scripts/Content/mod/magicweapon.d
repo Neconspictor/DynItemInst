@@ -62,8 +62,10 @@ func void MAGICWEAPON_CheckEffectState() {
 		
 		
 		if (itm.effectVob != 0 && data.ints[MAGICWEAPON_ENCHANTEDWEAPON]) {
+			itm.effect = "";
 			oCItemRemoveEffect(citm);
 			oCNpc_PutInSlot(hero, "ZS_SWORD", itmPtr, 1);
+			itm.effect = data.magicWeaponNewEffect;
 		};
 		
 	};
@@ -82,8 +84,10 @@ func void MAGICWEAPON_CheckEffectState() {
 		
 		
 		if (itm.effectVob != 0 && data.ints[MAGICWEAPON_ENCHANTEDWEAPON]) {
+			itm.effect = "";
 			oCItemRemoveEffect(citm);
 			oCNpc_PutInSlot(hero, "ZS_BOW", itmPtr, 1);
+			itm.effect = data.magicWeaponNewEffect;
 		};
 		
 	};
@@ -102,8 +106,10 @@ func void MAGICWEAPON_CheckEffectState() {
 		
 		
 		if (itm.effectVob != 0 && data.ints[MAGICWEAPON_ENCHANTEDWEAPON]) {
+			itm.effect = "";
 			oCItemRemoveEffect(citm);
 			oCNpc_PutInSlot(hero, "ZS_CROSSBOW", itmPtr, 1);
+			itm.effect = data.magicWeaponNewEffect;
 		};
 		
 	};
@@ -122,8 +128,10 @@ func void MAGICWEAPON_CheckEffectState() {
 		
 		
 		if (itm.effectVob != 0 && data.ints[MAGICWEAPON_ENCHANTEDWEAPON]) {
+			itm.effect = "";
 			oCItemRemoveEffect(citm);
 			oCNpc_PutInSlot(hero, "ZS_LONGSWORD", itmPtr, 1);
+			itm.effect = data.magicWeaponNewEffect;
 		};
 		
 	};

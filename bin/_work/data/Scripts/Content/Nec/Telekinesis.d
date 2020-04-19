@@ -118,8 +118,6 @@ func void TELEKINESIS_ClearInterpolators() {
 	var int adr;
 	adr = GetProcAddress (LoadLibrary (NEC_relativeLibraryPath), "TELEKINESIS_ClearInterpolators");
 	CALL__cdecl(adr);
-	
-	MEM_Warn("TELEKINESIS_ClearInterpolators called.");
 };
 
 
