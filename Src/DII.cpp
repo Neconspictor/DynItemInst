@@ -863,6 +863,7 @@ bool DII::ItemUpdater::updateItem(void* obj, void* param, oCItem* itm)
 		}
 
 		manager->setInstanceId(itm, resolvedID);
+		manager->oCItemSaveRemoveEffect(itm);
 		itm->InitByScript(resolvedID, itm->amount);
 
 		if (isActive) itm->flags |= ITEM_ACTIVE;
@@ -870,7 +871,9 @@ bool DII::ItemUpdater::updateItem(void* obj, void* param, oCItem* itm)
 		if (nfocus) itm->flags |= ITEM_NFOCUS;
 
 		manager->oCItemSaveRemoveEffect(itm);
-		manager->oCItemSaveInsertEffect(itm);
+
+		if (isInWorld && !isActive)
+			manager->oCItemSaveInsertEffect(itm);
 
 		return true;
 	}

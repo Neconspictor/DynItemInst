@@ -1162,7 +1162,9 @@ void ObjectManager::callForAllNpcItems(bool(*func)(void* obj, void* param, oCIte
 					//oCItemSaveRemoveEffect(itm);
 					//oCNpcPutInSlot(npc, slotName, nullptr, 1);
 					//oCItemSaveInsertEffect(itm);
-					oCNpcPutInSlot(npc, slotName, vob, 1);
+					oCItemSaveRemoveEffect(itm);
+					oCNpcPutInSlot(npc, slotName, itm, 1);
+					oCItemSaveInsertEffect(itm);
 				}
 			}
 			
