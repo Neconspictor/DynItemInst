@@ -115,14 +115,13 @@ public:
 /** ZenGin object base class. */
 class zCObjectNVT
 {
-private:
+public:
 	//int		_vtbl;
-protected:
 	int		refCtr;
 	int		hashIndex;
 	int		hashNext;
 	zSTRING objectName;
-public:    
+   
 	//.text:00401ED0 ; public: virtual void __thiscall zCObject::Archive(class zCArchiver &)
 	/** Insert description. 
 	* @usable Ingame only

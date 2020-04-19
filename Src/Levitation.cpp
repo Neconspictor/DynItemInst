@@ -156,6 +156,7 @@ bool Levitation::gameIsPaused = false;
 bool Levitation::noCollision = false;
 int Levitation::frameTime = 0;
 int Levitation::diffFrameTime = 0;
+bool Levitation::mCustomCollisionDetected = false;
 
 LevitationData heroLevitationBean;
 bool heroLevitationBeanCalled;
@@ -206,7 +207,8 @@ void Levitation::hookModule()
 	HookManager* hookManager = HookManager::getHookManager();
 	hookManager->addFunctionHook((LPVOID*)&zCVobDoFrameActivity, zCVobDoFrameActivityHook, mModuleDesc);
 	hookManager->addFunctionHook((LPVOID*)&oCGamePause, oCGamePauseHook, mModuleDesc);
-	hookManager->addFunctionHook((LPVOID*)&oCGameUnpause, oCGameUnpauseHook, mModuleDesc);	
+	hookManager->addFunctionHook((LPVOID*)&oCGameUnpause, oCGameUnpauseHook, mModuleDesc);
+	//hookManager->addFunctionHook((LPVOID*)&zCVobCheckAndResolveCollisions, zCVobCheckAndResolveCollisionsHook, mModuleDesc);
 	
 	hookManager->addFunctionHook((LPVOID*)&zCVobUpdatePhysics, zCVobUpdatePhysicsHook, mModuleDesc);
 	hookManager->addFunctionHook((LPVOID*)&oCAIHumanPC_ActionMove, oCAIHumanPC_ActionMoveHook, mModuleDesc);
@@ -220,6 +222,7 @@ void Levitation::unHookModule()
 	hookManager->removeFunctionHook((LPVOID*)&oCGameUnpause, oCGameUnpauseHook, mModuleDesc);
 	hookManager->removeFunctionHook((LPVOID*)&zCVobUpdatePhysics, zCVobUpdatePhysicsHook, mModuleDesc);
 	hookManager->removeFunctionHook((LPVOID*)&oCAIHumanPC_ActionMove, oCAIHumanPC_ActionMoveHook, mModuleDesc);
+	//hookManager->removeFunctionHook((LPVOID*)&zCVobCheckAndResolveCollisions, zCVobCheckAndResolveCollisionsHook, mModuleDesc);
 }
 
 zVEC3 levitatePosition;
@@ -236,6 +239,7 @@ void Levitation::zCVobDoFrameActivityHook(void* pThis)
 	bool adjust = false;
 	float oldYPosition = 0;
 	zVEC3 oldLook;
+	zVEC3 pos;
 
 
 	if (pThis == hero)
@@ -271,7 +275,7 @@ void Levitation::zCVobDoFrameActivityHook(void* pThis)
 		if (hasFinished)
 			levitatePosition = levitate();
 
-		zVEC3 pos;
+		
 		hero->GetPositionWorld(pos.x, pos.y, pos.z);
 		float hoverDistance = heroLevitationBean.getDistanceToGround(pos);
 		if (true) {
@@ -281,11 +285,20 @@ void Levitation::zCVobDoFrameActivityHook(void* pThis)
 		}
 		
 	}
+
+	//if (adjust) {
+	//	adjust = !doCustomCollisionCheck(hero);
+	//}
+	
 	zCVobDoFrameActivity(pThis);
 
 	if (adjust) {
 		doCustomCollisionCheck(hero);
+		//hero->SetPositionWorld(pos);
 	}
+	
+
+	
 }
 
 void Levitation::zCVobSetPhysicsEnabledHook(void* pThis, int second)
@@ -348,28 +361,47 @@ void Levitation::zCVobCheckAndResolveCollisionsHook(void* pThis)
 
 	oCNpc* hero = oCNpc::GetHero();
 	void* collisionObject = nullptr;
+	zVEC3 translation;
 
 	if (hero != nullptr)
 		collisionObject = hero->m_poCollisionObject;
 
-	bool adjust = (pThis == hero) && isLevitationActive() && (collisionObject != nullptr);
+	bool adjust = (pThis == hero) && isLevitationActive() && (collisionObject != nullptr) && !customCollisionDetected();
 	if (adjust)
 	{
 		zMAT4* mat = (zMAT4*)((char*)collisionObject + 0x44);
-		zVEC3 translation(mat->_14, mat->_24, mat->_34);
-		mLogStream << "zCVobCheckAndResolveCollisionsHook (before):" << std::endl;
+		translation = zVEC3(mat->_14, mat->_24, mat->_34);
+		/*mLogStream << "zCVobCheckAndResolveCollisionsHook (before):" << std::endl;
 		mLogStream << "\ttranslation = " << translation << std::endl;
-		util::logWarning(&mLogStream);
+		util::logWarning(&mLogStream);*/
+		//return;
+		
 	}
 	zCVobCheckAndResolveCollisions(pThis);
 
 	if (adjust)
 	{
+		collisionObject = hero->m_poCollisionObject;
 		zMAT4* mat = (zMAT4*)((char*)collisionObject + 0x44);
-		zVEC3 translation(mat->_14, mat->_24, mat->_34);
+
+		zVEC3 diff; 
+		diff.x = mat->_14 - translation.x;
+		diff.y = mat->_24 - translation.y;
+		diff.z = mat->_34 - translation.z;
+		float length = std::sqrtf(diff.x * diff.x + diff.y * diff.y + diff.z * diff.z);
+
+		
+
+		if (length < 2.2 || length > 20) return;
+
+		mat->_14 = translation.x;
+		mat->_24 = translation.y;
+		mat->_34 = translation.z;
+		
+		/*zVEC3 translation(mat->_14, mat->_24, mat->_34);
 		mLogStream << "zCVobCheckAndResolveCollisionsHook (after):" << std::endl;
 		mLogStream << "\ttranslation = " << translation << std::endl;
-		util::logWarning(&mLogStream);
+		util::logWarning(&mLogStream);*/
 	}
 }
 
@@ -516,6 +548,13 @@ void Levitation::zCVobUpdatePhysicsHook(void* pThis)
 	if (adjust)
 	{
 		zMAT4* mat = (zMAT4*)((char*)collisionObject + 0x44);
+
+		auto pos = hero->GetPosition();
+
+		mat->_14 = pos.x;
+		mat->_24 = pos.y;
+		mat->_34 = pos.z;
+
 		translationBefore = zVEC3(mat->_14, mat->_24, mat->_34);
 		//logStream << "zCVobUpdatePhysicsHook (before):" << std::endl;
 		//logStream << "\ttranslation = " << translation << std::endl;
@@ -865,6 +904,11 @@ int Levitation::getMoveDownKey()
 	return symbol->content.data_int;
 }
 
+bool Levitation::customCollisionDetected()
+{
+	return mCustomCollisionDetected;
+}
+
 zVEC3 Levitation::levitate() {
 
 	zVEC3 positionAdd(0, 0, 0);
@@ -1127,11 +1171,16 @@ bool checkVobCollision__checkVob(zCVob* vob, const zTBBox3D& boundingBox)
 	if (vob == nullptr) return false;
 
 	std::stringstream mLogStream;
+
+
 	zCArray<void*>* leafObjects = &vob->vobLeafList;
 	zCPolygon** polys;
 	//int third;
 	mLogStream << "checkVobCollision__checkVob(): Check object with leaf number: " << leafObjects->GetSize() << std::endl;
-	mLogStream << "checkVobCollision__checkVob(): visual name: " << vob->GetObjectName().ToChar() << std::endl;
+
+	auto& name = vob->objectName;
+
+	mLogStream << "checkVobCollision__checkVob(): visual name: " << name.ToChar() << std::endl;
 	util::logWarning(&mLogStream);
 
 	for (unsigned int i = 0; i < leafObjects->GetSize(); ++i)
@@ -1180,6 +1229,10 @@ bool Levitation::checkVobCollision(void* zCBspBaseObject, zCVob* testedVob, cons
 			mLogStream << "checkVobCollision(): test vob with number: " << i << std::endl;
 			util::logWarning(&mLogStream);
 
+			if (i > 0) {
+				bool test = false;
+			}
+
 			zCVob* vob = collectedVobs.GetItem(i);
 			if (vob != testedVob && vob != nullptr)
 			{
@@ -1188,7 +1241,7 @@ bool Levitation::checkVobCollision(void* zCBspBaseObject, zCVob* testedVob, cons
 				bool collidesWithDynamicVobs = vob->bitfield[0] & zCVob_bitfield0_collDetectionDynamic;
 				bool isStaticVob = vob->bitfield[0] & zCVob_bitfield0_staticVob;
 				//bool hasCollisionObject = vob->m_poCollisionObject != nullptr;
-				if (collidesWithDynamicVobs && isStaticVob)
+				if (collidesWithDynamicVobs) //isStaticVob
 				{
 					if (checkVobCollision__checkVob(vob, boundingBox))
 						return true;
@@ -1227,6 +1280,8 @@ bool checkCollision(oCNpc* hero, const zMAT4& mat)
 	box.bbox3D_maxs += pos;
 	box.bbox3D_mins += pos;
 
+	
+
 	Levitation::zCBspBaseCollectPolysInBBox3D(pointer, rec, polys, third);
 	if (polys != NULL) {
 		if (third)
@@ -1252,12 +1307,16 @@ bool checkCollision(oCNpc* hero, const zMAT4& mat)
 				if (poly->CheckBBoxPolyIntersection(box))
 				{
 					zCMaterial* material = poly->GetMaterial();
-					char bitflag = *((char*)(char*)material + 0x70);
-					bool hasNoCollision = bitflag & (1 << 4);
+					char* bitflag = ((char*)(char*)material + 0x70);
+					bool hasNoCollision = *bitflag & (1 << 4);
 
 					const char* materialName = material->GetName().ToChar();
 					bool isGhostOccluder = strcmp(materialName, "GHOSTOCCLUDER") == 0;
 					bool isNW_MISC_FULLALPHA_01 = strcmp(materialName, "NW_MISC_FULLALPHA_01") == 0;
+
+					if (isGhostOccluder || isNW_MISC_FULLALPHA_01) {
+						//*bitflag = *bitflag | (1 << 4);
+					}
 
 					if (hasNoCollision)
 					{
@@ -1265,6 +1324,11 @@ bool checkCollision(oCNpc* hero, const zMAT4& mat)
 						//logStream << "checkCollision(): ignore poly with no collision material" << std::endl;
 						//util::logWarning(&logStream);
 						continue;
+					}
+					else {
+						std::stringstream logStream;
+						logStream << "checkCollision(): collision detected!" << std::endl;
+						util::logWarning(&logStream);
 					}
 
 					if (isGhostOccluder)
@@ -1277,6 +1341,8 @@ bool checkCollision(oCNpc* hero, const zMAT4& mat)
 
 					if (isNW_MISC_FULLALPHA_01)
 					{
+						bool test = false;
+
 						//std::stringstream logStream;
 						//logStream << "checkCollision(): ignore poly with NW_MISC_FULLALPHA_01 material" << std::endl;
 						//util::logWarning(&logStream);
@@ -1300,13 +1366,13 @@ bool checkCollision(oCNpc* hero, const zMAT4& mat)
 	}
 
 	//if (!intersected)
-		//intersected = checkVobCollision(pointer, hero, rec);
+		//intersected = Levitation::checkVobCollision(pointer, hero, rec);
 
 	return intersected;
 }
 
 
-void Levitation::doCustomCollisionCheck(oCNpc* npc) {
+bool Levitation::doCustomCollisionCheck(oCNpc* npc) {
 
 	std::stringstream mLogStream;
 	zTBBox3D bBox = LevitationData::zCModelGetBBox3D(npc->GetModel());// ->GetBBox3D();
@@ -1318,7 +1384,7 @@ void Levitation::doCustomCollisionCheck(oCNpc* npc) {
 	zCModelCalcModelBBox3DWorld(model);
 	zVEC3 oldPos = zVEC3(heroLevitationBean.oldXPos, heroLevitationBean.oldYPos, heroLevitationBean.oldZPos);
 
-	if (checkCollision(npc, *mat))
+	if (mCustomCollisionDetected = checkCollision(npc, *mat))
 	{
 		npc->SetPositionWorld(oldPos);
 
@@ -1330,6 +1396,8 @@ void Levitation::doCustomCollisionCheck(oCNpc* npc) {
 			//hero->SetPositionWorld(oldPos + normal*20);
 		//} 
 	}
+
+	return mCustomCollisionDetected;
 }
 
 std::ostream & operator<<(std::ostream & os, const Plane & p)

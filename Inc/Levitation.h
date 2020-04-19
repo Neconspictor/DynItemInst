@@ -463,6 +463,7 @@ public:
 	static bool noCollision;
 	static int frameTime;
 	static int diffFrameTime;
+	static bool mCustomCollisionDetected;
 
 	Levitation();
 	virtual ~Levitation();
@@ -534,7 +535,7 @@ public:
 
 	static __int32 __cdecl sysGetTime();
 	static zVEC3 levitate();
-	static void doCustomCollisionCheck(oCNpc* npc);
+	static bool doCustomCollisionCheck(oCNpc* npc);
 	static int calcPastFrameTime();
 	static Motion getCollideYDir(zVEC3, float, bool);
 	static Motion getCollideForwardDir(oCNpc*, float, bool);
@@ -555,5 +556,7 @@ public:
 	static int getTurnRightKey();
 	static int getMoveUpKey();
 	static int getMoveDownKey();
+
+	static bool customCollisionDetected();
 
 };
