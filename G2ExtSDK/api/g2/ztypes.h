@@ -636,7 +636,9 @@ public:
 	*/
 	const T& operator [] (const unsigned int pos) const
 	{
-		if((int)pos <= this->m_numInArray)
+		if ((int)pos >= this->m_numInArray) {
+			throw std::out_of_range("position index is to big: index = " + std::to_string(pos));
+		}
 			return this->m_array[pos];
 	};
 
@@ -644,8 +646,11 @@ public:
 	*/
 	T& operator [] (const unsigned int pos)
 	{
-		if((int)pos <= this->m_numInArray)
-			return this->m_array[pos];
+		if ((int)pos >= this->m_numInArray) {
+			throw std::out_of_range("position index is to big: index = " + std::to_string(pos));
+		}
+
+		return this->m_array[pos];
 	};
 
 	/** Insert description. 
@@ -702,8 +707,12 @@ public:
 	*/
 	const T& GetItem(const unsigned int pos)
 	{
-		if((pos < this->m_numInArray) && (pos < this->m_numAlloc))
-			return this->m_array[pos];
+		if ((int)pos >= this->m_numInArray || 
+			(int)pos >= this->m_numAlloc) {
+			throw std::out_of_range("position index is to big: index = " + std::to_string(pos));
+		}
+
+		return this->m_array[pos];
 	};
 
 	/** Insert description. 
