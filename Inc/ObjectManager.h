@@ -90,7 +90,7 @@ public:
 	/**
 	 * Resolves proxying for symbol names.
 	 */
-	const zSTRING& resolveProxying(const zSTRING& symbolName) const;
+	const char* resolveProxying(const zSTRING& symbolName) const;
 
 	/**
 	 * \return the current instance of this class.
@@ -115,7 +115,7 @@ public:
 	/**
 	 * \return true if a new instance could be created. Otherwise false.
 	 */
-	bool createNewInstanceWithoutExistingId(oCItem* item, int key, const zSTRING& instanceName);
+	bool createNewInstanceWithoutExistingId(oCItem* item, int key, const std::string& instanceName);
 
 	//void createNewInstanceForExistingId(oCItem* item, int instanceId);
 	/**
@@ -123,7 +123,7 @@ public:
 			 * \param item The item to use for instance creation.
 			 * \return The instance id respectively the index of the new created zCPar_Symbol. Zero is returned if the instance couldn't be created.
 			 */
-	int createNewInstanceId(oCItem* item, const zSTRING& instanceName);
+	int createNewInstanceId(oCItem* item, const std::string& instanceName);
 
 	/**
 	 * Deletes a DII by its parser symbol table index.
@@ -199,7 +199,7 @@ public:
 	 * \param instanceId The instance id of which the parent instance id should be set
 	 * \param value The the parent instance id to be set
 	 */
-	void setPrototypeSymbolName(int instanceParserSymbolID, const zSTRING& parentInstanceSymbolName);
+	void setPrototypeSymbolName(int instanceParserSymbolID, const std::string& parentInstanceSymbolName);
 
 	/**
 	 * Provides the parent instance id for a given instance id.
@@ -207,7 +207,7 @@ public:
 	 * \param instanceId The instance id of which the parent instance id should be returned.
 	 * \return the parent instance id of the given instance id.
 	 */
-	const zSTRING& getPrototypeSymbolName(int instanceParserSymbolID);
+	const std::string& getPrototypeSymbolName(int instanceParserSymbolID);
 
 	/**
 	 * Sets the instance id for a given oCItem.
@@ -330,17 +330,15 @@ public:
 
 private:
 
-
-
 	// <int instanceId, Item* item>
 	std::unordered_map<int, std::unique_ptr<DynInstance>> mNewInstanceMap;
 	std::unordered_map<int, zCPar_Symbol*> mNewInstanceToSymbolMap;
-	std::unordered_map<zSTRING, zCPar_Symbol*, zSTRING_Hasher> mNameToSymbolMap;
-	std::unordered_map<zSTRING, int, zSTRING_Hasher> mNameToInstanceMap;
+	std::unordered_map<std::string, zCPar_Symbol*> mNameToSymbolMap;
+	std::unordered_map<std::string, int> mNameToInstanceMap;
 
 	std::map<int, int> mProxies;
-	std::unordered_map<zSTRING, zSTRING, zSTRING_Hasher> mProxiesNames;
-	std::unordered_map<zSTRING, int, zSTRING_Hasher> mUnresolvedNamesToInstances;
+	std::unordered_map<std::string, std::string> mProxiesNames;
+	std::unordered_map<std::string, int> mUnresolvedNamesToInstances;
 
 	std::stringstream mLogStream;
 
@@ -363,7 +361,7 @@ private:
 	 */
 	int createParserSymbol(const ParserInfo& info);
 
-	zCPar_Symbol * createNewInstanceSymbol(int instanceParserSymbolID, zCPar_Symbol * prototype, const zSTRING& symbolName) const;
+	zCPar_Symbol * createNewInstanceSymbol(int instanceParserSymbolID, zCPar_Symbol * prototype, const std::string& symbolName) const;
 };
 
 

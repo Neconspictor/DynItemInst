@@ -123,12 +123,12 @@ public:
 	~DynInstance();
 
 public:
-	zSTRING mSymbolName;
+	std::string mSymbolName;
 	int zCPar_Symbol_Bitfield;
-	zSTRING mPrototypeSymbolName;
+	std::string mPrototypeSymbolName;
 	int		idx;
-	zSTRING name;
-	zSTRING nameID;
+	std::string name;
+	std::string nameID;
 	int		hp;
 	int		hp_max;
 	int     mainflags;
@@ -168,11 +168,11 @@ public:
 	int		disguiseGuild;
 
 	// -- visual
-	zSTRING	visual;
+	std::string	visual;
 
 	// -- change of mesh on equip
-	zSTRING visual_change;	//	ASC file
-	zSTRING effect;			//  Effect instance
+	std::string visual_change;	//	ASC file
+	std::string effect;			//  Effect instance
 
 	int		visual_skin;
 
@@ -223,24 +223,24 @@ public:
 	 * Provides the parent's instance id of this dynamic instance. The Parent instance id is the parser 
 	 * index of the base class of this dynamic instance.
 	 */
-	const zSTRING& getPrototypeSymbolName();
+	const std::string& getPrototypeSymbolName();
 
 	/**
 	 * Sets this' parent instance id. The Parent instance id is the parser index of the base class of
 	 * this dynamic instance.
 	 */
-	void setPrototypeSymbolName(const zSTRING& symbolName);
+	void setPrototypeSymbolName(const std::string& symbolName);
 
 	/**
 	 * \return The name of the zCPar_Symbol associated with this dynamic instance
 	 */
-	const zSTRING& getSymbolName();
+	const std::string& getSymbolName();
 
 	/**
 	 * Sets the name of the zCPar_Symbol associated with this dynamic instance.
 	 * \param name The name of the zCPar_Symbol
 	 */
-	void setSymbolName(const zSTRING& symbolName);
+	void setSymbolName(const std::string& symbolName);
 
 	virtual void serialize(std::ostream&) const override;
 

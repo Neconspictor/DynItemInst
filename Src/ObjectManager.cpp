@@ -52,12 +52,16 @@ std::unique_ptr<ObjectManager> ObjectManager::mInstance = std::make_unique<Objec
 
 bool ObjectManager::addProxy(const zSTRING & sourceInstance, const zSTRING & targetInstance)
 {
+	std::string sourceInstance2 = sourceInstance.ToChar();
+	std::string targetInstance2 = targetInstance.ToChar();
+
+
 	//We only add a proxy if sourceInstance isn't proxied yet
-	auto sourceAlreadyThereIT = mProxiesNames.find(sourceInstance);
+	auto sourceAlreadyThereIT = mProxiesNames.find(sourceInstance2);
 	if (sourceAlreadyThereIT != mProxiesNames.end()) {
 		mLogStream << __FUNCSIG__ << ": Cannot add proxy (" << sourceInstance.ToChar() << ", " << targetInstance.ToChar()
 			<< ") since their already exists another proxy path: ("
-			<< sourceAlreadyThereIT->first.ToChar() << ", " << sourceAlreadyThereIT->second.ToChar() << ")" << std::endl;
+			<< sourceAlreadyThereIT->first << ", " << sourceAlreadyThereIT->second << ")" << std::endl;
 
 		util::logWarning(&mLogStream);
 		return false;
@@ -71,7 +75,7 @@ bool ObjectManager::addProxy(const zSTRING & sourceInstance, const zSTRING & tar
 	// Note: target instance id could be a resolved proxy!
 	auto targetInstanceID = parser->GetIndex(targetInstance);
 	{
-		auto it = mUnresolvedNamesToInstances.find(targetInstance);
+		auto it = mUnresolvedNamesToInstances.find(targetInstance2);
 		if (it != mUnresolvedNamesToInstances.end()) {
 			targetInstanceID = it->second;
 		}
@@ -114,10 +118,10 @@ bool ObjectManager::addProxy(const zSTRING & sourceInstance, const zSTRING & tar
 		it = mProxies.find(target);
 	}
 
-	mProxiesNames.insert({sourceInstance, targetInstance});
+	mProxiesNames.insert({sourceInstance2, targetInstance2});
 	
 	if (sourceInstanceID != -1) {
-		mUnresolvedNamesToInstances.insert({ sourceInstance, sourceInstanceID });
+		mUnresolvedNamesToInstances.insert({ std::string(sourceInstance.ToChar()), sourceInstanceID });
 		mProxies.insert({ sourceInstanceID, targetInstanceID });
 	}
 
@@ -137,13 +141,14 @@ int ObjectManager::getUnProxiedInstanceID(const zSTRING& instanceName) const
 
 void ObjectManager::removeProxy(const zSTRING& sourceInstance)
 {
-	auto it = mUnresolvedNamesToInstances.find(sourceInstance);
+	std::string name = sourceInstance.ToChar();
+	auto it = mUnresolvedNamesToInstances.find(name);
 	if (it == mUnresolvedNamesToInstances.end()) return;
 	auto sourceInstanceID = it->second;
 
 	mProxies.erase(sourceInstanceID);
-	mProxiesNames.erase(sourceInstance);
-	mUnresolvedNamesToInstances.erase(sourceInstance);
+	mProxiesNames.erase(name);
+	mUnresolvedNamesToInstances.erase(name);
 }
 
 int ObjectManager::resolveProxying(int instanceID) const
@@ -159,17 +164,17 @@ int ObjectManager::resolveProxying(int instanceID) const
 	return resolvedInstanceID;
 }
 
-const zSTRING& ObjectManager::resolveProxying(const zSTRING& symbolName) const
+const char* ObjectManager::resolveProxying(const zSTRING& symbolName) const
 {
-	const auto* resolvedName = &symbolName;
+	const char* resolvedName = symbolName.ToChar();
 	auto it = mProxiesNames.find(resolvedName);
 	while (it != mProxiesNames.end()) {
 		const auto& target = it->second;
-		resolvedName =& target;
+		resolvedName = target.c_str();
 		it = mProxiesNames.find(target);
 	}
 
-	return *resolvedName;
+	return resolvedName;
 }
 
 
@@ -241,7 +246,7 @@ void ObjectManager::release()
 }
 
 
-int ObjectManager::createNewInstanceId(oCItem* item, const zSTRING& instanceName) {
+int ObjectManager::createNewInstanceId(oCItem* item, const std::string& instanceName) {
 	if (item == NULL) {
 		mLogStream << "ObjectManager::createNewInstanceId: item is null!" << std::endl;
 		util::logWarning(&mLogStream);
@@ -267,7 +272,7 @@ int ObjectManager::createNewInstanceId(oCItem* item, const zSTRING& instanceName
 	int instanceParserSymbolID = *indexCount;
 
 	if (!createNewInstanceWithoutExistingId(item, instanceParserSymbolID, instanceName)) {
-		mLogStream << "ObjectManager::createNewInstanceId: Couldn't create new instance '" << instanceName.ToChar() << "'" << endl;
+		mLogStream << "ObjectManager::createNewInstanceId: Couldn't create new instance '" << instanceName << "'" << endl;
 		return 0;
 	}
 
@@ -291,7 +296,7 @@ void ObjectManager::deleteDII(int parserSymbolIndex)
 	//Check that the symbol cannot be found anymore
 	//auto* testSymbol = parser->GetSymbol(parserSymbolIndex);
 
-	const auto& name = symbol->name;
+	std::string name = symbol->name.ToChar();
 
 	auto* dii = mNewInstanceMap[parserSymbolIndex].get();
 	dii->setDoNotStore(true);
@@ -590,9 +595,9 @@ void ObjectManager::saveNewInstances(char* directoryPath, char* filename) {
 		auto* parser = zCParser::GetParser();
 		ofs << mProxiesNames.size() << '\n';
 		for (auto& pair : mProxiesNames) {
-			util::writezSTRING(ofs, pair.first);
+			util::writeString(ofs, pair.first);
 			ofs << ' ';
-			util::writezSTRING(ofs, pair.second);
+			util::writeString(ofs, pair.second);
 			ofs << '\n';
 		}
 	}
@@ -637,8 +642,8 @@ void ObjectManager::loadNewInstances(char* filename) {
 			//DynInstance* item = new DynInstance(*storeItem);
 
 			ParserInfo info;
-			info.newSymbolName = instance->getSymbolName().ToChar();
-			info.oldSymbolName = instance->getPrototypeSymbolName().ToChar();
+			info.newSymbolName = instance->getSymbolName().c_str();
+			info.oldSymbolName = instance->getPrototypeSymbolName().c_str();
 			info.bitfield = instance->getParserSymbolBitfield();
 			info.container = instance.get();
 
@@ -670,7 +675,7 @@ void ObjectManager::loadNewInstances(char* filename) {
 			zSTRING source(sourceInstanceName.c_str());
 			zSTRING target(targetInstanceName.c_str());
 
-			auto* symbol = createNewInstanceSymbol(parser->GetIndex(source), parser->GetSymbol(target), sourceInstanceName.c_str());
+			auto* symbol = createNewInstanceSymbol(parser->GetIndex(source), parser->GetSymbol(target), sourceInstanceName);
 			if (symbol) {
 				addSymbolToSymbolTable(symbol);
 			}
@@ -728,7 +733,7 @@ static void test (void* obj, void* param, oCItem* itm) {
 	}
 }
 
-bool ObjectManager::createNewInstanceWithoutExistingId(oCItem* item, int instanceParserSymbolID, const zSTRING& instanceName)
+bool ObjectManager::createNewInstanceWithoutExistingId(oCItem* item, int instanceParserSymbolID, const std::string& instanceName)
 {
 	zCParser* parser = zCParser::GetParser();
 	int parentId = getInstanceId(*item);
@@ -736,7 +741,7 @@ bool ObjectManager::createNewInstanceWithoutExistingId(oCItem* item, int instanc
 
 	if (old == NULL) {
 		std::stringstream mLogStream;
-		mLogStream << "ObjectManager::createNewInstanceWithoutExistingId: Couldn't create new instance since parent instance symbol couldn't be found! instanceName = " << instanceName.ToChar() << endl;
+		mLogStream << "ObjectManager::createNewInstanceWithoutExistingId: Couldn't create new instance since parent instance symbol couldn't be found! instanceName = " << instanceName << endl;
 		return false;
 	}
 
@@ -745,7 +750,7 @@ bool ObjectManager::createNewInstanceWithoutExistingId(oCItem* item, int instanc
 
 	if (!symbol) {
 		std::stringstream mLogStream;
-		mLogStream << "ObjectManager::createNewInstanceWithoutExistingId: Couldn't create symbol '" << instanceName.ToChar() << "'" << endl;
+		mLogStream << "ObjectManager::createNewInstanceWithoutExistingId: Couldn't create symbol '" << instanceName << "'" << endl;
 		return false;
 	}
 
@@ -765,26 +770,18 @@ bool ObjectManager::createNewInstanceWithoutExistingId(oCItem* item, int instanc
 			instanceBegin = parentId;
 		}*/
 	}
-	
-	const auto& symbolName = symbol->name;
-	
-	
 	instanceItem->store(*item);
 	setPrototypeSymbolName(instanceParserSymbolID, old->name.ToChar());
 
 	instanceItem->setParserSymbolBitfield(symbol->bitfield);
-	instanceItem->setSymbolName(symbolName.ToChar());
+	instanceItem->setSymbolName(symbol->name.ToChar());
 
-	
-	
 	mNewInstanceToSymbolMap.insert(pair<int, zCPar_Symbol*>(instanceParserSymbolID, symbol));
 
-
-	
-	
-	//transform(symbolName.begin(), symbolName.end(), symbolName.begin(), ::toupper);
-	mNameToSymbolMap.insert(pair<zSTRING, zCPar_Symbol*>(symbolName, symbol));
-	mNameToInstanceMap.insert(pair<zSTRING, int>(symbolName, instanceParserSymbolID));
+	string symbolName = symbol->name.ToChar();
+	transform(symbolName.begin(), symbolName.end(), symbolName.begin(), ::toupper);
+	mNameToSymbolMap.insert(pair<string, zCPar_Symbol*>(symbolName, symbol));
+	mNameToInstanceMap.insert(pair<string, int>(symbolName, instanceParserSymbolID));
 
 	mLogStream << "ObjectManager::createNewInstanceWithoutExistingId(): indexCount = " << *indexCount << endl;
 	util::debug(&mLogStream);
@@ -808,10 +805,6 @@ zCPar_Symbol* ObjectManager::createNewInstanceSymbol(const ParserInfo* old)
 	result->parent = ref->parent;
 	result->bitfield = ref->bitfield;
 	result->name = old->newSymbolName;
-
-	// ensure upper case
-	result->name = result->name.Upper();
-
 	result->offset = 0;
 	result->next = ref->next;
 	result->content.data_ptr = 0;//ref->content.data_ptr;
@@ -916,18 +909,16 @@ int ObjectManager::createParserSymbol(const ParserInfo& info)
 
 	updateContainerItem(&info);
 	mNewInstanceToSymbolMap.insert(pair<int, zCPar_Symbol*>(newInstanceId, symbol));
-	const auto& symbolName = symbol->name;
-	mNameToSymbolMap.insert(pair<zSTRING, zCPar_Symbol*>(symbolName, symbol));
-	mNameToInstanceMap.insert(pair<zSTRING, int>(symbolName, newInstanceId));
+	string symbolName = symbol->name.ToChar();
+	transform(symbolName.begin(), symbolName.end(), symbolName.begin(), ::toupper);
+	mNameToSymbolMap.insert(pair<string, zCPar_Symbol*>(symbolName, symbol));
+	mNameToInstanceMap.insert(pair<string, int>(symbolName, newInstanceId));
 
 	return newInstanceId;
 }
 
-zCPar_Symbol* ObjectManager::createNewInstanceSymbol(int instanceParserSymbolID, zCPar_Symbol* prototype, const zSTRING& source) const
+zCPar_Symbol* ObjectManager::createNewInstanceSymbol(int instanceParserSymbolID, zCPar_Symbol* prototype, const std::string& symbolName) const
 {
-
-	zSTRING name = source;
-	name = name.Upper();
 
 	zCPar_Symbol* symbol;
 	zCParser* parser = zCParser::GetParser();
@@ -944,16 +935,20 @@ zCPar_Symbol* ObjectManager::createNewInstanceSymbol(int instanceParserSymbolID,
 	}
 
 	//We have to check that the symbol name doesn't refer to an existing symbol
-	if (parser->GetSymbol(name)) {
+	if (parser->GetSymbol(symbolName.c_str())) {
 		stringstream mLogStream;
-		mLogStream << "ObjectManager::createNewSymbol: Symbol with name '" << name.ToChar() << "' already exists!" << endl;
+		mLogStream << "ObjectManager::createNewSymbol: Symbol with name '" << symbolName << "' already exists!" << endl;
 		util::logWarning(&mLogStream);
 		return nullptr;
 	}
 
 	symbol = zCPar_Symbol::create();
 
-	symbol->name = name;
+	string name = symbolName;
+	transform(name.begin(), name.end(), name.begin(), ::toupper);
+	zSTRING nameZString(name.c_str());
+	symbol->name = nameZString;
+	const char* charRep = nameZString.ToChar();
 
 	if (prototype) {
 		symbol->parent = prototype->parent;
@@ -991,7 +986,7 @@ int ObjectManager::getInstanceId(oCItem& item) {
 }
 
 
-void ObjectManager::setPrototypeSymbolName(int instanceParserSymbolID, const zSTRING& protoInstanceSymbolName) {
+void ObjectManager::setPrototypeSymbolName(int instanceParserSymbolID, const std::string& protoInstanceSymbolName) {
 	auto instanceIT = mNewInstanceMap.find(instanceParserSymbolID);
 	if (instanceIT == mNewInstanceMap.end()) {
 		std::stringstream mLogStream;
@@ -1007,10 +1002,10 @@ void ObjectManager::setPrototypeSymbolName(int instanceParserSymbolID, const zST
 *	Provides the instance id the unmodified item had at the time at which 
 *	the new instance id instanceId was created for a specific item.
 */
-const zSTRING& ObjectManager::getPrototypeSymbolName(int instanceParserSymbolID) {
+const std::string& ObjectManager::getPrototypeSymbolName(int instanceParserSymbolID) {
 
 	auto it = mNewInstanceMap.find(instanceParserSymbolID);
-	static zSTRING empty = "";
+	static std::string empty = "";
 	if (it == mNewInstanceMap.end()) return empty;
 	auto& instanceItem = it->second;
 	return instanceItem->getPrototypeSymbolName();
@@ -1079,9 +1074,9 @@ zCPar_Symbol* ObjectManager::getSymbolByIndex(int parserSymbolID)
 
 zCPar_Symbol* ObjectManager::getSymbolByName(const zSTRING& symbolName)
 {
-	//auto name = symbolName;
-	//name = name.Upper();
-	auto it = mNameToSymbolMap.find(symbolName);
+	string name = symbolName.ToChar();
+	transform(name.begin(), name.end(),name.begin(), ::toupper);
+	auto it = mNameToSymbolMap.find(name);
 	if (it == mNameToSymbolMap.end()) { return NULL; }
 	return it->second;
 }
@@ -1089,9 +1084,9 @@ zCPar_Symbol* ObjectManager::getSymbolByName(const zSTRING& symbolName)
 
 int ObjectManager::getIndexByName(const zSTRING& symbolName)
 {
-	//zSTRING name = symbolName;
-	//name = name.Upper();
-	auto it = mNameToInstanceMap.find(symbolName);
+	string name = symbolName.ToChar();
+	transform(name.begin(), name.end(),name.begin(), ::toupper);
+	auto it = mNameToInstanceMap.find(name);
 	if (it == mNameToInstanceMap.end()) { return -1; }
 	return it->second;
 }

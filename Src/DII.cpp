@@ -265,7 +265,7 @@ int DII::DII_CreateNewInstanceInt(oCItem* item) //Func int DII_CreateNewInstance
 #pragma pop_macro("max")
 #pragma pop_macro("min")
 
-		parserSymbolIndex = manager->createNewInstanceId(item, instanceName.c_str());
+		parserSymbolIndex = manager->createNewInstanceId(item, instanceName);
 		if (!parserSymbolIndex) {
 			mLogStream << __FUNCSIG__ << ": Couldn't create new instance '" << instanceName << "'" << std::endl;
 			util::logWarning(&mLogStream);
@@ -290,8 +290,9 @@ int DII::DII_CreateNewInstanceStr(oCItem* item, const zSTRING& instanceName)
 		return false;
 	}
 
-	auto instanceNameUpper = instanceName;
-	instanceNameUpper = instanceNameUpper.Upper();
+	std::string instanceNameStr = instanceName.ToChar();
+	std::transform(instanceNameStr.begin(), instanceNameStr.end(), instanceNameStr.begin(), std::toupper);
+
 
 	mLogStream << "Param: " << item->name.ToChar();
 	util::debug(&mLogStream);
@@ -299,9 +300,9 @@ int DII::DII_CreateNewInstanceStr(oCItem* item, const zSTRING& instanceName)
 	// Create new instance with item
 	ObjectManager* manager = ObjectManager::getObjectManager();
 
-	int parserSymbolIndex = manager->createNewInstanceId(item, instanceNameUpper);
+	int parserSymbolIndex = manager->createNewInstanceId(item, instanceNameStr);
 	if (!parserSymbolIndex) {
-		mLogStream << __FUNCSIG__ << ": Couldn't create new instance '" << instanceNameUpper.ToChar() << "'" << std::endl;
+		mLogStream << __FUNCSIG__ << ": Couldn't create new instance '" << instanceNameStr << "'" << std::endl;
 		util::logWarning(&mLogStream);
 	}
 
@@ -618,9 +619,7 @@ zCPar_Symbol* DII::zCPar_SymbolTableGetSymbolHook(void* pThis, int index)
 zCPar_Symbol* DII::zCPar_SymbolTableGetSymbolStringHook(void* pThis, zSTRING const & symbolName)
 {
 	auto* manager = ObjectManager::getObjectManager();
-
-	const auto& resolvedName = manager->resolveProxying(symbolName);
-	
+	zSTRING resolvedName = manager->resolveProxying(symbolName);
 	zCPar_Symbol* result = zCPar_SymbolTableGetSymbolString(pThis, resolvedName);
 	if (result == NULL)
 	{
@@ -633,7 +632,7 @@ zCPar_Symbol* DII::zCPar_SymbolTableGetSymbolStringHook(void* pThis, zSTRING con
 int DII::zCPar_SymbolTableGetIndexHook(void* pThis, zSTRING const& symbolName)
 {
 	auto* manager = ObjectManager::getObjectManager();
-	const auto& resolvedName = manager->resolveProxying(symbolName);
+	zSTRING resolvedName = manager->resolveProxying(symbolName);
 	int result = zCPar_SymbolTableGetIndex(pThis, resolvedName);
 	if (result == -1)
 	{
