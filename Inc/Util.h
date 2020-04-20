@@ -352,7 +352,11 @@ public:
 
 	static std::string trimFromRight(const std::string&);
 	static void readString(std::stringstream* is, std::string& data);
+    static void readzSTRING(std::stringstream* is, zSTRING& data);
+
     static void readAndTrim(std::stringstream* is, std::string& data);
+    static void readAndTrim(std::stringstream* is, zSTRING& data);
+
 	static void writeString(std::ostream& os, const std::string& data);
     static void writezSTRING(std::ostream& os, const zSTRING& data);
 	static void getInt(std::stringstream& ss, int& param);

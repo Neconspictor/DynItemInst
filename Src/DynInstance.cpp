@@ -207,8 +207,8 @@ void DynInstance::init(oCItem* item, int instanceParserSymbolID) {
 	//manager->oCItemSaveRemoveEffect(item);
 
 	item->idx=idx;
-	item->name=zSTRING(name.c_str());
-	item->nameID=zSTRING(nameID.c_str());
+	item->name= name;
+	item->nameID= nameID;
 	item->hp=hp;
 	item->hp_max=hp_max;
 	item->mainflags=mainflags;
@@ -277,11 +277,11 @@ void DynInstance::init(oCItem* item, int instanceParserSymbolID) {
 	item->disguiseGuild=disguiseGuild;
 
 	// -- visual
-	item->visual=zSTRING(visual.c_str());
+	item->visual= visual;
 
 	// -- change of mesh on equip
-	item->visual_change=zSTRING(visual_change.c_str());	//	ASC file
-	item->effect=zSTRING(effect.c_str());			//  Effect instance
+	item->visual_change= visual_change;	//	ASC file
+	item->effect= effect;			//  Effect instance
 
 	item->visual_skin=visual_skin;
 
@@ -337,22 +337,22 @@ void DynInstance::init(oCItem* item, int instanceParserSymbolID) {
 };
 
 
-const std::string& DynInstance::getPrototypeSymbolName() {
+const zSTRING& DynInstance::getPrototypeSymbolName() {
 	return mPrototypeSymbolName;	
 };
 
-void DynInstance::setPrototypeSymbolName(const std::string& symbolName){
+void DynInstance::setPrototypeSymbolName(const zSTRING& symbolName){
 	mPrototypeSymbolName = symbolName;
 }
 
 
-const std::string& DynInstance::getSymbolName()
+const zSTRING& DynInstance::getSymbolName()
 {
 	return mSymbolName;
 }
 
 
-void DynInstance::setSymbolName(const std::string& symbolName)
+void DynInstance::setSymbolName(const zSTRING& symbolName)
 {
 	mSymbolName = symbolName;
 }
@@ -360,18 +360,18 @@ void DynInstance::setSymbolName(const std::string& symbolName)
 void DynInstance::serialize(std::ostream& os) const
 {
 	//os << reusable << ' ';
-	util::writeString(os, mSymbolName);
+	util::writezSTRING(os, mSymbolName);
 	os << ' ';
 	
-	util::writeString(os, mPrototypeSymbolName);
+	util::writezSTRING(os, mPrototypeSymbolName);
 	os << ' ';
 	
 	os << zCPar_Symbol_Bitfield << ' ';
 	
 	os << idx << ' ';
-	util::writeString(os, name);
+	util::writezSTRING(os, name);
 	os << ' ';
-	util::writeString(os, nameID);
+	util::writezSTRING(os, nameID);
 	os << ' ';
 	os << hp << ' ';
 	os << hp_max << ' ';
@@ -438,13 +438,13 @@ void DynInstance::serialize(std::ostream& os) const
 	os << disguiseGuild << ' ';
 
 	// -- visual
-	util::writeString(os, visual);
+	util::writezSTRING(os, visual);
 	os << ' ';
 
 	// -- change of mesh on equip
-	util::writeString(os, visual_change);
+	util::writezSTRING(os, visual_change);
 	os << ' ';
-	util::writeString(os, effect);
+	util::writezSTRING(os, effect);
 	os << ' ';
 
 	os << visual_skin << ' ';
@@ -496,8 +496,8 @@ void DynInstance::deserialize(std::stringstream* is)
 	util::readAndTrim(is, mPrototypeSymbolName);
 	util::getInt(*is, zCPar_Symbol_Bitfield);
 	util::getInt(*is, idx);
-	util::readString(is, name);
-	util::readString(is, nameID);
+	util::readzSTRING(is, name);
+	util::readzSTRING(is, nameID);
 	util::getInt(*is, hp);
 	util::getInt(*is, hp_max);
 	util::getInt(*is, mainflags);
@@ -563,11 +563,11 @@ void DynInstance::deserialize(std::stringstream* is)
 	util::getInt(*is, disguiseGuild);
 
 	// -- visual
-	util::readString(is, visual);
+	util::readzSTRING(is, visual);
 
 	// -- change of mesh on equip
-	util::readString(is, visual_change);
-	util::readString(is, effect);
+	util::readzSTRING(is, visual_change);
+	util::readzSTRING(is, effect);
 
 	util::getInt(*is, visual_skin);
 

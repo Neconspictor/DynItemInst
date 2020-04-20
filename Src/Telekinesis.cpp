@@ -136,7 +136,7 @@ std::unique_ptr<TelekinesisInterpolator> TelekinesisInterpolator::createTelekine
 	// distance is measured in cm
 	// speed is cm / s
 	// we need milliseconds
-	long long millis = (distance * 1000.0f)/ speed;
+	long long millis = static_cast<long long>((distance * 1000.0f)/ speed);
 
 	//logStream << "TelekinesisInterpolator::createTelekinesisInterpolator(): distance = " << distance << std::endl;
 	//logStream << "TelekinesisInterpolator::createTelekinesisInterpolator(): millis = " << millis << std::endl;
@@ -157,7 +157,7 @@ Interpolator::milliseconds TelekinesisInterpolator::calcPitStopDuration(const zV
 	static const float e = 0.0001f;
 	float factor = pitStopDistance / summedDistance;
 
-	long long pitStopMillis = factor * duration.count();
+	long long pitStopMillis = static_cast<long long>(factor * duration.count());
 
 	return milliseconds(pitStopMillis);
 }
@@ -186,7 +186,9 @@ TelekinesisInterpolator* Telekinesis::TELEKINESIS_CreateInterpolator(const zVEC3
 	util::debug(&mLogStream);
 
 
-	std::unique_ptr<TelekinesisInterpolator> interpolator = TelekinesisInterpolator::createTelekinesisInterpolator(*vobPosition, *npcPosition, upMoveAmount, speed);
+	std::unique_ptr<TelekinesisInterpolator> interpolator = TelekinesisInterpolator::createTelekinesisInterpolator(*vobPosition, *npcPosition, 
+		static_cast<float>(upMoveAmount), 
+		static_cast<float>(speed));
 	mInterpolators.emplace_back(std::move(interpolator));
 	return mInterpolators.back().get();
 }
@@ -266,7 +268,9 @@ int Telekinesis::TELEKINESIS_IsVobSeeable(oCNpc* npc, zCVob* vob)
 
 	const int result = zCWorldTraceRayNearestHit(world, npcPosition, direction, npc, traceFlags);
 
-	for (int i = 0; i < world->traceRayVobList.GetSize(); ++i)
+	const auto vobListSize = static_cast<int>(world->traceRayVobList.GetSize());
+
+	for (int i = 0; i < vobListSize; ++i)
 	{
 		zCVob* vob = world->traceRayVobList[i];
 		if (vob != nullptr)

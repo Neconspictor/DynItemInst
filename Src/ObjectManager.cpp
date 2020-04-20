@@ -637,8 +637,8 @@ void ObjectManager::loadNewInstances(char* filename) {
 			//DynInstance* item = new DynInstance(*storeItem);
 
 			ParserInfo info;
-			info.newSymbolName = instance->getSymbolName().c_str();
-			info.oldSymbolName = instance->getPrototypeSymbolName().c_str();
+			info.newSymbolName = instance->getSymbolName().ToChar();
+			info.oldSymbolName = instance->getPrototypeSymbolName().ToChar();
 			info.bitfield = instance->getParserSymbolBitfield();
 			info.container = instance.get();
 
@@ -991,7 +991,7 @@ int ObjectManager::getInstanceId(oCItem& item) {
 }
 
 
-void ObjectManager::setPrototypeSymbolName(int instanceParserSymbolID, const std::string& protoInstanceSymbolName) {
+void ObjectManager::setPrototypeSymbolName(int instanceParserSymbolID, const zSTRING& protoInstanceSymbolName) {
 	auto instanceIT = mNewInstanceMap.find(instanceParserSymbolID);
 	if (instanceIT == mNewInstanceMap.end()) {
 		std::stringstream mLogStream;
@@ -1007,10 +1007,10 @@ void ObjectManager::setPrototypeSymbolName(int instanceParserSymbolID, const std
 *	Provides the instance id the unmodified item had at the time at which 
 *	the new instance id instanceId was created for a specific item.
 */
-const std::string& ObjectManager::getPrototypeSymbolName(int instanceParserSymbolID) {
+const zSTRING& ObjectManager::getPrototypeSymbolName(int instanceParserSymbolID) {
 
 	auto it = mNewInstanceMap.find(instanceParserSymbolID);
-	static std::string empty = "";
+	static zSTRING empty = "";
 	if (it == mNewInstanceMap.end()) return empty;
 	auto& instanceItem = it->second;
 	return instanceItem->getPrototypeSymbolName();

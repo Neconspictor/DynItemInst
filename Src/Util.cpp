@@ -221,10 +221,24 @@ void util::readString(std::stringstream* is, std::string& data)
 	data = trimFromRight(data);
 }
 
+void util::readzSTRING(std::stringstream* is, zSTRING& data)
+{
+	std::string str;
+	readString(is, str);
+	data = zSTRING(str.c_str());
+}
+
 void util::readAndTrim(std::stringstream* is, std::string& data)
 {
 	readString(is, data);
 	data = trimFromRight(data);
+}
+
+void util::readAndTrim(std::stringstream* is, zSTRING& data)
+{
+	std::string str;
+	readAndTrim(is, str);
+	data = zSTRING(str.c_str());
 }
 
 void util::writeString(std::ostream& os, const std::string& data)

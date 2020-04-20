@@ -199,7 +199,7 @@ public:
 	 * \param instanceId The instance id of which the parent instance id should be set
 	 * \param value The the parent instance id to be set
 	 */
-	void setPrototypeSymbolName(int instanceParserSymbolID, const std::string& parentInstanceSymbolName);
+	void setPrototypeSymbolName(int instanceParserSymbolID, const zSTRING& parentInstanceSymbolName);
 
 	/**
 	 * Provides the parent instance id for a given instance id.
@@ -207,7 +207,7 @@ public:
 	 * \param instanceId The instance id of which the parent instance id should be returned.
 	 * \return the parent instance id of the given instance id.
 	 */
-	const std::string& getPrototypeSymbolName(int instanceParserSymbolID);
+	const zSTRING& getPrototypeSymbolName(int instanceParserSymbolID);
 
 	/**
 	 * Sets the instance id for a given oCItem.
