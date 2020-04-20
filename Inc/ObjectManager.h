@@ -90,7 +90,7 @@ public:
 	/**
 	 * Resolves proxying for symbol names.
 	 */
-	const char* resolveProxying(const zSTRING& symbolName) const;
+	const zSTRING& resolveProxying(const zSTRING& symbolName) const;
 
 	/**
 	 * \return the current instance of this class.
@@ -115,7 +115,7 @@ public:
 	/**
 	 * \return true if a new instance could be created. Otherwise false.
 	 */
-	bool createNewInstanceWithoutExistingId(oCItem* item, int key, const std::string& instanceName);
+	bool createNewInstanceWithoutExistingId(oCItem* item, int key, const zSTRING& instanceName);
 
 	//void createNewInstanceForExistingId(oCItem* item, int instanceId);
 	/**
@@ -123,7 +123,7 @@ public:
 			 * \param item The item to use for instance creation.
 			 * \return The instance id respectively the index of the new created zCPar_Symbol. Zero is returned if the instance couldn't be created.
 			 */
-	int createNewInstanceId(oCItem* item, const std::string& instanceName);
+	int createNewInstanceId(oCItem* item, const zSTRING& instanceName);
 
 	/**
 	 * Deletes a DII by its parser symbol table index.
@@ -330,15 +330,17 @@ public:
 
 private:
 
+
+
 	// <int instanceId, Item* item>
 	std::unordered_map<int, std::unique_ptr<DynInstance>> mNewInstanceMap;
 	std::unordered_map<int, zCPar_Symbol*> mNewInstanceToSymbolMap;
-	std::unordered_map<std::string, zCPar_Symbol*> mNameToSymbolMap;
-	std::unordered_map<std::string, int> mNameToInstanceMap;
+	std::unordered_map<zSTRING, zCPar_Symbol*, zSTRING_Hasher> mNameToSymbolMap;
+	std::unordered_map<zSTRING, int, zSTRING_Hasher> mNameToInstanceMap;
 
 	std::map<int, int> mProxies;
-	std::unordered_map<std::string, std::string> mProxiesNames;
-	std::unordered_map<std::string, int> mUnresolvedNamesToInstances;
+	std::unordered_map<zSTRING, zSTRING, zSTRING_Hasher> mProxiesNames;
+	std::unordered_map<zSTRING, int, zSTRING_Hasher> mUnresolvedNamesToInstances;
 
 	std::stringstream mLogStream;
 
@@ -361,7 +363,7 @@ private:
 	 */
 	int createParserSymbol(const ParserInfo& info);
 
-	zCPar_Symbol * createNewInstanceSymbol(int instanceParserSymbolID, zCPar_Symbol * prototype, const std::string& symbolName) const;
+	zCPar_Symbol * createNewInstanceSymbol(int instanceParserSymbolID, zCPar_Symbol * prototype, const zSTRING& symbolName) const;
 };
 
 

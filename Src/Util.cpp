@@ -235,6 +235,14 @@ void util::writeString(std::ostream& os, const std::string& data)
 	os << content;
 }
 
+void util::writezSTRING(std::ostream& os, const zSTRING& data)
+{
+	// c-strings avoid Nullbytes to be written
+	char const* content = data.ToChar();
+	os << data.Length() << ' ';
+	os << content;
+}
+
 void util::getInt(std::stringstream& ss, int& param)
 {
 	while (ss.peek() == ' ')

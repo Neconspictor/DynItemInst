@@ -151,6 +151,16 @@ public:
 		return *this;
 	};
 
+	/**
+	 * Equal comparison operator.
+	 * Note: this operator is not present in the gothic 2 executable.
+	 */
+	bool operator==(const zSTRING& other) const {
+
+		if (length != other.length) return false;
+		return memcmp(data, other.data, length);
+	}
+
 	//.text:0059D010 ; public: void __thiscall zSTRING::Clear(void)
 	/** This method clears the zSTRING
 	* @usable Ingame only
@@ -313,6 +323,32 @@ public:
 	{
 		XCALL(0x0059D0F0);
 	};
+};
+
+
+/**
+ * A hasher for zSTRING objects.
+ */
+struct zSTRING_Hasher
+{
+	/**
+	 * Calculates a hash value from a zSTRING.
+	 */
+	std::size_t operator()(const zSTRING& str) const
+	{
+
+		// a fast hashing algorithm for avoiding unnecessary object initialization
+		const char* data = str.ToChar();
+		const size_t length = str.Length();
+		std::size_t hash = 0;
+		_INLINE_VAR constexpr size_t _FNV_prime = 16777619U; // from microsoft's type_trait implementation
+		for (size_t i = 0; i < length; ++i) {
+			hash ^= static_cast<size_t>(data[i]);
+			hash *= _FNV_prime;
+		}
+
+		return hash;
+	}
 };
 
 #undef __G2EXT_API_HEADER
