@@ -11,12 +11,97 @@ const string MAGICWEAPON_MISSING_MELEE_WEAPON = "Keine Nahkampfwaffe ausgerüstet
 const string MAGICWEAPON_MISSING_RANGED_WEAPON = "Keine Fernkampfwaffe ausgerüstet!";
 const string MAGICWEAPON_DIALOG_BACK = "Abbrechen";
 const string MAGICWEAPON_ERROR_ALREADY_ENCHANTED = "Waffe ist bereits verzaubert!";
-const string MAGICWEAPON_USER_INFO = "Verzauberung hält 5 Minuten an!";
+const string MAGICWEAPON_USER_INFO = "Verzauberung hält für 20 Sekunden an!";
 
 var int MAGICWEAPON_INIT_CALLED;
 var string MAGICWEAPON_MELEE_WEAPON;
 var string MAGICWEAPON_RANGED_WEAPON;
-//var int ZAUBERART;
+//var int MAGICWEAPON_TYPE;
+
+
+// object addresses
+const int oCObjectFactory = 9276912;//0x008D8DF0
+const int  oCMsgManipulateClassDefPtr = 11216992;//00AB286
+
+//function addresses
+const int oCItemRemoveEffectAddress = 7416832; //0x00712C00
+const int oCItemInsertEffectAddress = 7416896; //0x712C40
+const int zCClassDefObjectCreatedAddress = 5942960; //005AAEB0
+const int oCMsgManipulateoCMsgManipulateAddress = 7768384; //00768940
+const int zCEventManagerOnMessageAddress = 7889792;//00786380
+const int zCVobGetEMAddress = 6290960;//005FFE10
+
+// constants
+const int EV_EQUIPITEM_MSGTYPE = 14; //0x0E
+const int OCMSGMANIPULATE_BYTE_SIZE = 124;//0x7C
+
+var int MAGICWEAPON_TYPE;
+
+//magic weapon stuff
+const int MAGICWEAPON_BonusDamage = 30;
+const int MAGICWEAPON_NONE = 0;
+const int MAGICWEAPON_FIRE = 1;
+
+//functions
+
+//.text:00712C00 public: void __thiscall oCItem::RemoveEffect(void) proc near
+func void oCItemRemoveEffect(var c_item itm) {
+	//before calling the actual function check that itm has an effect to remove
+	var int ptr; ptr = _@(itm);
+	ptr = ptr + 832;//0x340
+	if (ptr == 0) {
+		Print("oCItemRemoveEffect: Item has no valid effect!");
+		return;
+	};
+
+	var int this; this = _@(itm);
+	CALL__thiscall(this, oCItemRemoveEffectAddress);
+};
+
+//.text:00712C40 public: void __thiscall oCItem::InsertEffect(void) proc near
+func void oCItemInsertEffect(var c_item itm) {
+	//before calling the actual function check that itm has no effect already
+	var int ptr; ptr = _@(itm);
+	ptr = ptr + 832;//0x340
+	if (MEM_ReadInt(ptr) != 0) {
+		Print("oCItemInsertEffect: Item has already an effect!");
+		return;
+	};
+	var int this; this = _@(itm);
+	CALL__thiscall(this, oCItemInsertEffectAddress);
+};
+
+//.text:005AAEB0 public: static void __cdecl zCClassDef::ObjectCreated(class zCObject *, class zCClassDef *) proc near
+func void zCClassDefObjectCreated(var int zCObjectPtr, var int zCClassDefPtr) {
+	CALL_IntParam(zCClassDefPtr);
+	CALL_IntParam(zCObjectPtr);
+	CALL__cdecl(zCClassDefObjectCreatedAddress);
+};
+
+//.text:00768940 public: __thiscall oCMsgManipulate::oCMsgManipulate(enum  oCMsgManipulate::TManipulateSubType, class zCVob *) proc near
+func void oCMsgManipulateoCMsgManipulate(var int msgPtr, var int subType, var int vobPtr) {
+	CALL_IntParam(vobPtr);
+	CALL_IntParam(subType);
+	CALL__thiscall(msgPtr, oCMsgManipulateoCMsgManipulateAddress);
+};
+
+//.text:00786380 public: virtual void __thiscall zCEventManager::OnMessage(class zCEventMessage *, class zCVob *)
+func void zCEventManagerOnMessage(var int zCEventManagerPtr, var int msgPtr, var int vobPtr) {
+	CALL_IntParam(vobPtr);
+	CALL_IntParam(msgPtr);
+	CALL__thiscall(zCEventManagerPtr, zCEventManagerOnMessageAddress);
+};
+
+//.text:005FFE10 public: class zCEventManager * __fastcall zCVob::GetEM(int) proc near
+func int zCVobGetEM(var int zCVobPtr, var int intParam) {
+	var int ret;
+	CALL_PutRetValTo(_@(ret));
+	CALL__fastcall(zCVobPtr, intParam, zCVobGetEMAddress);
+	return +ret;
+};
+
+
+
 
 class MAGICWEAPON_RemoveDesc {
     var string instanceName;
@@ -293,15 +378,6 @@ func void RemoveMagicWeaponEffects(var MAGICWEAPON_RemoveDesc desc) {
 	DII_DeleteItem(temp);
 };
 
-func void MagicWeapon_RemoveIceSpell(var int hndl)
-{
-	var MAGICWEAPON_RemoveDesc desc; desc = get(hndl);
-	RemoveMagicWeaponEffects(desc);
-	PrintScreen ("Eisverzauberung ist erloschen!", -1, -1, "font_old_20_white.tga", 2);
-	FF_RemoveData(MagicWeapon_RemoveIceSpell, hndl);
-	delete(hndl);
-};
-
 func void MagicWeapon_RemoveFireSpell(var int hndl)
 {
 
@@ -309,15 +385,6 @@ func void MagicWeapon_RemoveFireSpell(var int hndl)
 	RemoveMagicWeaponEffects(desc);
 	PrintScreen ("Feuerverzauberung ist erloschen!", -1, -1, "font_old_20_white.tga", 2);
 	FF_RemoveData(MagicWeapon_RemoveFireSpell, hndl);
-	delete(hndl);
-};
-
-func void MagicWeapon_RemovePoisonMagic(var int hndl)
-{
-	var MAGICWEAPON_RemoveDesc desc; desc = get(hndl);
-	RemoveMagicWeaponEffects(desc);
-	PrintScreen ("Giftverzauberung ist erloschen!", -1, -1, "font_old_20_white.tga", 2);
-	FF_RemoveData(MagicWeapon_RemovePoisonMagic, hndl);
 	delete(hndl);
 };
 
@@ -333,12 +400,19 @@ func void MagicWeapon_MakeEnchantedWeapon(var string weaponInstanceName,
 	
 	var int weaponId; weaponId = DII_GetInstanceID(weaponInstanceName);
 	var c_item temp; temp = DII_CreateNewItem(weaponInstanceName);
-	var string oldDesc; oldDesc = temp.description;
-	var string oldEffect; oldEffect = temp.effect;
+	
 
 	var string newDesc; newDesc = ConcatStrings(temp.description, descriptionAddition);
+	var string oldEffect; oldEffect = temp.effect;
+	
 	temp.description = newDesc;
 	temp.effect = newEffect;
+	temp.damageTotal = temp.damageTotal + MAGICWEAPON_BonusDamage;
+	temp.damage[DAM_INDEX_FIRE] = temp.damage[DAM_INDEX_FIRE] + MAGICWEAPON_BonusDamage;
+	temp.damageType = temp.damageType | DAM_FIRE;
+	temp.text[1] = "Feuerschaden-Bonus";
+	temp.count[1] = MAGICWEAPON_BonusDamage;
+	temp.count[2] = temp.damageTotal ;
 	var int newId;
 	var string newInstanceName;
 	
@@ -356,8 +430,6 @@ func void MagicWeapon_MakeEnchantedWeapon(var string weaponInstanceName,
 	Npc_RemoveInvItems(self, weaponId, 2);
 	var DII_USER_DATA data;
 	data = DII_GetUserData(newInstanceName);
-	data.magicWeaponNewDesc = newDesc;
-	data.magicWeaponOldDesc = oldDesc;
 	data.magicWeaponNewEffect = newEffect;
 	data.magicWeaponOldEffect = oldEffect;
 	data.magicWeaponOldInstanceName = weaponInstanceName;
@@ -383,43 +455,43 @@ instance PC_MAGICWEAPON_END(C_Info)
 {
 	npc = PC_Hero;
 	nr = 999;
-	condition = pc_magicweapon_end_condition;
-	information = pc_magicweapon_end_info;
+	condition = PC_MAGICWEAPON_END_CONDITION;
+	information = PC_MAGICWEAPON_END_INFO;
 	permanent = TRUE;
 	description = MAGICWEAPON_DIALOG_BACK;
 };
 
 
-func int pc_magicweapon_end_condition()
+func int PC_MAGICWEAPON_END_CONDITION()
 {
-	if (ZAUBERART > 0)
+	if (MAGICWEAPON_TYPE > MAGICWEAPON_NONE)
 	{
 		return TRUE;
 	};
 };
 
-func void pc_magicweapon_end_info()
+func void PC_MAGICWEAPON_END_INFO()
 {
-	ZAUBERART = 0;
+	MAGICWEAPON_TYPE = MAGICWEAPON_NONE;
 	AI_StopProcessInfos (self);
 	magicWeaponCreationDone(self);
 };
 
 
-instance PC_FEUERZAUBER_NAH(C_Info)
+instance PC_FIRE_ENCHANTMENT_MELEE(C_Info)
 {
 	npc = PC_Hero;
 	nr = 100;
-	condition = pc_feuerzauber_nah_condition;
-	information = pc_feuerzauber_nah_info;
+	condition = PC_FIRE_ENCHANTMENT_MELEE_CONDITION;
+	information = PC_FIRE_ENCHANTMENT_MELEE_INFO;
 	permanent = TRUE;
-	description = "Feuerzauber auf Nahkampfwaffe anwenden!";
+	description = "Feuerverzauberung auf Nahkampfwaffe anwenden.";
 };
 
 
-func int pc_feuerzauber_nah_condition()
+func int PC_FIRE_ENCHANTMENT_MELEE_CONDITION()
 {		
-	if (ZAUBERART != 1) {
+	if (MAGICWEAPON_TYPE != MAGICWEAPON_FIRE) {
 		return FALSE;
 	}; 
 	
@@ -434,9 +506,12 @@ func int pc_feuerzauber_nah_condition()
 	return FALSE;
 };
 
-func void pc_feuerzauber_nah_info()
+func void PC_FIRE_ENCHANTMENT_MELEE_INFO()
 {	
-	if (DII_IsInstanceDynamic(MAGICWEAPON_MELEE_WEAPON)) {
+	var DII_USER_DATA data;
+	data = DII_GetUserData(MAGICWEAPON_MELEE_WEAPON);
+
+	if (data.ints[MAGICWEAPON_ENCHANTEDWEAPON]) {
 		Print(MAGICWEAPON_ERROR_ALREADY_ENCHANTED);
 	} else if (DII_GetInstanceID(MAGICWEAPON_MELEE_WEAPON) != DII_GetInstanceID(MAGICWEAPON_NOT_INITIALIZED)){
 		MagicWeapon_MakeEnchantedWeapon(MAGICWEAPON_MELEE_WEAPON, MAGICWEAPON_FIRE, "SPELLFX_FLAMESWORD", " - entflammt", itwr_feuerzauber, MagicWeapon_RemoveFireSpell);
@@ -448,26 +523,26 @@ func void pc_feuerzauber_nah_info()
 	};
 
 	//allow calling this dialog again
-	ZAUBERART = 0;
+	MAGICWEAPON_TYPE = MAGICWEAPON_NONE;
 	AI_StopProcessInfos (self);
 	magicWeaponCreationDone(self);
 };
 
 
-instance PC_FEUERZAUBER_FERN(C_Info)
+instance PC_FIRE_ENCHANTMENT_RANGED(C_Info)
 {
 	npc = PC_Hero;
 	nr = 200;
-	condition = pc_feuerzauber_fern_condition;
-	information = pc_feuerzauber_fern_info;
+	condition = PC_FIRE_ENCHANTMENT_RANGED_CONDITION;
+	information = PC_FIRE_ENCHANTMENT_RANGED_INFO;
 	permanent = TRUE;
-	description = "Feuerzauber auf Fernkampfwaffe anwenden!";
+	description = "Feuerverzauberung auf Fernkampfwaffe anwenden.";
 };
 
 
-func int pc_feuerzauber_fern_condition()
+func int PC_FIRE_ENCHANTMENT_RANGED_CONDITION()
 {
-	if (ZAUBERART != 1) {
+	if (MAGICWEAPON_TYPE != MAGICWEAPON_FIRE) {
 		return FALSE;
 	}; 
 	
@@ -482,9 +557,12 @@ func int pc_feuerzauber_fern_condition()
 	return FALSE;
 };
 
-func void pc_feuerzauber_fern_info()
+func void PC_FIRE_ENCHANTMENT_RANGED_INFO()
 {	
-	if (DII_IsInstanceDynamic(MAGICWEAPON_RANGED_WEAPON)) {
+	var DII_USER_DATA data;
+	data = DII_GetUserData(MAGICWEAPON_RANGED_WEAPON);
+
+	if (data.ints[MAGICWEAPON_ENCHANTEDWEAPON]) {
 		Print(MAGICWEAPON_ERROR_ALREADY_ENCHANTED);
 	} else if (DII_GetInstanceID(MAGICWEAPON_RANGED_WEAPON) != DII_GetInstanceID(MAGICWEAPON_NOT_INITIALIZED)){
 		MagicWeapon_MakeEnchantedWeapon(MAGICWEAPON_RANGED_WEAPON, MAGICWEAPON_FIRE, "SPELLFX_FLAMESWORD", " - entflammt", itwr_feuerzauber, MagicWeapon_RemoveFireSpell);
@@ -494,198 +572,7 @@ func void pc_feuerzauber_fern_info()
 	}else{
 		Print(MAGICWEAPON_MISSING_RANGED_WEAPON);
 	};
-	ZAUBERART = 0;
-	AI_StopProcessInfos (self);
-	magicWeaponCreationDone(self);
-};
-
-
-instance PC_EISZAUBER_NAH(C_Info)
-{
-	npc = PC_Hero;
-	nr = 100;
-	condition = pc_eiszauber_nah_condition;
-	information = pc_eiszauber_nah_info;
-	permanent = TRUE;
-	description = "Eiszauber auf Nahkampfwaffe anwenden!";
-};
-
-
-func int pc_eiszauber_nah_condition()
-{
-	if (ZAUBERART != 2) {
-		return FALSE;
-	}; 
-	
-	if (!MAGICWEAPON_INIT_CALLED) {
-		magicWeaponInit(self);
-	};
-	
-	if (DII_GetInstanceID(MAGICWEAPON_MELEE_WEAPON) != DII_GetInstanceID(MAGICWEAPON_NOT_INITIALIZED)) {
-		return TRUE;
-	};
-	
-	return FALSE;
-};
-
-
-func void pc_eiszauber_nah_info()
-{
-	if (DII_IsInstanceDynamic(MAGICWEAPON_MELEE_WEAPON)) {
-		Print(MAGICWEAPON_ERROR_ALREADY_ENCHANTED);
-	} else if (DII_GetInstanceID(MAGICWEAPON_MELEE_WEAPON) != DII_GetInstanceID(MAGICWEAPON_NOT_INITIALIZED)){
-		MagicWeapon_MakeEnchantedWeapon(MAGICWEAPON_MELEE_WEAPON, MAGICWEAPON_ICE, "SPELLFX_ICESWORD", " - vereist", itwr_eiszauber, MagicWeapon_RemoveIceSpell);
-		MAGICWEAPON_MELEE_WEAPON = MAGICWEAPON_NOT_INITIALIZED;
-		AI_ReadyMeleeWeapon(self);
-		PrintScreen (MAGICWEAPON_USER_INFO, -1, -1, "font_old_20_white.tga", 2);
-	}else{
-		Print(MAGICWEAPON_MISSING_MELEE_WEAPON);
-	};
-	
-	//allow calling this dialog again
-	ZAUBERART = 0;
-	AI_StopProcessInfos (self);
-	magicWeaponCreationDone(self);
-};
-
-
-instance PC_EISZAUBER_FERN(C_Info)
-{
-	npc = PC_Hero;
-	nr = 200;
-	condition = pc_eiszauber_fern_condition;
-	information = pc_eiszauber_fern_info;
-	permanent = TRUE;
-	description = "Eiszauber auf Fernkampfwaffe anwenden!";
-};
-
-
-func int pc_eiszauber_fern_condition()
-{
-	if (ZAUBERART != 2) {
-		return FALSE;
-	}; 
-	
-	if (!MAGICWEAPON_INIT_CALLED) {
-		magicWeaponInit(self);
-	};
-	
-	if (DII_GetInstanceID(MAGICWEAPON_RANGED_WEAPON) != DII_GetInstanceID(MAGICWEAPON_NOT_INITIALIZED)) {
-		return TRUE;
-	};
-	
-	return FALSE;
-};
-
-func void pc_eiszauber_fern_info()
-{
-	if (DII_IsInstanceDynamic(MAGICWEAPON_RANGED_WEAPON)) {
-		Print(MAGICWEAPON_ERROR_ALREADY_ENCHANTED);
-	} else if (DII_GetInstanceID(MAGICWEAPON_RANGED_WEAPON) != DII_GetInstanceID(MAGICWEAPON_NOT_INITIALIZED)){
-		MagicWeapon_MakeEnchantedWeapon(MAGICWEAPON_RANGED_WEAPON, MAGICWEAPON_ICE, "SPELLFX_ICESWORD", " - vereist", itwr_eiszauber, MagicWeapon_RemoveIceSpell);
-		MAGICWEAPON_RANGED_WEAPON = MAGICWEAPON_NOT_INITIALIZED;
-		AI_ReadyRangedWeapon(self);
-		PrintScreen (MAGICWEAPON_USER_INFO, -1, -1, "font_old_20_white.tga", 2);
-	}else{
-		Print(MAGICWEAPON_MISSING_RANGED_WEAPON);
-	};
-	ZAUBERART = 0;
-	AI_StopProcessInfos (self);
-	magicWeaponCreationDone(self);
-};
-
-
-instance PC_POISONMAGIC_NAH(C_Info)
-{
-	npc = PC_Hero;
-	nr = 100;
-	condition = pc_POISONMAGIC_nah_condition;
-	information = pc_POISONMAGIC_nah_info;
-	permanent = TRUE;
-	description = "Giftverzauberung auf Nahkampfwaffe anwenden!";
-};
-
-
-func int pc_POISONMAGIC_nah_condition()
-{
-	if (ZAUBERART != 3) {
-		return FALSE;
-	}; 
-	
-	if (!MAGICWEAPON_INIT_CALLED) {
-		magicWeaponInit(self);
-	};
-	
-	if (DII_GetInstanceID(MAGICWEAPON_MELEE_WEAPON) != DII_GetInstanceID(MAGICWEAPON_NOT_INITIALIZED)) {
-		return TRUE;
-	};
-	
-	return FALSE;
-};
-
-func void pc_POISONMAGIC_nah_info()
-{	
-	if (DII_IsInstanceDynamic(MAGICWEAPON_MELEE_WEAPON)) {
-		Print(MAGICWEAPON_ERROR_ALREADY_ENCHANTED);
-	} else if (DII_GetInstanceID(MAGICWEAPON_MELEE_WEAPON) != DII_GetInstanceID(MAGICWEAPON_NOT_INITIALIZED)){
-		MagicWeapon_MakeEnchantedWeapon(MAGICWEAPON_MELEE_WEAPON, MAGICWEAPON_POISON, "SPELLFX_POISONSWORD", " - vergiftet", itwr_PoisonMagic, MagicWeapon_RemovePoisonMagic);
-		MAGICWEAPON_MELEE_WEAPON = MAGICWEAPON_NOT_INITIALIZED;
-		AI_ReadyMeleeWeapon(self);
-		PrintScreen (MAGICWEAPON_USER_INFO, -1, -1, "font_old_20_white.tga", 2);
-	}else{
-		Print(MAGICWEAPON_MISSING_MELEE_WEAPON);
-	};
-	
-	//allow calling this dialog again
-	ZAUBERART = 0;
-	AI_StopProcessInfos (self);
-	magicWeaponCreationDone(self);
-};
-
-
-instance PC_POISONMAGIC_FERN(C_Info)
-{
-	npc = PC_Hero;
-	nr = 200;
-	condition = pc_POISONMAGIC_fern_condition;
-	information = pc_POISONMAGIC_fern_info;
-	permanent = TRUE;
-	description = "Giftverzauberung auf Fernkampfwaffe anwenden!";
-};
-
-
-func int pc_POISONMAGIC_fern_condition()
-{
-	if (ZAUBERART != 3) {
-		return FALSE;
-	}; 
-	
-	if (!MAGICWEAPON_INIT_CALLED) {
-		magicWeaponInit(self);
-	};
-	
-	if (DII_GetInstanceID(MAGICWEAPON_RANGED_WEAPON) != DII_GetInstanceID(MAGICWEAPON_NOT_INITIALIZED)) {
-		return TRUE;
-	};
-	
-	return FALSE;
-};
-
-func void pc_POISONMAGIC_fern_info()
-{
-	if (DII_IsInstanceDynamic(MAGICWEAPON_RANGED_WEAPON)) {
-		Print(MAGICWEAPON_ERROR_ALREADY_ENCHANTED);
-	} else if (DII_GetInstanceID(MAGICWEAPON_RANGED_WEAPON) != DII_GetInstanceID(MAGICWEAPON_NOT_INITIALIZED)){
-		MagicWeapon_MakeEnchantedWeapon(MAGICWEAPON_RANGED_WEAPON, MAGICWEAPON_POISON, "SPELLFX_POISONSWORD", " - vergiftet", itwr_PoisonMagic, MagicWeapon_RemovePoisonMagic);
-		MAGICWEAPON_RANGED_WEAPON = MAGICWEAPON_NOT_INITIALIZED;
-		AI_ReadyRangedWeapon(self);
-		PrintScreen (MAGICWEAPON_USER_INFO, -1, -1, "font_old_20_white.tga", 2);
-	}else{
-		Print(MAGICWEAPON_MISSING_RANGED_WEAPON);
-	};
-	
-	//allow calling this dialog again
-	ZAUBERART = 0;
+	MAGICWEAPON_TYPE = MAGICWEAPON_NONE;
 	AI_StopProcessInfos (self);
 	magicWeaponCreationDone(self);
 };
