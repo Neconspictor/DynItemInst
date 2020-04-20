@@ -633,7 +633,7 @@ zCPar_Symbol* DII::zCPar_SymbolTableGetSymbolStringHook(void* pThis, zSTRING con
 int DII::zCPar_SymbolTableGetIndexHook(void* pThis, zSTRING const& symbolName)
 {
 	auto* manager = ObjectManager::getObjectManager();
-	zSTRING resolvedName = manager->resolveProxying(symbolName);
+	const auto& resolvedName = manager->resolveProxying(symbolName);
 	int result = zCPar_SymbolTableGetIndex(pThis, resolvedName);
 	if (result == -1)
 	{

@@ -1079,9 +1079,9 @@ zCPar_Symbol* ObjectManager::getSymbolByIndex(int parserSymbolID)
 
 zCPar_Symbol* ObjectManager::getSymbolByName(const zSTRING& symbolName)
 {
-	auto name = symbolName;
-	name = name.Upper();
-	auto it = mNameToSymbolMap.find(name);
+	//auto name = symbolName;
+	//name = name.Upper();
+	auto it = mNameToSymbolMap.find(symbolName);
 	if (it == mNameToSymbolMap.end()) { return NULL; }
 	return it->second;
 }
@@ -1089,9 +1089,9 @@ zCPar_Symbol* ObjectManager::getSymbolByName(const zSTRING& symbolName)
 
 int ObjectManager::getIndexByName(const zSTRING& symbolName)
 {
-	zSTRING name = symbolName;
-	name = name.Upper();
-	auto it = mNameToInstanceMap.find(name);
+	//zSTRING name = symbolName;
+	//name = name.Upper();
+	auto it = mNameToInstanceMap.find(symbolName);
 	if (it == mNameToInstanceMap.end()) { return -1; }
 	return it->second;
 }
