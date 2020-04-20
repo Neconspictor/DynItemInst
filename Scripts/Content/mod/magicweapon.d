@@ -37,6 +37,22 @@ func int oCNpcGetSlotItem (var c_npc npc, var string slotName) {
 	return +itmPtr;
 };
 
+//.text:006742F0 ; public: class zSTRING const & __thiscall oCVisualFX::GetName(void)const
+func string oCVisualFX_GetName (var int ptr) {
+
+	if (!ptr) { return "";};
+	
+	const int oCVisualFX_GetNameAddress = 6767344;
+	//var zSTRING zSlotName; zSlotName = _^(_@s(slotName));
+	var int zstringPtr;
+	
+	CALL_PutRetValTo(_@(zstringPtr));
+    CALL__thiscall(ptr, oCVisualFX_GetNameAddress);
+	
+	return MEM_ReadString(zstringPtr);
+	//_^@s(zstringPtr);
+};
+
 
 func void MAGICWEAPON_CheckEffectState() {
 	
@@ -48,6 +64,7 @@ func void MAGICWEAPON_CheckEffectState() {
 	var int instanceID;
 	var string instanceName;
 	var DII_USER_DATA data;
+	var string visualEffectName;
 	
 	itmPtr = oCNpcGetSlotItem(hero, "ZS_SWORD");
 	
@@ -59,14 +76,14 @@ func void MAGICWEAPON_CheckEffectState() {
 		instanceID = Hlp_GetInstanceID(itm);
 		instanceName = DII_GetSymbolName(instanceID);
 		data = DII_GetUserData(instanceName);
+		visualEffectName = oCVisualFX_GetName(itm.effectVob);
 		
-		
-		if (!Hlp_StrCmp(itm.effect, data.magicWeaponOldEffect) && data.ints[MAGICWEAPON_ENCHANTEDWEAPON]) {
+		if (data.ints[MAGICWEAPON_ENCHANTEDWEAPON] && !Hlp_StrCmp(visualEffectName, data.magicWeaponOldEffect)) {
 			itm.effect = data.magicWeaponOldEffect;
 			oCItemRemoveEffect(citm);
 			oCItemInsertEffect(citm);
 			oCNpc_PutInSlot(hero, "ZS_SWORD", itmPtr, 1);
-			itm.effect = data.magicWeaponOldEffect;
+			itm.effect = data.magicWeaponNewEffect;
 		};
 		
 	};
@@ -82,13 +99,14 @@ func void MAGICWEAPON_CheckEffectState() {
 		instanceID = Hlp_GetInstanceID(itm);
 		instanceName = DII_GetSymbolName(instanceID);
 		data = DII_GetUserData(instanceName);
+		visualEffectName = oCVisualFX_GetName(itm.effectVob);
 		
-		if (!Hlp_StrCmp(itm.effect, data.magicWeaponOldEffect) && data.ints[MAGICWEAPON_ENCHANTEDWEAPON]) {
+		if (data.ints[MAGICWEAPON_ENCHANTEDWEAPON] && !Hlp_StrCmp(visualEffectName, data.magicWeaponOldEffect)) {
 			itm.effect = data.magicWeaponOldEffect;
 			oCItemRemoveEffect(citm);
 			oCItemInsertEffect(citm);
 			oCNpc_PutInSlot(hero, "ZS_BOW", itmPtr, 1);
-			itm.effect = data.magicWeaponOldEffect;
+			itm.effect = data.magicWeaponNewEffect;
 		};
 		
 	};
@@ -104,14 +122,15 @@ func void MAGICWEAPON_CheckEffectState() {
 		instanceID = Hlp_GetInstanceID(itm);
 		instanceName = DII_GetSymbolName(instanceID);
 		data = DII_GetUserData(instanceName);
+		visualEffectName = oCVisualFX_GetName(itm.effectVob);
 		
 		
-		if (!Hlp_StrCmp(itm.effect, data.magicWeaponOldEffect) && data.ints[MAGICWEAPON_ENCHANTEDWEAPON]) {
+		if (data.ints[MAGICWEAPON_ENCHANTEDWEAPON] && !Hlp_StrCmp(visualEffectName, data.magicWeaponOldEffect)) {
 			itm.effect = data.magicWeaponOldEffect;
 			oCItemRemoveEffect(citm);
 			oCItemInsertEffect(citm);
 			oCNpc_PutInSlot(hero, "ZS_CROSSBOW", itmPtr, 1);
-			itm.effect = data.magicWeaponOldEffect;
+			itm.effect = data.magicWeaponNewEffect;
 		};
 		
 	};
@@ -127,14 +146,15 @@ func void MAGICWEAPON_CheckEffectState() {
 		instanceID = Hlp_GetInstanceID(itm);
 		instanceName = DII_GetSymbolName(instanceID);
 		data = DII_GetUserData(instanceName);
+		visualEffectName = oCVisualFX_GetName(itm.effectVob);
 		
 		
-		if (!Hlp_StrCmp(itm.effect, data.magicWeaponOldEffect) && data.ints[MAGICWEAPON_ENCHANTEDWEAPON]) {
+		if (data.ints[MAGICWEAPON_ENCHANTEDWEAPON] && !Hlp_StrCmp(visualEffectName, data.magicWeaponOldEffect)) {
 			itm.effect = data.magicWeaponOldEffect;
 			oCItemRemoveEffect(citm);
 			oCItemInsertEffect(citm);
 			oCNpc_PutInSlot(hero, "ZS_LONGSWORD", itmPtr, 1);
-			itm.effect = data.magicWeaponOldEffect;
+			itm.effect = data.magicWeaponNewEffect;
 		};
 		
 	};
@@ -151,8 +171,9 @@ func void MAGICWEAPON_CheckEffectState() {
 		instanceID = Hlp_GetInstanceID(itm);
 		instanceName = DII_GetSymbolName(instanceID);
 		data = DII_GetUserData(instanceName);
+		visualEffectName = oCVisualFX_GetName(itm.effectVob);
 		
-		if (!Hlp_StrCmp(itm.effect, data.magicWeaponNewEffect) && data.ints[MAGICWEAPON_ENCHANTEDWEAPON]) {
+		if (data.ints[MAGICWEAPON_ENCHANTEDWEAPON] && !Hlp_StrCmp(visualEffectName, data.magicWeaponNewEffect)) {
 			itm.effect = data.magicWeaponNewEffect;
 			oCItemRemoveEffect(citm);
 			oCItemInsertEffect(citm);
@@ -174,8 +195,9 @@ func void MAGICWEAPON_CheckEffectState() {
 		instanceID = Hlp_GetInstanceID(itm);
 		instanceName = DII_GetSymbolName(instanceID);
 		data = DII_GetUserData(instanceName);
+		visualEffectName = oCVisualFX_GetName(itm.effectVob);
 		
-		if (!Hlp_StrCmp(itm.effect, data.magicWeaponNewEffect) && data.ints[MAGICWEAPON_ENCHANTEDWEAPON]) {
+		if (data.ints[MAGICWEAPON_ENCHANTEDWEAPON] && !Hlp_StrCmp(visualEffectName, data.magicWeaponNewEffect)) {
 			itm.effect = data.magicWeaponNewEffect;
 			oCItemRemoveEffect(citm);
 			oCItemInsertEffect(citm);
@@ -342,7 +364,6 @@ func void MagicWeapon_MakeEnchantedWeapon(var string weaponInstanceName,
 	
 	//sign newId as an enchanted weapon
 	data.ints[MAGICWEAPON_ENCHANTEDWEAPON] = TRUE;
-	data.ints[MAGICWEAPON_TYPE] = type;
 	Npc_RemoveInvItems (self, scrollToRemove, 1);
 	
 	//Equip weapon

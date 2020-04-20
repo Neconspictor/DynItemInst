@@ -15,7 +15,6 @@ var int teleportedHero;
 
 func void debugPrintUserData(var DII_USER_DATA userData) {
 	MEM_Warn(ConcatStrings("userData.ints[0] = ", IntToString(userData.ints[0])));
-	MEM_Warn(ConcatStrings("userData.ints[1] = ", IntToString(userData.ints[1])));
 	
 	MEM_Warn(ConcatStrings("userData.magicWeaponNewDesc = ", userData.magicWeaponNewDesc));
 	MEM_Warn(ConcatStrings("userData.magicWeaponOldDesc = ", userData.magicWeaponOldDesc));
@@ -76,7 +75,6 @@ func void positionHero() {
 			userData = DII_GetUserData(instanceName);
 			debugPrintUserData(userData);
 			
-			userData.ints[1] = 666;
 			userData.magicWeaponNewDesc = "new desc";
 			userData.magicWeaponOldDesc = "old desc";
 			
@@ -178,7 +176,7 @@ func void INIT_GLOBAL()
 	
 	LeGo_Init(LeGo_All & ~LeGo_Bloodsplats);
 	
-	NECPACK_INIT_GLOBAL();
+	NEC_INIT_GLOBAL();
 	
 	MAGICWEAPON_init();
 	
