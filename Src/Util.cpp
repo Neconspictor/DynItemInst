@@ -393,14 +393,14 @@ void util::copyContentTo(std::string source, std::string dest, std::string patte
 
 	if (error)
 	{
-		mLogStream << "util::copyContentTo: Couldn't copy files from " << source << " to "
+		mLogStream << __FUNCSIG__ << ": Couldn't copy files from " << source << " to "
 			<< dest << std::endl;
 		logFault(&mLogStream);
 	}
 
 	if (s.fAnyOperationsAborted)
 	{
-		mLogStream << "util::copyContentTo: Any operation was aborted while copying " << source << " to "
+		mLogStream << __FUNCSIG__ << ": Any operation was aborted while copying " << source << " to "
 			<< dest << std::endl;
 		logFault(&mLogStream);
 	}
@@ -419,14 +419,14 @@ void util::deleteAllFiles(std::string folder, std::string pattern)
 
 	if (error)
 	{
-		mLogStream << "util::deleteAllFiles: Couldn't delete files from " << folder << " with pattern "
+		mLogStream << __FUNCSIG__ << ": Couldn't delete files from " << folder << " with pattern "
 			<< pattern << std::endl;
 		logFault(&mLogStream);
 	}
 
 	if (s.fAnyOperationsAborted)
 	{
-		mLogStream << "util::deleteAllFiles: Any operation was aborted while deleting files from " << folder << " with pattern "
+		mLogStream << __FUNCSIG__ << ": Any operation was aborted while deleting files from " << folder << " with pattern "
 			<< pattern << std::endl;
 		logFault(&mLogStream);
 	}
@@ -437,7 +437,7 @@ void util::copyFileTo(std::string from, std::string to){
 	//do not copy if source and destination are equal
 	if (from.compare(to) == 0)
 	{
-		mLogStream << "util::copyFileTo: No copying is done, as source and destination are equal:" << std::endl;
+		mLogStream << __FUNCSIG__ << ": No copying is done, as source and destination are equal:" << std::endl;
 		mLogStream << "\tsource: " << from << std::endl;
 		mLogStream << "\tdestination: " << to << std::endl;
 		logWarning(&mLogStream);
@@ -469,7 +469,7 @@ void util::copyFileTo(std::string from, std::string to){
 
 		if (NULL != errorText)
 		{
-			mLogStream << "util::copyFileTo: While copying from " << from << " to " << to << 
+			mLogStream << __FUNCSIG__ << ": While copying from " << from << " to " << to <<
 				" an error occured: " << errorText << std::endl;
 			logFault(&mLogStream);
 

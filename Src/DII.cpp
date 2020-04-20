@@ -748,13 +748,13 @@ DII::~DII()
 
 void DII::oCGameLoadGameHook(void* pThis, int second, zSTRING const& worldName)
 {
-	mLogStream << "DynItemInst::oCGameLoadGameHook: load..."<< std::endl;
+	mLogStream << __FUNCSIG__ << ": load..."<< std::endl;
 	util::logInfo(&mLogStream);
 	ObjectManager* manager = ObjectManager::getObjectManager();
 	manager->releaseInstances();
 	oCGameLoadGame(pThis, second, worldName);
 
-	mLogStream << "DynItemInst::oCGameLoadGameHook: done." << std::endl;
+	mLogStream << __FUNCSIG__ << ": done." << std::endl;
 	util::logInfo(&mLogStream);
 }
 
@@ -820,7 +820,7 @@ std::string DII::getClearedWorldName(zSTRING const & worldName) {
 
 void DII::loadDynamicInstances(int saveGameSlotNumber)
 {
-	mLogStream << "DynItemInst::loadDynamicInstances: load dii instances..." << std::endl;
+	mLogStream << __FUNCSIG__ << ": load dii instances..." << std::endl;
 	util::logInfo(&mLogStream);
 	ObjectManager* manager = ObjectManager::getObjectManager();
 	manager->releaseInstances();
@@ -828,7 +828,7 @@ void DII::loadDynamicInstances(int saveGameSlotNumber)
 	std::string saveGameDir = manager->getSaveGameDirectoryPath(saveGameSlotNumber);
 	std::string fileName = saveGameDir + instances;
 	manager->loadNewInstances((char*)fileName.c_str());
-	mLogStream << "DynItemInst::loadDynamicInstances: done." << std::endl;
+	mLogStream << __FUNCSIG__ << ": done." << std::endl;
 	util::logInfo(&mLogStream);
 }
 
