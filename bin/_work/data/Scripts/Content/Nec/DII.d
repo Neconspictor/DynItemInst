@@ -71,8 +71,10 @@ func void DII_ApplyInstanceChangesToAll(var string instanceName) {
 
 
 // *********************************************************************
-// Adds a new proxy. All newly created items with instance 'sourceInstance' will have instance 'targetInstance'
-// after calling this function.
+// Removes a proxy.
+// NOTE: I encourage you not to use it since a previously proxied instance 
+// can lead to hard to track bugs if this function is not used properly.
+// And usually it isn't needed. 
 // @return : TRUE, if the proxy is successfully setup. Otherwise FALSE.
 // *********************************************************************
 FUNC void DII_RemoveProxy (var string sourceInstanceName) {
