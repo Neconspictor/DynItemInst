@@ -158,7 +158,7 @@ public:
 	bool operator==(const zSTRING& other) const {
 
 		if (length != other.length) return false;
-		return memcmp(data, other.data, length);
+		return memcmp(data, other.data, length) == 0;
 	}
 
 	//.text:0059D010 ; public: void __thiscall zSTRING::Clear(void)
