@@ -47,12 +47,15 @@ inline void cdecl gothicOperatorDeleteArray(void*)
 	XCALL(0x00565F80)
 }
 
+class zCPolygon;
 
 struct zVEC2;
 struct zVEC3;
 struct zVEC4;
 struct zMAT3;
 struct zMAT4;
+
+struct zTSpatialState;
 
 typedef int				zINT;
 typedef int				zBOOL;
@@ -1100,6 +1103,29 @@ public:
 	*/
 	BYTE GetA(void);
 };
+
+
+
+struct zTSpatialState {
+	zREAL m_fFloorY;
+	zREAL m_fWaterY;
+	zREAL m_fCeilingY;
+	zREAL m_fLastFloorY;
+	zCPolygon* m_poFloorPoly;
+	zCPolygon* m_poWaterPoly;
+	zCPolygon* m_poCeilingPoly;
+	struct {
+		uint8_t m_bFloorIsStair : 1;
+		uint8_t m_bFloorIsVob : 1;
+		uint8_t m_bIsUninited : 1;
+		//	zUINT8                : 0;
+	};
+	//	zUINT8 __align[3];
+};
+
+std::ostream& operator<<(std::ostream& os, const zTSpatialState& spatialState);
+
+
 
 #include "ztypes.inl"
 

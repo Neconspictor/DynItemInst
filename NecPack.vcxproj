@@ -12,17 +12,91 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Inc\AdditMemory.h" />
+    <ClInclude Include="Inc\api\console.h" />
+    <ClInclude Include="Inc\api\core.h" />
+    <ClInclude Include="Inc\api\g2ext.h" />
+    <ClInclude Include="Inc\api\g2\cgamemanager.h" />
+    <ClInclude Include="Inc\api\g2\constants.h" />
+    <ClInclude Include="Inc\api\g2\macros.h" />
+    <ClInclude Include="Inc\api\g2\ocanictrl_human.h" />
+    <ClInclude Include="Inc\api\g2\ocgame.h" />
+    <ClInclude Include="Inc\api\g2\oCItemExtended.h" />
+    <ClInclude Include="Inc\api\g2\ocmob.h" />
+    <ClInclude Include="Inc\api\g2\ocnpc.h" />
+    <ClInclude Include="Inc\api\g2\ocnpcinventory.h" />
+    <ClInclude Include="Inc\api\g2\ocobjectfactory.h" />
+    <ClInclude Include="Inc\api\g2\ocspell.h" />
+    <ClInclude Include="Inc\api\g2\ocviewgothicprogressbar.h" />
+    <ClInclude Include="Inc\api\g2\ocviewprogressbar.h" />
+    <ClInclude Include="Inc\api\g2\ocviewstatusbar.h" />
+    <ClInclude Include="Inc\api\g2\ocvob.h" />
+    <ClInclude Include="Inc\api\g2\ocworldtimer.h" />
+    <ClInclude Include="Inc\api\g2\zcaiplayer.h" />
+    <ClInclude Include="Inc\api\g2\zcbsptree.h" />
+    <ClInclude Include="Inc\api\g2\zccamera.h" />
+    <ClInclude Include="Inc\api\g2\zcconsole.h" />
+    <ClInclude Include="Inc\api\g2\zcinput.h" />
+    <ClInclude Include="Inc\api\g2\zcinputcallback.h" />
+    <ClInclude Include="Inc\api\g2\zcmaterial.h" />
+    <ClInclude Include="Inc\api\g2\zcmesh.h" />
+    <ClInclude Include="Inc\api\g2\zcmodel.h" />
+    <ClInclude Include="Inc\api\g2\zcobject.h" />
+    <ClInclude Include="Inc\api\g2\zcoption.h" />
+    <ClInclude Include="Inc\api\g2\zcparser.h" />
+    <ClInclude Include="Inc\api\g2\zcpar_symbol.h" />
+    <ClInclude Include="Inc\api\g2\zcpolygon.h" />
+    <ClInclude Include="Inc\api\g2\zcrenderer.h" />
+    <ClInclude Include="Inc\api\g2\zcsession.h" />
+    <ClInclude Include="Inc\api\g2\zcskycontroller.h" />
+    <ClInclude Include="Inc\api\g2\zcsoundsystem.h" />
+    <ClInclude Include="Inc\api\g2\zctimer.h" />
+    <ClInclude Include="Inc\api\g2\zcvertex.h" />
+    <ClInclude Include="Inc\api\g2\zcview.h" />
+    <ClInclude Include="Inc\api\g2\zcvisual.h" />
+    <ClInclude Include="Inc\api\g2\zcvob.h" />
+    <ClInclude Include="Inc\api\g2\zcworld.h" />
+    <ClInclude Include="Inc\api\g2\zstring.h" />
+    <ClInclude Include="Inc\api\g2\ztypes.h" />
+    <ClInclude Include="Inc\api\interface.h" />
+    <ClInclude Include="Inc\api\log.h" />
+    <ClInclude Include="Inc\api\spacer\constants.h" />
+    <ClInclude Include="Inc\api\spacer\macros.h" />
+    <ClInclude Include="Inc\api\spacer\ocgame.h" />
+    <ClInclude Include="Inc\api\spacer\ocitem.h" />
+    <ClInclude Include="Inc\api\spacer\ocnpc.h" />
+    <ClInclude Include="Inc\api\spacer\ocnpcinventory.h" />
+    <ClInclude Include="Inc\api\spacer\ocvob.h" />
+    <ClInclude Include="Inc\api\spacer\ocworldtimer.h" />
+    <ClInclude Include="Inc\api\spacer\zbsptree.h" />
+    <ClInclude Include="Inc\api\spacer\zcconsole.h" />
+    <ClInclude Include="Inc\api\spacer\zcinput.h" />
+    <ClInclude Include="Inc\api\spacer\zcinputcallback.h" />
+    <ClInclude Include="Inc\api\spacer\zcobject.h" />
+    <ClInclude Include="Inc\api\spacer\zcparser.h" />
+    <ClInclude Include="Inc\api\spacer\zcpar_symbol.h" />
+    <ClInclude Include="Inc\api\spacer\zcsession.h" />
+    <ClInclude Include="Inc\api\spacer\zctimer.h" />
+    <ClInclude Include="Inc\api\spacer\zcview.h" />
+    <ClInclude Include="Inc\api\spacer\zcvob.h" />
+    <ClInclude Include="Inc\api\spacer\zcworld.h" />
+    <ClInclude Include="Inc\api\spacer\zstring.h" />
+    <ClInclude Include="Inc\api\spacer\ztypes.h" />
+    <ClInclude Include="Inc\api\stats.h" />
+    <ClInclude Include="Inc\api\sysinfo.h" />
     <ClInclude Include="Inc\Configuration.h" />
     <ClInclude Include="Inc\Constants.h" />
     <ClInclude Include="Inc\DllMain.h" />
     <ClInclude Include="Inc\DII.h" />
     <ClInclude Include="Inc\General.h" />
+    <ClInclude Include="Inc\GothicFunctions.h" />
+    <ClInclude Include="Inc\GothicMemoryLocations.h" />
     <ClInclude Include="Inc\HookManager.h" />
     <ClInclude Include="Inc\ISerialization.h" />
     <ClInclude Include="Inc\DynInstance.h" />
     <ClInclude Include="Inc\Levitation.h" />
     <ClInclude Include="Inc\LevitationData.h" />
     <ClInclude Include="Inc\Logger.h" />
+    <ClInclude Include="Inc\MathUtil.h" />
     <ClInclude Include="Inc\Module.h" />
     <ClInclude Include="Inc\ObjectManager.h" />
     <ClInclude Include="Inc\ocgameExtended.h" />
@@ -48,10 +122,12 @@
     <ClCompile Include="minhook-master\src\hook.c" />
     <ClCompile Include="minhook-master\src\trampoline.c" />
     <ClCompile Include="Src\api\g2\zcpar_symbol.cpp" />
+    <ClCompile Include="Src\api\g2\ztypes.cpp" />
     <ClCompile Include="Src\Configuration.cpp" />
     <ClCompile Include="Src\DllMain.cpp" />
     <ClCompile Include="Src\DII.cpp" />
     <ClCompile Include="Src\General.cpp" />
+    <ClCompile Include="Src\GothicFunctions.cpp" />
     <ClCompile Include="Src\HookManager.cpp" />
     <ClCompile Include="Src\DynInstance.cpp" />
     <ClCompile Include="Src\Levitation.cpp" />
@@ -66,6 +142,8 @@
     <None Include="exports.def">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
     </None>
+    <None Include="Inc\api\g2\ztypes.inl" />
+    <None Include="Inc\api\spacer\ztypes.inl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{F49E2048-15A5-46EB-9737-D31109C3DA55}</ProjectGuid>
@@ -105,7 +183,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>.\G2ExtSDK;.\Inc;.\minhook-master\include;C:\Development\Repositories\NecPack\boost-1.67.0;$(IncludePath)</IncludePath>
+    <IncludePath>.\Inc;.\minhook-master\include;C:\Development\Repositories\NecPack\boost-1.67.0;$(IncludePath)</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
     <TargetName>Nec</TargetName>
     <OutDir>E:\Program Files (x86)\JoWood\Gothic II Gold\System\Nec\</OutDir>

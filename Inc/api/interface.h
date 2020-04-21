@@ -40,6 +40,9 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #ifndef __API_G2EXT_INTERFACE_H__
 #define __API_G2EXT_INTERFACE_H__
 
+
+#define THISPTR_OFFSET(x) (((char *)this) + (x))
+
 #define G2EXT_BEGIN_INTERFACE_DECLARATION(name) __interface actual_##name
 
 #define G2EXT_INTERFACE_IMPLEMENT_INTERFACE(name)	actual_##base

@@ -57,6 +57,15 @@
     <Filter Include="Source Files\General">
       <UniqueIdentifier>{f247ea7f-5fd0-4c99-b807-d68e1b4c9510}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\api">
+      <UniqueIdentifier>{ee8d9897-fbcc-44b7-ae9f-e86b5ad7d09a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\api\g2">
+      <UniqueIdentifier>{baf6df7d-2b75-4e5a-91ae-d35aed7ff12a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\api\spacer">
+      <UniqueIdentifier>{a7f2df7e-dea7-4685-be42-56866d3b0d4a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Inc\DllMain.h">
@@ -146,6 +155,228 @@
     <ClInclude Include="Inc\General.h">
       <Filter>Header Files\General</Filter>
     </ClInclude>
+    <ClInclude Include="Inc\GothicFunctions.h">
+      <Filter>Header Files\General</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\GothicMemoryLocations.h">
+      <Filter>Header Files\General</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\console.h">
+      <Filter>Header Files\api</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\core.h">
+      <Filter>Header Files\api</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\g2ext.h">
+      <Filter>Header Files\api</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\interface.h">
+      <Filter>Header Files\api</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\log.h">
+      <Filter>Header Files\api</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\stats.h">
+      <Filter>Header Files\api</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\sysinfo.h">
+      <Filter>Header Files\api</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\g2\cgamemanager.h">
+      <Filter>Header Files\api\g2</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\g2\constants.h">
+      <Filter>Header Files\api\g2</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\g2\macros.h">
+      <Filter>Header Files\api\g2</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\g2\ocanictrl_human.h">
+      <Filter>Header Files\api\g2</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\g2\ocgame.h">
+      <Filter>Header Files\api\g2</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\g2\oCItemExtended.h">
+      <Filter>Header Files\api\g2</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\g2\ocmob.h">
+      <Filter>Header Files\api\g2</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\g2\ocnpc.h">
+      <Filter>Header Files\api\g2</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\g2\ocnpcinventory.h">
+      <Filter>Header Files\api\g2</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\g2\ocobjectfactory.h">
+      <Filter>Header Files\api\g2</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\g2\ocspell.h">
+      <Filter>Header Files\api\g2</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\g2\ocviewgothicprogressbar.h">
+      <Filter>Header Files\api\g2</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\g2\ocviewprogressbar.h">
+      <Filter>Header Files\api\g2</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\g2\ocviewstatusbar.h">
+      <Filter>Header Files\api\g2</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\g2\ocvob.h">
+      <Filter>Header Files\api\g2</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\g2\ocworldtimer.h">
+      <Filter>Header Files\api\g2</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\g2\zcaiplayer.h">
+      <Filter>Header Files\api\g2</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\g2\zcbsptree.h">
+      <Filter>Header Files\api\g2</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\g2\zccamera.h">
+      <Filter>Header Files\api\g2</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\g2\zcconsole.h">
+      <Filter>Header Files\api\g2</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\g2\zcinput.h">
+      <Filter>Header Files\api\g2</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\g2\zcinputcallback.h">
+      <Filter>Header Files\api\g2</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\g2\zcmesh.h">
+      <Filter>Header Files\api\g2</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\g2\zcmodel.h">
+      <Filter>Header Files\api\g2</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\g2\zcobject.h">
+      <Filter>Header Files\api\g2</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\g2\zcoption.h">
+      <Filter>Header Files\api\g2</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\g2\zcpar_symbol.h">
+      <Filter>Header Files\api\g2</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\g2\zcparser.h">
+      <Filter>Header Files\api\g2</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\g2\zcrenderer.h">
+      <Filter>Header Files\api\g2</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\g2\zcsession.h">
+      <Filter>Header Files\api\g2</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\g2\zcskycontroller.h">
+      <Filter>Header Files\api\g2</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\g2\zcsoundsystem.h">
+      <Filter>Header Files\api\g2</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\g2\zctimer.h">
+      <Filter>Header Files\api\g2</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\g2\zcview.h">
+      <Filter>Header Files\api\g2</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\g2\zcvisual.h">
+      <Filter>Header Files\api\g2</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\g2\zcvob.h">
+      <Filter>Header Files\api\g2</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\g2\zcworld.h">
+      <Filter>Header Files\api\g2</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\g2\zstring.h">
+      <Filter>Header Files\api\g2</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\g2\ztypes.h">
+      <Filter>Header Files\api\g2</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\spacer\constants.h">
+      <Filter>Header Files\api\spacer</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\spacer\macros.h">
+      <Filter>Header Files\api\spacer</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\spacer\ocgame.h">
+      <Filter>Header Files\api\spacer</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\spacer\ocitem.h">
+      <Filter>Header Files\api\spacer</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\spacer\ocnpc.h">
+      <Filter>Header Files\api\spacer</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\spacer\ocnpcinventory.h">
+      <Filter>Header Files\api\spacer</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\spacer\ocvob.h">
+      <Filter>Header Files\api\spacer</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\spacer\ocworldtimer.h">
+      <Filter>Header Files\api\spacer</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\spacer\zbsptree.h">
+      <Filter>Header Files\api\spacer</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\spacer\zcconsole.h">
+      <Filter>Header Files\api\spacer</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\spacer\zcinput.h">
+      <Filter>Header Files\api\spacer</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\spacer\zcinputcallback.h">
+      <Filter>Header Files\api\spacer</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\spacer\zcobject.h">
+      <Filter>Header Files\api\spacer</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\spacer\zcpar_symbol.h">
+      <Filter>Header Files\api\spacer</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\spacer\zcparser.h">
+      <Filter>Header Files\api\spacer</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\spacer\zcsession.h">
+      <Filter>Header Files\api\spacer</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\spacer\zctimer.h">
+      <Filter>Header Files\api\spacer</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\spacer\zcview.h">
+      <Filter>Header Files\api\spacer</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\spacer\zcvob.h">
+      <Filter>Header Files\api\spacer</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\spacer\zcworld.h">
+      <Filter>Header Files\api\spacer</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\spacer\zstring.h">
+      <Filter>Header Files\api\spacer</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\spacer\ztypes.h">
+      <Filter>Header Files\api\spacer</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\g2\zcpolygon.h">
+      <Filter>Header Files\api\g2</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\g2\zcmaterial.h">
+      <Filter>Header Files\api\g2</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\api\g2\zcvertex.h">
+      <Filter>Header Files\api\g2</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\MathUtil.h">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\DllMain.cpp">
@@ -205,8 +436,20 @@
     <ClCompile Include="Src\General.cpp">
       <Filter>Source Files\General</Filter>
     </ClCompile>
+    <ClCompile Include="Src\GothicFunctions.cpp">
+      <Filter>Source Files\General</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\api\g2\ztypes.cpp">
+      <Filter>Source Files\api\g2</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />
+    <None Include="Inc\api\g2\ztypes.inl">
+      <Filter>Header Files\api\g2</Filter>
+    </None>
+    <None Include="Inc\api\spacer\ztypes.inl">
+      <Filter>Header Files\api\spacer</Filter>
+    </None>
   </ItemGroup>
 </Project>

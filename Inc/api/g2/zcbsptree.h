@@ -54,6 +54,19 @@ class zCBspBase;
 class zCMesh;
 class zCPolygon;
 
+
+
+class zCBspBase_Small
+{
+public:
+	void* parent;
+	zTBBox3D bbox3D;
+	void** polyList;
+	int	numPolys;
+	int nodeType;
+};
+
+
 enum zTBspTreeMode    
 {   
 	zBSP_MODE_INDOOR, 

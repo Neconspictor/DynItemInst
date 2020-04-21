@@ -215,7 +215,7 @@ public:
 	/** Insert description. 
 	* @usable Ingame only
 	*/
-	float GetDistanceToVob(zCVob & pA)
+	float __thiscall GetDistanceToVob(zCVob & pA)
 	{
 		XCALL(0x0061B910);
 	};
