@@ -1,4 +1,4 @@
-const int Value_Ru_Levitation				=	0;
+const int Value_Ru_Levitation				=	500;
 
 /*******************************************************************************************/
 INSTANCE ItRu_Levitation (C_Item)

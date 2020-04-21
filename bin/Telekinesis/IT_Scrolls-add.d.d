@@ -1,4 +1,4 @@
-const int 	Value_Sc_Telekinesis	= 0;
+const int 	Value_Sc_Telekinesis	= 200;
 
 /*******************************************************************************************/
 INSTANCE ItSc_Telekinesis(C_Item)
