@@ -67,35 +67,6 @@ Levitation::~Levitation()
 
 void Levitation::hookModule()
 {
-	zCVobDoFrameActivity = reinterpret_cast<ZCVobDoFrameActivity>(ZCVOB_DO_FRAME_ACTIVITY_ADDRESS);
-	zCVobSetPhysicsEnabled = reinterpret_cast<ZCVobSetPhysicsEnabled>(ZCVOB_SET_PHYSICS_ENABLED_ADDRESS);
-	oCGamePause = reinterpret_cast<OCGamePause>(OCGAME_PAUSE_ADDRESS);
-	oCGameUnpause = reinterpret_cast<OCGameUnpause>(OCGAME_UNPAUSE_ADDRESS);
-	zCVobSetCollDet = reinterpret_cast<void(__thiscall*)(void*, int)>(ZCVOB_SET_COLL_DET_ADDRESS);
-	zCAIPlayerCheckFloorSliding = reinterpret_cast<int(__thiscall*)(void*)>((ZCAIPLAYER_CHECK_FLOOR_SLIDING_ADDRESS));
-
-	doSurfaceAlignment = reinterpret_cast<DoSurfaceAlignment>((DO_SURFACE_ALIGNMENT_ADDRESS));
-	zCTriggerOnTouch = reinterpret_cast<ZCTriggerOnTouch>(ZCTRIGGER_ON_TOUCH_ADDRESS);
-	zCVobHasEnoughSpace = reinterpret_cast<ZCVobHasEnoughSpace>(ZCVOB_HAS_ENOUGH_SPACE_ADDRESS);
-	zCVobCheckAndResolveCollisions = reinterpret_cast<ZCVobCheckAndResolveCollisions>((ZCVOB_CHECK_AND_RESOLVE_COLLISION_ADDRESS));
-	zCVobGetVelocity = reinterpret_cast<zVEC3(__thiscall*)(void*)>(ZCVOB_GET_VELOCITY_ADDRESS);
-	zCAIPlayerCheckEnoughSpaceMoveDir = (ZCAIPlayerCheckEnoughSpaceMoveDir)0x00511320;
-	testStatic_Char_Char = (TestStatic_Char_Char)TESTSTATIC_CHAR_CHAR_ADDRESS;
-	zCCollObjectCharacterTestHardCollisions = (ZCCollObjectCharacterTestHardCollisions) ZCCOLL_OBJECT_CHARACTER_TEST_HARD_COLLIONS_ADDRESS;
-	zCAIPlayerCheckPhysics = (ZCAIPlayerCheckPhysics)ZCAIPLAYER_CHECK_PHYSICS;
-
-
-
-
-	zCVobUpdatePhysics = (ZCVobUpdatePhysics)ZCVOB_UPDATE_PHYSICS_ADDRESS;
-	zCVobEndMovement = (ZCVobEndMovement)ZCVOB_END_MOVEMENT;
-	zCCollObjectCharacterFindFloorWaterCeiling = (ZCCollObjectCharacterFindFloorWaterCeiling)ZCCOLL_OBJECT_CHARACTER_FIND_FLOOR_WATER_CEILING;
-	zCCollObjectCharacterTestSoftCollisions = (ZCCollObjectCharacterTestSoftCollisions)ZCCOLL_OBJECT_CHARACTER_TEST_SOFT_COLLIONS_ADDRESS;
-	zCCollObjectCharacterDetectCollisionsSelf = (ZCCollObjectCharacterDetectCollisionsSelf)ZCCOLL_OBJECT_CHARACTER_DETECT_SELF_COLLISION_ADDRESS;
-	zCVobCalcGroundPoly = (ZCVobCalcGroundPoly)ZCVOB_CALC_GROUND_POLY_ADDRESS;
-	zMAT4SetTranslation = (ZMAT4SetTranslation) ZMAT4_SET_TRANSLATION_ADDRESS;
-	zCCollObjectCharacterCalcSlideVector = (ZCCollObjectCharacterCalcSlideVector)ZCCOLL_OBJECT_CHARACTER_CALC_SLIDE_VECTOR_ADDRESS;
-
 	HookManager* hookManager = HookManager::getHookManager();
 	hookManager->addFunctionHook((LPVOID*)&zCVobDoFrameActivity, zCVobDoFrameActivityHook, mModuleDesc);
 	hookManager->addFunctionHook((LPVOID*)&oCGamePause, oCGamePauseHook, mModuleDesc);
