@@ -1,5 +1,5 @@
 
-
+const int NEC_SILENT = FALSE;
 const int _NEC_FLAGS = 0;
 
 // **********************************************************************************
@@ -23,7 +23,7 @@ func void NEC_InitPerceptions(var int flags)
         if (!NEC_SILENT) {
             MEMINT_HandleError(zERR_TYPE_FATAL, ConcatStrings(NEC_relativeLibraryPath, " couldn't be loaded!"));
         } else {
-            msg = ConcatStrings("NEC_Init: ", NEC_relativeLibraryPath);
+            msg = ConcatStrings("neclib: ", NEC_relativeLibraryPath);
             msg = ConcatStrings(msg, " couldn't be loaded!");
             MEM_Error(msg);
         };
@@ -33,7 +33,7 @@ func void NEC_InitPerceptions(var int flags)
         msg = ConcatStrings("Expected lib version: ", toStringf(expectedLibVersion));
         msg = ConcatStrings(msg, " , loadded lib version: ");
         msg = ConcatStrings(msg, toStringf(libVersion));
-        msg = ConcatStrings(msg, "; Library version doesn't conform to expected one! No initialization will be performed and DII won't work!");
+        msg = ConcatStrings(msg, "; Library version doesn't conform to expected one! No initialization will be performed and neclib won't work as expected!");
         NEC_Init_Modules = false;
         if (!NEC_SILENT) {
             MEMINT_HandleError(zERR_TYPE_FATAL, msg);
@@ -48,6 +48,12 @@ func void NEC_InitPerceptions(var int flags)
 	CALL_IntParam(flags);
 	CALL_PutRetValTo(_@(_NEC_FLAGS));
     CALL__cdecl(adr);
+	
+	if (flags != _NEC_FLAGS) {
+		MEM_Error("neclib: Not all modules have been correctly hooked!");
+	} else {
+		MEM_Info("neclib: All modules have been hooked.");
+	};
 	
 	// NOTE: the other flags are set in NEC_INIT_GLOBAL
 	NEC_Init_Modules = _NEC_FLAGS & NEC_DII;
@@ -68,4 +74,6 @@ func void NEC_INIT_GLOBAL() {
 		NEC_Init_Modules = NEC_Init_Modules | NEC_TELEKINESIS;
 		TELEKINESIS_Init();
 	};
+	
+	MEM_Info("neclib: NEC_INIT_GLOBAL: initialized.");
 };

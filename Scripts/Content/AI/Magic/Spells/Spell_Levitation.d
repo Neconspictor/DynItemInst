@@ -10,7 +10,8 @@ INSTANCE Spell_Levitation (C_Spell_Proto)
 	time_per_mana			= 0;
 	spelltype 				= SPELL_NEUTRAL;
 	targetCollectAlgo		= TARGET_COLLECT_CASTER;
-	canTurnDuringInvest		= 0;
+	canTurnDuringInvest		= FALSE;
+	canChangeTargetDuringInvest	=	FALSE;
 	//canTurnDuringInvest		= 0;
 };
 

@@ -1,4 +1,3 @@
-const int NEC_SILENT = 0;
 const string NEC_relativeLibraryPath = ".\NEC\NEC.DLL";
 
 // flags for lib config
@@ -23,6 +22,7 @@ FUNC INT NEC_GetLibVersion() {
 
     //library couldn't be found?
     if (!adr) {
+		MEM_Error(ConcatStrings("neclib: NEC_GetLibVersion(): Library couldn't be loaded: ", NEC_relativeLibraryPath));
         return 0;
     };
 

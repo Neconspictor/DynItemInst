@@ -32,7 +32,7 @@ FUNC STRING DII_GetSymbolName(var int symbolIndex) {
 // *********************************************************************
 FUNC INT DII_AddProxy (var string sourceInstanceName, var string targetInstanceName) {
     if (!(NEC_Init_Modules & NEC_DII)) {
-        MEM_Warn("DII_AddProxy: DII Module isn't initialized!");
+        MEM_Warn("neclib: DII_AddProxy: DII Module isn't initialized!");
         return FALSE;
     };
 	
@@ -59,7 +59,7 @@ FUNC INT DII_AddProxy (var string sourceInstanceName, var string targetInstanceN
 func void DII_ApplyInstanceChangesToAll(var string instanceName) {
 	
 	if (!(NEC_Init_Modules & NEC_DII)) {
-        MEM_Warn("DII_ApplyInstanceChangesToAll: DII Module isn't initialized!");
+        MEM_Warn("neclib: DII_ApplyInstanceChangesToAll: DII Module isn't initialized!");
         return;
     };
 	
@@ -79,7 +79,7 @@ func void DII_ApplyInstanceChangesToAll(var string instanceName) {
 // *********************************************************************
 FUNC void DII_RemoveProxy (var string sourceInstanceName) {
     if (!(NEC_Init_Modules & NEC_DII)) {
-        MEM_Warn("DII_RemoveProxy: DII Module isn't initialized!");
+        MEM_Warn("neclib: DII_RemoveProxy: DII Module isn't initialized!");
         return;
     };
 	
@@ -99,7 +99,7 @@ FUNC void DII_RemoveProxy (var string sourceInstanceName) {
 // ************************************************************
 FUNC C_ITEM DII_CreateNewItem (var string instanceName) {
 	if (!(NEC_Init_Modules & NEC_DII)) {
-        MEM_Warn("DII_CreateNewItem: DII Module isn't initialized!");
+        MEM_Warn("neclib: DII_CreateNewItem: DII Module isn't initialized!");
         return;
     };
 	
@@ -124,7 +124,7 @@ FUNC C_ITEM DII_CreateNewItem (var string instanceName) {
 // *********************************************************************
 FUNC STRING DII_CreateNewInstance (var c_item itm) {
     if (!(NEC_Init_Modules & NEC_DII)) {
-        MEM_Warn("DII_CreateNewInstance: DII Module isn't initialized!");
+        MEM_Warn("neclib: DII_CreateNewInstance: DII Module isn't initialized!");
         return "";
     };
 	
@@ -149,7 +149,7 @@ FUNC STRING DII_CreateNewInstance (var c_item itm) {
 // *********************************************************************
 FUNC INT DII_CreateNewInstanceStr (var c_item itm, var string instanceName) {
     if (!(NEC_Init_Modules & NEC_DII)) {
-        MEM_Warn("DII_CreateNewInstanceStr: DII Module isn't initialized!");
+        MEM_Warn("neclib: DII_CreateNewInstanceStr: DII Module isn't initialized!");
         return FALSE;
     };
 
@@ -172,7 +172,7 @@ FUNC INT DII_CreateNewInstanceStr (var c_item itm, var string instanceName) {
 // ***************************************************************
 func void DII_DeleteDII (var string instanceName) {
     if (!(NEC_Init_Modules & NEC_DII)) {
-        MEM_Warn("DII_DeleteDII: DII Module isn't initialized!");
+        MEM_Warn("neclib: DII_DeleteDII: DII Module isn't initialized!");
         return;
     };
 	
@@ -191,7 +191,7 @@ func void DII_DeleteDII (var string instanceName) {
 // ***************************************************************
 func void DII_DeleteItem (VAR C_ITEM itm) {
     if (!(NEC_Init_Modules & NEC_DII)) {
-        MEM_Warn("DII_DeleteItem: DII Module isn't initialized!");
+        MEM_Warn("neclib: DII_DeleteItem: DII Module isn't initialized!");
         return;
     };
 
@@ -210,7 +210,7 @@ func void DII_DeleteItem (VAR C_ITEM itm) {
 // ************************************************************
 FUNC INT DII_IsDynamic(var c_item itm) {
 	if (!(NEC_Init_Modules & NEC_DII)) {
-        MEM_Warn("DII_IsDynamic: DII Module isn't initialized!");
+        MEM_Warn("neclib: DII_IsDynamic: DII Module isn't initialized!");
         return FALSE;
     };
 
@@ -232,7 +232,7 @@ FUNC INT DII_IsDynamic(var c_item itm) {
 // ************************************************************
 FUNC INT DII_IsInstanceDynamic(var string instanceName) {
     if (!(NEC_Init_Modules & NEC_DII)) {
-        MEM_Warn("DII_IsInstanceDynamic: DII Module isn't initialized!");
+        MEM_Warn("neclib: DII_IsInstanceDynamic: DII Module isn't initialized!");
         return FALSE;
     };
 	
@@ -258,7 +258,7 @@ FUNC INT DII_IsInstanceDynamic(var string instanceName) {
 // ************************************************************
 func INT DII_UpdateInstance(var string instanceName, var c_item itm) {
     if (!(NEC_Init_Modules & NEC_DII)) {
-        MEM_Warn("DII_UpdateInstance: DII Module isn't initialized!");
+        MEM_Warn("neclib: DII_UpdateInstance: DII Module isn't initialized!");
         return FALSE;
     };
 	
@@ -284,7 +284,7 @@ func INT DII_UpdateInstance(var string instanceName, var c_item itm) {
 
 FUNC DII_USER_DATA DII_GetUserData (var string instanceName) {
     if (!(NEC_Init_Modules & NEC_DII)) {
-        MEM_Warn("DII_GetUserData: DII Module isn't initialized!");
+        MEM_Warn("neclib: DII_GetUserData: DII Module isn't initialized!");
         MEM_NullToInst();
 		return;
     };
@@ -316,7 +316,7 @@ FUNC DII_USER_DATA DII_GetUserData (var string instanceName) {
 func void DII_ChangeInstanceForAll(var string sourceInstanceName, var string targetInstanceName) {
 	
 	if (!(NEC_Init_Modules & NEC_DII)) {
-        MEM_Warn("DII_ChangeInstanceForAll: DII Module isn't initialized!");
+        MEM_Warn("neclib: DII_ChangeInstanceForAll: DII Module isn't initialized!");
         return;
     };
 	

@@ -9,6 +9,8 @@ const int TELEKINESIS_UPMOVEMENT = 50; // (in cm) the focus item is moved upward
 const int TELEKINESIS_SPEED = 150; // (in cm/s) the traveling speed of the focus item.
 const int TELEKINESIS_MOVEMENT_DELAY = 2000; // (in ms) time to wait before the focus item travels
 
+const string PRINT_TO_FAR_AWAY = "Mmh, das Objekt kann ich nicht sehen...";
+
 
 INSTANCE Spell_Telekinesis (C_Spell_Proto)
 {
@@ -61,7 +63,7 @@ func void _Spell_Telekinesis_MoveTarget(var int hndl) {
 		TELEKINESIS_DeleteInterpolator(data.pInterpolator);
 		FF_RemoveData(_Spell_Telekinesis_MoveTarget, hndl);
 		delete(hndl);
-		MEM_WARN("_Spell_Telekinesis_MoveTarget():: Detected end of target move!");
+		MEM_Info("neclib: _Spell_Telekinesis_MoveTarget():: End of movement.");
 		
 		return;
 	};
@@ -125,6 +127,7 @@ func int Spell_Logic_Telekinesis (var int manaInvested)
 	//MEM_Warn(ConcatStrings("canSee = ", IntToString(canSee)));
 	
 	if (!canSee && (manaInvested == 0)) {
+		Print(PRINT_TO_FAR_AWAY);
 		return SPL_DONTINVEST;
 	};
 	
@@ -142,6 +145,19 @@ func int Spell_Logic_Telekinesis (var int manaInvested)
 		data.pTarget = oCSelf.focus_vob;
 		
 		FF_ApplyExtData(_Spell_Telekinesis_MoveTargetStart, TELEKINESIS_MOVEMENT_DELAY, 1, hndl);
+		
+		
+		// ensure that npcs react if hero tries to steal
+		if (Npc_IsPlayer(self)) {
+			var int itemBak; itemBak = _@(item); 
+
+			item = _^(data.pTarget);			
+			Npc_SendPassivePerc(self, PERC_ASSESSTHEFT, self, self);
+			MEM_AssignInstSuppressNullWarning = TRUE;
+			item = _^(itemBak);
+			MEM_AssignInstSuppressNullWarning = FALSE;
+		};
+		
 	};
 	
 	return SPL_NEXTLEVEL;
@@ -149,6 +165,6 @@ func int Spell_Logic_Telekinesis (var int manaInvested)
 
 func void Spell_Cast_Telekinesis(var int spellLevel)
 {	
-	self.aivar[AIV_SpellLevel] = 1;
-	MEM_WARN("Spell_Cast_Telekinesis: called.");
+	self.aivar[AIV_SpellLevel] = 1; // tells _Spell_Telekinesis_MoveTarget to stop
+	MEM_Info("neclib: Spell_Cast_Telekinesis: called.");
 };

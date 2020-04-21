@@ -3,10 +3,10 @@
 
 const int LEVITATION_HOVER_DISTANCE = 50; 					// hover distance (in cm/s)
 const int LEVITATION_SPEED_VERTICAL = 60; 					// up/down levitation speed (in cm/s)
-const int LEVITATION_SPEED_FORWARD = 500; 					// forward levitation speed (in cm/s)
-const int LEVITATION_SPEED_BACKWARD = 100; 					// backward levitation speed (in cm/s)
+const int LEVITATION_SPEED_FORWARD = 200; 					// forward levitation speed (in cm/s)
+const int LEVITATION_SPEED_BACKWARD = 200; 					// backward levitation speed (in cm/s)
 const int LEVITATION_SPEED_TURN = 90;						// turn speed (in degree angles/s)
-const int LEVITATION_MAX_LIFETIME = 13000; 					// maximum lifetime of the levitation state (in ms)
+const int LEVITATION_MAX_LIFETIME = 30000; 					// maximum lifetime of the levitation state (in ms)
 const int LEVITATION_GRAVITY = 10;							// levitation gravity (in cm/s). Set it to 0 for no gravity.
 
 const int LEVITATION_CONTINOUS_SUBSTRACTION_TIME = 120;		// specifies the time (in seconds) it takes for the continous lifetime substraction 
@@ -15,13 +15,13 @@ const int LEVITATION_CONTINOUS_SUBSTRACTION_TIME = 120;		// specifies the time (
 const string LEVITATION_OVERLAY = "Humans_Levitate.mds";	// levitation overlay
 
 // user control
-const int LEVITATION_CONTROL_FORWARD = KEY_UPARROW; 		// forward movement KEY_UPARROW
-const int LEVITATION_CONTROL_BACKWARD = KEY_DOWNARROW; 		// backward movement KEY_DOWNARROW
-const int LEVITATION_CONTROL_LEFT = KEY_LEFTARROW; 			// left turn KEY_LEFTARROW
-const int LEVITATION_CONTROL_RIGHT = KEY_RIGHTARROW; 		// right turn KEY_RIGHTARROW
-const int LEVITATION_CONTROL_UP = KEY_Y; 			// up movement KEY_LBRACKET
-const int LEVITATION_CONTROL_DOWN = KEY_X; 		// down movement KEY_APOSTROPHE
-const int LEVITATION_CONTROL_TERMINATE = KEY_RETURN; 		// terminates levitation state KEY_RETURN
+const int LEVITATION_CONTROL_FORWARD = KEY_UPARROW; 		// forward movement
+const int LEVITATION_CONTROL_BACKWARD = KEY_DOWNARROW; 		// backward movement
+const int LEVITATION_CONTROL_LEFT = KEY_LEFTARROW; 			// left turn
+const int LEVITATION_CONTROL_RIGHT = KEY_RIGHTARROW; 		// right turn
+const int LEVITATION_CONTROL_UP = KEY_A; 			// up movement
+const int LEVITATION_CONTROL_DOWN = KEY_Z; 		// down movement
+const int LEVITATION_CONTROL_TERMINATE = KEY_RETURN; 		// terminates levitation state
 
 // private
 var int _LEVITATION_barHandle; 								// lifetime bar of the levitation state
@@ -35,7 +35,7 @@ var int _LEVITATION_IsActive; 								// indicates that the NEC library should a
  */
 func int LEVITATION_IsGamePaused() {
 	if (!(NEC_Init_Modules & NEC_LEVITATION)) {
-		MEM_Warn("LEVITATION_IsGamePaused: Levitation module isn't initialized!");
+		MEM_Warn("neclib: LEVITATION_IsGamePaused: Levitation module isn't initialized!");
         return FALSE;
     };
 	
@@ -58,14 +58,17 @@ func int LEVITATION_IsGamePaused() {
 func void LEVITATION_Init() {
 
 	if (!(NEC_Init_Modules & NEC_LEVITATION)) {
-        MEM_Warn("LEVITATION_Init: Levitation module isn't specified to be initialized!");
+        MEM_Warn("neclib: LEVITATION_Init: Levitation module isn't specified to be initialized!");
         return;
     };
 	
 	if (!_LEVITATION_barHandle) {
 		_LEVITATION_barHandle = Bar_Create(GothicBar@);
 		Bar_Hide(_LEVITATION_barHandle);
+		MEM_Info("neclib: LEVITATION_Init: created lifetime bar.");
 	};
+	
+	MEM_Info("neclib: LEVITATION_Init: done.");
 };
 
 /**
@@ -73,7 +76,7 @@ func void LEVITATION_Init() {
  */
 func void LEVITATION_Begin() {
 	if (!(NEC_Init_Modules & NEC_LEVITATION)) {
-        MEM_Warn("LEVITATION_Begin: Levitation module isn't initialized!");
+        MEM_Warn("neclib: LEVITATION_Begin: Levitation module isn't initialized!");
         return;
     };
 	
@@ -83,6 +86,8 @@ func void LEVITATION_Begin() {
 	Mdl_ApplyOverlayMds	(hero, LEVITATION_OVERLAY); 
 	_LEVITATION_consumedLifetme = FLOATNULL;
 	FF_ApplyOnce(LEVITATION_ConsumeLifetime);
+	
+	MEM_Info("neclib: LEVITATION_Begin: begin levitation...");
 };
 
 /**
@@ -90,7 +95,7 @@ func void LEVITATION_Begin() {
  */
 func void LEVITATION_End() {
 	if (!(NEC_Init_Modules & NEC_LEVITATION)) {
-        MEM_Warn("LEVITATION_End: Levitation module isn't initialized!");
+        MEM_Warn("neclib: LEVITATION_End: Levitation module isn't initialized!");
         return;
     };
 	
@@ -98,6 +103,7 @@ func void LEVITATION_End() {
 	Bar_Hide(_LEVITATION_barHandle);
 	Mdl_RemoveOverlayMDS(hero, "Humans_Levitate.mds");
 	FF_Remove(LEVITATION_ConsumeLifetime);
+	MEM_Info("neclib: LEVITATION_End: end levitation.");
 };
 
 /**
@@ -105,7 +111,7 @@ func void LEVITATION_End() {
  */
 func void LEVITATION_Toggle() {
 	if (!(NEC_Init_Modules & NEC_LEVITATION)) {
-        MEM_Warn("LEVITATION_Toggle: Levitation module isn't initialized!");
+        MEM_Warn("neclib: LEVITATION_Toggle: Levitation module isn't initialized!");
         return;
     };
 		

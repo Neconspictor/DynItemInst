@@ -3,7 +3,7 @@
  */
  
  
- const int TARGET_TYPE_ITEM_TELEKINESIS = 256;
+ //const int TARGET_TYPE_ITEM_TELEKINESIS = 256;
  
  /**
   * Creates a new telekinesis interpolator object.
@@ -14,7 +14,7 @@
   */
 func int TELEKINESIS_CreateInterpolator(var int pVobPosition, var int pNpcPosition, var int upMoveAmount, var int speed) {
 	if (!(NEC_Init_Modules & NEC_TELEKINESIS)) {
-        MEM_Warn("TELEKINESIS_CreateInterpolator: Telekinesis module isn't initialized!");
+        MEM_Warn("neclib: TELEKINESIS_CreateInterpolator: Telekinesis module isn't initialized!");
         return 0;
     };
 
@@ -38,7 +38,7 @@ func int TELEKINESIS_CreateInterpolator(var int pVobPosition, var int pNpcPositi
  */
 func void TELEKINESIS_GetInterpolatedVec(var int pTelekinesisInterpolator, var int pDestVec3) {
     if (!(NEC_Init_Modules & NEC_TELEKINESIS)) {
-		MEM_Warn("TELEKINESIS_GetInterpolatedVec: Telekinesis module isn't initialized!");
+		MEM_Warn("neclib: TELEKINESIS_GetInterpolatedVec: Telekinesis module isn't initialized!");
         return;
     };
 
@@ -56,7 +56,7 @@ func void TELEKINESIS_GetInterpolatedVec(var int pTelekinesisInterpolator, var i
  */
 func void TELEKINESIS_DeleteInterpolator(var int pTelekinesisInterpolator) {
     if (!(NEC_Init_Modules & NEC_TELEKINESIS)) {
-		MEM_Warn("TELEKINESIS_DeleteInterpolator: Telekinesis module isn't initialized!");
+		MEM_Warn("neclib: TELEKINESIS_DeleteInterpolator: Telekinesis module isn't initialized!");
         return;
     };
 
@@ -74,7 +74,7 @@ func void TELEKINESIS_DeleteInterpolator(var int pTelekinesisInterpolator) {
  */
 func void TELEKINESIS_Interpolate(var int pTelekinesisInterpolator, var int vobPtr) {
     if (!(NEC_Init_Modules & NEC_TELEKINESIS)) {
-		MEM_Warn("TELEKINESIS_Interpolate: Telekinesis module isn't initialized!");
+		MEM_Warn("neclib: TELEKINESIS_Interpolate: Telekinesis module isn't initialized!");
         return;
     };
 
@@ -93,7 +93,7 @@ func void TELEKINESIS_Interpolate(var int pTelekinesisInterpolator, var int vobP
  */
 func int TELEKINESIS_IsVobSeeable(var int pNpc, var int pVob) {
 	if (!(NEC_Init_Modules & NEC_TELEKINESIS)) {
-		MEM_Warn("TELEKINESIS_IsVobSeeable: Telekinesis module isn't initialized!");
+		MEM_Warn("neclib: TELEKINESIS_IsVobSeeable: Telekinesis module isn't initialized!");
         return 0;
     };
 
@@ -114,7 +114,7 @@ func int TELEKINESIS_IsVobSeeable(var int pNpc, var int pVob) {
  */
 func void TELEKINESIS_ClearInterpolators() {
     if (!(NEC_Init_Modules & NEC_TELEKINESIS)) {
-		MEM_Warn("TELEKINESIS_ClearInterpolators: Telekinesis module isn't initialized!");
+		MEM_Warn("neclib: TELEKINESIS_ClearInterpolators: Telekinesis module isn't initialized!");
         return;
     };
 
@@ -139,6 +139,7 @@ func void Spell_Telekinesis_Prio() {
         return;
     };
     
+	const int npc_prio_backup = 42; // 42 == not initialized yet
 	const int item_range2_backup = 42; // 42 == not initialized yet
 	const int item_azi_backup = 42; // 42 == not initialized yet
 	const int item_elevup_backup = 42; // 42 == not initialized yet
@@ -147,6 +148,7 @@ func void Spell_Telekinesis_Prio() {
 	
 	
     if (item_prio_backup == 42) {
+		npc_prio_backup = Focus_Magic.npc_prio;
 		item_range2_backup = castToIntf(Focus_Magic.item_range2);
 		item_azi_backup = castToIntf(Focus_Magic.item_azi);
 		item_elevup_backup = castToIntf(Focus_Magic.item_elevup);
@@ -158,37 +160,34 @@ func void Spell_Telekinesis_Prio() {
     if (spellID == SPL_Telekinesis) {
         // Adjust the global(!) focus priorities temporarily(!)
 		// Note: item_range1 and item_range2 are stored in squared 
-		Focus_Magic.item_range2 = castFromIntf(mulf(castToIntf(3500.0), castToIntf(3500.0)));
+		//Focus_Magic.item_range2 = castFromIntf(mulf(castToIntf(3500.0), castToIntf(3500.0)));
+		Focus_Magic.npc_prio = -1;
 		Focus_Magic.item_azi = 90.0;	
 		Focus_Magic.item_elevup = 90.0;	
 		Focus_Magic.item_elevdo = -89.0;
 		Focus_Magic.item_prio = 1;
-		MEM_Info("Spell_Telekinesis_Prio: changed Focus_Magic");
+		MEM_Info("neclib: Spell_Telekinesis_Prio: changed Focus_Magic");
 		
     } else if (item_prio_backup != 42) {
         // Reset the focus priorities for all other spells!
+		Focus_Magic.npc_prio = npc_prio_backup;
         Focus_Magic.item_range2 = castFromIntf(item_range2_backup);
 		Focus_Magic.item_azi = castFromIntf(item_azi_backup);
 		Focus_Magic.item_elevup = castFromIntf(item_elevup_backup);
 		Focus_Magic.item_elevdo = castFromIntf(item_elevdo_backup);
 		Focus_Magic.item_prio = item_prio_backup;
-		MEM_Info("Spell_Telekinesis_Prio: resetted Focus_Magic");
     };
 	
 	
 	var int range1; range1 = truncf(castToIntf(Focus_Magic.item_range1));
 	var int range2; range2 = truncf(castToIntf(Focus_Magic.item_range2));
-	
-	MEM_Info(ConcatStrings("Spell_Telekinesis_Prio: Focus_Magic.item_range1 = ", IntToString(range1)));
-	MEM_Info(ConcatStrings("Spell_Telekinesis_Prio: Focus_Magic.item_range2 = ", IntToString(range2)));
-	MEM_Info(ConcatStrings("Spell_Telekinesis_Prio: Focus_Magic.item_prio = ", IntToString(Focus_Magic.item_prio)));
 };
 
 
 /*
  * Make the focus check mob specific (disallow NPC)
  */
-func void Spell_Telekinesis_Focus() {
+/*func void Spell_Telekinesis_Focus() {
     // Constructed case that will only happen for Spell_Telekinesis
     if (ECX == TARGET_TYPE_ITEM_TELEKINESIS) {
 	
@@ -200,7 +199,7 @@ func void Spell_Telekinesis_Focus() {
             ECX = 1;
         };
     };
-};
+};*/
 
 
 /**
@@ -215,8 +214,8 @@ func void TELEKINESIS_Init()
 
 
     HookEngineF(oCSpell__Setup_G2, 7, Spell_Telekinesis_Prio);
-	HookEngineF(+MEMINT_SwitchG1G2(oCSpell__IsTargetTypeValid_G1,
-                                   oCSpell__IsTargetTypeValid_G2),        5, Spell_Telekinesis_Focus);
+	//HookEngineF(+MEMINT_SwitchG1G2(oCSpell__IsTargetTypeValid_G1,
+    //                               oCSpell__IsTargetTypeValid_G2),        5, Spell_Telekinesis_Focus);
 	
 	// Make sure Focus_Magic is initialized (necessary for Spell_Telekinesis_Prio). For details see GothicFreeAim
     const int oCNpcFocus__focuslist_G1         =  9283120; //0x8DA630
@@ -226,10 +225,12 @@ func void TELEKINESIS_Init()
     var int fMagicPtr; fMagicPtr = MEM_ReadIntArray(+MEMINT_SwitchG1G2(oCNpcFocus__focuslist_G1,
 																		oCNpcFocus__focuslist_G2),  5); ///Focus_Magic
     if (fMagicPtr) {
-        MEM_Info("TELEKINESIS_Init: Reinitializing Focus_Magic instance");
+        MEM_Info("neclib: TELEKINESIS_Init: Reinitializing Focus_Magic instance");
         Focus_Magic = _^(fMagicPtr);
 		
     };
 	
 	TELEKINESIS_ClearInterpolators();
+	
+	MEM_Info("neclib: TELEKINESIS_Init: done.");
 };
