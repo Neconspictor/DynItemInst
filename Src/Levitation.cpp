@@ -59,9 +59,7 @@ Levitation::Levitation() :Module("Levitation")
 {
 }
 
-Levitation::~Levitation()
-{
-}
+Levitation::~Levitation() = default;
 
 void Levitation::hookModule()
 {
@@ -69,7 +67,7 @@ void Levitation::hookModule()
 	hookManager->addFunctionHook((LPVOID*)&zCVobDoFrameActivity, zCVobDoFrameActivityHook, mModuleDesc);
 	hookManager->addFunctionHook((LPVOID*)&oCGamePause, oCGamePauseHook, mModuleDesc);
 	hookManager->addFunctionHook((LPVOID*)&oCGameUnpause, oCGameUnpauseHook, mModuleDesc);
-	//hookManager->addFunctionHook((LPVOID*)&zCVobCheckAndResolveCollisions, zCVobCheckAndResolveCollisionsHook, mModuleDesc);
+	hookManager->addFunctionHook((LPVOID*)&zCVobCheckAndResolveCollisions, zCVobCheckAndResolveCollisionsHook, mModuleDesc);
 	
 	hookManager->addFunctionHook((LPVOID*)&zCVobUpdatePhysics, zCVobUpdatePhysicsHook, mModuleDesc);
 	hookManager->addFunctionHook((LPVOID*)&oCAIHumanPC_ActionMove, oCAIHumanPC_ActionMoveHook, mModuleDesc);
@@ -83,7 +81,7 @@ void Levitation::unHookModule()
 	hookManager->removeFunctionHook((LPVOID*)&oCGameUnpause, oCGameUnpauseHook, mModuleDesc);
 	hookManager->removeFunctionHook((LPVOID*)&zCVobUpdatePhysics, zCVobUpdatePhysicsHook, mModuleDesc);
 	hookManager->removeFunctionHook((LPVOID*)&oCAIHumanPC_ActionMove, oCAIHumanPC_ActionMoveHook, mModuleDesc);
-	//hookManager->removeFunctionHook((LPVOID*)&zCVobCheckAndResolveCollisions, zCVobCheckAndResolveCollisionsHook, mModuleDesc);
+	hookManager->removeFunctionHook((LPVOID*)&zCVobCheckAndResolveCollisions, zCVobCheckAndResolveCollisionsHook, mModuleDesc);
 }
 
 zVEC3 levitatePosition;
@@ -102,7 +100,6 @@ void Levitation::zCVobDoFrameActivityHook(void* pThis)
 	zVEC3 oldLook;
 	zVEC3 pos;
 
-
 	if (pThis == hero)
 	{
 		frameTimePast = calcPastFrameTime(); 
@@ -117,7 +114,6 @@ void Levitation::zCVobDoFrameActivityHook(void* pThis)
 		heroLevitationBean.oldLook = oldLook;
 
 		//check if hard collision tests should be applied (important for vobs and mobs)
-		//doHardTests = check_prePass(hero, hero->trafoObjToWorld);
 
 		//.text:0065F790 ; public: static class oCInformationManager & __cdecl oCInformationManager::GetInformationManager(void)
 		using OCInformationManagerGetInformationManager = void* (__cdecl*)();
@@ -181,6 +177,7 @@ void Levitation::zCVobCheckAndResolveCollisionsHook(void* pThis)
 	oCNpc* hero = oCNpc::GetHero();
 	void* collisionObject = nullptr;
 	zVEC3 translation;
+	bool intersectionsWithVobs = false;
 
 	if (hero != nullptr)
 		collisionObject = hero->m_poCollisionObject;
@@ -194,6 +191,8 @@ void Levitation::zCVobCheckAndResolveCollisionsHook(void* pThis)
 		mLogStream << "\ttranslation = " << translation << std::endl;
 		util::logWarning(&mLogStream);*/
 		//return;
+
+		intersectionsWithVobs = check_prePass(hero, hero->trafoObjToWorld);
 		
 	}
 	zCVobCheckAndResolveCollisions(pThis);
@@ -211,7 +210,8 @@ void Levitation::zCVobCheckAndResolveCollisionsHook(void* pThis)
 
 		
 
-		if (length < 2.2 || length > 20) return;
+		//if (length < 2.2 || length > 20) return;
+		if (intersectionsWithVobs) return;
 
 		mat->_14 = translation.x;
 		mat->_24 = translation.y;
@@ -486,63 +486,6 @@ zVEC3 Levitation::levitate() {
 	return positionAdd;
 };
 
-Motion Levitation::getCollideYDir(zVEC3 pos, float middlePointDist, bool up) {
-	zVEC3 dir;
-	if (up) {
-		pos.y += middlePointDist;
-		dir = pos;
-		dir.y += 1000000000;
-	}
-	else {
-		pos.y += middlePointDist;
-		dir = pos;
-		dir.y -= 1000000000;
-	}
-	zCWorld* world = oCGame::GetGame()->GetWorld();
-	int flags = (1 << 0) | (1 << 7) | (1 << 8) | (1 << 9) | (1 << 10) | (1 << 11) | (1 << 14);
-	LevitationData::zCWorldTraceRayNearestHit(world, pos, dir, NULL, flags);
-	zVEC3* intersection = &(world->foundIntersection);
-
-	Motion motion;
-	motion.normal = world->foundPolyNormal;
-	motion.distance = abs(intersection->y - pos.y);
-	motion.objectPos = pos;
-	motion.intersect = *intersection;
-	return motion;
-};
-
-Motion Levitation::getCollideForwardDir(oCNpc* npc, float middlepointDistance, bool backward) {
-	zMAT4* mat = &(npc->trafoObjToWorld);
-	zVEC3 dir = zVEC3(mat->m[0][2], mat->m[1][2], mat->m[2][2]);
-	// position inside the BBox
-	float headSize = 30.0f;
-	zVEC3 pos = zVEC3(mat->m[0][3], mat->m[1][3] + middlepointDistance + headSize, mat->m[2][3]);
-	pos.x += dir.x * 10;
-	pos.y += dir.y * 10;
-	pos.z += dir.z * 10;
-	if (backward) {
-		dir = zVEC3(-dir.x, -dir.y, -dir.z);
-	}
-
-	float distanceFactor = 1000000000;
-	// dir has length 1 
-	// we want a vector that is 10000 units away from pos in direction dir
-	zVEC3 posOutside = zVEC3(pos.x + dir.x*distanceFactor, pos.y + dir.y*distanceFactor, pos.z + dir.z*distanceFactor);
-
-	zCWorld* world = oCGame::GetGame()->GetWorld();
-	int flags = (1 << 0) | (1 << 7) | (1 << 8) | (1 << 9) | (1 << 10) | (1 << 11) | (1 << 14);
-	LevitationData::zCWorldTraceRayNearestHit(world, pos, posOutside, NULL, flags);
-	zVEC3* intersection = &(world->foundIntersection);
-
-	Motion motion;
-	motion.normal = world->foundPolyNormal;
-	motion.distance = abs((intersection->x - pos.x) + (intersection->y - pos.y) + (intersection->z - pos.z));
-	motion.objectPos = pos;
-	motion.intersect = *intersection;
-	return motion;
-};
-
-
 int Levitation::calcPastFrameTime() {
 	int time = sysGetTime();
 	int diff = time - Levitation::frameTime;
@@ -551,7 +494,7 @@ int Levitation::calcPastFrameTime() {
 	return diff;
 };
 
-zVEC3 getCollidingPolyNormal(oCNpc* hero, const zMAT4& mat)
+zVEC3 Levitation::getCollidingPolyNormal(oCNpc* hero, const zMAT4& mat)
 {
 	bool intersected = false;
 	zVEC3 pos(mat.m[0][3], mat.m[1][3], mat.m[2][3]);
@@ -632,14 +575,29 @@ bool Levitation::check_prePass(oCNpc* hero, const zMAT4& mat)
 	zCModelCalcModelBBox3DWorld(model);
 	zTBBox3D box = LevitationData::zCModelGetBBox3D(model);
 
-	//make rec a little bit bigger than box
+	//place bounding box at npc origin.
 	box.bbox3D_maxs += pos;
 	box.bbox3D_mins += pos;
 
 	zCArray<zCVob*> collectedVobs;
 	Levitation::zCBspBaseCollectVobsInBBox3D(pointer, collectedVobs, box);
 
-	return (collectedVobs.GetSize() > 1); // +1 for hero
+	//iterate over vobs and check if collision is turned on
+	// Note, that hero will be included in the list!
+	bool foundCollisionVob = false;
+
+	for (int i = 0; i < collectedVobs.GetSize(); ++i) {
+		auto* vob = collectedVobs.GetItem(i);
+		if (vob == hero) continue;
+		
+		bool collisionDynamicFlag = vob->bitfield[0] & zCVob::bitfield0_collDetectionDynamic;
+		if (collisionDynamicFlag) {
+			bool test = false;
+		}
+	}
+
+
+	return collectedVobs.GetSize() > 1; // +1 for hero
 }
 
 bool checkVobCollision__checkVob(zCVob* vob, const zTBBox3D& boundingBox)
@@ -679,7 +637,7 @@ bool checkVobCollision__checkVob(zCVob* vob, const zTBBox3D& boundingBox)
 			if (poly->CheckBBoxPolyIntersection(boundingBox))
 			{
 				mLogStream << "checkVobCollision__checkVob(): Intersection found! " << std::endl;
-				util::logInfo(&mLogStream);
+				util::logWarning(&mLogStream);
 				return true;
 			}
 		}
@@ -729,13 +687,13 @@ bool Levitation::checkVobCollision(void* zCBspBaseObject, zCVob* testedVob, cons
 	return false;
 }
 
-bool checkCollision(oCNpc* hero, const zMAT4& mat)
+bool Levitation::checkForLevitationStaticCollision(oCNpc* hero, const zMAT4& mat)
 {
 	bool intersected = false;
 	zVEC3 pos (mat.m[0][3], mat.m[1][3], mat.m[2][3]);
 	zCPolygon** polys;
 	void* pointer = (void*)*(int*)((BYTE*)hero + 0x0b8);
-	pointer = (void*)*(int*)((BYTE*)pointer + 0x1b4);
+	auto* zCBspBasePtr = (void*)*(int*)((BYTE*)pointer + 0x1b4);
 	int third = 0;
 
 	zCModel* model = hero->GetModel();
@@ -758,7 +716,7 @@ bool checkCollision(oCNpc* hero, const zMAT4& mat)
 
 	
 
-	Levitation::zCBspBaseCollectPolysInBBox3D(pointer, rec, polys, third);
+	Levitation::zCBspBaseCollectPolysInBBox3D(zCBspBasePtr, rec, polys, third);
 	if (polys != NULL) {
 		if (third)
 		{
@@ -834,8 +792,73 @@ bool checkCollision(oCNpc* hero, const zMAT4& mat)
 		}
 	}
 
-	//if (!intersected)
-		//intersected = Levitation::checkVobCollision(pointer, hero, rec);
+	return intersected;
+}
+
+bool Levitation::checkForLevitationVobCollision(oCNpc* hero, const zMAT4& mat)
+{
+	bool intersected = false;
+	zVEC3 pos(mat.m[0][3], mat.m[1][3], mat.m[2][3]);
+	zCPolygon** polys;
+	void* pointer = (void*)*(int*)((BYTE*)hero + 0x0b8);
+	auto* zCBspBasePtr = (void*)*(int*)((BYTE*)pointer + 0x1b4);
+	int third = 0;
+
+	zCModel* model = hero->GetModel();
+	zCModelCalcModelBBox3DWorld(model);
+	zTBBox3D box = LevitationData::zCModelGetBBox3D(model);
+
+	//make rec a little bit bigger than box
+	zTBBox3D rec;
+	rec.bbox3D_maxs = box.bbox3D_maxs;//zVEC3(100,100,100);
+	box.bbox3D_maxs.x = 20;
+	box.bbox3D_maxs.z *= 0.5;
+	rec.bbox3D_mins = box.bbox3D_mins;//zVEC3(-100, -100, -100);
+	box.bbox3D_mins.x = -20;
+	box.bbox3D_mins.z *= 0.5;
+	rec.bbox3D_maxs += pos;
+	rec.bbox3D_mins += pos;
+
+	box.bbox3D_maxs += pos;
+	box.bbox3D_mins += pos;
+
+
+
+	zCArray<zCVob*> collectedVobs;
+	Levitation::zCBspBaseCollectVobsInBBox3D(zCBspBasePtr, collectedVobs, box);
+
+	if (collectedVobs.GetSize() > 0)
+	{
+		std::stringstream mLogStream;
+		mLogStream << "checkVobCollision(): Found vobs!: " << collectedVobs.GetSize() << std::endl;
+		util::logInfo(&mLogStream);
+
+		for (unsigned int i = 0; i < collectedVobs.GetSize(); ++i)
+		{
+			mLogStream << "checkVobCollision(): test vob with number: " << i << std::endl;
+			util::logInfo(&mLogStream);
+
+			if (i > 0) {
+				bool test = false;
+			}
+
+			zCVob* vob = collectedVobs.GetItem(i);
+			if (vob != hero && vob != nullptr)
+			{
+				int zCVob_bitfield0_collDetectionDynamic = ((1 << 1) - 1) << 7;
+				int zCVob_bitfield0_staticVob = ((1 << 1) - 1) << 4;
+				bool collidesWithDynamicVobs = vob->bitfield[0] & zCVob_bitfield0_collDetectionDynamic;
+				bool isStaticVob = vob->bitfield[0] & zCVob_bitfield0_staticVob;
+				//bool hasCollisionObject = vob->m_poCollisionObject != nullptr;
+				if (collidesWithDynamicVobs) //isStaticVob
+				{
+					if (checkVobCollision__checkVob(vob, box))
+						return true;
+				}
+			}
+		}
+	}
+
 
 	return intersected;
 }
@@ -853,7 +876,13 @@ bool Levitation::doCustomCollisionCheck(oCNpc* npc) {
 	zCModelCalcModelBBox3DWorld(model);
 	zVEC3 oldPos = zVEC3(heroLevitationBean.oldXPos, heroLevitationBean.oldYPos, heroLevitationBean.oldZPos);
 
-	if (mCustomCollisionDetected = checkCollision(npc, *mat))
+
+	mCustomCollisionDetected = checkForLevitationStaticCollision(npc, *mat);
+	if (!mCustomCollisionDetected)
+		mCustomCollisionDetected = checkForLevitationVobCollision(npc, *mat);//Levitation::checkVobCollision(pointer, hero, rec);
+
+
+	if (mCustomCollisionDetected)
 	{
 		npc->SetPositionWorld(oldPos);
 

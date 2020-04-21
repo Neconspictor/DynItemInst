@@ -175,10 +175,16 @@ __forceinline zTVobTypeVT GetVobType(zCVob* vob)
 	return VOB_TYPE_VT_ERROR;
 };
 
+
 /** Insert description. */
 class zCVob : public zCObjectNVT
 {	
 public:
+
+	static constexpr int bitfield0_collDetectionDynamic = ((1 << 1) - 1) << 7;
+	static constexpr int bitfield0_staticVob = ((1 << 1) - 1) << 4;
+
+
 	zCTree<zCVob>*	globalVobTreeNode;         // 0x0024 zCTree<zCVob>*
 	int				lastTimeDrawn;             // 0x0028 zTFrameCtr
 	DWORD			lastTimeCollected;         // 0x002C zDWORD

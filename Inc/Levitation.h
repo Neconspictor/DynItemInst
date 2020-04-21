@@ -34,14 +34,6 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 
 #include <GothicFunctions.h>
 
-struct Motion
-{
-	zVEC3 normal;
-	float distance;
-	zVEC3 objectPos;
-	zVEC3 intersect;
-};
-
 
 class Levitation : public Module
 {
@@ -79,10 +71,13 @@ public:
 
 	static __int32 __cdecl sysGetTime();
 	static zVEC3 levitate();
+	
 	static bool doCustomCollisionCheck(oCNpc* npc);
+	static bool checkForLevitationStaticCollision(oCNpc* hero, const zMAT4& mat);
+	static bool checkForLevitationVobCollision(oCNpc* hero, const zMAT4& mat);
+
 	static int calcPastFrameTime();
-	static Motion getCollideYDir(zVEC3, float, bool);
-	static Motion getCollideForwardDir(oCNpc*, float, bool);
+	static zVEC3 getCollidingPolyNormal(oCNpc* hero, const zMAT4& mat);
 	static bool check_prePass(oCNpc* hero, const zMAT4& mat);
 	static bool checkVobCollision(void* zCBspBaseObject, zCVob* testedVob, zTBBox3D const& boundingBox);
 	static bool isLevitationActive();
