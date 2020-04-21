@@ -7,7 +7,7 @@
 class Float
 {
 public:
-	static const float EPSILON;
+	static constexpr float EPSILON = 0.001f;
 	static bool areEqual(const float& a, const float& b)
 	{
 		if (abs(a - b) < EPSILON)
