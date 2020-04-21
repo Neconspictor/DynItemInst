@@ -110,10 +110,7 @@ void Levitation::zCVobDoFrameActivityHook(void* pThis)
 	}
 
 	if (adjust) {
-		//oldYPosition = hero->GetPosition().y;
-		char* modelPtr = (char*)hero->GetModel();
-
-		modelPtr[0x1F8] = 0xD;
+		removeModelGravity(hero->GetModel());
 
 		zMAT4* mat = &hero->trafoObjToWorld;
 		oldLook = zVEC3(mat->m[0][2], mat->m[1][2], mat->m[2][2]);
@@ -247,29 +244,9 @@ void Levitation::zCVobUpdatePhysicsHook(void* pThis)
 		mat->_14 = pos.x;
 		mat->_24 = pos.y;
 		mat->_34 = pos.z;
-
-		translationBefore = zVEC3(mat->_14, mat->_24, mat->_34);
-		//logStream << "zCVobUpdatePhysicsHook (before):" << std::endl;
-		//logStream << "\ttranslation = " << translation << std::endl;
-		//util::logInfo(&logStream);
 	}
-
-	if (!adjust)
+	else {
 		zCVobUpdatePhysics(pThis);
-
-	if (adjust)
-	{
-		zMAT4* mat = (zMAT4*)((char*)collisionObject + 0x44);
-		zVEC3 translationAfter(mat->_14, mat->_24, mat->_34);
-
-		if (translationAfter.y < translationBefore.y)
-		{
-			//mat->_24 = translationBefore.y;
-		}
-
-		//logStream << "zCVobUpdatePhysicsHook (after):" << std::endl;
-		//logStream << "\ttranslation = " << translation << std::endl;
-		//util::logInfo(&logStream);
 	}
 }
 
@@ -302,12 +279,11 @@ int Levitation::oCAIHumanPC_ActionMoveHook(void* pThis, int param1)
 
 	if (adjust)
 	{
-		int modelAddress = *(int*)((char*)pThis + 0x68);
+		zCModel* modelAddress = *((zCModel**)((char*)pThis + 0x68));
 
-		if (modelAddress != 0)
+		if (modelAddress != nullptr)
 		{
-			char* model = (char*)modelAddress;
-			model[0x1F8] = 0xD;
+			removeModelGravity(modelAddress);
 		}
 	}
 
@@ -399,6 +375,14 @@ int Levitation::getMoveDownKey()
 bool Levitation::customCollisionDetected()
 {
 	return mCustomCollisionDetected;
+}
+
+void Levitation::removeModelGravity(zCModel* model)
+{
+	// Unfortunately i don't anymore if this is deactivating gravity or smoething else
+	// But it worked, so i leave it as it is :)
+	char* modelPtr = (char*)model;
+	modelPtr[0x1F8] = 0xD;
 }
 
 zVEC3 Levitation::levitate() {

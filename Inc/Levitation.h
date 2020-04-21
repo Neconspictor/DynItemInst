@@ -102,4 +102,7 @@ public:
 
 	static bool customCollisionDetected();
 
+
+	static void removeModelGravity(zCModel* model);
+
 };
