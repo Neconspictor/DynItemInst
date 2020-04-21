@@ -1,7 +1,8 @@
 /* 
- * This constants are used to determine by the nec library how DII_USER_DATA is defined.
+ * This constants are used to determine by the neclib library how DII_USER_DATA is defined.
  * Define as many integers and strings as you like, but keep in mind that integers have to be defined before
- * the string members. DII will load the members assuming that order!
+ * the string members. neclib will load the members assuming that order!
+ * Note: If you change the amount, savegames with a different amount might not work anymore and you will get an error message.
  */
 const int DII_USER_DATA_INTEGER_AMOUNT = 1;
 const int DII_USER_DATA_STRING_AMOUNT = 5;
@@ -29,8 +30,8 @@ CLASS DII_USER_DATA
 const int DII_SLOT_COUNT = 9;
 
 // Defines the animation slots that will be tested for dii item changes by NEC library.
-// Default are the slots of HUM_BODY_NAKED0.ASC, but change it, if you need more. Also slots for other 
-// models are supported.
+// Default are the slots of HUM_BODY_NAKED0.ASC, but change it, if you need more. You can also add
+// slots from other models.
 const string DII_SLOTS[DII_SLOT_COUNT] = {
 	"ZS_HELMET",
 	"ZS_LEFTHAND",
