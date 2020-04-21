@@ -457,7 +457,7 @@ int Levitation::zCCollObjectCharacterCalcSlideVectorHook(void* pThis, zVEC3 cons
 		mLogStream << "\tvec3 = " << vec3 << std::endl;
 		mLogStream << "\tvec4 = " << vec4 << std::endl;
 		mLogStream << "\tfloatValue = " << floatValue << std::endl;
-		util::logWarning(&mLogStream);
+		util::logInfo(&mLogStream);
 	}
 
 	int result = zCCollObjectCharacterCalcSlideVector(pThis, vec1, vec2, vec3, vec4, floatValue);
@@ -473,8 +473,7 @@ int Levitation::zCCollObjectCharacterCalcSlideVectorHook(void* pThis, zVEC3 cons
 		mLogStream << "\tvec3 = " << vec3 << std::endl;
 		mLogStream << "\tvec4 = " << vec4 << std::endl;
 		mLogStream << "\tfloatValue = " << floatValue << std::endl;
-		util::logWarning(&mLogStream);
-		util::logWarning(&mLogStream);
+		util::logInfo(&mLogStream);
 	}
 
 	return result;
@@ -489,7 +488,7 @@ zMAT4& Levitation::zMAT4SetTranslationHook(zMAT4* pThis, zVEC3 const& translatio
 		zVEC3 trans(pThis->_14, pThis->_24, pThis->_34);
 		mLogStream << "zMAT4SetTranslationHook (before):" << std::endl;
 		mLogStream << "\ttrans = " << trans << std::endl;
-		util::logWarning(&mLogStream);
+		util::logInfo(&mLogStream);
 	}
 
 	zMAT4& result = zMAT4SetTranslation(pThis, translation);
@@ -499,7 +498,7 @@ zMAT4& Levitation::zMAT4SetTranslationHook(zMAT4* pThis, zVEC3 const& translatio
 		zVEC3 trans(pThis->_14, pThis->_24, pThis->_34);
 		mLogStream << "zMAT4SetTranslationHook (after):" << std::endl;
 		mLogStream << "\ttrans = " << trans << std::endl;
-		util::logWarning(&mLogStream);
+		util::logInfo(&mLogStream);
 	}
 
 	return result;
@@ -520,7 +519,7 @@ void Levitation::zCVobCalcGroundPolyHook(void* pThis)
 		zVEC3 translation(mat->_14, mat->_24, mat->_34);
 		mLogStream << "zCVobCalcGroundPolyHook (before):" << std::endl;
 		mLogStream << "\ttranslation = " << translation << std::endl;
-		util::logWarning(&mLogStream);
+		util::logInfo(&mLogStream);
 	}
 	zCVobCalcGroundPoly(pThis);
 
@@ -530,7 +529,7 @@ void Levitation::zCVobCalcGroundPolyHook(void* pThis)
 		zVEC3 translation(mat->_14, mat->_24, mat->_34);
 		mLogStream << "zCVobCalcGroundPolyHook (after):" << std::endl;
 		mLogStream << "\ttranslation = " << translation << std::endl;
-		util::logWarning(&mLogStream);
+		util::logInfo(&mLogStream);
 	}
 }
 
@@ -558,7 +557,7 @@ void Levitation::zCVobUpdatePhysicsHook(void* pThis)
 		translationBefore = zVEC3(mat->_14, mat->_24, mat->_34);
 		//logStream << "zCVobUpdatePhysicsHook (before):" << std::endl;
 		//logStream << "\ttranslation = " << translation << std::endl;
-		//util::logWarning(&logStream);
+		//util::logInfo(&logStream);
 	}
 
 	if (!adjust)
@@ -576,7 +575,7 @@ void Levitation::zCVobUpdatePhysicsHook(void* pThis)
 
 		//logStream << "zCVobUpdatePhysicsHook (after):" << std::endl;
 		//logStream << "\ttranslation = " << translation << std::endl;
-		//util::logWarning(&logStream);
+		//util::logInfo(&logStream);
 	}
 }
 
@@ -595,7 +594,7 @@ void Levitation::zCVobEndMovementHook(void* pThis, int arg0)
 		zVEC3 translation(mat->_14, mat->_24, mat->_34);
 		mLogStream << "zCVobEndMovementHook (before):" << std::endl;
 		mLogStream << "\ttranslation = " << translation << std::endl;
-		util::logWarning(&mLogStream);
+		util::logInfo(&mLogStream);
 	}
 	zCVobEndMovement(pThis, arg0);
 
@@ -605,7 +604,7 @@ void Levitation::zCVobEndMovementHook(void* pThis, int arg0)
 		zVEC3 translation(mat->_14, mat->_24, mat->_34);
 		mLogStream << "zCVobEndMovementHook (after):" << std::endl;
 		mLogStream << "\ttranslation = " << translation << std::endl;
-		util::logWarning(&mLogStream);
+		util::logInfo(&mLogStream);
 	}
 }
 
@@ -673,7 +672,7 @@ int Levitation::zCCollObjectCharacterTestHardCollisionsHook(void* pThis, zVEC3& 
 		//logStream << "log (after) = " << log << std::endl;
 		//logStream << "levitatePosition (after) = " << levitatePosition << std::endl;
 
-		//util::logWarning(&logStream);
+		//util::logInfo(&logStream);
 
 		if (log)
 		{
@@ -700,7 +699,7 @@ void Levitation::zCCollObjectCharacterDetectCollisionsSelfHook(void* pThis, void
 		zVEC3 translation (mat->_14, mat->_24, mat->_34);
 		mLogStream << "zCCollObjectCharacterDetectCollisionsSelfHook (before):" << std::endl;
 		mLogStream << "\ttranslation = " << translation << std::endl;
-		util::logWarning(&mLogStream);
+		util::logInfo(&mLogStream);
 
 
 	}
@@ -713,7 +712,7 @@ void Levitation::zCCollObjectCharacterDetectCollisionsSelfHook(void* pThis, void
 		zVEC3 translation(mat->_14, mat->_24, mat->_34);
 		mLogStream << "zCCollObjectCharacterDetectCollisionsSelfHook (after):" << std::endl;
 		mLogStream << "\ttranslation = " << translation << std::endl;
-		util::logWarning(&mLogStream);
+		util::logInfo(&mLogStream);
 	}
 }
 
@@ -738,7 +737,7 @@ void Levitation::zCCollObjectCharacterFindFloorWaterCeilingHook(void* pThis, zVE
 		mLogStream << "zCCollObjectCharacterFindFloorWaterCeilingHook (before):" << std::endl;
 		mLogStream << "\ttranslation = " << translation << std::endl;
 		mLogStream << "\tzTSpatialState = " << *zTSpatialState << std::endl;
-		util::logWarning(&mLogStream);
+		util::logInfo(&mLogStream);
 	}
 	zCCollObjectCharacterFindFloorWaterCeiling(pThis, vec1, zTSpatialState);
 
@@ -749,7 +748,7 @@ void Levitation::zCCollObjectCharacterFindFloorWaterCeilingHook(void* pThis, zVE
 		mLogStream << "zCCollObjectCharacterFindFloorWaterCeilingHook (after):" << std::endl;
 		mLogStream << "\ttranslation = " << translation << std::endl;
 		mLogStream << "\tzTSpatialState = " << *zTSpatialState << std::endl;
-		util::logWarning(&mLogStream);
+		util::logInfo(&mLogStream);
 	}
 }
 
@@ -1181,7 +1180,7 @@ bool checkVobCollision__checkVob(zCVob* vob, const zTBBox3D& boundingBox)
 	auto& name = vob->objectName;
 
 	mLogStream << "checkVobCollision__checkVob(): visual name: " << name.ToChar() << std::endl;
-	util::logWarning(&mLogStream);
+	util::logInfo(&mLogStream);
 
 	for (unsigned int i = 0; i < leafObjects->GetSize(); ++i)
 	{
@@ -1189,7 +1188,7 @@ bool checkVobCollision__checkVob(zCVob* vob, const zTBBox3D& boundingBox)
 		//Levitation::zCBspBaseCollectPolysInBBox3D(leaf, boundingBox, polys, third);
 		mLogStream << "checkVobCollision__checkVob(): leave has poly count: " << leaf->numPolys << std::endl;
 		//logStream << "checkVobCollision__checkBspLeaf(): Found polys: " << third << std::endl;
-		util::logWarning(&mLogStream);
+		util::logInfo(&mLogStream);
 
 		zCPolygon** polyList = (zCPolygon**)leaf->polyList;
 
@@ -1199,11 +1198,11 @@ bool checkVobCollision__checkVob(zCVob* vob, const zTBBox3D& boundingBox)
 
 			//logStream << "checkVobCollision__checkVob(): pos = " << pos << std::endl;
 			//logStream << "checkVobCollision__checkVob(): vob pos = " << vob->GetPositionWorld() << std::endl;
-			//util::logWarning(&logStream);
+			//util::logInfo(&logStream);
 			if (poly->CheckBBoxPolyIntersection(boundingBox))
 			{
 				mLogStream << "checkVobCollision__checkVob(): Intersection found! " << std::endl;
-				util::logWarning(&mLogStream);
+				util::logInfo(&mLogStream);
 				return true;
 			}
 		}
@@ -1222,12 +1221,12 @@ bool Levitation::checkVobCollision(void* zCBspBaseObject, zCVob* testedVob, cons
 	{
 		std::stringstream mLogStream;
 		mLogStream << "checkVobCollision(): Found vobs!: " << collectedVobs.GetSize() << std::endl;
-		util::logWarning(&mLogStream);
+		util::logInfo(&mLogStream);
 
 		for (unsigned int i = 0; i < collectedVobs.GetSize(); ++i)
 		{
 			mLogStream << "checkVobCollision(): test vob with number: " << i << std::endl;
-			util::logWarning(&mLogStream);
+			util::logInfo(&mLogStream);
 
 			if (i > 0) {
 				bool test = false;
@@ -1322,7 +1321,7 @@ bool checkCollision(oCNpc* hero, const zMAT4& mat)
 					{
 						//std::stringstream logStream;
 						//logStream << "checkCollision(): ignore poly with no collision material" << std::endl;
-						//util::logWarning(&logStream);
+						//util::debug(&logStream);
 						continue;
 					}
 
@@ -1330,7 +1329,7 @@ bool checkCollision(oCNpc* hero, const zMAT4& mat)
 					{
 						//std::stringstream logStream;
 						//logStream << "checkCollision(): ignore poly with GHOSTOCCLUDER material" << std::endl;
-						//util::logWarning(&logStream);
+						//util::debug(&logStream);
 						continue;
 					}
 
@@ -1338,7 +1337,7 @@ bool checkCollision(oCNpc* hero, const zMAT4& mat)
 					{
 						//std::stringstream logStream;
 						//logStream << "checkCollision(): ignore poly with NW_MISC_FULLALPHA_01 material" << std::endl;
-						//util::logWarning(&logStream);
+						//util::debug(&logStream);
 						continue;
 					}*/
 
@@ -1349,7 +1348,7 @@ bool checkCollision(oCNpc* hero, const zMAT4& mat)
 
 						//std::stringstream logStream;
 						//logStream << "checkCollision(): intersection found!: " << materialName << std::endl;
-						//util::logWarning(&logStream);
+						//util::debug(&logStream);
 						//we have found what we wanted -> a collision!
 						break;
 					}

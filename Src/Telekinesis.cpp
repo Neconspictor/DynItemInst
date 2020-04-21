@@ -140,7 +140,7 @@ std::unique_ptr<TelekinesisInterpolator> TelekinesisInterpolator::createTelekine
 
 	//logStream << "TelekinesisInterpolator::createTelekinesisInterpolator(): distance = " << distance << std::endl;
 	//logStream << "TelekinesisInterpolator::createTelekinesisInterpolator(): millis = " << millis << std::endl;
-	//util::logWarning(&logStream);
+	//util::logInfo(&logStream);
 
 
 	return std::make_unique<TelekinesisInterpolator>(start, pitStop, end, clock.now(), milliseconds(millis));

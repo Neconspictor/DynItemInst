@@ -153,7 +153,7 @@ void Logger::logAlways(std::stringstream* stream)
 
 	if (tozSpy)
 	{
-		writeTozSpy(Warning, message);
+		writeTozSpy(Info, message);
 	}
 
 	// Clear again
