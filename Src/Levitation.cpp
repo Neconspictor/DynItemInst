@@ -40,6 +40,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <MathUtil.h>
 #include <api/g2/zcpolygon.h>
 #include <api/g2/ztypes.h>
+#include <Configuration.h>
 
 
 bool Levitation::gameIsPaused = false;
@@ -610,20 +611,15 @@ bool checkVobCollision__checkVob(zCVob* vob, const zTBBox3D& boundingBox)
 	zCArray<void*>* leafObjects = &vob->vobLeafList;
 	zCPolygon** polys;
 	//int third;
-	mLogStream << "checkVobCollision__checkVob(): Check object with leaf number: " << leafObjects->GetSize() << std::endl;
-
 	auto& name = vob->objectName;
 
-	mLogStream << "checkVobCollision__checkVob(): visual name: " << name.ToChar() << std::endl;
-	util::logInfo(&mLogStream);
+	mLogStream << __FUNCTION__ << ": Check object with leaf number: " << leafObjects->GetSize() << std::endl;
+	mLogStream << __FUNCTION__ << "checkVobCollision__checkVob(): visual name: " << name.ToChar() << std::endl;
+	util::debug(&mLogStream);
 
 	for (unsigned int i = 0; i < leafObjects->GetSize(); ++i)
 	{
 		zCBspBase_Small* leaf = (zCBspBase_Small*)leafObjects->GetItem(i);
-		//Levitation::zCBspBaseCollectPolysInBBox3D(leaf, boundingBox, polys, third);
-		mLogStream << "checkVobCollision__checkVob(): leave has poly count: " << leaf->numPolys << std::endl;
-		//logStream << "checkVobCollision__checkBspLeaf(): Found polys: " << third << std::endl;
-		util::logInfo(&mLogStream);
 
 		zCPolygon** polyList = (zCPolygon**)leaf->polyList;
 
@@ -636,8 +632,8 @@ bool checkVobCollision__checkVob(zCVob* vob, const zTBBox3D& boundingBox)
 			//util::logInfo(&logStream);
 			if (poly->CheckBBoxPolyIntersection(boundingBox))
 			{
-				mLogStream << "checkVobCollision__checkVob(): Intersection found! " << std::endl;
-				util::logWarning(&mLogStream);
+				mLogStream << __FUNCTION__ << ": Intersection found! " << std::endl;
+				util::debug(&mLogStream);
 				return true;
 			}
 		}
@@ -655,12 +651,12 @@ bool Levitation::checkVobCollision(void* zCBspBaseObject, zCVob* testedVob, cons
 	if (collectedVobs.GetSize() > 0)
 	{
 		std::stringstream mLogStream;
-		mLogStream << "checkVobCollision(): Found vobs!: " << collectedVobs.GetSize() << std::endl;
+		mLogStream << __FUNCTION__ << ": Found vobs!: " << collectedVobs.GetSize() << std::endl;
 		util::logInfo(&mLogStream);
 
 		for (unsigned int i = 0; i < collectedVobs.GetSize(); ++i)
 		{
-			mLogStream << "checkVobCollision(): test vob with number: " << i << std::endl;
+			mLogStream << __FUNCTION__ << ": test vob with number: " << i << std::endl;
 			util::logInfo(&mLogStream);
 
 			if (i > 0) {
@@ -754,17 +750,23 @@ bool Levitation::checkForLevitationStaticCollision(oCNpc* hero, const zMAT4& mat
 
 					if (hasNoCollision)
 					{
-						//std::stringstream logStream;
-						//logStream << "checkCollision(): ignore poly with no collision material" << std::endl;
-						//util::debug(&logStream);
+						if (Configuration::debugEnabled()) {
+							std::stringstream logStream;
+							logStream << __FUNCTION__ << ": ignore poly with no collision flagged material" << std::endl;
+							util::debug(&logStream);
+						}
+						
 						continue;
 					}
 
 					if (isGhostOccluder)
 					{
-						//std::stringstream logStream;
-						//logStream << "checkCollision(): ignore poly with GHOSTOCCLUDER material" << std::endl;
-						//util::debug(&logStream);
+						if (Configuration::debugEnabled()) {
+							std::stringstream logStream;
+							logStream << __FUNCTION__ << ": ignore poly with GHOSTOCCLUDER material" << std::endl;
+							util::debug(&logStream);
+						}
+						
 						continue;
 					}
 
@@ -781,10 +783,12 @@ bool Levitation::checkForLevitationStaticCollision(oCNpc* hero, const zMAT4& mat
 					if (!intersected && !hasNoCollision && !isGhostOccluder) {
 						intersected = true;
 
-						//std::stringstream logStream;
-						//logStream << "checkCollision(): intersection found!: " << materialName << std::endl;
-						//util::debug(&logStream);
-						//we have found what we wanted -> a collision!
+						if (Configuration::debugEnabled()) {
+							std::stringstream logStream;
+							logStream << __FUNCTION__ << ": intersection found!: " << materialName << std::endl;
+							util::debug(&logStream);
+						}
+
 						break;
 					}
 				}
@@ -827,21 +831,17 @@ bool Levitation::checkForLevitationVobCollision(oCNpc* hero, const zMAT4& mat)
 	zCArray<zCVob*> collectedVobs;
 	Levitation::zCBspBaseCollectVobsInBBox3D(zCBspBasePtr, collectedVobs, box);
 
-	if (collectedVobs.GetSize() > 0)
+	if (collectedVobs.GetSize() > 1) // hero is always included!
 	{
-		std::stringstream mLogStream;
-		mLogStream << "checkVobCollision(): Found vobs!: " << collectedVobs.GetSize() << std::endl;
-		util::logInfo(&mLogStream);
+		if (Configuration::debugEnabled()) {
+			std::stringstream mLogStream;
+			mLogStream << __FUNCTION__ << ": Found vobs: " << collectedVobs.GetSize() - 1 << std::endl;
+			util::debug(&mLogStream);
+		}
+		
 
 		for (unsigned int i = 0; i < collectedVobs.GetSize(); ++i)
 		{
-			mLogStream << "checkVobCollision(): test vob with number: " << i << std::endl;
-			util::logInfo(&mLogStream);
-
-			if (i > 0) {
-				bool test = false;
-			}
-
 			zCVob* vob = collectedVobs.GetItem(i);
 			if (vob != hero && vob != nullptr)
 			{
