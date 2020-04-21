@@ -1,6 +1,6 @@
 #pragma once
 
-#include <api/g2/zstring.h>
+#include "api/g2/ztypes.h"
 
 constexpr int zMAT_GROUP_WATER = 5;
 constexpr int zMAT_GROUP_SNOW = 6;

@@ -43,15 +43,15 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 
 #include "api/g2/ztypes.h"
 #include "api/g2/macros.h"
+#include <api/g2/zstring.h>
 
 class zCArchiver;
 
 /** ZenGin object base class. */
 class zCObject
 {
-private:
+public:
 	int		_vtbl;
-protected:
 	int		refCtr;
 	int		hashIndex;
 	int		hashNext;

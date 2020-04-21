@@ -2,13 +2,14 @@
 
 ZCVobDoFrameActivity zCVobDoFrameActivity = (ZCVobDoFrameActivity)ZCVOB_DO_FRAME_ACTIVITY_ADDRESS;
 ZCVobSetPhysicsEnabled zCVobSetPhysicsEnabled = (ZCVobSetPhysicsEnabled)ZCVOB_SET_PHYSICS_ENABLED_ADDRESS;
+
 OCGamePause oCGamePause = (OCGamePause)OCGAME_PAUSE_ADDRESS;
 OCGameUnpause oCGameUnpause = (OCGameUnpause)OCGAME_UNPAUSE_ADDRESS;
 
 ZCVobSetCollDet zCVobSetCollDet = (ZCVobSetCollDet)ZCVOB_SET_COLL_DET_ADDRESS;
 ZCAIPlayerCheckFloorSliding zCAIPlayerCheckFloorSliding = (ZCAIPlayerCheckFloorSliding)ZCAIPLAYER_CHECK_FLOOR_SLIDING_ADDRESS;
 
-DoSurfaceAlignment doSurfaceAlignment = (DoSurfaceAlignment)DO_SURFACE_ALIGNMENT_ADDRESS;
+ZCAIPlayerDoSurfaceAlignment zCAIPlayerDoSurfaceAlignment = (ZCAIPlayerDoSurfaceAlignment)ZCAIPLAYER_DO_SURFACE_ALIGNMENT_ADDRESS;
 ZCVobCheckAndResolveCollisions zCVobCheckAndResolveCollisions = (ZCVobCheckAndResolveCollisions)ZCVOB_CHECK_AND_RESOLVE_COLLISION_ADDRESS;
 
 ZCTriggerOnTouch zCTriggerOnTouch = (ZCTriggerOnTouch)ZCTRIGGER_ON_TOUCH_ADDRESS;
@@ -41,4 +42,8 @@ ZCAIPlayerCheckPhysics zCAIPlayerCheckPhysics = (ZCAIPlayerCheckPhysics)ZCAIPLAY
 ZCCollObjectCharacterFindFloorWaterCeiling zCCollObjectCharacterFindFloorWaterCeiling = (ZCCollObjectCharacterFindFloorWaterCeiling)ZCCOLL_OBJECT_CHARACTER_FIND_FLOOR_WATER_CEILING;
 OCItemContainerDrawCategory oCItemContainerDrawCategory = (OCItemContainerDrawCategory)OCITEM_CONTAINER_DRAW_CATEGORY_ADDRESS;
 
-OCItemContainerGetSelectedItem oCItemContainerGetSelectedItem = (OCItemContainerGetSelectedItem)0x007092C0;
+OCItemContainerGetSelectedItem oCItemContainerGetSelectedItem = (OCItemContainerGetSelectedItem)OCITEM_CONTAINER_GET_SELECTED_ITEM_ADDRESS;
+ZVEC3Normalize zVEC3Normalize = (ZVEC3Normalize)ZVEC3_NORMALIZE_ADDRESS;
+
+OCNpcResetPos oCNpcResetPos = (OCNpcResetPos)OCNPC_RESET_POS_ADDRESS;
+ZCVobRotateLocalY zCVobRotateLocalY = (ZCVobRotateLocalY)ZCVOB_ROTATE_LOCAL_Y;

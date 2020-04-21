@@ -73,33 +73,9 @@ typedef void (__thiscall* OCGameLoadGame)(void* pThis, int, zSTRING const &);
 OCGameLoadGame oCGameLoadGame;
 typedef void ( __thiscall* OCGameLoadWorld )(void*, int, zSTRING const &); 
 OCGameLoadWorld oCGameLoadWorld;
-typedef void ( __thiscall* OCGameChangeLevel )(void*, zSTRING const &, zSTRING const &); 
-OCGameChangeLevel oCGameChangeLevel;
-typedef int ( __thiscall* OCItemMulitSlot )(void*); 
-OCItemMulitSlot oCItemMulitSlot;
-
-
-typedef void(__thiscall* ZCVobSetHeadingAtWorld)(void*, zVEC3*);
-ZCVobSetHeadingAtWorld zCVobSetHeadingAtWorld;
-typedef void(__thiscall* DoSurfaceAlignment)(void*); DoSurfaceAlignment doSurfaceAlignment2;
-
-typedef int(__thiscall* ZCAIPlayerCheckFloorSliding)(void*);
-ZCAIPlayerCheckFloorSliding zCAIPlayerCheckFloorSliding2;
-
-typedef void(__thiscall* ZCVobSetPhysicsEnabled)(void*, int); ZCVobSetPhysicsEnabled zCVobSetPhysicsEnabled2;
-
-typedef void(__thiscall* ZCVobCheckAndResolveCollisions)(void*); ZCVobCheckAndResolveCollisions zCVobCheckAndResolveCollisions2;
 
 
 OCItemInsertEffect DII::oCItemInsertEffect = (OCItemInsertEffect)0x00712C40;
-
-void DII::zCVobSetHeadingAtWorldHook(void * pThis, zVEC3 * vec)
-{
-	if (oCNpc::GetHero() == pThis) {
-		return;
-	}
-	zCVobSetHeadingAtWorld(pThis, vec);
-}
 
 void DII::hookModule()
 {
@@ -109,28 +85,16 @@ void DII::hookModule()
 	createInstance = (CreateInstance) (ZCPARSER_CREATE_INSTANCE);
 	oCGameLoadGame = (OCGameLoadGame) OCGAME_LOAD_GAME_ADDRESS;
 
-	oCGameChangeLevel = reinterpret_cast<OCGameChangeLevel>(OCGAME_CHANGE_LEVEL_ADDRESS);
-	oCItemMulitSlot = (OCItemMulitSlot) OCITEM_MULTI_SLOT;
-
 	zCParserGetIndex = (ZCParserGetIndex)ZCPARSER_GETINDEX;
 	zCPar_SymbolTableGetIndex = (ZCPar_SymbolTableGetIndex) ZCPAR_SYMBOL_TABLE_GETINDEX;
 	zCPar_SymbolTableGetSymbol = (ZCPar_SymbolTableGetSymbol)ZCPAR_SYMBOL_TABLE_GETSYMBOL;
 	zCPar_SymbolTableGetSymbolString = (ZCPar_SymbolTableGetSymbolString)ZCPAR_SYMBOL_TABLE_GETSYMBOL_STRING;
 
-	zCVobSetHeadingAtWorld = (ZCVobSetHeadingAtWorld)ZCVOB_SET_HEADING_AT_WORLD;
-	doSurfaceAlignment2 = reinterpret_cast<DoSurfaceAlignment>((DO_SURFACE_ALIGNMENT_ADDRESS));
-	zCAIPlayerCheckFloorSliding2 = reinterpret_cast<int(__thiscall*)(void*)>((ZCAIPLAYER_CHECK_FLOOR_SLIDING_ADDRESS));
-	zCVobSetPhysicsEnabled2 = reinterpret_cast<ZCVobSetPhysicsEnabled>(ZCVOB_SET_PHYSICS_ENABLED_ADDRESS);
-	zCVobCheckAndResolveCollisions2 = reinterpret_cast<ZCVobCheckAndResolveCollisions>((ZCVOB_CHECK_AND_RESOLVE_COLLISION_ADDRESS));
 
 		//0x006521E0
 
 	HookManager* hookManager = HookManager::getHookManager();
 
-	//hookManager->addFunctionHook((LPVOID*)&zCVobSetHeadingAtWorld, zCVobSetHeadingAtWorldHook, moduleDesc);
-	//hookManager->addFunctionHook((LPVOID*)&doSurfaceAlignment2, DoSurfaceAlignmentHook, moduleDesc);
-	//hookManager->addFunctionHook((LPVOID*)&zCAIPlayerCheckFloorSliding2, zCAIPlayerCheckFloorSlidingHook, moduleDesc);
-	//hookManager->addFunctionHook((LPVOID*)&zCVobSetPhysicsEnabled2, zCVobSetPhysicsEnabledHook, moduleDesc);
 
 	hookManager->addFunctionHook((LPVOID*)&loadSavegame, loadSavegameHook, mModuleDesc);
 	hookManager->addFunctionHook((LPVOID*)&writeSavegame, writeSavegameHook, mModuleDesc);
@@ -139,10 +103,6 @@ void DII::hookModule()
 
 	hookManager->addFunctionHook((LPVOID*)&createInstance, createInstanceHook, mModuleDesc);
 	hookManager->addFunctionHook((LPVOID*)&oCGameLoadGame, oCGameLoadGameHook, mModuleDesc);
-	
-	hookManager->addFunctionHook((LPVOID*)&oCItemMulitSlot, oCItemMulitSlotHook, mModuleDesc);
-	//hookManager->addFunctionHook((LPVOID*)&oCMobContainerOpen, oCMobContainerOpenHook, moduleDesc);
-	
 	
 	hookManager->addFunctionHook((LPVOID*)&zCParserGetIndex, zCParserGetIndexHook, mModuleDesc);
 	hookManager->addFunctionHook((LPVOID*)&zCPar_SymbolTableGetIndex, zCPar_SymbolTableGetIndexHook, mModuleDesc);
@@ -159,8 +119,6 @@ void DII::unHookModule()
 
 	hookManager->removeFunctionHook((LPVOID*)&createInstance, createInstanceHook, mModuleDesc);
 	hookManager->removeFunctionHook((LPVOID*)&oCGameLoadGame, oCGameLoadGameHook, mModuleDesc);
-	hookManager->removeFunctionHook((LPVOID*)&oCItemMulitSlot, oCItemMulitSlotHook, mModuleDesc);
-	//hookManager->removeFunctionHook((LPVOID*)&oCMobContainerOpen, oCMobContainerOpenHook, moduleDesc);
 
 	hookManager->removeFunctionHook((LPVOID*)&zCParserGetIndex, zCParserGetIndexHook, mModuleDesc);
 	hookManager->removeFunctionHook((LPVOID*)&zCPar_SymbolTableGetIndex, zCPar_SymbolTableGetIndexHook, mModuleDesc);
@@ -430,166 +388,6 @@ void DII::DII_ChangeInstanceForAll(const zSTRING& sourceName, const zSTRING& tar
 	manager->callForAllItems(ItemUpdater::updateItemInstance, NULL, &params);
 }
 
-
-
-
-void DII::DoSurfaceAlignmentHook(void* pThis)
-{
-	oCNpc* hero = oCNpc::GetHero();
-	bool adjust = (hero == pThis);
-	if (adjust) {
-		return;
-	}
-	return doSurfaceAlignment2(pThis);
-}
-
-int DII::zCAIPlayerCheckFloorSlidingHook(void * pThis)
-{
-	oCNpc* hero = oCNpc::GetHero();
-	if (hero != NULL && (pThis == hero)) {
-		return 1;
-	}
-	return zCAIPlayerCheckFloorSliding2(pThis);
-}
-
-void DII::zCVobSetPhysicsEnabledHook(void * pThis, int second)
-{
-	oCNpc* hero = oCNpc::GetHero();
-	if (hero != NULL && (pThis == hero)) {
-		//if (input->KeyPressed(0x1A)) return; //zCVobSetPhysicsEnabled(pThis, true);
-		//zCVobCheckAndResolveCollisions2(pThis);
-		return;
-	}
-	zCVobSetPhysicsEnabled2(pThis, second);
-}
-
-_declspec(naked) void DII::zCPar_SymbolTableGetSymbolStringHookNaked()
-{
-	_asm
-	{
-		LEGO_HOOKENGINE_PREAMBLE
-		/*6 - 5 = 1 Bytes for remaining opcode */
-			nop
-			/*finally hook function call*/
-			jmp DII::zCPar_SymbolTableGetSymbolStringHook
-	}
-}
-
-
-/*_declspec(naked) void DynItemInst::zCPar_SymbolTableGetSymbolHookNaked()
-{
-	_asm
-	{
-		LEGO_HOOKENGINE_PREAMBLE
-		//6 - 5 = 1 Bytes for remaining opcode
-			nop
-			//finally hook function call
-			jmp DII::zCPar_SymbolTableGetSymbolHook
-	}
-}*/
-
-
-_declspec(naked) void DII::zCPar_SymbolTableGetIndexHookNaked()
-{
-	_asm
-	{
-		LEGO_HOOKENGINE_PREAMBLE
-		/*5 - 5 = 0 Bytes for remaining opcode */
-			/*finally hook function call*/
-			jmp DII::zCPar_SymbolTableGetIndexHook
-	}
-}
-
-
-_declspec(naked) void DII::zCParserGetIndexHookNaked()
-{
-	_asm
-	{
-		LEGO_HOOKENGINE_PREAMBLE
-		/*6 - 5 = 1 Bytes for remaining opcode */
-			nop
-			/*finally hook function call*/
-			jmp DII::zCParserGetIndexHook
-	}
-}
-
-
-_declspec(naked) void DII::loadSavegameHookNaked()
-{
-	_asm
-	{
-		LEGO_HOOKENGINE_PREAMBLE
-		/*7 - 5 = 2 Bytes for remaining opcode */
-			nop
-			nop
-			/*finally hook function call*/
-			jmp DII::loadSavegameHook
-	}
-}
-
-_declspec(naked) void DII::writeSavegameHookNaked()
-{
-	_asm
-	{
-		LEGO_HOOKENGINE_PREAMBLE
-		/*6 - 5 = 1 Byte for remaining opcode */
-			nop
-			/*finally hook function call*/
-			jmp DII::writeSavegameHook
-	}
-}
-
-
-_declspec(naked) void DII::oCItemGetValueHookNaked()
-{
-	_asm
-	{
-		LEGO_HOOKENGINE_PREAMBLE
-		/*9 - 5 = 4 Bytes for remaining opcode */
-		nop
-		nop
-		nop
-		nop
-		/*finally hook function call*/
-		jmp DII::oCItemGetValueHook
-	}
-}
-
-_declspec(naked) void DII::createInstanceHookNaked()
-{
-	_asm
-	{
-		LEGO_HOOKENGINE_PREAMBLE
-		/*5 - 5 = 0 Bytes for remaining opcode */
-		/*finally hook function call*/
-		jmp DII::createInstanceHook
-	}
-}
-
-_declspec(naked) void DII::oCGameLoadGameHookNaked()
-{
-	_asm
-	{
-		LEGO_HOOKENGINE_PREAMBLE
-		/*5 - 5 = 0 Bytes for remaining opcode */
-		/*finally hook function call*/
-			jmp DII::oCGameLoadGameHook
-	}
-}
-
-_declspec(naked) void DII::oCItemMulitSlotHookNaked()
-{
-	_asm
-	{
-		LEGO_HOOKENGINE_PREAMBLE
-		/*6 - 5 = 1 Byte for remaining opcode */
-			nop
-			/*finally hook function call*/
-			jmp DII::oCItemMulitSlotHook
-	}
-}
-
-
 int DII::oCItemGetValueHook(void* pThis) {
 	oCItem* item = static_cast<oCItem*>(pThis);
 	ObjectManager* manager = ObjectManager::getObjectManager();
@@ -756,16 +554,6 @@ void DII::oCGameLoadGameHook(void* pThis, int second, zSTRING const& worldName)
 
 	mLogStream << __FUNCSIG__ << ": done." << std::endl;
 	util::logInfo(&mLogStream);
-}
-
-int DII::oCItemMulitSlotHook(void* pThis)
-{
-	return oCItemMulitSlot(pThis);
-}
-
-zCVisual* DII::zCVisualLoadVisual(zSTRING const& name)
-{
-	XCALL(ZCVISUAL_LOAD_VISUAL);
 }
 
 zCListSort<oCItem>* DII::getInvItemByInstanceId(oCNpcInventory* inventory, int instanceId)

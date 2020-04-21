@@ -15,17 +15,17 @@ public:
 
 	zVEC3* getPolyNormal() const
 	{
-		return (zVEC3*)THISPTR_OFFSET(GothicMemoryLocations::zCPolygon::Offset_PolyNormalX);
+		return (zVEC3*)THISPTR_OFFSET(Offset_PolyNormalX);
 	}
 
 	zCMaterial* GetMaterial() const
 	{
-		return *(zCMaterial**)THISPTR_OFFSET(GothicMemoryLocations::zCPolygon::Offset_Material);
+		return *(zCMaterial**)THISPTR_OFFSET(Offset_Material);
 	}
 
 	unsigned char GetNumPolyVertices() const
 	{
-		return *(unsigned char*)THISPTR_OFFSET(GothicMemoryLocations::zCPolygon::Offset_NumPolyVertices);
+		return *(unsigned char*)THISPTR_OFFSET(Offset_NumPolyVertices);
 	}
 
 	//.text:005BBA70 public: int __fastcall zCPolygon::CheckBBoxPolyIntersection(struct zTBBox3D const &)const proc near

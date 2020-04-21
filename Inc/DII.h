@@ -68,21 +68,8 @@ public:
 	 */
 	virtual ~DII();
 
-	static void oCItemGetValueHookNaked();
-	static void loadSavegameHookNaked();
-	static void writeSavegameHookNaked();
-	static void createInstanceHookNaked();
-	static void oCGameLoadGameHookNaked();
-	static void oCItemMulitSlotHookNaked();
-	static void zCParserGetIndexHookNaked();
-	static void zCPar_SymbolTableGetSymbolStringHookNaked();
-	//static void zCPar_SymbolTableGetSymbolHookNaked();
-	static void zCPar_SymbolTableGetIndexHookNaked();
-
 	static OCItemInsertEffect oCItemInsertEffect;
 	
-	static int __fastcall zCCameraScreenProjectionTouchesPortalHookNaked(void* pThis, zTBBox3D const &, zTBBox2D const &);
-
 	/**
 	 * Extends functionality of oCItem::GetValue().
 	 * It is needed for displaying ingame the right item value for a dynamic instance.
@@ -167,25 +154,6 @@ public:
 	 */
 	static void __thiscall oCGameLoadGameHook(void* pThis, int second, zSTRING const & worldName);
 
-
-	/**
-	 * Extends functionality of oCItem::MulitSlot()
-	 * which checks if the item is stackable or not.
-	 * While writing a savegame it is not desired that items with a dynamic instance id
-	 * are stackable. So the function MulitSlot() denies multi slotting for all items if the member
-	 * DynItemInst::denyMultiSlot is set to true.
-	 * \param pThis A pointer to a valid oCItem object.
-	 */
-	static int __thiscall oCItemMulitSlotHook(void* pThis);
-
-
-	/**
-	 * Calls the gothic 2 function zCVisual::LoadVisual(zSTRING const &)
-	 * \param name The name of the visual to load
-	 * \return The loaded zCVisual
-	 */
-	static zCVisual* __cdecl zCVisualLoadVisual(zSTRING const & name);
-
 	/**
 	 * Provides an sublist of the given inventory. At its head position the list has an oCItem
 	 * which has an instance id equal to that one that was provided to this function.
@@ -198,42 +166,6 @@ public:
 	static zCListSort<oCItem>* getInvItemByInstanceId(oCNpcInventory* inventory, int instanceId);
 
 	static oCItem* getInvItemByInstanceId2(oCNpcInventory* inventory, int instanceId);
-
-	static void __thiscall zCCameraSetFarClipZHook(void* pThis, float value);
-
-	static void __thiscall zCVobUpdatePhysicsHook(void* pThis);
-
-	//.text:0064B260 public: virtual void __thiscall zCRnd_D3D::DrawPoly(class zCPolygon *) proc near
-	static void __thiscall zCRnd_D3DDrawPolyHook(void* pThis, void* poly);
-
-	//.text:0064AC30 public: virtual void __thiscall zCRnd_D3D::DrawPolySimple(class zCTexture *, struct zTRndSimpleVertex *, int) proc near
-	static void __thiscall zCRnd_D3DDrawPolySimpleHook(void* pThis, void* second, void* third, int fourth);
-
-	//.text:00650CF0 public: virtual void __thiscall zD3D_alphaPoly::Draw(int) proc near
-	static void __thiscall zCRnd_alphaPolyDrawHook(void* pThis, int second);
-
-	//.text:006B5810 protected: void __thiscall oCAniCtrl_Human::CheckFallStates(void) proc near
-	static void __thiscall oCAniCtrl_HumanCheckFallStatesHook(void* oCAniCtrl_Human);
-
-	//.text:00529DD0 public: int __thiscall zCPolygon::RenderPoly(int) proc near
-	static int __thiscall zCPolygonRenderPolyHook(void* pThis, int second);
-
-	//.text:005B7B20 public: int __fastcall zCPolygon::ClipToFrustum(int) proc near
-	static int __fastcall zCPolygonClipToFrustumHook(void* pThis, int second);
-
-	//.text:00534B70 private: void __thiscall zCBspSector::ActivateSectorRecIndoor(struct zTBBox2D const &, class zCBspSector *, int) proc near
-	static void __thiscall zCBspSectorActivateSectorRecIndoorHook(void* pThis, zTBBox2D const & second, void* third, int fourth);
-
-	//.text:0061CBC0 ; void __thiscall zCVob::SetHeadingAtWorld(zCVob *this, const struct zVEC3 *)
-	static void __thiscall zCVobSetHeadingAtWorldHook(void* pThis, zVEC3* vec);
-
-	static void __thiscall DoSurfaceAlignmentHook(void* pThis);
-
-	//.text:0050D4D0 ; int __thiscall zCAIPlayer::CheckFloorSliding(zCAIPlayer *__hidden this)
-	static int __thiscall zCAIPlayerCheckFloorSlidingHook(void* pThis);
-
-	static void __thiscall zCVobSetPhysicsEnabledHook(void* pThis, int second);
-
 
     /*! @copydoc Module::hookModule()
 	 */
@@ -349,9 +281,7 @@ private:
 
 	static const int OCGAME_LOAD_WORLD_ADDRESS = 0x006C90B0;
 	static const int OCGAME_CHANGE_LEVEL_ADDRESS = 0x006C7290;
-	static const int OCITEM_MULTI_SLOT = 0x007125A0;
 	static const int OCMOB_CONTAINER_OPEN = 0x00726500;
-	static const int ZCVISUAL_LOAD_VISUAL = 0x00606AD0;
 
 
 	//void __thiscall zCVob::SetHeadingAtWorld(zCVob *this, const struct zVEC3 *)

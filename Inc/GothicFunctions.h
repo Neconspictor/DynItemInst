@@ -21,7 +21,7 @@ using OCGameUnpause = void(__thiscall*)(void*); extern OCGameUnpause oCGameUnpau
 using ZCVobSetCollDet = void(__thiscall*)(void*, int); extern ZCVobSetCollDet zCVobSetCollDet;
 using ZCAIPlayerCheckFloorSliding = int(__thiscall*)(void*); extern ZCAIPlayerCheckFloorSliding zCAIPlayerCheckFloorSliding;
 
-using DoSurfaceAlignment = void(__thiscall*)(void*); extern DoSurfaceAlignment doSurfaceAlignment;
+using ZCAIPlayerDoSurfaceAlignment = void(__thiscall*)(void*); extern ZCAIPlayerDoSurfaceAlignment zCAIPlayerDoSurfaceAlignment;
 using ZCVobCheckAndResolveCollisions = void(__thiscall*)(void*); extern ZCVobCheckAndResolveCollisions zCVobCheckAndResolveCollisions;
 
 using ZCTriggerOnTouch = void(__thiscall*)(void*, zCVob*); extern ZCTriggerOnTouch zCTriggerOnTouch;
@@ -61,33 +61,11 @@ using OCItemContainerDrawCategory = void(__thiscall*)(void* pThis); extern OCIte
 //.text:007092C0 ; public: virtual class oCItem * __thiscall oCItemContainer::GetSelectedItem(void)
 using OCItemContainerGetSelectedItem = oCItem * (__thiscall*)(oCItemContainer * pThis); extern OCItemContainerGetSelectedItem oCItemContainerGetSelectedItem;
 
-//.text:00707BA4 ; naked function
-using OCItemContainerDrawGetItem = void (*)(); extern OCItemContainerDrawGetItem oCItemContainerDrawGetItem = (OCItemContainerDrawGetItem)0x00707BA4;
-
-//.text:00709740 ; void __thiscall oCItemContainer::NextItem(oCItemContainer *__hidden this)
-using OCItemContainerNextItem = void(__thiscall*)(oCItemContainer * pThis); extern OCItemContainerNextItem oCItemContainerNextItem = (OCItemContainerNextItem)0x00709740;
-
-//.text:007076B0 ; void __thiscall oCItemContainer::Draw(oCItemContainer *this)
-using OCItemContainerDraw = void(__thiscall*)(oCItemContainer * pThis); extern OCItemContainerDraw oCItemContainerDraw = (OCItemContainerDraw)0x007076B0;
-
-//.text:00705B80 ; int __cdecl oCItemCompareFunction(int,int)
-using OCItemCompareFunction = int(__cdecl*)(oCItem * a, oCItem * b); extern OCItemCompareFunction oCItemCompareFunction = (OCItemCompareFunction)0x00705B80;
-
-
-
-
-
-
  //.text:00490EA0 public: class zVEC3 & __thiscall zVEC3::Normalize(void) proc near
  using ZVEC3Normalize = int(__thiscall*)(zVEC3*); extern ZVEC3Normalize zVEC3Normalize;
 
  //.text:006824D0 public: virtual void __thiscall oCNpc::ResetPos(class zVEC3 &) proc near
  using OCNpcResetPos = void(__thiscall*)(oCNpc*, zVEC3&); extern OCNpcResetPos oCNpcResetPos;
 
- //0061B720
- using RotateLocalY = void(__thiscall*)(void*, float); extern RotateLocalY rotateLocalY;
-
-
- ZVEC3Normalize zVEC3Normalize = (ZVEC3Normalize)0x00490EA0;
- OCNpcResetPos oCNpcResetPos = (OCNpcResetPos)0x006824D0;
- RotateLocalY rotateLocalY = (RotateLocalY)0x0061B720;
+ //.text:0061B720; public: void __thiscall zCVob::RotateLocalY(float)
+ using ZCVobRotateLocalY = void(__thiscall*)(zCVob*, float degree); extern ZCVobRotateLocalY zCVobRotateLocalY;

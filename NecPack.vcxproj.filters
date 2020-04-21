@@ -442,6 +442,9 @@
     <ClCompile Include="Src\api\g2\ztypes.cpp">
       <Filter>Source Files\api\g2</Filter>
     </ClCompile>
+    <ClCompile Include="Src\api\g2\zcmaterial.cpp">
+      <Filter>Source Files\api\g2</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

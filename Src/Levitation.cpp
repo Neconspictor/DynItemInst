@@ -38,11 +38,9 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <api/g2/zcparser.h>
 #include <api/g2/oCItemExtended.h>
 #include <MathUtil.h>
+#include <api/g2/zcpolygon.h>
+#include <api/g2/ztypes.h>
 
-using namespace LevitationUtil;
-
-
-void oCItemContainerDrawGetItemNaked();
 
 bool Levitation::gameIsPaused = false;
 bool Levitation::noCollision = false;
@@ -216,7 +214,7 @@ void Levitation::DoSurfaceAlignmentHook(void* pThis)
 	if (adjust) {
 		return;
 	}
-	return doSurfaceAlignment(pThis);
+	return zCAIPlayerDoSurfaceAlignment(pThis);
 }
 
 void Levitation::zCVobCheckAndResolveCollisionsHook(void* pThis)
@@ -859,7 +857,7 @@ zVEC3 Levitation::levitate() {
 	}
 
 	//finally apply changes
-	rotateLocalY(hero, angle);
+	zCVobRotateLocalY(hero, angle);
 	zVEC3 finalPosition = hero->GetPositionWorld();
 	heroLevitationBean.oldXPos = finalPosition.x;
 	heroLevitationBean.oldYPos = finalPosition.y;
@@ -1255,34 +1253,8 @@ bool Levitation::doCustomCollisionCheck(oCNpc* npc) {
 	return mCustomCollisionDetected;
 }
 
-std::ostream & operator<<(std::ostream & os, const Plane & p)
-{
-	os << "(" << p.a << ", " << p.b << ", " << p.c << ", "<< 
-		p.d << ")";
-	return os;
-}
-
 __int32 __cdecl Levitation::sysGetTime() {
 	XCALL(0x00505280);
-};
-
-std::ostream& operator<<(std::ostream& os, const zTSpatialState& spatialState)
-{
-	os << "m_fFloorY = " << spatialState.m_fFloorY << std::endl;
-	os << "m_fWaterY = " << spatialState.m_fWaterY << std::endl;
-	os << "m_fCeilingY = " << spatialState.m_fCeilingY << std::endl;
-	os << "m_fLastFloorY = " << spatialState.m_fLastFloorY << std::endl;
-
-	os << "m_bFloorIsStair = " << (bool)spatialState.m_bFloorIsStair << std::endl;
-	os << "m_bFloorIsVob = " << (bool)spatialState.m_bFloorIsVob << std::endl;
-	os << "m_bIsUninited = " << (bool)spatialState.m_bIsUninited << std::endl;
-
-	return os;
-}
-
-int __thiscall zCMaterial::IsPortalMaterial(void* pThis)
-{
-	XCALL(0x005648D0);
 };
 
 const float Float::EPSILON = 0.001f;
