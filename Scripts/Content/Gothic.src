@@ -6,7 +6,6 @@ _INTERN\Ikarus.d
 _INTERN\float.d
 
 LeGo\Header.src
-Nec\Header.src
 
 
 mod\modConfig.d
@@ -20,6 +19,9 @@ AI\AI_INTERN\Npc_SetToMad.d
 AI\AI_INTERN\Species.d
 AI\AI_INTERN\PrintDebug.d
 AI\AI_INTERN\PrintPlus.d
+
+
+Nec\Header.src
 
 STORY\Events\B_AWAKE_STONEGUARDIAN.d
 

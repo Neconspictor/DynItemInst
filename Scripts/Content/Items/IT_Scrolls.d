@@ -62,10 +62,10 @@ const int 	Value_Sc_TrfShadowbeast		= 200;
 const int 	Value_Sc_TrfDragonSnapper	= 200;
 
 //Telekinesis
-const int 	Value_Sc_Telekinesis	= 0;
+const int 	Value_Sc_Telekinesis	= 200;
 
 //Levitation
-const int 	Value_Sc_Levitation		= 0;
+const int 	Value_Sc_Levitation		= 200;
 
 
 

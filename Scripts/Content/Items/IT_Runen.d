@@ -70,10 +70,10 @@ const int	Value_Ru_Teleport_3				=	500;
 
 
 //Telekinesis
-const	int	Value_Ru_Telekinesis			=	0;
+const	int	Value_Ru_Telekinesis			=	500;
 
 //Levitation 
-const int Value_Ru_Levitation				=	0;
+const int Value_Ru_Levitation				=	500;
 
 
 /*******************************************************************************************/

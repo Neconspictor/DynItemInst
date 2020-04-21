@@ -1,4 +1,4 @@
-instance ITWR_FEUERZAUBER(C_Item)
+instance ITWR_FireEnchantment(C_Item)
 {
 	name = "Feuerverzauberung";
 	mainflag = ITEM_KAT_DOCS;
@@ -6,7 +6,7 @@ instance ITWR_FEUERZAUBER(C_Item)
 	value = 200;
 	visual = "ItWr_Scroll_01.3DS";
 	material = MAT_LEATHER;
-	on_state[0] = usefeuerzauber;
+	on_state[0] = useFireEnchantment;
 	scemeName = "MAP";
 	description = name;
 	text[1] = "Die Feuerverzauberung vereint die Kraft des Stahls mit der Kraft des Feuers.";
@@ -17,7 +17,7 @@ instance ITWR_FEUERZAUBER(C_Item)
 };
 
 
-func void usefeuerzauber()
+func void useFireEnchantment()
 {
 	ZAUBERART = 1;
 	AI_ProcessInfos (hero);
