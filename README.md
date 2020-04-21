@@ -1,4 +1,9 @@
-Ikarus branch for Dynamic Item Instances - Version 1.01
+## neclib
 
+neclib is a library written in c++ that includes the following extensions for Gothic II - The Night Of The Raven:
 
-Dynamic Item Instances is a library written in c++ for creating dynamic item instances at runtime in the game Gothic 2 - Night of the Raven
+| Name          | Description                                                                                         |
+| ------------- |:--------------------------------------------------------------------------------------------------: |                                                                                     
+| DII           | Item instances can be created, modified and persistent at runtime.                                  |
+| Telekinesis   | A port of the Telekinesis spell known from Gothic 1.                                                |
+| Levitation    | A spell that enables the hero to fly. This spell is inspired by the same named spell from Risen 1.  |
