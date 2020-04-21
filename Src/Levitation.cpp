@@ -209,7 +209,16 @@ void Levitation::zCVobCheckAndResolveCollisionsHook(void* pThis)
 		diff.z = mat->_34 - translation.z;
 		float length = std::sqrtf(diff.x * diff.x + diff.y * diff.y + diff.z * diff.z);
 
-		
+
+		auto isTargetActive = Configuration::debugEnabled();
+		if (isTargetActive && intersectionsWithVobs) {
+			mLogStream << __FUNCTION__ << ": original collision detection is used" << std::endl;
+			util::debug(&mLogStream);
+		}
+		else if (isTargetActive) {
+			mLogStream << __FUNCTION__ << ": custom collision detection is used" << std::endl;
+			util::debug(&mLogStream);
+		}
 
 		//if (length < 2.2 || length > 20) return;
 		if (intersectionsWithVobs) return;
@@ -585,20 +594,21 @@ bool Levitation::check_prePass(oCNpc* hero, const zMAT4& mat)
 
 	//iterate over vobs and check if collision is turned on
 	// Note, that hero will be included in the list!
-	bool foundCollisionVob = false;
-
 	for (int i = 0; i < collectedVobs.GetSize(); ++i) {
 		auto* vob = collectedVobs.GetItem(i);
 		if (vob == hero) continue;
 		
 		bool collisionDynamicFlag = vob->bitfield[0] & zCVob::bitfield0_collDetectionDynamic;
+
+		// There are some vobs which response to collision but have no collision actually
+		// (e.g. triggers)
 		if (collisionDynamicFlag) {
 			bool test = false;
+			return true;
 		}
 	}
 
-
-	return collectedVobs.GetSize() > 1; // +1 for hero
+	return false;
 }
 
 bool checkVobCollision__checkVob(zCVob* vob, const zTBBox3D& boundingBox)
@@ -614,7 +624,8 @@ bool checkVobCollision__checkVob(zCVob* vob, const zTBBox3D& boundingBox)
 	auto& name = vob->objectName;
 
 	mLogStream << __FUNCTION__ << ": Check object with leaf number: " << leafObjects->GetSize() << std::endl;
-	mLogStream << __FUNCTION__ << "checkVobCollision__checkVob(): visual name: " << name.ToChar() << std::endl;
+	util::debug(&mLogStream);
+	mLogStream << __FUNCTION__ << ": visual name: " << name.ToChar() << std::endl;
 	util::debug(&mLogStream);
 
 	for (unsigned int i = 0; i < leafObjects->GetSize(); ++i)
@@ -850,7 +861,7 @@ bool Levitation::checkForLevitationVobCollision(oCNpc* hero, const zMAT4& mat)
 				bool collidesWithDynamicVobs = vob->bitfield[0] & zCVob_bitfield0_collDetectionDynamic;
 				bool isStaticVob = vob->bitfield[0] & zCVob_bitfield0_staticVob;
 				//bool hasCollisionObject = vob->m_poCollisionObject != nullptr;
-				if (collidesWithDynamicVobs) //isStaticVob
+				if (collidesWithDynamicVobs && vob->m_poCollisionObject) //isStaticVob
 				{
 					if (checkVobCollision__checkVob(vob, box))
 						return true;
@@ -878,8 +889,8 @@ bool Levitation::doCustomCollisionCheck(oCNpc* npc) {
 
 
 	mCustomCollisionDetected = checkForLevitationStaticCollision(npc, *mat);
-	if (!mCustomCollisionDetected)
-		mCustomCollisionDetected = checkForLevitationVobCollision(npc, *mat);//Levitation::checkVobCollision(pointer, hero, rec);
+	//if (!mCustomCollisionDetected)
+	//	mCustomCollisionDetected = checkForLevitationVobCollision(npc, *mat);//Levitation::checkVobCollision(pointer, hero, rec);
 
 
 	if (mCustomCollisionDetected)
