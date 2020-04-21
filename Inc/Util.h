@@ -38,7 +38,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <api/g2/zcparser.h>
 #include <api/g2/zcpar_symbol.h>
 
-#define UTIL_GET_SYMBOL_WITH_CHECKS(x) util::getSymbolWithChecks(x, __FUNCSIG__)
+#define UTIL_GET_SYMBOL_WITH_CHECKS(x) util::getSymbolWithChecks(x, __FUNCTION__)
 
 #define LEGO_HOOKENGINE_PREAMBLE __asm      \
 /* Port output */         \

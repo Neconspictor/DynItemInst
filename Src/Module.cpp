@@ -29,3 +29,8 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include "Module.h"
 
 std::stringstream Module::mLogStream;
+
+const std::string& Module::getName() const
+{
+	return mModuleDesc;
+}

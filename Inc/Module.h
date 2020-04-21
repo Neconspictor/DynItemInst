@@ -47,6 +47,8 @@ public:
 	 */
 	virtual ~Module() = default;
 
+	const std::string& getName()const;
+
 	/**
 	 * Initializes and hooks target functions needed by this module. 
 	 */

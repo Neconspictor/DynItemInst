@@ -98,6 +98,8 @@ LPVOID HookManager::getHookAddress(LPVOID original)
 void HookManager::hookModules()
 {
 	for (auto& module : mModules) {
+		mLogStream << __FUNCTION__ << ": hooking " << module->getName() << std::endl;
+		util::logAlways(&mLogStream);
 		module->hookModule();		
 	}
 }
@@ -198,7 +200,7 @@ int HookManager::hook(int flags)
 	// init Logger since Configuration file is initialized there
 	Logger::getLogger();
 
-	mLogStream << "HookManager::hook: read Configuration: " << std::endl;
+	mLogStream << __FUNCTION__ << ": read Configuration: " << std::endl;
 	mLogStream << "debugEnabled = " << Configuration::debugEnabled() << std::endl;
 	mLogStream << "logToFile = " << Configuration::getLogToFile() << std::endl;
 	mLogStream << "logTozSpy = " << Configuration::getLogTozSpy() << std::endl;
@@ -207,15 +209,15 @@ int HookManager::hook(int flags)
 	mLogStream << "logWarnings = " << Configuration::getLogWarnings() << std::endl;
 	mLogStream << "logErrors = " << Configuration::getLogErrors() << std::endl;
 	mLogStream << "logFatals = " << Configuration::getLogFatals() << std::endl;
-	mLogStream << "HookManager::hook: finished read." << std::endl;
+	mLogStream << __FUNCTION__ << ": finished read." << std::endl;
 
 	util::logAlways(&mLogStream);
 
-	mLogStream << "HookManager::hook: Hook target functions..."<< std::endl;
+	mLogStream << __FUNCTION__ << ": Hook target functions..."<< std::endl;
 	util::logAlways(&mLogStream);
 
 	if (MH_Initialize() != MH_OK) {
-		mLogStream << "HookManager::hook: Couldn't initialize hook engine!"<< std::endl;
+		mLogStream << __FUNCTION__ << ": Couldn't initialize hook engine!"<< std::endl;
 		util::logFatal(&mLogStream);
 		unhook();
 		return 0;
@@ -241,7 +243,7 @@ int HookManager::hook(int flags)
 
 	manager->hookModules();
 
-	mLogStream << "HookManager::hook: done." << std::endl;
+	mLogStream << __FUNCTION__ << ": done." << std::endl;
 	Logger::getLogger()->logAlways(&mLogStream);
 
 	return mInstance->mFlags;
@@ -251,9 +253,9 @@ int HookManager::hook(int flags)
 void HookManager::unhook()
 {
 	if (!mInstance) return;
-	mLogStream << "HookManager::unHook: Unhook functions..." << std::endl;
+	mLogStream << __FUNCTION__ << ": Unhook functions..." << std::endl;
 	mInstance->unHookModules();
 	release();
-	mLogStream << "HookManager::unHook: Unhook done."<< std::endl;
+	mLogStream << __FUNCTION__ << ": Unhook done."<< std::endl;
 	util::logInfo(&mLogStream);
 }

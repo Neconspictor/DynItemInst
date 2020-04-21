@@ -179,10 +179,10 @@ void Telekinesis::unHookModule()
 TelekinesisInterpolator* Telekinesis::TELEKINESIS_CreateInterpolator(const zVEC3* vobPosition, const zVEC3* npcPosition,
 	int upMoveAmount, int speed)
 {
-	mLogStream << __FUNCSIG__ << ": vobPosition = " << *vobPosition << std::endl;
-	mLogStream << __FUNCSIG__ << ": npcPosition = " << *npcPosition << std::endl;
-	mLogStream << __FUNCSIG__ << ": upMoveAmount = " << upMoveAmount << std::endl;
-	mLogStream << __FUNCSIG__ << ": speed = " << speed << std::endl;
+	mLogStream << __FUNCTION__ << ": vobPosition = " << *vobPosition << std::endl;
+	mLogStream << __FUNCTION__ << ": npcPosition = " << *npcPosition << std::endl;
+	mLogStream << __FUNCTION__ << ": upMoveAmount = " << upMoveAmount << std::endl;
+	mLogStream << __FUNCTION__ << ": speed = " << speed << std::endl;
 	util::debug(&mLogStream);
 
 
@@ -209,7 +209,7 @@ void Telekinesis::TELEKINESIS_DeleteInterpolator(TelekinesisInterpolator* interp
 
 	if (newEnd != mInterpolators.end())
 	{
-		mLogStream << __FUNCSIG__ << ": successfully removed interpolator!" << std::endl;
+		mLogStream << __FUNCTION__ << ": successfully removed interpolator!" << std::endl;
 		util::debug(&mLogStream);
 	}
 
@@ -280,21 +280,21 @@ int Telekinesis::TELEKINESIS_IsVobSeeable(oCNpc* npc, zCVob* vob)
 			case VOB_TYPE_MOB:
 			{
 				oCMob* mob = (oCMob*)vob;
-				mLogStream << __FUNCSIG__ << ": vob is mob: " << mob->name.ToChar() << std::endl;
+				mLogStream << __FUNCTION__ << ": vob is mob: " << mob->name.ToChar() << std::endl;
 				util::debug(&mLogStream);
 				break;
 			}
 			case VOB_TYPE_ITEM:
 			{
 				oCItem* item = (oCItem*)vob;
-				mLogStream << __FUNCSIG__ << ": vob is item: " << item->name.ToChar() << std::endl;
+				mLogStream << __FUNCTION__ << ": vob is item: " << item->name.ToChar() << std::endl;
 				util::debug(&mLogStream);
 				break;
 			}
 			case VOB_TYPE_NPC:
 			{
 				oCNpc* focusNpc = (oCNpc*)vob;
-				mLogStream << __FUNCSIG__ << ": vob is npc: " << focusNpc->name[0].ToChar() << std::endl;
+				mLogStream << __FUNCTION__ << ": vob is npc: " << focusNpc->name[0].ToChar() << std::endl;
 				util::debug(&mLogStream);
 				break;
 			}

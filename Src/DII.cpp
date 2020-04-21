@@ -136,14 +136,14 @@ bool DII::DII_AddProxy(const zSTRING& sourceInstanceName, const zSTRING& targetI
 
 void DII::DII_ApplyInstanceChangesToAll(const zSTRING& instanceName)
 {
-	mLogStream << __FUNCSIG__ << ": " << instanceName.ToChar() << std::endl;
+	mLogStream << __FUNCTION__ << ": " << instanceName.ToChar() << std::endl;
 	util::debug(&mLogStream);
 
 	auto* manager = ObjectManager::getObjectManager();
 	auto* parser = zCParser::GetParser();
 	auto symbolIndex = parser->GetIndex(instanceName);
 	if (!manager->isDynamicInstance(symbolIndex)) {
-		mLogStream << __FUNCSIG__ << ": " << instanceName.ToChar() << " is not a  DII" << std::endl;
+		mLogStream << __FUNCTION__ << ": " << instanceName.ToChar() << " is not a  DII" << std::endl;
 		util::logWarning(&mLogStream);
 		return;
 	}
@@ -203,7 +203,7 @@ int DII::DII_CreateNewInstanceInt(oCItem* item) //Func int DII_CreateNewInstance
 {
 	if (item == NULL) { return NULL; }
 
-	mLogStream << __FUNCSIG__ << ": Param: " << item->name.ToChar();
+	mLogStream << __FUNCTION__ << ": Param: " << item->name.ToChar();
 	util::debug(&mLogStream);
 
 	// Create new instance with item
@@ -225,12 +225,12 @@ int DII::DII_CreateNewInstanceInt(oCItem* item) //Func int DII_CreateNewInstance
 
 		parserSymbolIndex = manager->createNewInstanceId(item, instanceName);
 		if (!parserSymbolIndex) {
-			mLogStream << __FUNCSIG__ << ": Couldn't create new instance '" << instanceName << "'" << std::endl;
+			mLogStream << __FUNCTION__ << ": Couldn't create new instance '" << instanceName << "'" << std::endl;
 			util::logWarning(&mLogStream);
 		}
 	}
 
-	mLogStream << __FUNCSIG__ << ": key = " << parserSymbolIndex << std::endl;
+	mLogStream << __FUNCTION__ << ": key = " << parserSymbolIndex << std::endl;
 	util::debug(&mLogStream);
 	return parserSymbolIndex;
 }
@@ -260,16 +260,16 @@ int DII::DII_CreateNewInstanceStr(oCItem* item, const zSTRING& instanceName)
 
 	int parserSymbolIndex = manager->createNewInstanceId(item, instanceNameStr);
 	if (!parserSymbolIndex) {
-		mLogStream << __FUNCSIG__ << ": Couldn't create new instance '" << instanceNameStr << "'" << std::endl;
+		mLogStream << __FUNCTION__ << ": Couldn't create new instance '" << instanceNameStr << "'" << std::endl;
 		util::logWarning(&mLogStream);
 	}
 
 
 	int index = manager->getDynInstanceId(item);
-	mLogStream << __FUNCSIG__ << "Index: " << index << std::endl;
+	mLogStream << __FUNCTION__ << "Index: " << index << std::endl;
 	util::debug(&mLogStream);
 
-	mLogStream << __FUNCSIG__ << ": parser symbol index for instance = " << parserSymbolIndex << std::endl;
+	mLogStream << __FUNCTION__ << ": parser symbol index for instance = " << parserSymbolIndex << std::endl;
 	util::debug(&mLogStream);
 	return parserSymbolIndex != 0;
 }
@@ -298,7 +298,7 @@ BYTE* DII::DII_GetUserData(int instanceIdParserSymbolIndex) // Func DII_UserData
 
 	if (!manager->isDynamicInstance(instanceIdParserSymbolIndex))
 	{
-		mLogStream << __FUNCSIG__ << ": instanceId isn't dynamic" << std::endl;
+		mLogStream << __FUNCTION__ << ": instanceId isn't dynamic" << std::endl;
 		util::debug(&mLogStream);
 		return NULL;
 	}
@@ -318,14 +318,14 @@ bool DII::DII_UpdateInstance(const zSTRING& instanceName, oCItem* item)
 	DynInstance* dynInstance = manager->getInstanceItem(instanceIdParserSymbolIndex);
 
 	if (!item) {
-		mLogStream << __FUNCSIG__ << ": item mustn't be null " << std::endl;
+		mLogStream << __FUNCTION__ << ": item mustn't be null " << std::endl;
 		util::logWarning(&mLogStream);
 		return false;
 	}
 
 	if (!dynInstance)
 	{
-		mLogStream << __FUNCSIG__ << ": dynInstance not found for instance id " << instanceIdParserSymbolIndex << std::endl;
+		mLogStream << __FUNCTION__ << ": dynInstance not found for instance id " << instanceIdParserSymbolIndex << std::endl;
 		util::logWarning(&mLogStream);
 		return false;
 	}
@@ -352,7 +352,7 @@ void DII::DII_GetItemByInstanceId(int itemParserSymbolIndex, int instanceIdParse
 
 	if (!instanceSym)
 	{
-		mLogStream << __FUNCSIG__ << ": instanceSym is Null! No item will be searched!" << std::endl;
+		mLogStream << __FUNCTION__ << ": instanceSym is Null! No item will be searched!" << std::endl;
 		util::logWarning(&mLogStream);
 		return;
 	}
@@ -363,12 +363,12 @@ void DII::DII_GetItemByInstanceId(int itemParserSymbolIndex, int instanceIdParse
 
 	if (!item)
 	{
-		mLogStream << __FUNCSIG__ << ": item is null!" << std::endl;
+		mLogStream << __FUNCTION__ << ": item is null!" << std::endl;
 		util::logWarning(&mLogStream);
 	}
 	else
 	{
-		mLogStream << __FUNCSIG__ << ": item found..." << std::endl;
+		mLogStream << __FUNCTION__ << ": item found..." << std::endl;
 		util::debug(&mLogStream);
 	};
 
@@ -464,19 +464,19 @@ DII::~DII()
 
  void DII::loadSavegameHook(void* pThis,int saveGameSlotNumber, int b)
 {   
-	mLogStream << "DynItemInst::loadSavegameHook: load savegame..." << std::endl;
+	mLogStream << __FUNCTION__ << ": load savegame..." << std::endl;
 	util::logInfo(&mLogStream);
 	loadDynamicInstances(saveGameSlotNumber);
 	loadSavegame(pThis, saveGameSlotNumber, b);
 
-	mLogStream << "DynItemInst::loadSavegameHook: done." << std::endl;
+	mLogStream << __FUNCTION__ << ": done." << std::endl;
 	util::logInfo(&mLogStream);
 };
 
 
  void DII::writeSavegameHook(void* pThis,int saveGameSlotNumber, int b)
 {   
-	mLogStream << "DynItemInst::writeSavegameHook: save game..." << std::endl;
+	mLogStream << __FUNCTION__" << : save game..." << std::endl;
 	util::logInfo(&mLogStream);
 
 	ObjectManager* manager = ObjectManager::getObjectManager();
@@ -506,7 +506,7 @@ DII::~DII()
 	manager->saveNewInstances(const_cast<char*>(saveGameDir.c_str()), const_cast<char*>(saveInstances.c_str()));
 	util::copyFileTo(saveGameDir + saveInstances, currentDir + saveInstances);
 
-	mLogStream << "DynItemInst::writeSavegameHook: done." << std::endl;
+	mLogStream << __FUNCTION__ << ": done." << std::endl;
 	util::logInfo(&mLogStream);
 };
 
@@ -520,7 +520,7 @@ DII::~DII()
 	zCPar_Symbol* symbol = zCParser::GetParser()->GetSymbol(instanceId);
 	if (symbol == NULL)
 	{
-		mLogStream << "DynItemInst::createInstanceHook: symbol is null! InstanceId: " << instanceId << std::endl;
+		mLogStream << __FUNCTION__ << ": symbol is null! InstanceId: " << instanceId << std::endl;
 		util::debug(&mLogStream, Logger::Warning);
 	}
 
@@ -552,7 +552,7 @@ void DII::oCGameLoadGameHook(void* pThis, int second, zSTRING const& worldName)
 	manager->releaseInstances();
 	oCGameLoadGame(pThis, second, worldName);
 
-	mLogStream << __FUNCSIG__ << ": done." << std::endl;
+	mLogStream << __FUNCTION__ << ": done." << std::endl;
 	util::logInfo(&mLogStream);
 }
 
@@ -608,7 +608,7 @@ std::string DII::getClearedWorldName(zSTRING const & worldName) {
 
 void DII::loadDynamicInstances(int saveGameSlotNumber)
 {
-	mLogStream << __FUNCSIG__ << ": load dii instances..." << std::endl;
+	mLogStream << __FUNCTION__ << ": load dii instances..." << std::endl;
 	util::logInfo(&mLogStream);
 	ObjectManager* manager = ObjectManager::getObjectManager();
 	manager->releaseInstances();
@@ -616,7 +616,7 @@ void DII::loadDynamicInstances(int saveGameSlotNumber)
 	std::string saveGameDir = manager->getSaveGameDirectoryPath(saveGameSlotNumber);
 	std::string fileName = saveGameDir + instances;
 	manager->loadNewInstances((char*)fileName.c_str());
-	mLogStream << __FUNCSIG__ << ": done." << std::endl;
+	mLogStream << __FUNCTION__ << ": done." << std::endl;
 	util::logInfo(&mLogStream);
 }
 
@@ -646,7 +646,7 @@ bool DII::ItemUpdater::updateItem(void* obj, void* param, oCItem* itm)
 		bool notSameInstance = manager->resolveProxying(params->newInstanceID) != id;
 
 		if (notSameInstance) {
-			mLogStream << __FUNCSIG__ << ": setting another instance Id causes item effects not to vanish!" << std::endl;
+			mLogStream << __FUNCTION__ << ": setting another instance Id causes item effects not to vanish!" << std::endl;
 			util::logWarning(&mLogStream);
 		}
 

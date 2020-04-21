@@ -59,7 +59,7 @@ bool ObjectManager::addProxy(const zSTRING & sourceInstance, const zSTRING & tar
 	//We only add a proxy if sourceInstance isn't proxied yet
 	auto sourceAlreadyThereIT = mProxiesNames.find(sourceInstance2);
 	if (sourceAlreadyThereIT != mProxiesNames.end()) {
-		mLogStream << __FUNCSIG__ << ": Cannot add proxy (" << sourceInstance.ToChar() << ", " << targetInstance.ToChar()
+		mLogStream << __FUNCTION__ << ": Cannot add proxy (" << sourceInstance.ToChar() << ", " << targetInstance.ToChar()
 			<< ") since their already exists another proxy path: ("
 			<< sourceAlreadyThereIT->first << ", " << sourceAlreadyThereIT->second << ")" << std::endl;
 
@@ -83,7 +83,7 @@ bool ObjectManager::addProxy(const zSTRING & sourceInstance, const zSTRING & tar
 
 	// We don't want to proxy invalid parser symbol indices
 	if (sourceInstanceID == -1) {
-		mLogStream << __FUNCSIG__ << ": Cannot add proxy (" << sourceInstance.ToChar() << ", " << targetInstance.ToChar()
+		mLogStream << __FUNCTION__ << ": Cannot add proxy (" << sourceInstance.ToChar() << ", " << targetInstance.ToChar()
 			<< ") since source instance index is not a valid parser symbol index!" << std::endl;
 		util::logWarning(&mLogStream);
 		return false;
@@ -91,7 +91,7 @@ bool ObjectManager::addProxy(const zSTRING & sourceInstance, const zSTRING & tar
 
 
 	if (targetInstanceID == -1) {
-		mLogStream << __FUNCSIG__ << ": Cannot add proxy (" << sourceInstance.ToChar() << ", " << targetInstance.ToChar()
+		mLogStream << __FUNCTION__ << ": Cannot add proxy (" << sourceInstance.ToChar() << ", " << targetInstance.ToChar()
 			<< ") since target instance index is not a valid parser symbol index!" << std::endl;
 		util::logWarning(&mLogStream);
 		return false;
@@ -99,7 +99,7 @@ bool ObjectManager::addProxy(const zSTRING & sourceInstance, const zSTRING & tar
 	
 	// We don't want self proxying
 	if (targetInstanceID == sourceInstanceID) {
-		mLogStream << __FUNCSIG__ << ": Cannot add proxy (" << sourceInstance.ToChar() << ", " << targetInstance.ToChar()
+		mLogStream << __FUNCTION__ << ": Cannot add proxy (" << sourceInstance.ToChar() << ", " << targetInstance.ToChar()
 			<< ") since self proxying isn't allowed!" << std::endl;
 		util::logWarning(&mLogStream);
 		return false;
@@ -110,7 +110,7 @@ bool ObjectManager::addProxy(const zSTRING & sourceInstance, const zSTRING & tar
 	while (it != mProxies.end()) {
 		auto target = it->second;
 		if (target == sourceInstanceID) {
-			mLogStream << __FUNCSIG__ << ": Cannot add proxy (" << sourceInstance.ToChar() << ", " << targetInstance.ToChar() 
+			mLogStream << __FUNCTION__ << ": Cannot add proxy (" << sourceInstance.ToChar() << ", " << targetInstance.ToChar() 
 				<< ") since it would result into circle proxying!" << std::endl;
 			util::logWarning(&mLogStream);
 			return false;
@@ -605,7 +605,7 @@ void ObjectManager::saveNewInstances(char* directoryPath, char* filename) {
 		mLogStream << "exception msg: " << e.what() << std::endl;
 		util::logAlways(&mLogStream);
 
-		mLogStream << __FUNCSIG__ << ": Couldn't process " << fullpath << std::endl;
+		mLogStream << __FUNCTION__ << ": Couldn't process " << fullpath << std::endl;
 		util::logFatal(&mLogStream);
 	}
 }
@@ -680,7 +680,7 @@ void ObjectManager::loadNewInstances(char* filename) {
 				addSymbolToSymbolTable(symbol);
 			}
 			if (!addProxy(source, target)) {
-				mLogStream << __FUNCSIG__ << ": Couldn't load proxy (" << sourceInstanceName << ", " << targetInstanceName << ")" << std::endl;
+				mLogStream << __FUNCTION__ << ": Couldn't load proxy (" << sourceInstanceName << ", " << targetInstanceName << ")" << std::endl;
 				util::logFatal(&mLogStream);
 			}
 		}
@@ -689,7 +689,7 @@ void ObjectManager::loadNewInstances(char* filename) {
 		mLogStream << "exception msg: " << e.what() << std::endl;
 		util::logAlways(&mLogStream);
 
-		mLogStream << __FUNCSIG__ << ": Couldn't process " << filename << std::endl;
+		mLogStream << __FUNCTION__ << ": Couldn't process " << filename << std::endl;
 		util::logFatal(&mLogStream);
 	}
 
