@@ -67,7 +67,7 @@ void HookManager::registerHook(LPVOID original, LPVOID hook)
 	// Was the address previously hooked?
 	if (it != originalToHookAddress.end())
 	{
-		mLogStream << "HookManager::registerHook: Warning: Address was previously hooked! Hook count = " 
+		mLogStream << __FUNCTION__ << ": Address was previously hooked! Hook count = "
 			<< originalToHookAddress.count(original) + 1 << std::endl;
 		util::logWarning(&mLogStream);
 	}
@@ -119,13 +119,24 @@ void HookManager::addModule(std::unique_ptr<Module> module)
 void HookManager::addFunctionHook(LPVOID* source, LPVOID destination, std::string description)
 {
 	LPVOID address = *source;
+
+	if (getHookAddress(address)) {
+		mLogStream.setf(std::ios::hex, std::ios::basefield);
+		mLogStream << __FUNCTION__ << ": Function at address 0x" << address
+			<< " for module " << description << " is already hooked!" << std::endl;
+		mLogStream.unsetf(std::ios::hex);
+		util::logFatal(&mLogStream);
+		return;
+	}
+
+
 	MH_STATUS status = MH_CreateHook(*source, destination,source);
 
 	//LONG error = 0;
 	if (status != MH_OK)
 	{
 		mLogStream.setf(std::ios::hex, std::ios::basefield);
-		mLogStream << "HookManager::addFunctionHook: Error: Couldn't hook function at address 0x"<< address
+		mLogStream << __FUNCTION__ << ": Couldn't hook function at address 0x"<< address
 			<< " for module " << description<< std::endl;
 		mLogStream.unsetf(std::ios::hex);
 		util::logFatal(&mLogStream);
@@ -135,7 +146,7 @@ void HookManager::addFunctionHook(LPVOID* source, LPVOID destination, std::strin
 	MH_EnableHook(address);
 
 	mLogStream.setf(std::ios::hex, std::ios::basefield);
-	mLogStream << "HookManager::addFunctionHook: " << "Function at address 0x"<< address 
+	mLogStream << __FUNCTION__ << ": Function at address 0x"<< address
 		<< " for module "<< description <<" was successfully hooked."<< std::endl;
 	mLogStream.unsetf(std::ios::hex);
 	util::logAlways(&mLogStream);

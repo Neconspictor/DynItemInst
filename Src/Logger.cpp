@@ -169,6 +169,10 @@ void Logger::log(LogLevel level, std::stringstream* stream)
 	if (!isLogLevelActive(level)) { return; }
 
 	std::string message = stream->str();
+	// Clear the string stream's content
+	stream->clear();
+	stream->str("");
+
 	if (toConsole)
 	{
 		writeToConsole(level, message);	
@@ -183,10 +187,6 @@ void Logger::log(LogLevel level, std::stringstream* stream)
 	{
 		writeTozSpy(level, message);
 	}
-
-	// Clear the string stream's content
-	stream->clear();
-	stream->str("");
 }
 
 bool Logger::isLogLevelActive(LogLevel level)

@@ -546,7 +546,7 @@ DII::~DII()
 
 void DII::oCGameLoadGameHook(void* pThis, int second, zSTRING const& worldName)
 {
-	mLogStream << __FUNCSIG__ << ": load..."<< std::endl;
+	mLogStream << __FUNCTION__  << ": load..."<< std::endl;
 	util::logInfo(&mLogStream);
 	ObjectManager* manager = ObjectManager::getObjectManager();
 	manager->releaseInstances();

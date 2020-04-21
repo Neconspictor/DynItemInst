@@ -124,6 +124,9 @@ private:
 	bool mCalled = false;
 	int mFlags = 0;
 
+
+
+
 	/**
 	 * Unhooks all registered modules and releases allocated memory.
 	 */
