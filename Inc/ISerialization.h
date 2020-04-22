@@ -26,11 +26,8 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 
 /////////////////////////////////////////////////////////////////////////////**/
 
-#ifndef __ISERILIZATION_H__
-#define __ISERILIZATION_H__
+#pragma once
 #include <istream>
-#include <sstream>
-
 
 /**
  * ISerialization is an interface for objects that have to be serialized 
@@ -42,7 +39,7 @@ public:
 	/**
 	 * Initializes this object with a given input stream.
 	 */
-	virtual void deserialize(std::stringstream*) = 0;
+	virtual void deserialize(std::istream&) = 0;
 
 	/**
 	 * Serializes and stores this object in a given output stream.
@@ -51,5 +48,3 @@ public:
 
 	virtual ~ISerialization() {};
 };
-
-#endif __ISERILIZATION_H__

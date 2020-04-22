@@ -137,14 +137,14 @@ bool DII::DII_AddProxy(const zSTRING& sourceInstanceName, const zSTRING& targetI
 void DII::DII_ApplyInstanceChangesToAll(const zSTRING& instanceName)
 {
 	mLogStream << __FUNCTION__ << ": " << instanceName.ToChar() << std::endl;
-	util::debug(&mLogStream);
+	util::debug(mLogStream);
 
 	auto* manager = ObjectManager::getObjectManager();
 	auto* parser = zCParser::GetParser();
 	auto symbolIndex = parser->GetIndex(instanceName);
 	if (!manager->isDynamicInstance(symbolIndex)) {
 		mLogStream << __FUNCTION__ << ": " << instanceName.ToChar() << " is not a  DII" << std::endl;
-		util::logWarning(&mLogStream);
+		util::logWarning(mLogStream);
 		return;
 	}
 
@@ -164,7 +164,7 @@ oCItem* __cdecl DII::DII_CreateNewItem(int instanceId) // Func void DII_CreateNe
 	oCItem* item = oCObjectFactory::GetFactory()->CreateItem(instanceId);
 
 	mLogStream << "DII_CreateNewItem: " << instanceId;
-	util::debug(&mLogStream);
+	util::debug(mLogStream);
 
 	return item;
 }
@@ -178,7 +178,7 @@ void __cdecl DII::DII_DeleteDII(int parserSymbolIndex)
 	}
 	catch (const std::invalid_argument & e) {
 		mLogStream << e.what() << std::endl;
-		util::logWarning(&mLogStream);
+		util::logWarning(mLogStream);
 	}
 }
 
@@ -188,7 +188,7 @@ void DII::DII_DeleteItem(oCItem* item)
 
 	int* refCtr = (int*)((BYTE*)item + 0x4);
 	mLogStream << "DII_DeleteItem:  refCtr: " << *refCtr;
-	util::debug(&mLogStream);
+	util::debug(mLogStream);
 
 	if (*refCtr >= 0)
 	{
@@ -204,7 +204,7 @@ int DII::DII_CreateNewInstanceInt(oCItem* item) //Func int DII_CreateNewInstance
 	if (item == NULL) { return NULL; }
 
 	mLogStream << __FUNCTION__ << ": Param: " << item->name.ToChar();
-	util::debug(&mLogStream);
+	util::debug(mLogStream);
 
 	// Create new instance with item
 	ObjectManager* manager = ObjectManager::getObjectManager();
@@ -226,12 +226,12 @@ int DII::DII_CreateNewInstanceInt(oCItem* item) //Func int DII_CreateNewInstance
 		parserSymbolIndex = manager->createNewInstanceId(item, instanceName);
 		if (!parserSymbolIndex) {
 			mLogStream << __FUNCTION__ << ": Couldn't create new instance '" << instanceName << "'" << std::endl;
-			util::logWarning(&mLogStream);
+			util::logWarning(mLogStream);
 		}
 	}
 
 	mLogStream << __FUNCTION__ << ": key = " << parserSymbolIndex << std::endl;
-	util::debug(&mLogStream);
+	util::debug(mLogStream);
 	return parserSymbolIndex;
 }
 
@@ -253,7 +253,7 @@ int DII::DII_CreateNewInstanceStr(oCItem* item, const zSTRING& instanceName)
 
 
 	mLogStream << "Param: " << item->name.ToChar();
-	util::debug(&mLogStream);
+	util::debug(mLogStream);
 
 	// Create new instance with item
 	ObjectManager* manager = ObjectManager::getObjectManager();
@@ -261,16 +261,16 @@ int DII::DII_CreateNewInstanceStr(oCItem* item, const zSTRING& instanceName)
 	int parserSymbolIndex = manager->createNewInstanceId(item, instanceNameStr);
 	if (!parserSymbolIndex) {
 		mLogStream << __FUNCTION__ << ": Couldn't create new instance '" << instanceNameStr << "'" << std::endl;
-		util::logWarning(&mLogStream);
+		util::logWarning(mLogStream);
 	}
 
 
 	int index = manager->getDynInstanceId(item);
 	mLogStream << __FUNCTION__ << "Index: " << index << std::endl;
-	util::debug(&mLogStream);
+	util::debug(mLogStream);
 
 	mLogStream << __FUNCTION__ << ": parser symbol index for instance = " << parserSymbolIndex << std::endl;
-	util::debug(&mLogStream);
+	util::debug(mLogStream);
 	return parserSymbolIndex != 0;
 }
 
@@ -299,7 +299,7 @@ BYTE* DII::DII_GetUserData(int instanceIdParserSymbolIndex) // Func DII_UserData
 	if (!manager->isDynamicInstance(instanceIdParserSymbolIndex))
 	{
 		mLogStream << __FUNCTION__ << ": instanceId isn't dynamic" << std::endl;
-		util::debug(&mLogStream);
+		util::debug(mLogStream);
 		return NULL;
 	}
 
@@ -319,14 +319,14 @@ bool DII::DII_UpdateInstance(const zSTRING& instanceName, oCItem* item)
 
 	if (!item) {
 		mLogStream << __FUNCTION__ << ": item mustn't be null " << std::endl;
-		util::logWarning(&mLogStream);
+		util::logWarning(mLogStream);
 		return false;
 	}
 
 	if (!dynInstance)
 	{
 		mLogStream << __FUNCTION__ << ": dynInstance not found for instance id " << instanceIdParserSymbolIndex << std::endl;
-		util::logWarning(&mLogStream);
+		util::logWarning(mLogStream);
 		return false;
 	}
 	dynInstance->store(*item);
@@ -353,7 +353,7 @@ void DII::DII_GetItemByInstanceId(int itemParserSymbolIndex, int instanceIdParse
 	if (!instanceSym)
 	{
 		mLogStream << __FUNCTION__ << ": instanceSym is Null! No item will be searched!" << std::endl;
-		util::logWarning(&mLogStream);
+		util::logWarning(mLogStream);
 		return;
 	}
 
@@ -364,12 +364,12 @@ void DII::DII_GetItemByInstanceId(int itemParserSymbolIndex, int instanceIdParse
 	if (!item)
 	{
 		mLogStream << __FUNCTION__ << ": item is null!" << std::endl;
-		util::logWarning(&mLogStream);
+		util::logWarning(mLogStream);
 	}
 	else
 	{
 		mLogStream << __FUNCTION__ << ": item found..." << std::endl;
-		util::debug(&mLogStream);
+		util::debug(mLogStream);
 	};
 
 	// update the c_item
@@ -465,19 +465,19 @@ DII::~DII()
  void DII::loadSavegameHook(void* pThis,int saveGameSlotNumber, int b)
 {   
 	mLogStream << __FUNCTION__ << ": load savegame..." << std::endl;
-	util::logInfo(&mLogStream);
+	util::logInfo(mLogStream);
 	loadDynamicInstances(saveGameSlotNumber);
 	loadSavegame(pThis, saveGameSlotNumber, b);
 
 	mLogStream << __FUNCTION__ << ": done." << std::endl;
-	util::logInfo(&mLogStream);
+	util::logInfo(mLogStream);
 };
 
 
  void DII::writeSavegameHook(void* pThis,int saveGameSlotNumber, int b)
 {   
 	mLogStream << __FUNCTION__" << : save game..." << std::endl;
-	util::logInfo(&mLogStream);
+	util::logInfo(mLogStream);
 
 	ObjectManager* manager = ObjectManager::getObjectManager();
 
@@ -507,7 +507,7 @@ DII::~DII()
 	util::copyFileTo(saveGameDir + saveInstances, currentDir + saveInstances);
 
 	mLogStream << __FUNCTION__ << ": done." << std::endl;
-	util::logInfo(&mLogStream);
+	util::logInfo(mLogStream);
 };
 
 
@@ -521,7 +521,7 @@ DII::~DII()
 	if (symbol == NULL)
 	{
 		mLogStream << __FUNCTION__ << ": symbol is null! InstanceId: " << instanceId << std::endl;
-		util::debug(&mLogStream, Logger::Warning);
+		util::debug(mLogStream, Logger::Warning);
 	}
 
 	// Get the smybol of the item variable and let it point to the 'source' variable (will contain the newly created item!)
@@ -547,13 +547,13 @@ DII::~DII()
 void DII::oCGameLoadGameHook(void* pThis, int second, zSTRING const& worldName)
 {
 	mLogStream << __FUNCTION__  << ": load..."<< std::endl;
-	util::logInfo(&mLogStream);
+	util::logInfo(mLogStream);
 	ObjectManager* manager = ObjectManager::getObjectManager();
 	manager->releaseInstances();
 	oCGameLoadGame(pThis, second, worldName);
 
 	mLogStream << __FUNCTION__ << ": done." << std::endl;
-	util::logInfo(&mLogStream);
+	util::logInfo(mLogStream);
 }
 
 zCListSort<oCItem>* DII::getInvItemByInstanceId(oCNpcInventory* inventory, int instanceId)
@@ -609,7 +609,7 @@ std::string DII::getClearedWorldName(zSTRING const & worldName) {
 void DII::loadDynamicInstances(int saveGameSlotNumber)
 {
 	mLogStream << __FUNCTION__ << ": load dii instances..." << std::endl;
-	util::logInfo(&mLogStream);
+	util::logInfo(mLogStream);
 	ObjectManager* manager = ObjectManager::getObjectManager();
 	manager->releaseInstances();
 	std::string instances = SAVE_ITEM_INSTANCES + SAVE_ITEM_FILE_EXT;
@@ -617,7 +617,7 @@ void DII::loadDynamicInstances(int saveGameSlotNumber)
 	std::string fileName = saveGameDir + instances;
 	manager->loadNewInstances((char*)fileName.c_str());
 	mLogStream << __FUNCTION__ << ": done." << std::endl;
-	util::logInfo(&mLogStream);
+	util::logInfo(mLogStream);
 }
 
 
@@ -647,7 +647,7 @@ bool DII::ItemUpdater::updateItem(void* obj, void* param, oCItem* itm)
 
 		if (notSameInstance) {
 			mLogStream << __FUNCTION__ << ": setting another instance Id causes item effects not to vanish!" << std::endl;
-			util::logWarning(&mLogStream);
+			util::logWarning(mLogStream);
 		}
 
 		manager->setInstanceId(itm, resolvedID);

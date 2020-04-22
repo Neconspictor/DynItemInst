@@ -301,7 +301,7 @@ public:
         if (index == -1) {
             std::stringstream mLogStream;
             mLogStream << callerDescription << ": '" << name.ToChar() << "' not defined!" << std::endl;
-            util::logFatal(&mLogStream);
+            util::logFatal(mLogStream);
         }
 
         return index;
@@ -321,7 +321,7 @@ public:
         if (index == -1) {
             std::stringstream mLogStream;
             mLogStream << callerDescription << ": '" << name.ToChar() << "' not defined!" << std::endl;
-            util::logFatal(&mLogStream);
+            util::logFatal(mLogStream);
         }
 
         return parser->GetSymbol(index);
@@ -334,7 +334,7 @@ public:
         if (!symbol) {
             std::stringstream mLogStream;
             mLogStream << callerDescription << ": " << index << " is not an index to a parser symbol!" << std::endl;
-            util::logFatal(&mLogStream);
+            util::logFatal(mLogStream);
         }
 
         return symbol;
@@ -348,25 +348,34 @@ public:
 
 	static void assertDIIRequirements(bool expression, std::string errorMessage);
 
-	static void debug(std::stringstream* ss, Logger::LogLevel level = Logger::Info);
+	static void debug(std::stringstream& ss, Logger::LogLevel level = Logger::Info);
 
 	static std::string trimFromRight(const std::string&);
-	static void readString(std::stringstream* is, std::string& data);
-    static void readzSTRING(std::stringstream* is, zSTRING& data);
+	static void readString(std::istream& is, std::string& data);
+    static void readzSTRING(std::istream& is, zSTRING& data);
 
-    static void readAndTrim(std::stringstream* is, std::string& data);
-    static void readAndTrim(std::stringstream* is, zSTRING& data);
+    static void readAndTrim(std::istream& is, std::string& data);
+    static void readAndTrim(std::istream& is, zSTRING& data);
+
+    template<class T>
+    static void readValue(std::istream& is, T& value) {
+        is.read((char*)&value, sizeof(T));
+    }
+
+    template<class T>
+    static void writeValue(std::ostream& os, const T& value) {
+        os.write((char*)&value, sizeof(T));
+    }
 
 	static void writeString(std::ostream& os, const std::string& data);
     static void writezSTRING(std::ostream& os, const zSTRING& data);
-	static void getInt(std::stringstream& ss, int& param);
-	static void getBool(std::stringstream& ss, bool& param);
-	static void logInfo(std::stringstream* ss);
-	static void logWarning(std::stringstream* ss);
-	static void logFault(std::stringstream* ss);
-	static void logFatal(std::stringstream* ss);
 
-	static void logAlways(std::stringstream* ss);
+	static void logInfo(std::stringstream& ss);
+	static void logWarning(std::stringstream& ss);
+	static void logFault(std::stringstream& ss);
+	static void logFatal(std::stringstream& ss);
+
+	static void logAlways(std::stringstream& ss);
 
 	static void callDaedalusFunction_Int2(std::string functionName, int first, int second, bool isExternal);
 

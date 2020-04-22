@@ -5,10 +5,7 @@
  * Note: If you change the amount, savegames with a different amount might not work anymore and you will get an error message.
  */
 const int DII_USER_DATA_INTEGER_AMOUNT = 1;
-const int DII_USER_DATA_STRING_AMOUNT = 5;
-
-//indices used for magic weapons example
-const int MAGICWEAPON_ENCHANTEDWEAPON = 0;
+const int DII_USER_DATA_STRING_AMOUNT = 1;
 
 CLASS DII_USER_DATA
 {
@@ -19,11 +16,7 @@ CLASS DII_USER_DATA
 	// string arrays don't work properly; 
 	// you cannot pass string array members (like myStrings[2])to functions or 
 	// use it in an assignment expression on the right side.
-	var string magicWeaponNewDesc;
-	var string magicWeaponOldDesc;
-	var string magicWeaponNewEffect;
-	var string magicWeaponOldEffect;
-	var string magicWeaponOldInstanceName;
+	var string exampleString;
 };
 
 // slot number for DII 

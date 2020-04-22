@@ -69,7 +69,7 @@ void HookManager::registerHook(LPVOID original, LPVOID hook)
 	{
 		mLogStream << __FUNCTION__ << ": Address was previously hooked! Hook count = "
 			<< originalToHookAddress.count(original) + 1 << std::endl;
-		util::logWarning(&mLogStream);
+		util::logWarning(mLogStream);
 	}
 	originalToHookAddress.insert(std::pair<LPVOID,LPVOID>(original, hook));
 	hookToOriginalAddress.insert(std::pair<LPVOID,LPVOID>(hook, original));
@@ -99,7 +99,7 @@ void HookManager::hookModules()
 {
 	for (auto& module : mModules) {
 		mLogStream << __FUNCTION__ << ": hooking " << module->getName() << std::endl;
-		util::logAlways(&mLogStream);
+		util::logAlways(mLogStream);
 		module->hookModule();		
 	}
 }
@@ -125,7 +125,7 @@ void HookManager::addFunctionHook(LPVOID* source, LPVOID destination, std::strin
 		mLogStream << __FUNCTION__ << ": Function at address 0x" << address
 			<< " for module " << description << " is already hooked!" << std::endl;
 		mLogStream.unsetf(std::ios::hex);
-		util::logFatal(&mLogStream);
+		util::logFatal(mLogStream);
 		return;
 	}
 
@@ -139,7 +139,7 @@ void HookManager::addFunctionHook(LPVOID* source, LPVOID destination, std::strin
 		mLogStream << __FUNCTION__ << ": Couldn't hook function at address 0x"<< address
 			<< " for module " << description<< std::endl;
 		mLogStream.unsetf(std::ios::hex);
-		util::logFatal(&mLogStream);
+		util::logFatal(mLogStream);
 		return;
 	}
 
@@ -149,7 +149,7 @@ void HookManager::addFunctionHook(LPVOID* source, LPVOID destination, std::strin
 	mLogStream << __FUNCTION__ << ": Function at address 0x"<< address
 		<< " for module "<< description <<" was successfully hooked."<< std::endl;
 	mLogStream.unsetf(std::ios::hex);
-	util::logAlways(&mLogStream);
+	util::logAlways(mLogStream);
 
 	registerHook(address, destination);
 }
@@ -163,7 +163,7 @@ void HookManager::removeFunctionHook(LPVOID* source, LPVOID destination, std::st
 		mLogStream << "HookManager::removeFunctionHook: Error: Couldn't find original function for function hook 0x"<< destination
 			<< " for module " << description<< std::endl;
 		mLogStream.unsetf(std::ios::hex);
-		util::logFatal(&mLogStream);
+		util::logFatal(mLogStream);
 		return;
 	}
 
@@ -180,7 +180,7 @@ void HookManager::removeFunctionHook(LPVOID* source, LPVOID destination, std::st
 		mLogStream << "HookManager::removeFunctionHook: Fault: Couldn't remove hook function at address 0x"<< destination 
 			<<" for module " << description<< std::endl;
 		mLogStream.unsetf(std::ios::hex);
-		util::logFatal(&mLogStream);
+		util::logFatal(mLogStream);
 		return;
 	}
 
@@ -189,7 +189,7 @@ void HookManager::removeFunctionHook(LPVOID* source, LPVOID destination, std::st
 	mLogStream.setf(std::ios::hex, std::ios::basefield);
 	mLogStream << "HookManager::removeFunctionHook: Function hook at address 0x"<< original <<" for module " << description
 		<< " was successfully removed."<< std::endl;
-	util::logAlways(&mLogStream);
+	util::logAlways(mLogStream);
 	mLogStream.unsetf(std::ios::hex);
 
 	unregisterHook(original, destination);
@@ -222,14 +222,14 @@ int HookManager::hook(int flags)
 	mLogStream << "logFatals = " << Configuration::getLogFatals() << std::endl;
 	mLogStream << __FUNCTION__ << ": finished read." << std::endl;
 
-	util::logAlways(&mLogStream);
+	util::logAlways(mLogStream);
 
 	mLogStream << __FUNCTION__ << ": Hook target functions..."<< std::endl;
-	util::logAlways(&mLogStream);
+	util::logAlways(mLogStream);
 
 	if (MH_Initialize() != MH_OK) {
 		mLogStream << __FUNCTION__ << ": Couldn't initialize hook engine!"<< std::endl;
-		util::logFatal(&mLogStream);
+		util::logFatal(mLogStream);
 		unhook();
 		return 0;
 	}
@@ -255,7 +255,7 @@ int HookManager::hook(int flags)
 	manager->hookModules();
 
 	mLogStream << __FUNCTION__ << ": done." << std::endl;
-	Logger::getLogger()->logAlways(&mLogStream);
+	Logger::getLogger()->logAlways(mLogStream);
 
 	return mInstance->mFlags;
 };
@@ -268,5 +268,5 @@ void HookManager::unhook()
 	mInstance->unHookModules();
 	release();
 	mLogStream << __FUNCTION__ << ": Unhook done."<< std::endl;
-	util::logInfo(&mLogStream);
+	util::logInfo(mLogStream);
 }

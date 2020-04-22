@@ -183,7 +183,7 @@ TelekinesisInterpolator* Telekinesis::TELEKINESIS_CreateInterpolator(const zVEC3
 	mLogStream << __FUNCTION__ << ": npcPosition = " << *npcPosition << std::endl;
 	mLogStream << __FUNCTION__ << ": upMoveAmount = " << upMoveAmount << std::endl;
 	mLogStream << __FUNCTION__ << ": speed = " << speed << std::endl;
-	util::debug(&mLogStream);
+	util::debug(mLogStream);
 
 
 	std::unique_ptr<TelekinesisInterpolator> interpolator = TelekinesisInterpolator::createTelekinesisInterpolator(*vobPosition, *npcPosition, 
@@ -210,7 +210,7 @@ void Telekinesis::TELEKINESIS_DeleteInterpolator(TelekinesisInterpolator* interp
 	if (newEnd != mInterpolators.end())
 	{
 		mLogStream << __FUNCTION__ << ": successfully removed interpolator!" << std::endl;
-		util::debug(&mLogStream);
+		util::debug(mLogStream);
 	}
 
 	mInterpolators.erase(newEnd, mInterpolators.end());
@@ -281,21 +281,21 @@ int Telekinesis::TELEKINESIS_IsVobSeeable(oCNpc* npc, zCVob* vob)
 			{
 				oCMob* mob = (oCMob*)vob;
 				mLogStream << __FUNCTION__ << ": vob is mob: " << mob->name.ToChar() << std::endl;
-				util::debug(&mLogStream);
+				util::debug(mLogStream);
 				break;
 			}
 			case VOB_TYPE_ITEM:
 			{
 				oCItem* item = (oCItem*)vob;
 				mLogStream << __FUNCTION__ << ": vob is item: " << item->name.ToChar() << std::endl;
-				util::debug(&mLogStream);
+				util::debug(mLogStream);
 				break;
 			}
 			case VOB_TYPE_NPC:
 			{
 				oCNpc* focusNpc = (oCNpc*)vob;
 				mLogStream << __FUNCTION__ << ": vob is npc: " << focusNpc->name[0].ToChar() << std::endl;
-				util::debug(&mLogStream);
+				util::debug(mLogStream);
 				break;
 			}
 			default:;

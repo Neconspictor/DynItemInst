@@ -63,7 +63,7 @@ bool ObjectManager::addProxy(const zSTRING & sourceInstance, const zSTRING & tar
 			<< ") since their already exists another proxy path: ("
 			<< sourceAlreadyThereIT->first << ", " << sourceAlreadyThereIT->second << ")" << std::endl;
 
-		util::logWarning(&mLogStream);
+		util::logWarning(mLogStream);
 		return false;
 	}
 
@@ -85,7 +85,7 @@ bool ObjectManager::addProxy(const zSTRING & sourceInstance, const zSTRING & tar
 	if (sourceInstanceID == -1) {
 		mLogStream << __FUNCTION__ << ": Cannot add proxy (" << sourceInstance.ToChar() << ", " << targetInstance.ToChar()
 			<< ") since source instance index is not a valid parser symbol index!" << std::endl;
-		util::logWarning(&mLogStream);
+		util::logWarning(mLogStream);
 		return false;
 	}
 
@@ -93,7 +93,7 @@ bool ObjectManager::addProxy(const zSTRING & sourceInstance, const zSTRING & tar
 	if (targetInstanceID == -1) {
 		mLogStream << __FUNCTION__ << ": Cannot add proxy (" << sourceInstance.ToChar() << ", " << targetInstance.ToChar()
 			<< ") since target instance index is not a valid parser symbol index!" << std::endl;
-		util::logWarning(&mLogStream);
+		util::logWarning(mLogStream);
 		return false;
 	}
 	
@@ -101,7 +101,7 @@ bool ObjectManager::addProxy(const zSTRING & sourceInstance, const zSTRING & tar
 	if (targetInstanceID == sourceInstanceID) {
 		mLogStream << __FUNCTION__ << ": Cannot add proxy (" << sourceInstance.ToChar() << ", " << targetInstance.ToChar()
 			<< ") since self proxying isn't allowed!" << std::endl;
-		util::logWarning(&mLogStream);
+		util::logWarning(mLogStream);
 		return false;
 	}
 
@@ -112,7 +112,7 @@ bool ObjectManager::addProxy(const zSTRING & sourceInstance, const zSTRING & tar
 		if (target == sourceInstanceID) {
 			mLogStream << __FUNCTION__ << ": Cannot add proxy (" << sourceInstance.ToChar() << ", " << targetInstance.ToChar() 
 				<< ") since it would result into circle proxying!" << std::endl;
-			util::logWarning(&mLogStream);
+			util::logWarning(mLogStream);
 			return false;
 		}
 		it = mProxies.find(target);
@@ -249,7 +249,7 @@ void ObjectManager::release()
 int ObjectManager::createNewInstanceId(oCItem* item, const std::string& instanceName) {
 	if (item == NULL) {
 		mLogStream << "ObjectManager::createNewInstanceId: item is null!" << std::endl;
-		util::logWarning(&mLogStream);
+		util::logWarning(mLogStream);
 		return 0;
 	}
 
@@ -262,7 +262,7 @@ int ObjectManager::createNewInstanceId(oCItem* item, const std::string& instance
 
 	if (prototypeSymbol == NULL) {
 		mLogStream << "ObjectManager::createNewInstanceId: item parser symbol is null!" << std::endl;
-		util::logWarning(&mLogStream);
+		util::logWarning(mLogStream);
 		return 0;
 	}
 
@@ -310,7 +310,7 @@ void ObjectManager::deleteDII(int parserSymbolIndex)
 	// Note: We expect that exactly one entry was deleted.
 	if (deleteCount != 1) {
 		mLogStream << "ObjectManager::deleteDII: Assertion error: deleteCount is '" << deleteCount << "' but we expected 1" << endl;
-		util::logFatal(&mLogStream);
+		util::logFatal(mLogStream);
 	}
 }
 
@@ -320,7 +320,7 @@ void ObjectManager::registerInstance(int instanceIdParserSymbolIndex, std::uniqu
 	if (it != mNewInstanceMap.end())
 	{
 		mLogStream << "Instance id already exists! Nothing will be created." << endl;
-		util::debug(&mLogStream, Logger::Warning);
+		util::debug(mLogStream, Logger::Warning);
 		return;
 	}
 
@@ -334,9 +334,9 @@ void ObjectManager::releaseInstances() {
 	int* symTableSize = getParserInstanceCount();
 	*symTableSize = *symTableSize - allocatedSize;
 	mLogStream << __FUNCTION__ << ": allocatedSize = " << allocatedSize << endl;
-	util::logAlways(&mLogStream);
+	util::logAlways(mLogStream);
 	mLogStream << __FUNCTION__ << ": symTableSize = " << *symTableSize << endl;
-	util::logAlways(&mLogStream);
+	util::logAlways(mLogStream);
 
 	// clear all data structures
 	mNewInstanceMap.clear();
@@ -354,7 +354,7 @@ bool ObjectManager::assignInstanceId(oCItem* item, int instanceIdParserSymbolInd
 	if (it == mNewInstanceMap.end())
 	{
 		mLogStream<< __FUNCTION__ << ": instance id wasn't found: " << instanceIdParserSymbolIndex << std::endl;
-		util::debug(&mLogStream, Logger::Warning);
+		util::debug(mLogStream, Logger::Warning);
 		return false;
 	}
 	
@@ -363,7 +363,7 @@ bool ObjectManager::assignInstanceId(oCItem* item, int instanceIdParserSymbolInd
 	if(!initByNewInstanceId(item))
 	{
 		mLogStream << __FUNCTION__ << ": Item Initialisation failed!" << std::endl;
-		util::debug(&mLogStream, Logger::Warning);
+		util::debug(mLogStream, Logger::Warning);
 		return false;
 	};
 	return true;
@@ -546,7 +546,7 @@ void ObjectManager::setDynInstanceId(oCItem* item, int instanceIdParserSymbolInd
 	} else
 	{
 		mLogStream << __FUNCTION__ << ": parameter id has no assigned index. Nothing will be done." << endl;
-		util::debug(&mLogStream, Logger::Warning);
+		util::debug(mLogStream, Logger::Warning);
 	}
 };
 
@@ -570,7 +570,7 @@ void ObjectManager::saveNewInstances(char* directoryPath, char* filename) {
 	}
 
 	string fullpath = dir + string(filename);
-	ofstream ofs(const_cast<char*>(fullpath.c_str()));
+	ofstream ofs(const_cast<char*>(fullpath.c_str()), std::ios::binary | std::ios::trunc);
 
 	try {
 		ofs.exceptions(std::ios::failbit | std::ios::badbit);
@@ -583,36 +583,37 @@ void ObjectManager::saveNewInstances(char* directoryPath, char* filename) {
 				instances.push_back(instance);
 		}
 
+		// Save header for later compatibility checks
+		ARCHIVE_HEADER header;
+		util::writeValue(ofs, header);
+
 		// Save instance items
-		ofs << instances.size() << '\n';
+		auto instanceSize = instances.size();
+		ofs.write((char*)&instanceSize, sizeof(instanceSize));
 		for (auto* instance : instances) {
 			instance->serialize(ofs);
-			//oa << storeItem;
-			ofs << '\n';
 		}
 
 		// Save proxies
 		auto* parser = zCParser::GetParser();
-		ofs << mProxiesNames.size() << '\n';
+		util::writeValue(ofs, mProxiesNames.size());
 		for (auto& pair : mProxiesNames) {
 			util::writeString(ofs, pair.first);
-			ofs << ' ';
 			util::writeString(ofs, pair.second);
-			ofs << '\n';
 		}
 	}
 	catch (const std::exception & e) {
 		mLogStream << "exception msg: " << e.what() << std::endl;
-		util::logAlways(&mLogStream);
+		util::logAlways(mLogStream);
 
 		mLogStream << __FUNCTION__ << ": Couldn't process " << fullpath << std::endl;
-		util::logFatal(&mLogStream);
+		util::logFatal(mLogStream);
 	}
 }
 
 
 void ObjectManager::loadNewInstances(char* filename) {
-	ifstream ifs(filename);
+	ifstream ifs(filename, std::ios::binary | std::ios::in);
 	if (ifs.fail()) {
 		return;
 	}
@@ -621,24 +622,24 @@ void ObjectManager::loadNewInstances(char* filename) {
 
 		ifs.exceptions(std::ios::failbit | std::ios::badbit);
 
+		ARCHIVE_HEADER expectedHeader;
+		ARCHIVE_HEADER header;
+		util::readValue(ifs, header);
+
+		//check that the read header matches the expected one!
+		if (std::memcmp(&expectedHeader, &header, sizeof(ARCHIVE_HEADER)) != 0) {
+			throw std::runtime_error("Incompatible archive format");
+		}
+
 		// archive and stream closed when destructors are called
 		size_t size = 0;
-		std::stringstream ss;
-		std::string line, token;
-		getline(ifs, line);
-		ss << line;
-		getline(ss, token);
-		size = atoi(token.c_str());
+		util::readValue(ifs, size);
 
 		for (size_t i = 0; i != size; ++i) {
-			ss.str("");
-			ss.clear();
-			getline(ifs, line);
-			ss << line;
 			auto instance = std::make_unique<DynInstance>();
 
 			//ifs >> storeItem;
-			instance->deserialize(&ss);
+			instance->deserialize(ifs);
 			//DynInstance* item = new DynInstance(*storeItem);
 
 			ParserInfo info;
@@ -654,22 +655,14 @@ void ObjectManager::loadNewInstances(char* filename) {
 
 		auto* parser = zCParser::GetParser();
 		size_t proxiesSize = 0;
-		getline(ifs, line);
-		ss.str("");
-		ss.clear();
-		ss << line;
-		getline(ss, token);
-		proxiesSize = atoi(token.c_str());
+		util::readValue(ifs, proxiesSize);
 
 		for (size_t i = 0; i != proxiesSize; ++i) {
-			ss.str("");
-			ss.clear();
-			getline(ifs, line);
-			ss << line;
+
 			std::string sourceInstanceName;
 			std::string targetInstanceName;
-			util::readAndTrim(&ss, sourceInstanceName);
-			util::readAndTrim(&ss, targetInstanceName);
+			util::readAndTrim(ifs, sourceInstanceName);
+			util::readAndTrim(ifs, targetInstanceName);
 
 
 			zSTRING source(sourceInstanceName.c_str());
@@ -681,16 +674,16 @@ void ObjectManager::loadNewInstances(char* filename) {
 			}
 			if (!addProxy(source, target)) {
 				mLogStream << __FUNCTION__ << ": Couldn't load proxy (" << sourceInstanceName << ", " << targetInstanceName << ")" << std::endl;
-				util::logFatal(&mLogStream);
+				util::logFatal(mLogStream);
 			}
 		}
 	}
 	catch (const std::exception& e) {
 		mLogStream << "exception msg: " << e.what() << std::endl;
-		util::logAlways(&mLogStream);
+		util::logFatal(mLogStream);
 
 		mLogStream << __FUNCTION__ << ": Couldn't process " << filename << std::endl;
-		util::logFatal(&mLogStream);
+		util::logFatal(mLogStream);
 	}
 
 };
@@ -784,9 +777,9 @@ bool ObjectManager::createNewInstanceWithoutExistingId(oCItem* item, int instanc
 	mNameToInstanceMap.insert(pair<string, int>(symbolName, instanceParserSymbolID));
 
 	mLogStream << __FUNCTION__ << ": indexCount = " << *indexCount << endl;
-	util::debug(&mLogStream);
+	util::debug(mLogStream);
 	mLogStream << __FUNCTION__ << ": parser symbol index = " << instanceParserSymbolID << endl;
-	util::debug(&mLogStream);
+	util::debug(mLogStream);
 
 	return true;
 }
@@ -828,7 +821,7 @@ bool ObjectManager::addSymbolToSymbolTable(zCPar_Symbol* symbol)
 	mLogStream << __FUNCTION__ << ": Index = " << parser->GetIndex(symbol->name) << endl;
 	mLogStream << __FUNCTION__ << ": countBefore = " << countBefore << endl;
 	mLogStream << __FUNCTION__ << ": index count = " << *indexCount << endl;
-	util::debug(&mLogStream);
+	util::debug(mLogStream);
 
 	// Some Ikarus functions need the correct length of the current symbol table.
 	updateIkarusSymbols();
@@ -862,25 +855,25 @@ void ObjectManager::updateContainerItem(const ObjectManager::ParserInfo* info)
 void ObjectManager::logSymbolData(zCPar_Symbol* sym)
 {
 	mLogStream << sym->name.ToChar() << endl;
-	util::logInfo(&mLogStream);
+	util::debug(mLogStream);
 	mLogStream << sym->parent->name.ToChar() << endl;
-	util::logInfo(&mLogStream);
+	util::debug(mLogStream);
 	mLogStream<< sym->bitfield << endl;
-	util::logInfo(&mLogStream);
+	util::debug(mLogStream);
 	mLogStream << sym->filenr << endl;
-	util::logInfo(&mLogStream);
+	util::debug(mLogStream);
 	mLogStream << sym->line << endl;
-	util::logInfo(&mLogStream);
+	util::debug(mLogStream);
 	mLogStream << sym->line_anz << endl;
-	util::logInfo(&mLogStream);
+	util::debug(mLogStream);
 	mLogStream << sym->next << endl;
-	util::logInfo(&mLogStream);
+	util::debug(mLogStream);
 	mLogStream << sym->offset << endl;
-	util::logInfo(&mLogStream);
+	util::debug(mLogStream);
 	mLogStream << sym->pos_beg << endl;
-	util::logInfo(&mLogStream);
+	util::debug(mLogStream);
 	mLogStream << sym->pos_anz << endl;
-	util::logInfo(&mLogStream);
+	util::debug(mLogStream);
 };
 
 int ObjectManager::createParserSymbol(const ParserInfo& info)
@@ -895,13 +888,13 @@ int ObjectManager::createParserSymbol(const ParserInfo& info)
 		int* symTableSize = getParserInstanceCount();
 		mLogStream << "index: " << index << endl;
 		mLogStream << "symTableSize: " << *symTableSize << endl;
-		util::debug(&mLogStream, Logger::Warning);
+		util::debug(mLogStream, Logger::Warning);
 		if (index >= *symTableSize)
 		{
 			*symTableSize = index + 1;
 			updateIkarusSymbols();
 			mLogStream << __FUNCTION__ << ": resized symbol table. symTableSize = " << *symTableSize << endl;
-			util::logInfo(&mLogStream);
+			util::logInfo(mLogStream);
 		}
 	}
 
@@ -930,7 +923,7 @@ zCPar_Symbol* ObjectManager::createNewInstanceSymbol(int instanceParserSymbolID,
 	if (symbol) {
 		stringstream mLogStream;
 		mLogStream << __FUNCTION__ << ": Symbol for instance id '" << instanceParserSymbolID << "' already exists!" << endl;
-		util::logWarning(&mLogStream);
+		util::logWarning(mLogStream);
 		return nullptr;
 	}
 
@@ -938,7 +931,7 @@ zCPar_Symbol* ObjectManager::createNewInstanceSymbol(int instanceParserSymbolID,
 	if (parser->GetSymbol(symbolName.c_str())) {
 		stringstream mLogStream;
 		mLogStream << __FUNCTION__ << ": Symbol with name '" << symbolName << "' already exists!" << endl;
-		util::logWarning(&mLogStream);
+		util::logWarning(mLogStream);
 		return nullptr;
 	}
 
@@ -991,7 +984,7 @@ void ObjectManager::setPrototypeSymbolName(int instanceParserSymbolID, const std
 	if (instanceIT == mNewInstanceMap.end()) {
 		std::stringstream mLogStream;
 		mLogStream << __FUNCTION__ << ": instanceID not registered: " << instanceParserSymbolID << endl;
-		util::logFatal(&mLogStream);
+		util::logFatal(mLogStream);
 	}
 
 	auto& instanceItem = instanceIT->second;
@@ -1047,7 +1040,7 @@ bool ObjectManager::InitItemWithDynInstance(oCItem* item, int index)
 	if (index == NULL)
 	{
 		mLogStream << __FUNCTION__ << ": instanceId wasn't found!" << std::endl;
-		util::logWarning(&mLogStream);
+		util::logWarning(mLogStream);
 		return false;
 	}
 	return assignInstanceId(item, index);
@@ -1094,7 +1087,7 @@ int ObjectManager::getIndexByName(const zSTRING& symbolName)
 void ObjectManager::updateIkarusSymbols()
 {
 	mLogStream << __FUNCTION__ << ": update Ikarus symbols..." << endl;
-	util::logInfo(&mLogStream);
+	util::logInfo(mLogStream);
 
 	// Some Ikarus functions need the correct length of the current symbol table.
 	// MEM_Reinit_Parser() updates all involved references.

@@ -71,9 +71,6 @@
     <ClInclude Include="Inc\DllMain.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Inc\AdditMemory.h">
-      <Filter>Header Files\DII</Filter>
-    </ClInclude>
     <ClInclude Include="Inc\Configuration.h">
       <Filter>Header Files\DII</Filter>
     </ClInclude>

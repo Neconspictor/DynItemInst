@@ -113,11 +113,11 @@ void util::assertDIIRequirements(bool expression, std::string errorMessage)
 	if (!expression)
 	{
 		mLogStream << "DII-Assertion failed: " << errorMessage << std::endl;
-		Logger::getLogger()->log(Logger::Fatal, &mLogStream);
+		Logger::getLogger()->log(Logger::Fatal, mLogStream);
 	}
 }
 
-void util::debug(std::stringstream* ss, Logger::LogLevel level)
+void util::debug(std::stringstream& ss, Logger::LogLevel level)
 {
 	if (Configuration::debugEnabled())
 	{
@@ -125,13 +125,13 @@ void util::debug(std::stringstream* ss, Logger::LogLevel level)
 	} else
 	{
 		//flush strin stream
-		ss->clear();
-		ss->str("");
+		ss.clear();
+		ss.str("");
 	}
 }
 
 
-void util::logAlways(std::stringstream* ss)
+void util::logAlways(std::stringstream& ss)
 {
 	Logger::getLogger()->logAlways(ss);
 }
@@ -200,19 +200,14 @@ std::string util::trimFromRight(const std::string& str)
 	return str.substr(0, endpos + 1);
 }
 
-void util::readString(std::stringstream* is, std::string& data)
+void util::readString(std::istream& is, std::string& data)
 {
-	while (is->peek() == ' ')
-	{
-		is->get();
-	}
-
-	int size = 0;
-	getInt(*is, size);
+	size_t size = 0;
+	readValue(is, size);
 	if (size)
 	{
 		data.resize(size);
-		is->get(&data[0], size +1);
+		is.read((char*)data.data(), size);
 	}
 	else
 	{
@@ -221,20 +216,20 @@ void util::readString(std::stringstream* is, std::string& data)
 	data = trimFromRight(data);
 }
 
-void util::readzSTRING(std::stringstream* is, zSTRING& data)
+void util::readzSTRING(std::istream& is, zSTRING& data)
 {
 	std::string str;
 	readString(is, str);
 	data = zSTRING(str.c_str());
 }
 
-void util::readAndTrim(std::stringstream* is, std::string& data)
+void util::readAndTrim(std::istream& is, std::string& data)
 {
 	readString(is, data);
 	data = trimFromRight(data);
 }
 
-void util::readAndTrim(std::stringstream* is, zSTRING& data)
+void util::readAndTrim(std::istream& is, zSTRING& data)
 {
 	std::string str;
 	readAndTrim(is, str);
@@ -245,57 +240,36 @@ void util::writeString(std::ostream& os, const std::string& data)
 {
 	// c-strings avoid Nullbytes to be written
 	char const* content = data.c_str();
-	os << std::strlen(content) << ' ';
-	os << content;
+	size_t size = std::strlen(content);
+	writeValue(os, size);
+	os.write(content, size);
 }
 
 void util::writezSTRING(std::ostream& os, const zSTRING& data)
 {
 	// c-strings avoid Nullbytes to be written
 	char const* content = data.ToChar();
-	os << data.Length() << ' ';
-	os << content;
+	size_t size = data.Length();
+	writeValue(os, size);
+	os.write(content, size);
 }
 
-void util::getInt(std::stringstream& ss, int& param)
-{
-	while (ss.peek() == ' ')
-	{
-		ss.get();
-	}
-
-	std::string token;
-	getline(ss, token, ' ');
-	param = atoi(token.c_str());
-};
-
-void util::getBool(std::stringstream& ss, bool& param)
-{
-	while (ss.peek() == ' ')
-	{
-		ss.get();
-	}
-	std::string token;
-	getline(ss, token, ' ');
-	param = atoi(token.c_str()) != 0;
-};
-
-void util::logInfo(std::stringstream* ss)
+void util::logInfo(std::stringstream& ss)
 {
 	Logger::getLogger()->log(Logger::Info, ss);
 }
 
-void util::logWarning(std::stringstream* ss)
+void util::logWarning(std::stringstream& ss)
 {
 	Logger::getLogger()->log(Logger::Warning, ss);
 }
 
-void util::logFault(std::stringstream* ss)
+void util::logFault(std::stringstream& ss)
 {
 	Logger::getLogger()->log(Logger::Fault, ss);
 }
 
-void util::logFatal(std::stringstream* ss)
+void util::logFatal(std::stringstream& ss)
 {
 	Logger::getLogger()->log(Logger::Fatal, ss);
 }
@@ -322,7 +296,7 @@ bool util::existsDir(const std::string& path)
 	if (!(attributes & FILE_ATTRIBUTE_DIRECTORY))
 	{
 		mLogStream << "util::existsDir: " << path << " exists but isn't a directory!" << std::endl;
-		logFault(&mLogStream);
+		logFault(mLogStream);
 	}
 
 	return true;
@@ -417,14 +391,14 @@ void util::copyContentTo(std::string source, std::string dest, std::string patte
 	{
 		mLogStream << __FUNCTION__ << ": Couldn't copy files from " << source << " to "
 			<< dest << std::endl;
-		logFault(&mLogStream);
+		logFault(mLogStream);
 	}
 
 	if (s.fAnyOperationsAborted)
 	{
 		mLogStream << __FUNCTION__ << ": Any operation was aborted while copying " << source << " to "
 			<< dest << std::endl;
-		logFault(&mLogStream);
+		logFault(mLogStream);
 	}
 }
 
@@ -443,14 +417,14 @@ void util::deleteAllFiles(std::string folder, std::string pattern)
 	{
 		mLogStream << __FUNCTION__ << ": Couldn't delete files from " << folder << " with pattern "
 			<< pattern << std::endl;
-		logFault(&mLogStream);
+		logFault(mLogStream);
 	}
 
 	if (s.fAnyOperationsAborted)
 	{
 		mLogStream << __FUNCTION__ << ": Any operation was aborted while deleting files from " << folder << " with pattern "
 			<< pattern << std::endl;
-		logFault(&mLogStream);
+		logFault(mLogStream);
 	}
 };
 
@@ -462,7 +436,7 @@ void util::copyFileTo(std::string from, std::string to){
 		mLogStream << __FUNCTION__ << ": No copying is done, as source and destination are equal:" << std::endl;
 		mLogStream << "\tsource: " << from << std::endl;
 		mLogStream << "\tdestination: " << to << std::endl;
-		logWarning(&mLogStream);
+		logWarning(mLogStream);
 		return;
 	}
 
@@ -493,7 +467,7 @@ void util::copyFileTo(std::string from, std::string to){
 		{
 			mLogStream << __FUNCTION__ << ": While copying from " << from << " to " << to <<
 				" an error occured: " << errorText << std::endl;
-			logFault(&mLogStream);
+			logFault(mLogStream);
 
 			// release memory allocated by FormatMessage()
 			LocalFree(errorText);

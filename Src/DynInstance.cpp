@@ -65,7 +65,7 @@ static void restorePreviousId(void* obj, void* param, oCItem* itm) {
 	if (itm && (itm->GetInstance() == instanceID))
 	{
 		*params->mLogStream << "item has instanceId marked as reusable: " << itm->description.ToChar() << endl;
-		util::debug(params->mLogStream);
+		util::debug(*params->mLogStream);
 
 		ObjectManager* manager = ObjectManager::getObjectManager();
 		manager->setInstanceId(itm, params->previousID);
@@ -359,208 +359,201 @@ void DynInstance::setSymbolName(const std::string& symbolName)
 
 void DynInstance::serialize(std::ostream& os) const
 {
-	//os << reusable << ' ';
-	util::writeString(os, mSymbolName);
-	os << ' ';
-	
+	util::writeString(os, mSymbolName);	
 	util::writeString(os, mPrototypeSymbolName);
-	os << ' ';
-	
-	os << zCPar_Symbol_Bitfield << ' ';
-	
-	os << idx << ' ';
-	util::writeString(os, name);
-	os << ' ';
-	util::writeString(os, nameID);
-	os << ' ';
-	os << hp << ' ';
-	os << hp_max << ' ';
-	os << mainflags << ' ';
-	os << flags << ' ';
-	os << weight << ' ';
-	os << value << ' ';
 
-	// -- weapons		
-	os << damageType << ' ';
-	os << damageTotal << ' ';
+	util::writeValue(os, zCPar_Symbol_Bitfield);
+	util::writeValue(os, idx);
+
+	util::writeString(os, name);
+	util::writeString(os, nameID);
+
+	util::writeValue(os, hp);
+	util::writeValue(os, hp_max);
+	util::writeValue(os, mainflags);
+	util::writeValue(os, flags);
+	util::writeValue(os, weight);
+	util::writeValue(os, value);
+
+	// -- weapons
+	util::writeValue(os, damageType);
+	util::writeValue(os, damageTotal);
 
 	for (int i = 0; i < 8; ++i)
 	{
-		os << damage[i] << ' ';
+		util::writeValue(os, damage[i]);
 	}
 
 	// -- armor 
-	os << wear << ' ';
+	util::writeValue(os, wear);
 	
 	for (int i = 0; i < 8; ++i)
 	{
-		os << protection[i] << ' ';
+		util::writeValue(os, protection[i]);
 	}
 
 	// -- food
-	os << nutrition << ' ';
+	util::writeValue(os, nutrition);
 
 	// -- use attributes
 	for (int i = 0; i < 3; ++i)
 	{
-		os << cond_atr[i] << ' ';
+		util::writeValue(os, cond_atr[i]);
 	}
 
 	for (int i = 0; i < 3; ++i)
 	{
-		os << cond_value[i] << ' ';
+		util::writeValue(os, cond_value[i]);
 	}
 
 	// -- attributes that will be changed on equip
 	for (int i = 0; i < 3; ++i)
 	{
-		os << change_atr[i] << ' ';
+		util::writeValue(os, change_atr[i]);
 	}
 
 	for (int i = 0; i < 3; ++i)
 	{
-		os << change_value[i] << ' ';
+		util::writeValue(os, change_value[i]);
 	}
 
 	// -- parser functions
-	os << magic << ' ';
-	os << on_equip << ' ';
-	os << on_unequip << ' ';
+	util::writeValue(os, magic);
+	util::writeValue(os, on_equip); //TODO use symbol name
+	util::writeValue(os, on_unequip); //TODO use symbol name
 
 	for (int i = 0; i < 4; ++i)
 	{
-		os << on_state[i] << ' ';
+		util::writeValue(os, on_state[i]);
 	}
 
-	// -- owner									
-	os << owner << ' ';			//	owner: npc instance
-	os << ownerGuild << ' ';		//	owner: guild
-	os << disguiseGuild << ' ';
+	// -- owner		
+	util::writeValue(os, owner); //	owner: npc instance
+	util::writeValue(os, ownerGuild); //	owner: guild
+	util::writeValue(os, disguiseGuild);
 
 	// -- visual
 	util::writeString(os, visual);
-	os << ' ';
 
 	// -- change of mesh on equip
 	util::writeString(os, visual_change);
-	os << ' ';
 	util::writeString(os, effect);
-	os << ' ';
 
-	os << visual_skin << ' ';
+	util::writeValue(os, visual_skin);
 
 	util::writeString(os, scemeName);
-	os << ' ';
-	os << material << ' ';
-	os << munition << ' ';		//	Instance of ammunition
 
-	os << spell << ' ';
-	os << range << ' ';
+	util::writeValue(os, material);
+	util::writeValue(os, munition); //	Instance of ammunition
 
-	os << mag_circle << ' ';
+	util::writeValue(os, spell);
+	util::writeValue(os, range);
+
+	util::writeValue(os, mag_circle);
 
 	util::writeString(os, description);
-	os << ' ';
 
 	for (int i = 0; i < 6; ++i)
 	{
 		util::writeString(os, text[i]);
-		os << ' ';
 	}
 
 	for (int i = 0; i < 6; ++i)
 	{
-		os << count[i] << ' ';
+		util::writeValue(os, count[i]);
 	}
 
 	// -- inventory presentation
-	os << inv_zbias << ' ';								//  far plane (how far the item goes into the room by the z-axis)
-	os << inv_rotx << ' ';								//  rotation around x-axis (in degrees)
-	os << inv_roty << ' ';								//  rotation around y-axis (in degrees)
-	os << inv_rotz << ' ';								//  rotation around z-axis (in degrees)
-	os << inv_animate << ' ';							//  rotate the item
+	util::writeValue(os, inv_zbias); //  far plane (how far the item goes into the room by the z-axis)
+	util::writeValue(os, inv_rotx);
+	util::writeValue(os, inv_roty);
+	util::writeValue(os, inv_rotz); // rotation around z - axis(in degrees)
+	util::writeValue(os, inv_animate); //  rotate the item ?
 
-	os << amount << ' ';
-	os << c_manipulation << ' ';					//int ?
-	os << last_manipulation << ' ';				//zREAL ?
-	os << magic_value << ' ';					//int ?
+	util::writeValue(os, amount);
+	util::writeValue(os, c_manipulation); // int ?
+	util::writeValue(os, last_manipulation); //zReal?
+	util::writeValue(os, magic_value); // int ?
 
 	dii_userData.serialize(os);
 }
 
 
-void DynInstance::deserialize(std::stringstream* is)
+void DynInstance::deserialize(std::istream& is)
 {
 	//util::getBool(*is, reusable);
 	util::readAndTrim(is, mSymbolName);
 	util::readAndTrim(is, mPrototypeSymbolName);
-	util::getInt(*is, zCPar_Symbol_Bitfield);
-	util::getInt(*is, idx);
+
+	util::readValue(is, zCPar_Symbol_Bitfield);
+	util::readValue(is, idx);
+
 	util::readString(is, name);
 	util::readString(is, nameID);
-	util::getInt(*is, hp);
-	util::getInt(*is, hp_max);
-	util::getInt(*is, mainflags);
-	util::getInt(*is, flags);
-	util::getInt(*is, weight);
-	util::getInt(*is, value);
+
+	util::readValue(is, hp);
+	util::readValue(is, hp_max);
+	util::readValue(is, mainflags);
+	util::readValue(is, flags);
+	util::readValue(is, weight);
+	util::readValue(is, value);
 
 	// -- weapons		
-	util::getInt(*is, damageType);
-	util::getInt(*is, damageTotal);
+	util::readValue(is, damageType);
+	util::readValue(is, damageTotal);
 
 	for (int i = 0; i < 8; ++i)
 	{
-		util::getInt(*is, damage[i]);
+		util::readValue(is, damage[i]);
 	}
 
 	// -- armor 
-	*is >> wear;
+	util::readValue(is, wear);
 
 	for (int i = 0; i < 8; ++i)
 	{
-		util::getInt(*is, protection[i]);
+		util::readValue(is, protection[i]);
 	}
 
 	// -- food
-	util::getInt(*is, nutrition);
+	util::readValue(is, nutrition);
 
 	// -- use attributes
 	for (int i = 0; i < 3; ++i)
 	{
-		util::getInt(*is, cond_atr[i]);
+		util::readValue(is, cond_atr[i]);
 	}
 
 	for (int i = 0; i < 3; ++i)
 	{
-		util::getInt(*is, cond_value[i]);
+		util::readValue(is, cond_value[i]);
 	}
 
 	// -- attributes that will be changed on equip
 	for (int i = 0; i < 3; ++i)
 	{
-		util::getInt(*is, change_atr[i]);
+		util::readValue(is, change_atr[i]);
 	}
 
 	for (int i = 0; i < 3; ++i)
 	{
-		util::getInt(*is, change_value[i]);
+		util::readValue(is, change_value[i]);
 	}
 
 	// -- parser functions
-	util::getInt(*is, magic);
-	util::getInt(*is, on_equip);
-	util::getInt(*is, on_unequip);
+	util::readValue(is, magic);
+	util::readValue(is, on_equip); // TODO symbol string!
+	util::readValue(is, on_unequip); // TODO symbol string!
 
 	for (int i = 0; i < 4; ++i)
 	{
-		util::getInt(*is, on_state[i]);
+		util::readValue(is, on_state[i]);
 	}
 
-	// -- owner						
-	util::getInt(*is, owner);
-	util::getInt(*is, ownerGuild);
-	util::getInt(*is, disguiseGuild);
+	// -- owner
+	util::readValue(is, owner); // TODO symbol string!
+	util::readValue(is, ownerGuild);
+	util::readValue(is, disguiseGuild);
 
 	// -- visual
 	util::readString(is, visual);
@@ -569,16 +562,15 @@ void DynInstance::deserialize(std::stringstream* is)
 	util::readString(is, visual_change);
 	util::readString(is, effect);
 
-	util::getInt(*is, visual_skin);
+	util::readValue(is, visual_skin);
 
 	util::readString(is, scemeName);
-	util::getInt(*is, material);
-	util::getInt(*is, munition);
+	util::readValue(is, material);
+	util::readValue(is, munition); // TODO symbol string!
 
-	util::getInt(*is, spell);
-	util::getInt(*is, range);
-
-	util::getInt(*is, mag_circle);
+	util::readValue(is, spell);
+	util::readValue(is, range);
+	util::readValue(is, mag_circle);
 
 	util::readString(is, description);
 
@@ -589,20 +581,20 @@ void DynInstance::deserialize(std::stringstream* is)
 
 	for (int i = 0; i < 6; ++i)
 	{
-		util::getInt(*is, count[i]);
+		util::readValue(is, count[i]);
 	}
 
 	// -- inventory presentation
-	util::getInt(*is, inv_zbias);
-	util::getInt(*is, inv_rotx);
-	util::getInt(*is, inv_roty);
-	util::getInt(*is, inv_rotz);
-	util::getInt(*is, inv_animate);
+	util::readValue(is, inv_zbias);
+	util::readValue(is, inv_rotx);
+	util::readValue(is, inv_roty);
+	util::readValue(is, inv_rotz);
+	util::readValue(is, inv_animate);
 
-	util::getInt(*is, amount);
-	util::getInt(*is, c_manipulation);
-	util::getInt(*is, last_manipulation);
-	util::getInt(*is, magic_value);
+	util::readValue(is, amount);
+	util::readValue(is, c_manipulation);
+	util::readValue(is, last_manipulation);
+	util::readValue(is, magic_value);
 
 	dii_userData.deserialize(is);
 }
@@ -651,7 +643,7 @@ DII_UserData::DII_UserData()
 DII_UserData::~DII_UserData()
 {
 	std::stringstream ss; ss <<"Called ~DII_UserData()" << std::endl;
-	util::debug(&ss);
+	util::debug(ss);
 	//release allocated memory
 	int indexBegin = userData.intAmount * sizeof(int);
 	zSTRINGSerialized* ptr = (zSTRINGSerialized*)((userData.pMemory) + indexBegin);
@@ -664,17 +656,20 @@ DII_UserData::~DII_UserData()
 
 void DII_UserData::serialize(std::ostream& os) const
 {
-	os << userData.intAmount << ' ' << userData.strAmount << ' ';
+	util::writeValue(os, userData.intAmount);
+	util::writeValue(os, userData.strAmount);
 
 	//save int array
 	for (int i = 0; i < userData.intAmount; ++i)
 	{
-		os << userData.getIntBegin()[i] << ' ';
+		util::writeValue(os, userData.getIntBegin()[i]);
 	}
+
+	//os << userData.strAmount;
 
 	stringstream ss;
 	ss << "strAmount: " << userData.strAmount << std::endl;
-	util::debug(&ss);
+	util::debug(ss);
 
 	//save bytestream
 	int indexBegin = userData.intAmount * sizeof(int);
@@ -685,9 +680,6 @@ void DII_UserData::serialize(std::ostream& os) const
 	for (int i = 0; i < userData.strAmount; ++i)
 	{
 		ptr = (zSTRINGSerialized*)((userData.pMemory) + indexBegin + i*sizeof(zSTRINGSerialized));
-		//os << ptr->_vtbl << ' ';
-		//os << ptr->_allocater << ' ';
-
 		string data;
 		if (ptr->ptr == NULL)
 		{
@@ -697,50 +689,21 @@ void DII_UserData::serialize(std::ostream& os) const
 		{
 			data = string(ptr->ptr);
 		}
-		ss << "string to write: " << data << std::endl;
-		util::debug(&ss);
-
-		ss << ": ptr->_vtbl: " << ptr->_vtbl << std::endl;
-		util::debug(&ss);
-
-		ss << "ptr->_allocater " << ptr->_allocater << std::endl;
-		util::debug(&ss);
-
-		if (ptr->ptr)
-		{
-			ss << "ptr->ptr: " << ptr->ptr << std::endl;
-			util::debug(&ss);
-		}
-		else
-		{
-			ss << "ptr->ptr: null" << endl;
-			util::debug(&ss);
-		}
-
-		ss << "ptr->len: " << ptr->len << endl;
-		util::debug(&ss);
-
-		ss << "ptr->res: " << ptr->res << endl;
-		util::debug(&ss);
 
 		util::writeString(os, data);
-		os << ' ';
 	}
-
-	//os << ptr->res;
 }
 
-void DII_UserData::deserialize(std::stringstream* is)
+void DII_UserData::deserialize(std::istream& is)
 {
-	util::getInt(*is, userData.intAmount);
-	util::getInt(*is, userData.strAmount);
-
+	util::readValue(is, userData.intAmount);
+	util::readValue(is, userData.strAmount);
 	assertEqualAmounts();
 
 	//init int array
 	for (int i = 0; i < userData.intAmount; ++i)
 	{
-		util::getInt(*is, userData.getIntBegin()[i]);
+		util::readValue(is, userData.getIntBegin()[i]);
 	}
 
 	// init string array
@@ -773,8 +736,9 @@ void DII_UserData::deserialize(std::stringstream* is)
 
 		zSTRING* test = (zSTRING*)ptr;
 
+
 		ss << "string loaded: " << std::string(test->ToChar()) << std::endl;
-		util::debug(&ss);
+		util::debug(ss);
 
 	}
 }
@@ -801,7 +765,7 @@ void DII_UserData::assertEqualAmounts()
 		std::stringstream mLogStream;
 		mLogStream << "DII_UserData::assertEqualAmounts: int amount (" << userData.intAmount <<
 				") doesn't match defined int amount (" << expectedIntAmount << ")"<< endl;
-		util::logFatal(&mLogStream);
+		util::logFatal(mLogStream);
 	}
 
 	if (expectedStrAmount != userData.strAmount) {
@@ -809,7 +773,7 @@ void DII_UserData::assertEqualAmounts()
 		std::stringstream mLogStream;
 		mLogStream << "DII_UserData::assertEqualAmounts: string amount (" << userData.strAmount <<
 			") doesn't match defined string amount (" << expectedStrAmount << ")" << endl;
-		util::logFatal(&mLogStream);
+		util::logFatal(mLogStream);
 	}
 }
 
@@ -821,7 +785,7 @@ void * DII_UserData::gothic2OperatorNew(size_t size)
 void DII_UserData::createMemory(int intAmount, int strAmount)
 {
 	std::stringstream ss; ss << "DII_UserData::createMemory: strAmount: " << strAmount << std::endl;
-	util::debug(&ss);
+	util::debug(ss);
 	int byteSize = intAmount * sizeof(int) + strAmount * sizeof(zSTRINGSerialized);
 	BYTE* memory = (BYTE*)gothic2OperatorNew(byteSize);
 	memset(memory, 0, byteSize);

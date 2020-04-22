@@ -33,7 +33,6 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <map>
 #include <queue>
 #include "oCMobContainer.h"
-#include "AdditMemory.h"
 #include "zCPar_SymbolTable.h"
 #include <functional>
 #include "api/g2/ocnpcinventory.h"
@@ -329,6 +328,20 @@ public:
 	bool initByNewInstanceId(oCItem* item);
 
 private:
+
+	struct ARCHIVE_HEADER {
+	public:
+
+		static constexpr float VERSION = 1.0f;
+		static constexpr const char DESC[] = "ARCHIVE_VERSION";
+
+		ARCHIVE_HEADER() {
+			std::memcpy(desc, DESC, sizeof(DESC));
+		}
+
+		char desc[sizeof(DESC)];
+		float version = VERSION;
+	};
 
 	// <int instanceId, Item* item>
 	std::unordered_map<int, std::unique_ptr<DynInstance>> mNewInstanceMap;

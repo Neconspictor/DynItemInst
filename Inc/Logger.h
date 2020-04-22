@@ -91,19 +91,19 @@ public:
 	 * Writes the given message 'message' to the log file.
 	 * \param message The message to be logged.
 	 */
-	void writeToFile(std::string message);
+	void writeToFile(const std::string& message);
 
 	/**
 	 * Writes the given message 'message' to zSpy with and log level 'level'.
 	 * \param level The logging level for this log.
 	 * \param message The message to be logged.
 	 */
-	void writeTozSpy(LogLevel level, std::string message);
+	void writeTozSpy(LogLevel level, const std::string& message);
 
-	void writeToConsole(LogLevel level, std::string message);
+	void writeToConsole(LogLevel level, const std::string& message);
 
 	bool isLogLevelActive(LogLevel level);
-	std::string createOutputWithLogLevel(LogLevel level, std::string message);
+	std::string createOutputWithLogLevel(LogLevel level, const std::string& message);
 	/**
 		 * Logs the content of the specified stringstream 'stream' with an log level 'level'. 
 		 * \param level The logging level for this log
@@ -112,9 +112,9 @@ public:
 		 * \param tozSpy Should the log message be written to zSpy?
 		 * \param toConsole Should the log message be written to console (std::cout)?
 		 */
-	void log(LogLevel level, std::stringstream* stream);
+	void log(LogLevel level, std::stringstream& stream);
 
-	void logAlways(std::stringstream* stream);
+	void logAlways(std::stringstream& stream);
 
 	std::string logLevelToString(LogLevel level);
 

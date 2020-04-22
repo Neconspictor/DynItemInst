@@ -63,7 +63,7 @@ public:
 
 	virtual void serialize(std::ostream&) const override;
 
-	virtual void deserialize(std::stringstream*) override;
+	virtual void deserialize(std::istream&) override;
 
 	static int getIntAmount();
 	static int getStringAmount();
@@ -244,7 +244,7 @@ public:
 
 	virtual void serialize(std::ostream&) const override;
 
-	virtual void deserialize(std::stringstream*) override;
+	virtual void deserialize(std::istream&) override;
 
 	/**
 	 * \return The content of the bitfield member of the parser symbol associated with this class. 

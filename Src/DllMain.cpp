@@ -65,11 +65,11 @@ BOOL APIENTRY DllMain( HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpRese
 		std::cout << "You should always see me!" << std::endl;
 		util::setModuleHandle(hModule);
 		mLogStream<< "DLL_Process_Attach called."<< std::endl;
-		Logger::getLogger()->logAlways(&mLogStream);
+		Logger::getLogger()->logAlways(mLogStream);
 		break;
 	case DLL_PROCESS_DETACH:
 		mLogStream<< "DLL_Process_Detach called."<< std::endl;
-		Logger::getLogger()->logAlways(&mLogStream);
+		Logger::getLogger()->logAlways(mLogStream);
 		Unhook();
 		Logger::release();
 		break;

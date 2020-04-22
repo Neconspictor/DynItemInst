@@ -83,7 +83,7 @@ void Logger::release()
 	SAFE_DELETE(instance);
 }
 
-void Logger::writeToFile(std::string message)
+void Logger::writeToFile(const std::string& message)
 {
 
 	std::string logFilePath = util::getModuleDirectory(util::getModuleHandle()) + std::string("\\") 
@@ -96,10 +96,10 @@ void Logger::writeToFile(std::string message)
 	fclose(pFile);
 }
 
-void Logger::writeTozSpy(LogLevel level, std::string message)
+void Logger::writeTozSpy(LogLevel level, const std::string& msg)
 {
 
-	message = "U: neclib: " + message;
+	auto message = "U: neclib: " + msg;
 	zERROR* zerr = (zERROR*)0x008CDCD0;	//zERROR zerr
 	zSTRING zMessage = zSTRING(message.c_str());
 
@@ -121,13 +121,13 @@ void Logger::writeTozSpy(LogLevel level, std::string message)
 	}	
 }
 
-void Logger::writeToConsole(LogLevel level, std::string message)
+void Logger::writeToConsole(LogLevel level, const std::string& message)
 {
 	std::string timeStamp = getTimeStamp();
 	std::cout << "["<< getTimeStamp() << ", " << logLevelToString(level) <<"]    " << message;
 }
 
-void Logger::logAlways(std::stringstream* stream)
+void Logger::logAlways(std::stringstream& stream)
 {
 	//make time stamp and add it along with the log level in front of the log message
 	std::string timeStamp = getTimeStamp();
@@ -136,7 +136,7 @@ void Logger::logAlways(std::stringstream* stream)
 	util.clear();
 	util.str("");
 	util << "[" << timeStamp << "]    "
-		<< stream->str();
+		<< stream.str();
 
 	std::string message = util.str();
 
@@ -159,19 +159,19 @@ void Logger::logAlways(std::stringstream* stream)
 	// Clear again
 	util.clear();
 	util.str("");
-	stream->clear();
-	stream->str("");
+	stream.clear();
+	stream.str("");
 }
 
-void Logger::log(LogLevel level, std::stringstream* stream)
+void Logger::log(LogLevel level, std::stringstream& stream)
 {
 	//early exit
 	if (!isLogLevelActive(level)) { return; }
 
-	std::string message = stream->str();
+	std::string message = stream.str();
 	// Clear the string stream's content
-	stream->clear();
-	stream->str("");
+	stream.clear();
+	stream.str("");
 
 	if (toConsole)
 	{
@@ -218,7 +218,7 @@ bool Logger::isLogLevelActive(LogLevel level)
 		break;
 	default:
 		std::stringstream ss; ss << "Logger::isLogLevelActive: unknown log level: " << level << std::endl;
-		logAlways(&ss);
+		logAlways(ss);
 		break;
 	}
 
@@ -226,7 +226,7 @@ bool Logger::isLogLevelActive(LogLevel level)
 	return false;
 }
 
-std::string Logger::createOutputWithLogLevel(LogLevel level, std::string message)
+std::string Logger::createOutputWithLogLevel(LogLevel level, const std::string& message)
 {
 	//make time stamp and add it along with the log level in front of the log message
 	std::string timeStamp = getTimeStamp();
@@ -254,7 +254,7 @@ std::string Logger::logLevelToString(LogLevel level)
 		return "FATAL";
 	default:
 		std::stringstream ss; ss << "Logger::logLevelToString: unknown log level: " << level << std::endl;
-		logAlways(&ss);
+		logAlways(ss);
 	}
 	return "";
 };

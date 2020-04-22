@@ -159,7 +159,7 @@ void Levitation::zCVobDoFrameActivityHook(void* pThis)
 void Levitation::oCGamePauseHook(void* pThis, int second)
 {
 	mLogStream << "Paused Game!" << std::endl;
-	util::logAlways(&mLogStream);
+	util::logAlways(mLogStream);
 	Levitation::gameIsPaused = true;
 	oCGamePause(pThis, second);
 }
@@ -167,7 +167,7 @@ void Levitation::oCGamePauseHook(void* pThis, int second)
 void Levitation::oCGameUnpauseHook(void* pThis)
 {
 	mLogStream << "Unpaused Game!" << std::endl;
-	util::logAlways(&mLogStream);
+	util::logAlways(mLogStream);
 	Levitation::gameIsPaused = false;
 	oCGameUnpause(pThis);
 }
@@ -190,7 +190,7 @@ void Levitation::zCVobCheckAndResolveCollisionsHook(void* pThis)
 		translation = zVEC3(mat->_14, mat->_24, mat->_34);
 		/*mLogStream << "zCVobCheckAndResolveCollisionsHook (before):" << std::endl;
 		mLogStream << "\ttranslation = " << translation << std::endl;
-		util::logWarning(&mLogStream);*/
+		util::logWarning(mLogStream);*/
 		//return;
 
 		intersectionsWithVobs = check_prePass(hero, hero->trafoObjToWorld);
@@ -213,11 +213,11 @@ void Levitation::zCVobCheckAndResolveCollisionsHook(void* pThis)
 		auto isTargetActive = Configuration::debugEnabled();
 		if (isTargetActive && intersectionsWithVobs) {
 			mLogStream << __FUNCTION__ << ": original collision detection is used" << std::endl;
-			util::debug(&mLogStream);
+			util::debug(mLogStream);
 		}
 		else if (isTargetActive) {
 			mLogStream << __FUNCTION__ << ": custom collision detection is used" << std::endl;
-			util::debug(&mLogStream);
+			util::debug(mLogStream);
 		}
 
 		//if (length < 2.2 || length > 20) return;
@@ -230,7 +230,7 @@ void Levitation::zCVobCheckAndResolveCollisionsHook(void* pThis)
 		/*zVEC3 translation(mat->_14, mat->_24, mat->_34);
 		mLogStream << "zCVobCheckAndResolveCollisionsHook (after):" << std::endl;
 		mLogStream << "\ttranslation = " << translation << std::endl;
-		util::logWarning(&mLogStream);*/
+		util::logWarning(mLogStream);*/
 	}
 }
 
@@ -521,10 +521,10 @@ zVEC3 Levitation::getCollidingPolyNormal(oCNpc* hero, const zMAT4& mat)
 	zTBBox3D rec;
 	rec.bbox3D_maxs = zVEC3(100, 100, 100);//box.bbox3D_maxs;//zVEC3(100,100,100);
 										   //logStream << "Test:  box.bbox3D_maxs: " << box.bbox3D_maxs << std::endl;
-										   //util::logInfo(&logStream);
+										   //util::logInfo(logStream);
 	rec.bbox3D_mins = zVEC3(-100, -100, -100);// box.bbox3D_mins;//zVEC3(-100, -100, -100);
 											  //logStream << "Test:  box.bbox3D_mins: " << box.bbox3D_mins << std::endl;
-											  //util::logInfo(&logStream);
+											  //util::logInfo(logStream);
 	rec.bbox3D_maxs += pos;
 	rec.bbox3D_mins += pos;
 	box.bbox3D_maxs += pos;
@@ -534,7 +534,7 @@ zVEC3 Levitation::getCollidingPolyNormal(oCNpc* hero, const zMAT4& mat)
 	if (polys != NULL) {
 		//writeToConsole("Collision detected: ", third);
 		//logStream << "Test: Collision detected: " << third << std::endl;
-		//util::logInfo(&logStream);
+		//util::logInfo(logStream);
 		if (third)
 		{
 			//create plane from intersecting poly
@@ -624,9 +624,9 @@ bool checkVobCollision__checkVob(zCVob* vob, const zTBBox3D& boundingBox)
 	auto& name = vob->objectName;
 
 	mLogStream << __FUNCTION__ << ": Check object with leaf number: " << leafObjects->GetSize() << std::endl;
-	util::debug(&mLogStream);
+	util::debug(mLogStream);
 	mLogStream << __FUNCTION__ << ": visual name: " << name.ToChar() << std::endl;
-	util::debug(&mLogStream);
+	util::debug(mLogStream);
 
 	for (unsigned int i = 0; i < leafObjects->GetSize(); ++i)
 	{
@@ -640,11 +640,11 @@ bool checkVobCollision__checkVob(zCVob* vob, const zTBBox3D& boundingBox)
 
 			//logStream << "checkVobCollision__checkVob(): pos = " << pos << std::endl;
 			//logStream << "checkVobCollision__checkVob(): vob pos = " << vob->GetPositionWorld() << std::endl;
-			//util::logInfo(&logStream);
+			//util::logInfo(logStream);
 			if (poly->CheckBBoxPolyIntersection(boundingBox))
 			{
 				mLogStream << __FUNCTION__ << ": Intersection found! " << std::endl;
-				util::debug(&mLogStream);
+				util::debug(mLogStream);
 				return true;
 			}
 		}
@@ -663,12 +663,12 @@ bool Levitation::checkVobCollision(void* zCBspBaseObject, zCVob* testedVob, cons
 	{
 		std::stringstream mLogStream;
 		mLogStream << __FUNCTION__ << ": Found vobs!: " << collectedVobs.GetSize() << std::endl;
-		util::logInfo(&mLogStream);
+		util::logInfo(mLogStream);
 
 		for (unsigned int i = 0; i < collectedVobs.GetSize(); ++i)
 		{
 			mLogStream << __FUNCTION__ << ": test vob with number: " << i << std::endl;
-			util::logInfo(&mLogStream);
+			util::logInfo(mLogStream);
 
 			if (i > 0) {
 				bool test = false;
@@ -764,7 +764,7 @@ bool Levitation::checkForLevitationStaticCollision(oCNpc* hero, const zMAT4& mat
 						if (Configuration::debugEnabled()) {
 							std::stringstream logStream;
 							logStream << __FUNCTION__ << ": ignore poly with no collision flagged material" << std::endl;
-							util::debug(&logStream);
+							util::debug(logStream);
 						}
 						
 						continue;
@@ -775,7 +775,7 @@ bool Levitation::checkForLevitationStaticCollision(oCNpc* hero, const zMAT4& mat
 						if (Configuration::debugEnabled()) {
 							std::stringstream logStream;
 							logStream << __FUNCTION__ << ": ignore poly with GHOSTOCCLUDER material" << std::endl;
-							util::debug(&logStream);
+							util::debug(logStream);
 						}
 						
 						continue;
@@ -785,7 +785,7 @@ bool Levitation::checkForLevitationStaticCollision(oCNpc* hero, const zMAT4& mat
 					{
 						//std::stringstream logStream;
 						//logStream << "checkCollision(): ignore poly with NW_MISC_FULLALPHA_01 material" << std::endl;
-						//util::debug(&logStream);
+						//util::debug(logStream);
 						continue;
 					}*/
 
@@ -797,7 +797,7 @@ bool Levitation::checkForLevitationStaticCollision(oCNpc* hero, const zMAT4& mat
 						if (Configuration::debugEnabled()) {
 							std::stringstream logStream;
 							logStream << __FUNCTION__ << ": intersection found!: " << materialName << std::endl;
-							util::debug(&logStream);
+							util::debug(logStream);
 						}
 
 						break;
@@ -847,7 +847,7 @@ bool Levitation::checkForLevitationVobCollision(oCNpc* hero, const zMAT4& mat)
 		if (Configuration::debugEnabled()) {
 			std::stringstream mLogStream;
 			mLogStream << __FUNCTION__ << ": Found vobs: " << collectedVobs.GetSize() - 1 << std::endl;
-			util::debug(&mLogStream);
+			util::debug(mLogStream);
 		}
 		
 
@@ -900,7 +900,7 @@ bool Levitation::doCustomCollisionCheck(oCNpc* npc) {
 		//if (checkCollision(hero, *mat))
 		//{
 		//	logStream << "Test: stuck detected!" << std::endl;
-		//	util::logInfo(&logStream);
+		//	util::logInfo(logStream);
 		//	zVEC3 normal = getCollidingPolyNormal(hero, *mat);
 			//hero->SetPositionWorld(oldPos + normal*20);
 		//} 
