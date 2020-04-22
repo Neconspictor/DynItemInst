@@ -147,8 +147,8 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{F49E2048-15A5-46EB-9737-D31109C3DA55}</ProjectGuid>
-    <RootNamespace>NecPack</RootNamespace>
-    <ProjectName>NecPack</ProjectName>
+    <RootNamespace>neclib</RootNamespace>
+    <ProjectName>neclib</ProjectName>
     <WindowsTargetPlatformVersion>7.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
