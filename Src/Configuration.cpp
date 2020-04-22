@@ -54,14 +54,14 @@ void Configuration::load(const string &filename)
 	}
 	
 
-	mConfig.logFile = tree.get<std::string>("LOGGING.logFile", "Nec_log.txt");
+	mConfig.logFile = tree.get<std::string>("LOGGING.logFile", "neclib-log.txt");
 
 	mConfig.logInfos = tree.get<bool>("LOGGING.logInfos", false);
 	mConfig.logWarnings = tree.get<bool>("LOGGING.logWarnings", false);
 	mConfig.logErrors = tree.get<bool>("LOGGING.logErrors", true);
 	mConfig.logFatals = tree.get<bool>("LOGGING.logFatals", true);
-	mConfig.logToZSpy = tree.get<bool>("LOGGING.logToZSpy", false);
-	mConfig.logToFile = tree.get<bool>("LOGGING.logToFile", true);
+	mConfig.logToZSpy = tree.get<bool>("LOGGING.logToZSpy", true);
+	mConfig.logToFile = tree.get<bool>("LOGGING.logToFile", false);
 	mConfig.logToConsole = tree.get<bool>("LOGGING.logToConsole", false);
 	mConfig.debugEnabled = tree.get<bool>("LOGGING.debugEnabled", false);
 }

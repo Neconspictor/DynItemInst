@@ -1,4 +1,4 @@
-LIBRARY	"Nec"
+LIBRARY	"neclib"
 EXPORTS
 	GetLibVersion
 	Hook

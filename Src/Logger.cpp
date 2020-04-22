@@ -59,8 +59,8 @@ Logger* Logger::getLogger()
 	if (instance == NULL)
 	{
 		instance = new Logger();
-		Configuration::load("Nec.ini");
-		Configuration::save("Nec.ini");
+		Configuration::load("neclib.ini");
+		Configuration::save("neclib.ini");
 		logFileName = Configuration::getLogFile();
 		instance->logInfos = Configuration::getLogInfos();
 		instance->logWarnings = Configuration::getLogWarnings();
