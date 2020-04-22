@@ -79,6 +79,8 @@ OCItemInsertEffect DII::oCItemInsertEffect = (OCItemInsertEffect)0x00712C40;
 
 void DII::hookModule()
 {
+	checkDII_USER_DATA_ClassFormat();
+
 	loadSavegame = (LoadSavegame) (LOAD_SAVEGAME_ADDRESS);
 	writeSavegame = (WriteSavegame) (WRITE_SAVEGAME_ADDRESS);
 	oCItemGetValue = (OCItemGetValue) (OCITEM_GET_VALUE_ADDRESS);
@@ -618,6 +620,100 @@ void DII::loadDynamicInstances(int saveGameSlotNumber)
 	manager->loadNewInstances((char*)fileName.c_str());
 	mLogStream << __FUNCTION__ << ": done." << std::endl;
 	util::logInfo(mLogStream);
+}
+
+void DII::checkDII_USER_DATA_ClassFormat()
+{
+	constexpr int zCPar_Symbol_bitfield_type = ((1 << 4) - 1) << 12;
+	constexpr int zPAR_TYPE_CLASS = 4 << 12;
+	constexpr int zPAR_TYPE_INT = 2 << 12;
+	constexpr int zPAR_TYPE_STRING = 3 << 12;
+	constexpr int zCPar_Symbol_bitfield_ele = ((1 << 12) - 1) << 0;
+
+	// Retrieve the class symbol
+	auto* parser = zCParser::GetParser();
+	auto* symbol = parser->GetSymbol(DII_USER_DATA_CLASS_NAME);
+
+	// assert that the symbol is valid
+	if (!symbol) {
+		mLogStream << __FUNCTION__ << ": " << DII_USER_DATA_CLASS_NAME << " is not defined" << std::endl;
+		util::logFatal(mLogStream);
+		return;
+	}
+
+	// assert that the symbol points to a class
+
+	auto type = symbol->bitfield & zCPar_Symbol_bitfield_type;
+	if (type != zPAR_TYPE_CLASS) {
+		mLogStream << __FUNCTION__ << ": Expected " << DII_USER_DATA_CLASS_NAME << " to be a class." << std::endl;
+		util::logFatal(mLogStream);
+		return;
+	}
+
+	// check that class size matches the expected size
+	auto* manager = ObjectManager::getObjectManager();
+	const auto classSize = symbol->offset;
+	const auto integerAmount = DII_UserData::getIntAmount();
+	const auto stringAmount = DII_UserData::getStringAmount();
+	const auto expectedSize = integerAmount * sizeof(int) + stringAmount * sizeof(zSTRINGSerialized);
+	if (classSize != expectedSize) {
+		mLogStream << __FUNCTION__ << ": class size of " << DII_USER_DATA_CLASS_NAME << " is " << classSize << " but " << expectedSize << " is expected" << std::endl;
+		util::logFatal(mLogStream);
+		return;
+	}
+
+
+
+	//check that all integers are defined before the strings.
+	// Are we done?
+	if (classSize == 0) return; 
+
+	auto processedSize = 0;
+	bool processStrings = false;
+
+	while (processedSize < classSize) {
+		symbol = symbol->next;
+		if (!symbol) {
+			mLogStream << __FUNCTION__ << ": " << DII_USER_DATA_CLASS_NAME << " has an unexpected  next symbol (null)(???)" << std::endl;
+			util::logFatal(mLogStream);
+			return;
+		}
+
+		int type = symbol->bitfield & zCPar_Symbol_bitfield_type;
+
+		if (type != zPAR_TYPE_INT && type != zPAR_TYPE_STRING) {
+			mLogStream << __FUNCTION__ << ": " << DII_USER_DATA_CLASS_NAME << ": only int and string members are supported for the class format." << std::endl;
+			util::logFatal(mLogStream);
+			return;
+		}
+
+		//check that all integers are defined before the strings come.
+		if (type == zPAR_TYPE_STRING && !processStrings) {
+			processStrings = true;
+			if (processedSize != integerAmount * sizeof(int)) {
+				mLogStream << __FUNCTION__ << ": " << DII_USER_DATA_CLASS_NAME << ": all integer variables have to be declared before the string variables!" << std::endl;
+				util::logFatal(mLogStream);
+				return;
+			}
+		}
+
+		// get the element count
+		int count = symbol->bitfield & zCPar_Symbol_bitfield_ele;
+		if (count <= 0) count = 1;
+
+		auto typeSize = processStrings ? sizeof(zSTRINGSerialized) : sizeof(int);
+
+		// update offset
+		processedSize = symbol->offset + count * typeSize;
+	}
+
+	// check the class size a second time for safety
+	if (processedSize != classSize) {
+		mLogStream << __FUNCTION__ << ": class size of " << DII_USER_DATA_CLASS_NAME << " is " << classSize << " but " << processedSize << " was calculated. Fix that bug!" << std::endl;
+		util::logFatal(mLogStream);
+		return;
+	}
+
 }
 
 

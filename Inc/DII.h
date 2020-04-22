@@ -261,8 +261,13 @@ public:
 	static const std::string FILE_PATERN;
 
 private:
+
+	static constexpr const char DII_USER_DATA_CLASS_NAME[] = "DII_USER_DATA";
+
 	static std::string getClearedWorldName(zSTRING const & worldName);
 	static void loadDynamicInstances(int saveGameSlotNumber);
+
+	static void checkDII_USER_DATA_ClassFormat();
 
 private:
 

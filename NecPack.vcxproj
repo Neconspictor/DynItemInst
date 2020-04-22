@@ -178,8 +178,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>.\G2ExtSDK;.\Inc;.\minhook-master\include;C:\Development\Repositories\NecPack\boost-1.67.0;$(IncludePath)</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
-    <TargetName>Nec</TargetName>
-    <OutDir>E:\Program Files (x86)\JoWood\Gothic II Gold\System\Nec\</OutDir>
+    <TargetName>neclib</TargetName>
+    <OutDir>E:\Program Files (x86)\JoWood\Gothic II Gold\System\neclib\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
