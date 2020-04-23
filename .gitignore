@@ -6,3 +6,4 @@
 *.opensdf
 /libs/
 .vs/
+/build/
