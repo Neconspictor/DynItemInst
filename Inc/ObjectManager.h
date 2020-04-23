@@ -332,7 +332,7 @@ private:
 	struct ARCHIVE_HEADER {
 	public:
 
-		static constexpr float VERSION = 1.0f;
+		static constexpr float VERSION = 1.1f;
 		static constexpr const char DESC[] = "ARCHIVE_VERSION";
 
 		ARCHIVE_HEADER() {
