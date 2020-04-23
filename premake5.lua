@@ -8,12 +8,12 @@ workspace "neclib"
 	
 project "neclib"
 	kind "SharedLib"
-	includedirs { "Inc", "minhook-master/include", "boost-1.67.0" }
+	includedirs { "Inc", "minhook/include", "boost-1.67.0" }
 	language "C++"
 	targetdir "build/bin/%{cfg.buildcfg}"
 	
 	files { "**.h", "**.hpp", "**.c", "**.cpp", "**.def"}
-	excludes { "Levitation/**", "MinHook/**", "boost-1.67.0/**" }
+	excludes { "Levitation/**", "boost-1.67.0/**" }
 	
 	filter "configurations:Debug"
 		defines {"DEBUG", "WIN32", "_DEBUG", "_WINDOWS", "_USRDLL", "DYNITEMINST_EXPORTS"}

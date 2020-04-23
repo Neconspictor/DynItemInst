@@ -1,6 +1,6 @@
 Third party libraries packages are included under their own licences.
 
-Boost 1.42 C++ libraries 
+Boost 1.67 C++ libraries 
 
  * Author: 	Way too many to list...
  * Homepage: 	http://www.boost.org/

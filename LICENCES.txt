@@ -1,8 +1,7 @@
-Licence for DynItemInst_Ikarus (v. 1.01) binaries
+Licence for neclib (v. 1.03) binaries
 
-DynItemInst_Ikarus is a library for allowing the creation of item instances at runtime
-in the game Gothic 2 TNotR
-Copyright (C) 2015 David Goeth
+neclib is a library which extends the base functionality of the game Gothic 2 TNotR.
+Copyright (C) 2015-2020 David Goeth
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -19,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 -------------------------------------------------------------------------------------------
 
-Licence for the DynItemInst_Ikarus (v. 1.01) API headers and source code
+Licence for the neclib (v. 1.03) API headers and source code
 
 THE WORK (AS DEFINED BELOW) IS PROVIDED
 UNDER THE TERMS OF THIS CREATIVE COMMONS
@@ -35,7 +34,7 @@ You may obtain a copy of the License at http://creativecommons.org/licenses/by-n
 Developed by David Goeth.
 All rights reserved.
 
-Copyright (C) 2015 David Goeth
+Copyright (C) 2015-2020 David Goeth
 
 -------------------------------------------------------------------------------------------
 
