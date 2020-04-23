@@ -664,9 +664,17 @@ void DII::checkDII_USER_DATA_ClassFormat()
 
 
 
-	//check that all integers are defined before the strings.
+	
 	// Are we done?
 	if (classSize == 0) return; 
+
+
+
+	//check that all integers are defined before the strings.
+
+	// Note: if symbol was loaded from dat file, the next pointer is null!
+	// In this case we have to skip without any checking.
+	if (!symbol->next) return;
 
 	auto processedSize = 0;
 	bool processStrings = false;
