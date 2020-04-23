@@ -7,3 +7,8 @@
 /libs/
 .vs/
 /build/
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+/obj/
