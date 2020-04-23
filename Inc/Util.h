@@ -294,6 +294,18 @@ public:
 
 
 
+    /**
+     * Provides the name of a symbol identified by its parser symbol index.
+     * If the index isn't valid, the empty string is returned.
+     */
+    static const zSTRING& getSymbolName(int index);
+
+    static inline int getIndexDefaultZero(const zSTRING& name) {
+        zCParser* parser; parser = zCParser::GetParser();
+        int index = parser->GetIndex(name);
+        return index == -1 ? 0 : index;
+    }
+
     static inline int getIndexWithChecks(const zSTRING& name, const std::string& callerDescription) {
         zCParser* parser; parser = zCParser::GetParser();
         int index = parser->GetIndex(name);

@@ -103,6 +103,18 @@ HMODULE util::getModuleHandle()
 	return hModule;
 }
 
+const zSTRING& util::getSymbolName(int index)
+{
+	auto* parser = zCParser::GetParser();
+	const auto* symbol = parser->GetSymbol(index);
+	if (!symbol) {
+		static zSTRING empty = "";
+		return empty;
+	}
+
+	return symbol->name;
+}
+
 std::string util::getGothicSystemDirectory()
 {
 	return getCurrentWorkingDir();

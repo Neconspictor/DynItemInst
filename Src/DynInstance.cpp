@@ -78,6 +78,9 @@ static void restorePreviousId(void* obj, void* param, oCItem* itm) {
 
 
 void DynInstance::store(oCItem& item) {
+
+	auto* parser = zCParser::GetParser();
+
 	idx=item.idx;
 	name=item.name.ToChar();
 	nameID=item.nameID.ToChar();
@@ -133,16 +136,16 @@ void DynInstance::store(oCItem& item) {
 	change_value[2]=item.change_value[2];
 
 	// -- parser functions
-	magic=item.magic;
-	on_equip=item.on_equip;
-	on_unequip=item.on_unequip;	
-	on_state[0]= item.on_state[0];
-	on_state[1]= item.on_state[1];
-	on_state[2]= item.on_state[2];
-	on_state[3]= item.on_state[3];
+	magic = util::getSymbolName(item.magic).ToChar();
+	on_equip= util::getSymbolName(item.on_equip).ToChar();
+	on_unequip= util::getSymbolName(item.on_unequip).ToChar();
+
+	for (int i = 0; i < 4; ++i) {
+		on_state[i] = util::getSymbolName(item.on_state[i]).ToChar();
+	}
 
 	// -- owner									
-	owner= item.owner;			//	owner: npc instance
+	owner= util::getSymbolName(item.owner).ToChar();			//	owner: npc instance
 	ownerGuild= item.ownerGuild;		//	owner: guild
 	disguiseGuild= item.disguiseGuild;
 
@@ -157,7 +160,7 @@ void DynInstance::store(oCItem& item) {
 
 	scemeName= item.scemeName.ToChar();
 	material= item.material;	
-	munition= item.munition;		//	Instance of ammunition
+	munition= util::getSymbolName(item.munition).ToChar();		//	Instance of ammunition
 
 	spell= item.spell;			
 	range= item.range;			
@@ -262,17 +265,16 @@ void DynInstance::init(oCItem* item, int instanceParserSymbolID) {
 	item->change_value[2]=change_value[2];
 
 	// -- parser functions
-	item->magic=magic;
-	item->on_equip=on_equip;
-	item->on_unequip=on_unequip;
+	item->magic= util::getIndexDefaultZero(magic.c_str());
+	item->on_equip= util::getIndexDefaultZero(on_equip.c_str());;
+	item->on_unequip= util::getIndexDefaultZero(on_unequip.c_str());
 
-	item->on_state[0]=on_state[0];
-	item->on_state[1]=on_state[1];
-	item->on_state[2]=on_state[2];
-	item->on_state[3]=on_state[3];
+	for (int i = 0; i < 4; ++i) {
+		item->on_state[i] = util::getIndexDefaultZero(on_state[i].c_str());
+	}
 
 	// -- owner									
-	item->owner=owner;			//	owner: npc instance
+	item->owner= util::getIndexDefaultZero(owner.c_str());			//	owner: npc instance
 	item->ownerGuild=ownerGuild;		//	owner: guild
 	item->disguiseGuild=disguiseGuild;
 
@@ -287,7 +289,7 @@ void DynInstance::init(oCItem* item, int instanceParserSymbolID) {
 
 	item->scemeName=zSTRING(scemeName.c_str());
 	item->material=material;	
-	item->munition=munition;		//	Instance of ammunition
+	item->munition= util::getIndexDefaultZero(munition.c_str());		//	Instance of ammunition
 
 	item->spell=spell;			
 	item->range=range;			
@@ -418,17 +420,17 @@ void DynInstance::serialize(std::ostream& os) const
 	}
 
 	// -- parser functions
-	util::writeValue(os, magic);
-	util::writeValue(os, on_equip); //TODO use symbol name
-	util::writeValue(os, on_unequip); //TODO use symbol name
+	util::writeString(os, magic);
+	util::writeString(os, on_equip); //TODO use symbol name
+	util::writeString(os, on_unequip); //TODO use symbol name
 
 	for (int i = 0; i < 4; ++i)
 	{
-		util::writeValue(os, on_state[i]);
+		util::writeString(os, on_state[i]);
 	}
 
 	// -- owner		
-	util::writeValue(os, owner); //	owner: npc instance
+	util::writeString(os, owner); //	owner: npc instance
 	util::writeValue(os, ownerGuild); //	owner: guild
 	util::writeValue(os, disguiseGuild);
 
@@ -444,7 +446,7 @@ void DynInstance::serialize(std::ostream& os) const
 	util::writeString(os, scemeName);
 
 	util::writeValue(os, material);
-	util::writeValue(os, munition); //	Instance of ammunition
+	util::writeString(os, munition); //	Instance of ammunition
 
 	util::writeValue(os, spell);
 	util::writeValue(os, range);
@@ -541,17 +543,17 @@ void DynInstance::deserialize(std::istream& is)
 	}
 
 	// -- parser functions
-	util::readValue(is, magic);
-	util::readValue(is, on_equip); // TODO symbol string!
-	util::readValue(is, on_unequip); // TODO symbol string!
+	util::readString(is, magic);
+	util::readString(is, on_equip); // TODO symbol string!
+	util::readString(is, on_unequip); // TODO symbol string!
 
 	for (int i = 0; i < 4; ++i)
 	{
-		util::readValue(is, on_state[i]);
+		util::readString(is, on_state[i]);
 	}
 
 	// -- owner
-	util::readValue(is, owner); // TODO symbol string!
+	util::readString(is, owner); // TODO symbol string!
 	util::readValue(is, ownerGuild);
 	util::readValue(is, disguiseGuild);
 
@@ -566,7 +568,7 @@ void DynInstance::deserialize(std::istream& is)
 
 	util::readString(is, scemeName);
 	util::readValue(is, material);
-	util::readValue(is, munition); // TODO symbol string!
+	util::readString(is, munition); // TODO symbol string!
 
 	util::readValue(is, spell);
 	util::readValue(is, range);

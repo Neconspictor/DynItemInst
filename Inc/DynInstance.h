@@ -157,13 +157,13 @@ public:
 	int     change_value[3];		//51
 
 	// -- parser functions
-	int     magic;
-	int     on_equip;
-	int     on_unequip;	
-	int     on_state[4];			
+	std::string     magic;
+	std::string     on_equip;
+	std::string     on_unequip;
+	std::string     on_state[4];
 
 	// -- owner									
-	int		owner;			//	owner: npc instance
+	std::string		owner;			//	owner: npc instance
 	int		ownerGuild;		//	owner: guild
 	int		disguiseGuild;
 
@@ -178,7 +178,7 @@ public:
 
 	std::string	scemeName;
 	int		material;	
-	int		munition;		//	Instance of ammunition
+	std::string		munition;		//	Instance of ammunition
 
 	int 	spell;			
 	int		range;			//85		
