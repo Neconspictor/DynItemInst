@@ -12,7 +12,6 @@ INSTANCE Spell_Levitation (C_Spell_Proto)
 	targetCollectAlgo		= TARGET_COLLECT_CASTER;
 	canTurnDuringInvest		= FALSE;
 	canChangeTargetDuringInvest	=	FALSE;
-	//canTurnDuringInvest		= 0;
 };
 
 func int Spell_Logic_Levitation (var int manaInvested)
