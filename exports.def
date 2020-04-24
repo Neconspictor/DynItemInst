@@ -9,7 +9,6 @@ EXPORTS
 	DII_CreateNewItem
 	DII_CreateNewInstance
 	DII_CreateNewInstanceStr
-	DII_DeleteDII
 	DII_DeleteItem
 	DII_IsDynamic
 	DII_IsInstanceDynamic

@@ -75,7 +75,6 @@ func void DII_ApplyInstanceChangesToAll(var string instanceName) {
 // NOTE: I encourage you not to use it since a previously proxied instance 
 // can lead to hard to track bugs if this function is not used properly.
 // And usually it isn't needed. 
-// @return : TRUE, if the proxy is successfully setup. Otherwise FALSE.
 // *********************************************************************
 FUNC void DII_RemoveProxy (var string sourceInstanceName) {
     if (!(NEC_Init_Modules & NEC_DII)) {
@@ -164,25 +163,6 @@ FUNC INT DII_CreateNewInstanceStr (var c_item itm, var string instanceName) {
 	CALL__cdecl(adr);
 	
 	return +ret;
-};
-
-
-// ***************************************************************
-//  Deletes a dynamic item instance by its instance name.
-// ***************************************************************
-func void DII_DeleteDII (var string instanceName) {
-    if (!(NEC_Init_Modules & NEC_DII)) {
-        MEM_Warn("neclib: DII_DeleteDII: DII Module isn't initialized!");
-        return;
-    };
-	
-	var int instanceParserSymbolID;
-	instanceParserSymbolID = DII_GetInstanceID(instanceName);
-	
-	var int adr;
-	adr = GetProcAddress (LoadLibrary (NEC_relativeLibraryPath), "DII_DeleteDII");
-	CALL_IntParam(instanceParserSymbolID);
-	CALL__cdecl(adr);
 };
 
 

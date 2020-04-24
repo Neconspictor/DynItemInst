@@ -12,3 +12,4 @@
 *.vcxproj.filters
 *.vcxproj.user
 /obj/
+/demo/_work/
