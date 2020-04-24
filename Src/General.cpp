@@ -44,9 +44,9 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 
 const float General::LIB_VERSION = 1.03f;
 
-General::General() : Module("DaedalusExports")
+General::General() : Module("General")
 {
-	mModuleDesc = "DaedalusExports";
+	mModuleDesc = "General";
 }
 
 General::~General()
