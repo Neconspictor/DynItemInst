@@ -76,7 +76,7 @@ func void DII_ApplyInstanceChangesToAll(var string instanceName) {
 // can lead to hard to track bugs if this function is not used properly.
 // And usually it isn't needed. 
 // *********************************************************************
-/*FUNC void DII_RemoveProxy (var string sourceInstanceName) {
+FUNC void DII_RemoveProxy (var string sourceInstanceName) {
     if (!(NEC_Init_Modules & NEC_DII)) {
         MEM_Warn("neclib: DII_RemoveProxy: DII Module isn't initialized!");
         return;
@@ -86,7 +86,7 @@ func void DII_ApplyInstanceChangesToAll(var string instanceName) {
 	adr = GetProcAddress (LoadLibrary (NEC_relativeLibraryPath), "DII_RemoveProxy");
 	CALL_zStringPtrParam(sourceInstanceName);
 	CALL__cdecl(adr);
-};*/
+};
 
 
 // ************************************************************
