@@ -28,5 +28,5 @@ const string spellFxAniLetters[MAX_SPELL] =
 
     // ...
 
-    "HEA"                   // 100  SPL_Telekinesis
+    "TLK"                   // 100  SPL_Telekinesis
 };

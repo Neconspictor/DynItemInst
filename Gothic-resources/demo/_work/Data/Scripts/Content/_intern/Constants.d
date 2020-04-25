@@ -939,7 +939,7 @@ const string spellFxAniLetters[MAX_SPELL] =
 	"XXX",					// 98	SPL_Reserved_98
 	"XXX",					// 99	SPL_Reserved_99
 	"SUM",					// 100	SPL_Levitation
-	"HEA"	  				// 101	SPL_Telekinesis
+	"TLK"	  				// 101	SPL_Telekinesis
 };
 
 

@@ -1,0 +1,9 @@
+// Telekinese
+
+			ani			("t_MagRun_2_TlkCast"		1	"s_TlkCast"		0.1 0.0 M.	"Hum_MagPetrify_M01.asc"	F	1	26)
+			ani			("s_TlkCast"				1	"s_TlkCast"		0.0 0.0 M.	"Hum_MagPetrify_M01.asc"	F	27	101	FPS:10)
+			ani			("t_TlkCast_2_Stand"		1	""				0.0 0.1 M.	"Hum_MagPetrify_M01.asc"	F	102	124)
+
+			ani			("t_TlkCast_2_TlkShoot"		1	"s_TlkShoot"	0.0 0.0 M.	"Hum_MagPetrify_M01.asc"	F	101	101	FPS:10)
+			ani			("s_TlkShoot"				1	"s_TlkShoot"	0.0 0.0 M.	"Hum_MagPetrify_M01.asc"	F	101	101	FPS:10)
+			ani			("t_TlkShoot_2_Stand"		1	""				0.0 0.1 M.	"Hum_MagPetrify_M01.asc"	F	102	124)
