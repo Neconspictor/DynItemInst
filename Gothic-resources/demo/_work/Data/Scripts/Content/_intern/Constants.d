@@ -643,8 +643,8 @@ const int SPL_Reserved_97			= 97;
 const int SPL_Reserved_98			= 98;
 const int SPL_Reserved_99			= 99;
 
-const int SPL_Telekinesis			= 100;
-const int SPL_Levitation			= 101;
+const int SPL_Levitation			= 100;
+const int SPL_Telekinesis			= 101;
 
 const int MAX_SPELL					= 102;   // 59 (Gothic), 68 (Gothic2), 100 (G2Addon)
 
@@ -791,8 +791,8 @@ const string spellFxInstanceNames[MAX_SPELL] =
 	"Light",				// 97	SPL_Reserved_97
 	"Light",				// 98	SPL_Reserved_98
 	"Light",					// 99	SPL_Reserved_99
-	"Telekinesis",			//100 SPL_Telekinesis
-	"Levitation"			//101 SPL_Levitation
+	"Levitation",			//100 SPL_Levitation
+	"Telekinesis"			//101 SPL_Telekinesis
 };
 
 
@@ -938,8 +938,8 @@ const string spellFxAniLetters[MAX_SPELL] =
 	"XXX",					// 97	SPL_Reserved_97
 	"XXX",					// 98	SPL_Reserved_98
 	"XXX",					// 99	SPL_Reserved_99
-	"HEA",	  				// 100	SPL_Telekinesis
-	"SUM"					// 101	SPL_Levitation
+	"SUM",					// 100	SPL_Levitation
+	"HEA"	  				// 101	SPL_Telekinesis
 };
 
 
