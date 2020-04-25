@@ -41,37 +41,62 @@ class Spell_Telekinesis_Data {
 instance Spell_Telekinesis_Data@(Spell_Telekinesis_Data);
 
 
-/**
- * Checks the state of the telekinesis interpolator and stops the spell.
+/*
+ * Checks the state of the telekinesis interpolator and stops the spell
  */
-func void _Spell_Telekinesis_MoveTarget(var int hndl) {
+func int _Spell_Telekinesis_MoveTarget(var int ptr) {
+    var Spell_Telekinesis_Data data; data = _^(ptr);
 
-	var Spell_Telekinesis_Data data; data = get(hndl);
-	var oCNpc oCSelf; oCSelf = _^(data.pCaster);	
-	var oCItem oCTarget; oCTarget = _^(data.pTarget);	
-	var int spellLevel; spellLevel = oCSelf.aiscriptvars[AIV_SpellLevel];
-	
-	if (spellLevel > 0) {
-	
-		//MEM_Warn(ConcatStrings("name = ", oCSelf.name));
-		//MEM_Warn(ConcatStrings("AIV_SpellLevel = ", IntToString(oCSelf.aiscriptvars[AIV_SpellLevel])));
-		oCSelf.aiscriptvars[AIV_SpellLevel] = 0;
-		
-		zCVobSetSleeping(data.pTarget, FALSE);
-		zCVobSetPhysicsEnabled(data.pTarget, TRUE);
-		
-		TELEKINESIS_DeleteInterpolator(data.pInterpolator);
-		FF_RemoveData(_Spell_Telekinesis_MoveTarget, hndl);
-		delete(hndl);
-		MEM_Info("neclib: _Spell_Telekinesis_MoveTarget():: End of movement.");
-		
-		return;
-	};
-	
-	var int vobPosition[3];
-	
-	TELEKINESIS_Interpolate(data.pInterpolator, data.pTarget);
+    // Another safety check
+    if (!Hlp_Is_oCNpc(data.pCaster)) || (!Hlp_Is_oCItem(data.pTarget)) {
+        return FALSE;
+    };
+
+    var oCNpc caster; caster = _^(data.pCaster);  
+    var oCItem oCTarget; oCTarget = _^(data.pTarget);
+    var int spellLevel; spellLevel = caster.aiscriptvars[AIV_SpellLevel];
+
+    // Begin movement
+    if (!data.pInterpolator) {
+        var int vobPosition[3];
+        vobPosition[0] = oCTarget._zCVob_trafoObjToWorld[3];
+        vobPosition[1] = oCTarget._zCVob_trafoObjToWorld[7];
+        vobPosition[2] = oCTarget._zCVob_trafoObjToWorld[11];
+        
+        var int npcPosition[3];
+        npcPosition[0] = caster._zCVob_trafoObjToWorld[3];
+        npcPosition[1] = caster._zCVob_trafoObjToWorld[7];
+        npcPosition[2] = caster._zCVob_trafoObjToWorld[11];
+        
+        data.pInterpolator = TELEKINESIS_createInterpolator(_@(vobPosition[0]), 
+                                                            _@(npcPosition[0]),
+                                                            TELEKINESIS_UPMOVEMENT,
+                                                            TELEKINESIS_SPEED);
+
+        return TRUE;
+    };
+
+    // End movement
+    if (spellLevel > 0) {
+        caster.aiscriptvars[AIV_SpellLevel] = 0;
+        
+        zCVobSetSleeping(data.pTarget, FALSE);
+        zCVobSetPhysicsEnabled(data.pTarget, TRUE);
+        
+        TELEKINESIS_DeleteInterpolator(data.pInterpolator);
+        MEM_Info("neclib: _Spell_Telekinesis_MoveTarget():: End of movement.");
+        
+        return FALSE;
+    };
+
+    // Continue movement
+    TELEKINESIS_Interpolate(data.pInterpolator, data.pTarget);
+
+    return TRUE;
 };
+
+
+
 
 /**
  * Starts the focus item to move.
@@ -143,17 +168,17 @@ func int Spell_Logic_Telekinesis (var int manaInvested)
 		{
 			self.attribute[ATR_MANA]=0;
 		};
-		
-		var int hndl; hndl = new(Spell_Telekinesis_Data@);
-		var Spell_Telekinesis_Data data; data = get(hndl);
-		data.pCaster = _@(oCSelf);
-		data.pTarget = oCSelf.focus_vob;
-		
-		FF_ApplyExtData(_Spell_Telekinesis_MoveTargetStart, TELEKINESIS_MOVEMENT_DELAY, 1, hndl);
+				
+		var int ptr; ptr = create(Spell_Telekinesis_Data@);
+        var Spell_Telekinesis_Data data; data = _^(ptr);
+        data.pCaster = _@(oCSelf);
+        data.pTarget = oCSelf.focus_vob;
+        data.pInterpolator = 0; // Mark as non-initialized
+
+        MEM_ArrayInsert(_Spell_Telekinesis_InstanceArrayPtr, ptr);
 		
 		
 		// ensure that npcs react if hero tries to steal
-		// Note: This only works if the hero is inside a house. From outside it doesn't work
 		if (Npc_IsPlayer(self)) {
 			var int itemBak; itemBak = _@(item); 
 
@@ -166,7 +191,7 @@ func int Spell_Logic_Telekinesis (var int manaInvested)
 		
 	};
 	
-	return SPL_NEXTLEVEL;
+	return SPL_NEXTLEVEL;//SPL_NEXTLEVEL;
 };
 
 func void Spell_Cast_Telekinesis(var int spellLevel)
@@ -182,4 +207,36 @@ func void Spell_Cast_Telekinesis(var int spellLevel)
 	};
 	
 	MEM_Info("neclib: Spell_Cast_Telekinesis: called.");
+};
+
+
+
+
+
+
+
+/*
+ * This is the "global" FrameFunction handling all active telekinesis spells
+ */
+func void _Spell_Telekinesis_Handler() {
+    if (!_Spell_Telekinesis_InstanceArrayPtr) {
+        return;
+    };
+
+    var zCArray arr; arr = _^(_Spell_Telekinesis_InstanceArrayPtr);
+    if (!arr.numInArray) {
+        return;
+    };
+
+    // Iterate over all instances and possibly delete them
+    var int i; i = 0;
+    while(i < arr.numInArray);
+        var int ele; ele = MEM_ReadIntArray(arr.array, i);
+        if (_Spell_Telekinesis_MoveTarget(ele)) {
+            i += 1;
+        } else {
+            MEM_ArrayRemoveIndex(_Spell_Telekinesis_InstanceArrayPtr, i);
+            MEM_Free(ele);
+        };
+    end;
 };

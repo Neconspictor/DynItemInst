@@ -2,6 +2,11 @@
  * Neclib telekinesis module
  */
  
+/*
+ * Pointer to the array holding all telekinesis spell instances
+ */
+const int _Spell_Telekinesis_InstanceArrayPtr = 0;
+ 
  //************************************************
 // Less restrict external test
 // by Sektenspinner: https://forum.worldofplayers.de/forum/threads/969446-Skriptpaket-Ikarus-3/page9?p=16955344#post16955344
@@ -222,6 +227,7 @@ func void Spell_Telekinesis_Prio() {
 };
 
 
+
 /**
  * Inits the telekinesis module.
  */ 
@@ -231,15 +237,23 @@ func void TELEKINESIS_Init()
     const int oCSpell__Setup_G2                = 4737328; //0x484930
 	const int oCSpell__IsTargetTypeValid_G1    = 4709316; //0x47DBC4
     const int oCSpell__IsTargetTypeValid_G2    = 4743108; //0x485FC4
+	const int oCNpcFocus__focuslist_G1         =  9283120; //0x8DA630
+    const int oCNpcFocus__focuslist_G2         = 11208440; //0xAB06F8
+	
+	
+	// Reset the array at every level change, loading and new game
+    if (_Spell_Telekinesis_InstanceArrayPtr) {
+        MEM_ArrayClear(_Spell_Telekinesis_InstanceArrayPtr);
+    } else {
+        _Spell_Telekinesis_InstanceArrayPtr = MEM_ArrayCreate();
+    };
+
+    // Start the "global" FrameFunction only once ever
+    FF_ApplyOnce(_Spell_Telekinesis_Handler);
 
 
     HookEngineF(oCSpell__Setup_G2, 7, Spell_Telekinesis_Prio);
-	//HookEngineF(+MEMINT_SwitchG1G2(oCSpell__IsTargetTypeValid_G1,
-    //                               oCSpell__IsTargetTypeValid_G2),        5, Spell_Telekinesis_Focus);
-	
 	// Make sure Focus_Magic is initialized (necessary for Spell_Telekinesis_Prio). For details see GothicFreeAim
-    const int oCNpcFocus__focuslist_G1         =  9283120; //0x8DA630
-    const int oCNpcFocus__focuslist_G2         = 11208440; //0xAB06F8
 
 
     var int fMagicPtr; fMagicPtr = MEM_ReadIntArray(+MEMINT_SwitchG1G2(oCNpcFocus__focuslist_G1,
