@@ -2,7 +2,45 @@
  * Neclib telekinesis module
  */
  
- 
+ //************************************************
+// Less restrict external test
+// by Sektenspinner: https://forum.worldofplayers.de/forum/threads/969446-Skriptpaket-Ikarus-3/page9?p=16955344#post16955344
+//************************************************
+
+const int _ExternalAcceptVobsCount = 0;
+const int _oCNpcTypeInfo = 8983472;  //0x8913B0
+const int _zCVobTypeInfo = 8970208;  //0x88DFE0
+
+func void ExternalAcceptVobs() {
+    if (!_ExternalAcceptVobsCount) {
+        const int once = 0;
+    
+        var int ptr; ptr = 7188726; //0x6DB0F6
+        if (!once) { MemoryProtectionOverride(ptr, 4); };
+        MEM_WriteInt(ptr, _zCVobTypeInfo); //0x88DFE0
+        
+        ptr = 7188773; //0x6DB125
+        if (!once) { MemoryProtectionOverride(ptr, 4); };
+        MEM_WriteInt(ptr, _zCVobTypeInfo); //0x88DFE0
+        
+        once = true;
+    };
+    
+    _ExternalAcceptVobsCount += 1;
+};
+
+func void ExternalDenyVobs() {
+    _ExternalAcceptVobsCount -= 1;
+    
+    if (!_ExternalAcceptVobsCount) {
+        var int ptr; ptr = 7188726; //0x6DB0F6
+        MEM_WriteInt(ptr, _oCNpcTypeInfo); //0x88DFE0
+        
+        ptr = 7188773; //0x6DB125
+        MEM_WriteInt(ptr, _oCNpcTypeInfo); //0x88DFE0
+    };
+};
+  
  //const int TARGET_TYPE_ITEM_TELEKINESIS = 256;
  
  /**
@@ -166,7 +204,7 @@ func void Spell_Telekinesis_Prio() {
 		Focus_Magic.item_elevup = 90.0;	
 		Focus_Magic.item_elevdo = -89.0;
 		Focus_Magic.item_prio = 1;
-		MEM_Info("neclib: Spell_Telekinesis_Prio: changed Focus_Magic");
+		//MEM_Info("neclib: Spell_Telekinesis_Prio: changed Focus_Magic");
 		
     } else if (item_prio_backup != 42) {
         // Reset the focus priorities for all other spells!
@@ -182,24 +220,6 @@ func void Spell_Telekinesis_Prio() {
 	var int range1; range1 = truncf(castToIntf(Focus_Magic.item_range1));
 	var int range2; range2 = truncf(castToIntf(Focus_Magic.item_range2));
 };
-
-
-/*
- * Make the focus check mob specific (disallow NPC)
- */
-/*func void Spell_Telekinesis_Focus() {
-    // Constructed case that will only happen for Spell_Telekinesis
-    if (ECX == TARGET_TYPE_ITEM_TELEKINESIS) {
-	
-		//MEM_Info("Spell_Telekinesis_Focus: called");
-        var int vobPtr; vobPtr = MEM_ReadInt(ESP+4);
-		var C_Item itm; itm = _^(vobPtr);
-        if (Hlp_IsValidItem(itm)) {
-			MEM_Info(ConcatStrings("Spell_Telekinesis_Focus: itm.name = ", itm.name));
-            ECX = 1;
-        };
-    };
-};*/
 
 
 /**
