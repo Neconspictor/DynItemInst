@@ -167,25 +167,6 @@ FUNC INT DII_CreateNewInstanceStr (var c_item itm, var string instanceName) {
 
 
 // ***************************************************************
-//  Deletes a dynamic item instance by its instance name.
-// ***************************************************************
-/*func void DII_DeleteDII (var string instanceName) {
-    if (!(NEC_Init_Modules & NEC_DII)) {
-        MEM_Warn("neclib: DII_DeleteDII: DII Module isn't initialized!");
-        return;
-    };
-	
-	var int instanceParserSymbolID;
-	instanceParserSymbolID = DII_GetInstanceID(instanceName);
-	
-	var int adr;
-	adr = GetProcAddress (LoadLibrary (NEC_relativeLibraryPath), "DII_DeleteDII");
-	CALL_IntParam(instanceParserSymbolID);
-	CALL__cdecl(adr);
-};*/
-
-
-// ***************************************************************
 //  Removes an item from the current world and deletes it.
 // ***************************************************************
 func void DII_DeleteItem (VAR C_ITEM itm) {
