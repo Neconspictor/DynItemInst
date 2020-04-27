@@ -60,20 +60,42 @@ func void NEC_InitPerceptions(var int flags)
 	
 };
 
+
+func int _NEC_INIT_Modul(var string initName, var int moduleFlag) {
+	
+	var int symb;
+	
+	if (_NEC_FLAGS & moduleFlag) {
+		
+		symb = MEM_FindParserSymbol(initName);
+		
+		if (symb <= 0) {
+			MEM_SendToSpy(zERR_TYPE_FATAL, ConcatStrings(ConcatStrings("neclib: Function ", initName), " not found"));
+			return FALSE;
+		};
+		
+		NEC_Init_Modules = NEC_Init_Modules | moduleFlag;
+		MEM_CallByID(symb);
+	};
+	
+	return TRUE;
+	
+};
+
 // **********************************************************************************
 // Initialization function for NEC that has to be called in INIT_GLOBAL.
 // **********************************************************************************
 func void NEC_INIT_GLOBAL() {
 
-	if (_NEC_FLAGS & NEC_LEVITATION) {
-		NEC_Init_Modules = NEC_Init_Modules | NEC_LEVITATION;
-		LEVITATION_Init();
-	};
+	const string LEVITATION_INIT_STR = "LEVITATION_Init";
+	const string TELEKINESIS_INIT_STR = "TELEKINESIS_Init";	
 	
-	if (_NEC_FLAGS & NEC_TELEKINESIS) {
-		NEC_Init_Modules = NEC_Init_Modules | NEC_TELEKINESIS;
-		TELEKINESIS_Init();
-	};
+	var int success;
 	
-	MEM_Info("neclib: NEC_INIT_GLOBAL: initialized.");
+	success = _NEC_INIT_Modul(LEVITATION_INIT_STR, NEC_LEVITATION);
+	success = success && _NEC_INIT_Modul(TELEKINESIS_INIT_STR, NEC_TELEKINESIS);
+	
+	if (success) {
+		MEM_Info("neclib: NEC_INIT_GLOBAL: initialized.");
+	};
 };

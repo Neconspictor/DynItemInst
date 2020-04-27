@@ -60,43 +60,42 @@ func void NEC_InitPerceptions(var int flags)
 	
 };
 
+
+func int _NEC_INIT_Modul(var string initName, var int moduleFlag) {
+	
+	var int symb;
+	
+	if (_NEC_FLAGS & moduleFlag) {
+		
+		symb = MEM_FindParserSymbol(initName);
+		
+		if (symb <= 0) {
+			MEM_SendToSpy(zERR_TYPE_FATAL, ConcatStrings(ConcatStrings("neclib: Function ", initName), " not found"));
+			return FALSE;
+		};
+		
+		NEC_Init_Modules = NEC_Init_Modules | moduleFlag;
+		MEM_CallByID(symb);
+	};
+	
+	return TRUE;
+	
+};
+
 // **********************************************************************************
 // Initialization function for NEC that has to be called in INIT_GLOBAL.
 // **********************************************************************************
 func void NEC_INIT_GLOBAL() {
 
-	const string TELEKINESIS_INIT_STR = "TELEKINESIS_Init";
 	const string LEVITATION_INIT_STR = "LEVITATION_Init";
-	var int symb;
+	const string TELEKINESIS_INIT_STR = "TELEKINESIS_Init";	
 	
-
-	if (_NEC_FLAGS & NEC_LEVITATION) {
-		
-		symb = MEM_FindParserSymbol(LEVITATION_INIT_STR);
-		
-		if (symb <= 0) {
-			MEM_SendToSpy(zERR_TYPE_FATAL, ConcatStrings(ConcatStrings("neclib: Function ", LEVITATION_INIT_STR), " not found"));
-			return;
-		};
-		
-		NEC_Init_Modules = NEC_Init_Modules | NEC_LEVITATION;
-		MEM_CallByID(symb);
-		
+	var int success;
+	
+	success = _NEC_INIT_Modul(LEVITATION_INIT_STR, NEC_LEVITATION);
+	success = success && _NEC_INIT_Modul(TELEKINESIS_INIT_STR, NEC_TELEKINESIS);
+	
+	if (success) {
+		MEM_Info("neclib: NEC_INIT_GLOBAL: initialized.");
 	};
-	
-	if (_NEC_FLAGS & NEC_TELEKINESIS) {
-		// Note: telekinesis_init is parsed later. So we use MEM_Call;
-		
-		symb = MEM_FindParserSymbol(TELEKINESIS_INIT_STR);
-		
-		if (symb <= 0) {
-			MEM_SendToSpy(zERR_TYPE_FATAL, ConcatStrings(ConcatStrings("neclib: Function ", TELEKINESIS_INIT_STR), " not found"));
-			return;
-		};
-		
-		NEC_Init_Modules = NEC_Init_Modules | NEC_TELEKINESIS;
-		MEM_CallByID(symb);
-	};
-	
-	MEM_Info("neclib: NEC_INIT_GLOBAL: initialized.");
 };

@@ -6,14 +6,12 @@ _INTERN\Ikarus.d
 _INTERN\float.d
 
 LeGo\Header_G2.src
+neclib\Header.src
 
 
 AI\AI_INTERN\AI_CONSTANTS.D
 AI\AI_INTERN\BODYSTATES.D
 AI\AI_INTERN\FOCUS.D
-
-neclib\Header.src
-
 AI\AI_INTERN\Npc_SetToMad.d
 AI\AI_INTERN\Species.d
 AI\AI_INTERN\PrintDebug.d
