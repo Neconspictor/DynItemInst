@@ -34,67 +34,135 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <chrono>
 #include <vector>
 #include <memory>
+#include <queue>
+#include <list>
 
-class Interpolator
+/**
+* Factor is a floating point number between zero and 1.
+*/
+template<class T>
+class Factor {
+public: 
+
+	Factor(T value) : mDecimalFactor(value){
+		mDecimalFactor = std::max<T>(mDecimalFactor, 0);
+		mDecimalFactor = std::min<T>(mDecimalFactor, 1);
+	}
+
+	const T& get() const {
+		return mDecimalFactor;
+	}
+
+private:
+	T mDecimalFactor;
+};
+
+class AbstractInterpolator
 {
 public:
 
-	using time_point = std::chrono::system_clock::time_point;
-	using milliseconds = std::chrono::milliseconds;
+	using Decimal = float;
 
-	Interpolator(const zVEC3& start, time_point startTime, milliseconds duration);
-	virtual ~Interpolator() = default;
+	using Seconds = Decimal;
 
-	virtual zVEC3 interpolate(time_point timePoint) const = 0;
-	virtual bool finished(time_point timePoint) const;
-	virtual time_point getStartTime() const;
-	virtual time_point getEndTime() const;
+	/** 
+	 * Speed is measured in centimeters per second
+	 */
+	using Speed = Decimal;
+
+	/**
+	 * Distance is measured in centimeters
+	 */
+	using Distance = Decimal;
+
+	using Factor = Factor<Decimal>;
+
+	AbstractInterpolator() = default;
+	AbstractInterpolator(const AbstractInterpolator&) = default;
+
+	virtual ~AbstractInterpolator() = default;
+
+	virtual zVEC3 interpolate(Seconds timePoint) = 0;
+	virtual bool finished(Seconds timePoint) const = 0;
+
+	/**
+	 * Provides frame time in seconds
+	 */
+	static float getFrameTime();
+
+	/**
+	 * Provides total time in seconds
+	 */
+	static float getTotalTime();
+
+	static inline constexpr float toSeconds(float milliSeconds) {
+		return milliSeconds / 1000.0f;
+	}
 
 protected:
-	virtual float calcFactor(time_point timePoint) const;
-
-	const zVEC3 m_start;
-	const time_point m_startTime;
-	const time_point m_endTime;
 
 	static std::stringstream mLogStream;
 };
 
 
-class LinearInterpolator : public Interpolator
+class LinearInterpolator : public AbstractInterpolator
 {
 public:
-	LinearInterpolator(const zVEC3& start, const zVEC3& end, time_point startTime, milliseconds duration);
+	LinearInterpolator(const zVEC3& startPos,
+		const zVEC3& endPos,
+		Seconds startTime,
+		Speed speed);
 	virtual ~LinearInterpolator() = default;
 
-	zVEC3 interpolate(time_point timePoint) const override;
+	LinearInterpolator(const LinearInterpolator&) = default;
+	LinearInterpolator& operator=(const LinearInterpolator&) = default;
+	LinearInterpolator& operator=(LinearInterpolator&&) = default;
+
+	zVEC3 interpolate(Seconds timePoint) override;
+
+	Seconds getStartTime() const;
+	Seconds getEndTime() const;
+	Speed getSpeed() const;
+	const zVEC3& getStartPosition() const;
+	const zVEC3& getEndPosition() const;
+
+	bool finished(Seconds timePoint) const  override;
 
 private:
+	zVEC3 mStartPosition;
+	zVEC3 mEndPosition;
+	Seconds mStartTime;
+	Speed mSpeed;
 
-	zVEC3 m_end;
+	Distance getDistance() const;
+	Seconds getDuration() const;
+	virtual Factor calcFactor(Seconds timePoint) const;
 };
 
-class TelekinesisInterpolator : public Interpolator
+class PathInterpolator : public AbstractInterpolator
 {
 public:
-	TelekinesisInterpolator(const zVEC3& start, const zVEC3& pitStop, const zVEC3& end, time_point startTime, milliseconds duration);
-	virtual ~TelekinesisInterpolator() = default;
+	PathInterpolator(std::queue<zVEC3> stations,
+		Seconds startTime,
+		Speed speed);
 
-	zVEC3 interpolate(time_point timePoint) const override;
+	virtual ~PathInterpolator() = default;
 
-	static std::unique_ptr<TelekinesisInterpolator> createTelekinesisInterpolator(const zVEC3& start, 
+	zVEC3 interpolate(Seconds timePoint) override;
+	bool finished(Seconds timePoint) const  override;
+
+	static std::unique_ptr<PathInterpolator> createTelekinesisInterpolator(const zVEC3& start, 
 		const zVEC3& end, 
 		float pitStopHeight, 
-		float speed // cm / s
+		float speed, // cm / s
+		float delay // ms
+		
 	);
 
 private:
 
-	static milliseconds calcPitStopDuration(const zVEC3& vec3, const zVEC3& pitStop, const zVEC3& end, milliseconds duration);
-
-	milliseconds m_PitStopDuration; // the duration of the pit stop
-	std::unique_ptr<LinearInterpolator> m_pitStopInterpolator; // used to calculate the pit stop
-	std::unique_ptr<LinearInterpolator> m_lastStopInterpolator; // used to calculate the last stop
+	LinearInterpolator mLinearInterpolator; // used to calculate the pit stop
+	std::queue<zVEC3> mStations;
 };
 
 
@@ -108,22 +176,23 @@ public:
 
 	static int TELEKINESIS_IsVobSeeable(oCNpc* npc, zCVob* vob);
 
-	static TelekinesisInterpolator* TELEKINESIS_CreateInterpolator(const zVEC3* vobPosition,
+	static PathInterpolator* TELEKINESIS_CreateInterpolator(const zVEC3* vobPosition,
 		const zVEC3* npcPosition,
 		int upMoveAmount,  // cm
-		int speed // cm / s
+		int speed, // cm / s
+		int delay // ms
 	);
 
-	static void TELEKINESIS_GetInterpolatedVec(TelekinesisInterpolator* interpolatorPtr, zVEC3* dest);
+	static void TELEKINESIS_GetInterpolatedVec(PathInterpolator* interpolatorPtr, zVEC3* dest);
 
-	static void TELEKINESIS_DeleteInterpolator(TelekinesisInterpolator* interpolatorPtr);
+	static void TELEKINESIS_DeleteInterpolator(PathInterpolator* interpolatorPtr);
 
-	static void TELEKINESIS_Interpolate(TelekinesisInterpolator* interpolatorPtr, zCVob* vob);
+	static void TELEKINESIS_Interpolate(PathInterpolator* interpolatorPtr, zVEC3* interpolatedPosition);
 
 	static void TELEKINESIS_ClearInterpolators();
 
 
 private:
 
-	static std::vector<std::unique_ptr<TelekinesisInterpolator>> mInterpolators;
+	static std::vector<std::unique_ptr<PathInterpolator>> mInterpolators;
 };

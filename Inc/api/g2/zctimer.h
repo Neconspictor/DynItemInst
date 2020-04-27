@@ -48,6 +48,20 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 class zCTimer
 {
 public:
+
+	zREAL factorMotion;        //zREAL        //nicht zu klein machen. Sonst: Freeze bei hoher Framerate!
+	zREAL frameTimeFloat;      //zREAL [msec] //Zeit der zwischen diesem und dem letzten Frame verstrichen ist
+	zREAL totalTimeFloat;      //zREAL [msec] //gesamte Zeit
+	zREAL frameTimeFloatSecs;  //zREAL  [s]
+	zREAL totalTimeFloatSecs;  //zREAL  [s]
+	zDWORD lastTimer;           //zDWORD
+	zDWORD frameTime;           //zDWORD [msec] //nochmal als Ganzahl
+	zDWORD totalTime;           //zDWORD [msec]
+	zDWORD minFrameTime;        //zDWORD       //antifreeze. Sonst wird die Framezeit auf 0 gerundet und nichts bewegt sich
+
+	zDWORD forcedMaxFrameTime;  //zDWORD //länger als das darf ein Frame (in Spielzeit) nicht dauern. Um zu große Zeitsprünge für die Objekte zu vermeiden? Jedenfalls sort dies dafür, dass das Spiel langsamer läuft, wenn das Spiel mit rendern nicht hinterherkommt.
+
+
 	//.text:006370B0 ; public: void __thiscall zCTimer::SetMotionFactor(float)
 	void SetMotionFactor(float p1)
 	{

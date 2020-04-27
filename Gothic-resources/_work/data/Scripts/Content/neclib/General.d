@@ -70,3 +70,52 @@ func void zCVobSetPhysicsEnabled(var int czvobPtr, var int enablePhysics) {
 	CALL_IntParam(enablePhysics);
 	CALL__thiscall(czvobPtr, adr);
 };
+
+
+//.text:0061BB70 ; void __thiscall zCVob::SetPositionWorld(zCVob *this, const struct zVEC3 *)
+func void zCVobSetPositionWorld(var int czvobPtr, var int zvec3Ptr) {
+	const int adr = 6404976;
+	CALL_IntParam(zvec3Ptr);
+	CALL__thiscall(czvobPtr, adr);
+};
+
+
+
+ //************************************************
+// Less restrict external test
+// by Sektenspinner: https://forum.worldofplayers.de/forum/threads/969446-Skriptpaket-Ikarus-3/page9?p=16955344#post16955344
+//************************************************
+
+const int _ExternalAcceptVobsCount = 0;
+const int _oCNpcTypeInfo = 8983472;  //0x8913B0
+const int _zCVobTypeInfo = 8970208;  //0x88DFE0
+
+func void ExternalAcceptVobs() {
+    if (!_ExternalAcceptVobsCount) {
+        const int once = 0;
+    
+        var int ptr; ptr = 7188726; //0x6DB0F6
+        if (!once) { MemoryProtectionOverride(ptr, 4); };
+        MEM_WriteInt(ptr, _zCVobTypeInfo); //0x88DFE0
+        
+        ptr = 7188773; //0x6DB125
+        if (!once) { MemoryProtectionOverride(ptr, 4); };
+        MEM_WriteInt(ptr, _zCVobTypeInfo); //0x88DFE0
+        
+        once = true;
+    };
+    
+    _ExternalAcceptVobsCount += 1;
+};
+
+func void ExternalDenyVobs() {
+    _ExternalAcceptVobsCount -= 1;
+    
+    if (!_ExternalAcceptVobsCount) {
+        var int ptr; ptr = 7188726; //0x6DB0F6
+        MEM_WriteInt(ptr, _oCNpcTypeInfo); //0x88DFE0
+        
+        ptr = 7188773; //0x6DB125
+        MEM_WriteInt(ptr, _oCNpcTypeInfo); //0x88DFE0
+    };
+};

@@ -65,14 +65,37 @@ func void NEC_InitPerceptions(var int flags)
 // **********************************************************************************
 func void NEC_INIT_GLOBAL() {
 
+	const string TELEKINESIS_INIT_STR = "TELEKINESIS_Init";
+	const string LEVITATION_INIT_STR = "LEVITATION_Init";
+	var int symb;
+	
+
 	if (_NEC_FLAGS & NEC_LEVITATION) {
+		
+		symb = MEM_FindParserSymbol(LEVITATION_INIT_STR);
+		
+		if (symb <= 0) {
+			MEM_SendToSpy(zERR_TYPE_FATAL, ConcatStrings(ConcatStrings("neclib: Function ", LEVITATION_INIT_STR), " not found"));
+			return;
+		};
+		
 		NEC_Init_Modules = NEC_Init_Modules | NEC_LEVITATION;
-		LEVITATION_Init();
+		MEM_CallByID(symb);
+		
 	};
 	
 	if (_NEC_FLAGS & NEC_TELEKINESIS) {
+		// Note: telekinesis_init is parsed later. So we use MEM_Call;
+		
+		symb = MEM_FindParserSymbol(TELEKINESIS_INIT_STR);
+		
+		if (symb <= 0) {
+			MEM_SendToSpy(zERR_TYPE_FATAL, ConcatStrings(ConcatStrings("neclib: Function ", TELEKINESIS_INIT_STR), " not found"));
+			return;
+		};
+		
 		NEC_Init_Modules = NEC_Init_Modules | NEC_TELEKINESIS;
-		TELEKINESIS_Init();
+		MEM_CallByID(symb);
 	};
 	
 	MEM_Info("neclib: NEC_INIT_GLOBAL: initialized.");

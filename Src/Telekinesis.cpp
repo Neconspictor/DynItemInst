@@ -34,132 +34,150 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <api/g2/ocnpc.h>
 #include <api/g2/ocgame.h>
 #include <api/g2/zcworld.h>
+#include <api\g2\zctimer.h>
+#include <list>
 
-std::stringstream Interpolator::mLogStream;
-std::vector<std::unique_ptr<TelekinesisInterpolator>> Telekinesis::mInterpolators;
+std::stringstream AbstractInterpolator::mLogStream;
+std::vector<std::unique_ptr<PathInterpolator>> Telekinesis::mInterpolators;
 
+float AbstractInterpolator::getFrameTime()
+{
+	return zCTimer::GetTimer()->frameTimeFloatSecs;
+}
 
-Interpolator::Interpolator(const zVEC3& start, time_point startTime, milliseconds duration)
+float AbstractInterpolator::getTotalTime()
+{
+	return zCTimer::GetTimer()->totalTimeFloatSecs;
+}
+
+LinearInterpolator::LinearInterpolator(const zVEC3& startPos, const zVEC3& endPos, Seconds startTime, Speed speed) :
+	AbstractInterpolator(),
+	mStartPosition(startPos), mEndPosition(endPos), mStartTime(startTime), mSpeed(speed)
+{
+}
+
+zVEC3 LinearInterpolator::interpolate(Seconds timePoint)
+{
+	const auto factor = calcFactor(timePoint);
+	const auto dir = mEndPosition - mStartPosition;
+	return mStartPosition + factor.get() * dir;
+}
+
+AbstractInterpolator::Seconds LinearInterpolator::getStartTime() const
+{
+	return mStartTime;
+}
+
+AbstractInterpolator::Seconds LinearInterpolator::getEndTime() const
+{
+	return getStartTime() + getDuration();
+}
+
+AbstractInterpolator::Speed LinearInterpolator::getSpeed() const
+{
+	return mSpeed;
+}
+
+const zVEC3& LinearInterpolator::getStartPosition() const
+{
+	return mStartPosition;
+}
+
+const zVEC3& LinearInterpolator::getEndPosition() const
+{
+	return mEndPosition;
+}
+
+bool LinearInterpolator::finished(Seconds timePoint) const
+{
+	return timePoint >= getEndTime();
+}
+
+AbstractInterpolator::Distance LinearInterpolator::getDistance() const
+{
+	const auto differene = getEndPosition() - getStartPosition();
+	return differene.Length();
+}
+
+AbstractInterpolator::Seconds LinearInterpolator::getDuration() const
+{
+	const auto speed = getSpeed();
+	if (speed < 0.0001f) {
+		return std::numeric_limits<Seconds>::infinity();
+	}
+	return getDistance() / getSpeed();
+}
+
+AbstractInterpolator::Factor LinearInterpolator::calcFactor(Seconds timePoint) const
+{
+	const auto startTime = getStartTime();
+	const auto distance = getDistance();
+	const auto passedTime = timePoint - startTime;
+	const auto passedDistance = passedTime * getSpeed();
+
+	return passedDistance / distance;
+}
+
+PathInterpolator::PathInterpolator(std::queue<zVEC3> stations,
+	Seconds startTime,
+	Speed speed)
 	:
-	m_start(start),
-	m_startTime(startTime),
-	m_endTime(startTime + duration)
+	AbstractInterpolator(),
+	// at(0) throws std::out_of_range error
+	mLinearInterpolator(zVEC3(), zVEC3(), startTime, speed),
+	mStations(std::move(stations))
 {
-}
-
-bool Interpolator::finished(time_point timePoint) const
-{
-	return timePoint.time_since_epoch() >= m_endTime.time_since_epoch();
-}
-
-Interpolator::time_point Interpolator::getStartTime() const
-{
-	return m_startTime;
-}
-
-Interpolator::time_point Interpolator::getEndTime() const
-{
-	return m_endTime;
-}
-
-float Interpolator::calcFactor(time_point timePoint) const
-{
-
-	using namespace std;
-	timePoint = min<>(timePoint, m_endTime);
-	timePoint = max<>(timePoint, m_startTime);
-
-	auto targetDuration = chrono::duration_cast<chrono::duration<long double>>(timePoint - m_startTime);
-	auto maxDuration = chrono::duration_cast<chrono::duration<long double>>(m_endTime - m_startTime);
-	float factor =  static_cast<float>(targetDuration.count() / maxDuration.count());
-
-	return factor;
-}
-
-LinearInterpolator::LinearInterpolator(const zVEC3& start, const zVEC3& end, time_point startTime,
-	milliseconds duration)
-	:
-	Interpolator(start, startTime, duration),
-	m_end(end)
-{
-}
-
-zVEC3 LinearInterpolator::interpolate(time_point timePoint) const
-{
-	float factor = calcFactor(timePoint);
-	zVEC3 dir = m_end - m_start;
-	return m_start + factor * dir;
-}
-
-TelekinesisInterpolator::TelekinesisInterpolator(const zVEC3& start, const zVEC3& pitStop, const zVEC3& end, time_point startTime,
-	milliseconds duration)
-	:
-	Interpolator(start, startTime, duration),
-	m_PitStopDuration(0),
-	m_pitStopInterpolator(nullptr),
-	m_lastStopInterpolator(nullptr)
-{
-	m_PitStopDuration = calcPitStopDuration(start, pitStop, end, duration);
-	m_pitStopInterpolator = std::make_unique<LinearInterpolator>(start, pitStop, startTime, m_PitStopDuration);
-
-	milliseconds lastStopMillis = duration - m_PitStopDuration;
-
-	m_lastStopInterpolator = std::make_unique<LinearInterpolator>(pitStop, end, startTime + m_PitStopDuration, lastStopMillis);
+	if (!mStations.empty()) {
+		mLinearInterpolator = LinearInterpolator(mStations.front(), mStations.front(), startTime, speed);
+		mStations.pop();
+	}
 
 	//m_pitStopInterpolator(start, pitStop, startTime, m_PitStopDuration),
 	//m_lastStopInterpolator(pitStop, end, startTime + m_PitStopDuration, duration - m_PitStopDuration)
 }
 
-zVEC3 TelekinesisInterpolator::interpolate(time_point timePoint) const
+zVEC3 PathInterpolator::interpolate(Seconds timePoint)
 {
 
-	if (!m_pitStopInterpolator->finished(timePoint))
-	{
-		return m_pitStopInterpolator->interpolate(timePoint);
+	if (mLinearInterpolator.finished(timePoint) && !mStations.empty()) {
+		const auto& startPos = mLinearInterpolator.getEndPosition();
+		const auto& endPos = mStations.front();
+		const auto startTime = mLinearInterpolator.getEndTime();
+		const auto& speed = mLinearInterpolator.getSpeed();
+		
+
+		mLinearInterpolator = LinearInterpolator(startPos, endPos, startTime, speed);
+		mStations.pop();
 	}
 
-	return m_lastStopInterpolator->interpolate(timePoint);
+	return mLinearInterpolator.interpolate(timePoint);
 }
 
-std::unique_ptr<TelekinesisInterpolator> TelekinesisInterpolator::createTelekinesisInterpolator(const zVEC3& start, const zVEC3& end,
-	float pitStopHeight, float speed)
+bool PathInterpolator::finished(Seconds timePoint) const
+{
+	if (mStations.empty()) {
+		return mLinearInterpolator.finished(timePoint);
+	}
+	return false;
+}
+
+std::unique_ptr<PathInterpolator> PathInterpolator::createTelekinesisInterpolator(const zVEC3& start, const zVEC3& end,
+	float pitStopHeight, 
+	float speed, // cm/s
+	float delay // ms
+)
 {
 	zVEC3 pitStop = start;
 	pitStop.y += pitStopHeight;
-	std::chrono::system_clock clock;
 
 	// calc duration from speed
 	float startPitStopDistance = (pitStop - start).Length();
 	float pitStopEndDistance = (end - pitStop).Length();
 	float distance = startPitStopDistance + pitStopEndDistance;
 
-	// distance is measured in cm
-	// speed is cm / s
-	// we need milliseconds
-	long long millis = static_cast<long long>((distance * 1000.0f)/ speed);
+	const auto startTime = getTotalTime() + toSeconds(delay);
 
-	//logStream << "TelekinesisInterpolator::createTelekinesisInterpolator(): distance = " << distance << std::endl;
-	//logStream << "TelekinesisInterpolator::createTelekinesisInterpolator(): millis = " << millis << std::endl;
-	//util::logInfo(&logStream);
-
-
-	return std::make_unique<TelekinesisInterpolator>(start, pitStop, end, clock.now(), milliseconds(millis));
-}
-
-
-Interpolator::milliseconds TelekinesisInterpolator::calcPitStopDuration(const zVEC3& start, const zVEC3& pitStop, const zVEC3& end,
-	milliseconds duration)
-{
-	float pitStopDistance = (pitStop - start).Length();
-	float lastStopDistance = (end - pitStop).Length();
-	float summedDistance = pitStopDistance + lastStopDistance;
-
-	static const float e = 0.0001f;
-	float factor = pitStopDistance / summedDistance;
-
-	long long pitStopMillis = static_cast<long long>(factor * duration.count());
-
-	return milliseconds(pitStopMillis);
+	return std::make_unique<PathInterpolator>(std::queue<zVEC3>({ start, pitStop, end }), startTime, speed);
 }
 
 Telekinesis::Telekinesis() : Module("Telekinesis")
@@ -176,30 +194,32 @@ void Telekinesis::unHookModule()
 
 
 
-TelekinesisInterpolator* Telekinesis::TELEKINESIS_CreateInterpolator(const zVEC3* vobPosition, const zVEC3* npcPosition,
-	int upMoveAmount, int speed)
+PathInterpolator* Telekinesis::TELEKINESIS_CreateInterpolator(const zVEC3* vobPosition, const zVEC3* npcPosition,
+	int upMoveAmount, int speed, int delay)
 {
 	mLogStream << __FUNCTION__ << ": vobPosition = " << *vobPosition << std::endl;
 	mLogStream << __FUNCTION__ << ": npcPosition = " << *npcPosition << std::endl;
 	mLogStream << __FUNCTION__ << ": upMoveAmount = " << upMoveAmount << std::endl;
 	mLogStream << __FUNCTION__ << ": speed = " << speed << std::endl;
+	mLogStream << __FUNCTION__ << ": delay = " << delay << std::endl;
 	util::debug(mLogStream);
 
 
-	std::unique_ptr<TelekinesisInterpolator> interpolator = TelekinesisInterpolator::createTelekinesisInterpolator(*vobPosition, *npcPosition, 
+	std::unique_ptr<PathInterpolator> interpolator = PathInterpolator::createTelekinesisInterpolator(*vobPosition, *npcPosition, 
 		static_cast<float>(upMoveAmount), 
-		static_cast<float>(speed));
+		static_cast<float>(speed),
+		static_cast<float>(delay));
 	mInterpolators.emplace_back(std::move(interpolator));
 	return mInterpolators.back().get();
 }
 
-void Telekinesis::TELEKINESIS_GetInterpolatedVec(TelekinesisInterpolator* interpolatorPtr, zVEC3* dest)
+void Telekinesis::TELEKINESIS_GetInterpolatedVec(PathInterpolator* interpolatorPtr, zVEC3* dest)
 {
-	zVEC3 result = interpolatorPtr->interpolate(std::chrono::system_clock::now());
+	zVEC3 result = interpolatorPtr->interpolate(AbstractInterpolator::getTotalTime());
 	*dest = result;
 }
 
-void Telekinesis::TELEKINESIS_DeleteInterpolator(TelekinesisInterpolator* interpolatorPtr)
+void Telekinesis::TELEKINESIS_DeleteInterpolator(PathInterpolator* interpolatorPtr)
 {
 
 	auto newEnd = std::remove_if(mInterpolators.begin(), mInterpolators.end(), [&](auto& it)
@@ -216,12 +236,17 @@ void Telekinesis::TELEKINESIS_DeleteInterpolator(TelekinesisInterpolator* interp
 	mInterpolators.erase(newEnd, mInterpolators.end());
 }
 
-void Telekinesis::TELEKINESIS_Interpolate(TelekinesisInterpolator* interpolatorPtr, zCVob* vob)
+void Telekinesis::TELEKINESIS_Interpolate(PathInterpolator* interpolatorPtr, zVEC3* interpolatedPosition)
 {
-	zVEC3 result = interpolatorPtr->interpolate(std::chrono::system_clock::now());
-	zVEC3 current = vob->GetVobPosition();
-	zVEC3 diff = result - current;
-	vob->Move(diff.x, diff.y, diff.z);
+	*interpolatedPosition = interpolatorPtr->interpolate(AbstractInterpolator::getTotalTime());
+	//zVEC3 current = vob->GetVobPosition();
+	//zVEC3 diff = result - current;
+	//vob->Move(diff.x, diff.y, diff.z);
+	/*vob->SetPositionWorld(result);
+	auto& trafo = vob->trafoObjToWorld;
+	trafo.m[0][3] = result.x;
+	trafo.m[1][3] = result.y;
+	trafo.m[2][3] = result.z;*/
 }
 
 void Telekinesis::TELEKINESIS_ClearInterpolators()
