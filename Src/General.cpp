@@ -42,7 +42,7 @@ Full license at http://creativecommons.org/licenses/by-nc/3.0/legalcode
 #include <api/g2/ocmob.h>
 
 
-const float General::LIB_VERSION = 1.03f;
+const float General::LIB_VERSION = 1.04f;
 
 General::General() : Module("General")
 {

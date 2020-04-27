@@ -43,7 +43,7 @@ FUNC INT _NEC_GetExpectedLibVersion() {
     var int fraction;
 
     integral = mkf(1);
-    fraction = divf(3, 100);
+    fraction = divf(4, 100);
     return addf(integral, fraction);
 };
 

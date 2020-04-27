@@ -41,13 +41,16 @@ func void NEC_InitPerceptions(var int flags)
             MEM_Error(msg);
         };
         return;
-    };
+    } else {
+		MEM_Info(ConcatStrings("neclib: NEC_InitPerceptions: neclib version = ", toStringf(libVersion)));
+	};
 
     var int adr;
     adr = GetProcAddress (LoadLibrary (NEC_relativeLibraryPath), "Hook");
 	CALL_IntParam(flags);
 	CALL_PutRetValTo(_@(_NEC_FLAGS));
     CALL__cdecl(adr);
+	
 	
 	if (flags != _NEC_FLAGS) {
 		MEM_Error("neclib: Not all modules have been correctly hooked!");
