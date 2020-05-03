@@ -17,6 +17,8 @@ func int Spell_ProcessMana_Release (var int manaInvested)
 	if (activeSpell == SPL_ChargeFireball	)	{	return	SPL_SENDCAST;	};
 	if (activeSpell == SPL_ChargeZap		)	{	return	SPL_SENDCAST;	};
 	if (activeSpell == SPL_WINDFIST			)	{	return	SPL_SENDCAST;	};
+	
+	if (activeSpell == SPL_TELEKINESIS		)	{	return	SPL_SENDCAST;	};
 
 	// ------ Alle anderen Spells (Aufrechterhaltung oder Loslassen OHNE gecastet zu haben (zu wenig investiert) ------	
 	return SPL_SENDSTOP;

@@ -105,6 +105,10 @@ func INT Spell_ProcessMana (VAR INT manaInvested)
 	if (activeSpell == SPL_Skull				)	{	return	Spell_Logic_Skull			(manaInvested);	};
 	if (activeSpell == SPL_SummonZombie			)	{	return	Spell_Logic_SummonZombie	(manaInvested);	};
 	if (activeSpell == SPL_SummonMud			)	{	return	Spell_Logic_SummonMud		(manaInvested);	};
+	
+	if (activeSpell == SPL_Levitation				)	{	return	Spell_Logic_Levitation	(manaInvested);	};
+	
+	if (activeSpell == SPL_Telekinesis				)	{	return	Spell_Logic_Telekinesis	(manaInvested);	};
 
 //Leer
 

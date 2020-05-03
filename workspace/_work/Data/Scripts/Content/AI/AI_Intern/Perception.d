@@ -100,6 +100,10 @@ FUNC VOID InitPerceptions()
 		// REIN scriptgenerierte Wahrnehmung!
 		Perc_SetRange		(PERC_OBSERVESUSPECT	, 100							);
 		// geht alle 2 Sekunden an alle, wenn der SC schleicht (NICHT, wenn er geduckt steht)
+		
+		
+		MEM_InitAll();
+		NEC_InitPerceptions(NEC_ALL);
 };
 
 

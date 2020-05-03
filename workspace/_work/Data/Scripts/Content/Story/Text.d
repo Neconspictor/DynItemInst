@@ -368,7 +368,9 @@ const string TXT_SPELLS[MAX_SPELL] =
 	"TXT_SPL_RESERVED_96",		// 96	SPL_Reserved_96
 	"TXT_SPL_RESERVED_97",		// 97	SPL_Reserved_97
 	"TXT_SPL_RESERVED_98",		// 98	SPL_Reserved_98
-	"TXT_SPL_RESERVED_99"		// 99	SPL_Reserved_99
+	"TXT_SPL_RESERVED_99",		// 99	SPL_Reserved_99
+	"Levitation",
+	"Telekinese"	
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -511,6 +513,9 @@ const string NAME_SPL_Reserved_96			= "NAME_SPL_RESERVED_96";
 const string NAME_SPL_Reserved_97			= "NAME_SPL_RESERVED_97";
 const string NAME_SPL_Reserved_98			= "NAME_SPL_RESERVED_98";
 const string NAME_SPL_Reserved_99			= "NAME_SPL_RESERVED_99";
+
+const string NAME_SPL_Levitation			= "Levitation"; // translate hat to your target language
+const string NAME_SPL_Telekinesis			= "Telekinese"; // translate hat to your target language
 
 
 // *****************************************************************************************

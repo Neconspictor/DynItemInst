@@ -1,17 +1,24 @@
 _INTERN\CONSTANTS.D
 _INTERN\CLASSES.D
+_INTERN\EngineClasses_G2\*.d
+_INTERN\Ikarus_Const_G2.d
+_INTERN\Ikarus.d
+_INTERN\float.d
 
-_INTERN\Ikarus_G2.src
 LeGo\Header_G2.src
 
 
 AI\AI_INTERN\AI_CONSTANTS.D
 AI\AI_INTERN\BODYSTATES.D
 AI\AI_INTERN\FOCUS.D
+
+neclib\Header.src
+
 AI\AI_INTERN\Npc_SetToMad.d
 AI\AI_INTERN\Species.d
 AI\AI_INTERN\PrintDebug.d
 AI\AI_INTERN\PrintPlus.d
+
 
 STORY\Events\B_AWAKE_STONEGUARDIAN.d
 
@@ -66,6 +73,8 @@ STORY\B_Story\B_RemoveNpc.d
 STORY\B_Content\B_RemoveQuarhodron.d
 STORY\B_Content\B_PlayerFindItem.d
 
+
+mod\magicweapon.d
 
 ITEMS\Tuning_*.d
 ITEMS\Einhand_EquipBonus.d
@@ -134,9 +143,10 @@ AI\HUMAN\C_Human\C_WantToFlee.d
 AI\HUMAN\C_Human\C_WantToRansack.d
 AI\HUMAN\C_Human\C_NpcHasAttackReasonToKill.d
 AI\HUMAN\C_Human\C_NpcBelongsTo.d
+AI\HUMAN\C_Human\C_NpcIsHero.d
 AI\HUMAN\C_Human\C_DropUnconscious.d
 AI\HUMAN\C_Human\C_NpcRansacksAlways.d
-AI\HUMAN\C_Human\C_NpcIsHero.d
+
 AI\HUMAN\C_Human\C_NpcIsUndead.d
 AI\HUMAN\C_Human\C_NpcIsEvil.d
 AI\HUMAN\C_Human\C_RefuseTalk.d

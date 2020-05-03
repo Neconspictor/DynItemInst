@@ -643,7 +643,10 @@ const int SPL_Reserved_97			= 97;
 const int SPL_Reserved_98			= 98;
 const int SPL_Reserved_99			= 99;
 
-const int MAX_SPELL					= 100;   // 59 (Gothic), 68 (Gothic2), 100 (G2Addon)
+const int SPL_Levitation			= 100;
+const int SPL_Telekinesis			= 101;
+
+const int MAX_SPELL					= 102;   // 59 (Gothic), 68 (Gothic2), 100 (G2Addon)
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -787,7 +790,9 @@ const string spellFxInstanceNames[MAX_SPELL] =
 	"Light",				// 96	SPL_Reserved_96
 	"Light",				// 97	SPL_Reserved_97
 	"Light",				// 98	SPL_Reserved_98
-	"Light"					// 99	SPL_Reserved_99
+	"Light",					// 99	SPL_Reserved_99
+	"Levitation",			//100 SPL_Levitation
+	"Telekinesis"			//101 SPL_Telekinesis
 };
 
 
@@ -932,7 +937,9 @@ const string spellFxAniLetters[MAX_SPELL] =
 	"XXX",  				// 96	SPL_Reserved_96
 	"XXX",					// 97	SPL_Reserved_97
 	"XXX",					// 98	SPL_Reserved_98
-	"XXX"					// 99	SPL_Reserved_99
+	"XXX",					// 99	SPL_Reserved_99
+	"SUM",					// 100	SPL_Levitation
+	"TLK"	  				// 101	SPL_Telekinesis
 };
 
 
@@ -969,7 +976,8 @@ const int NPC_TALENT_TAKEANIMALTROPHY	= 16;
 
 const int NPC_TALENT_FOREIGNLANGUAGE	= 17;
 const int NPC_TALENT_WISPDETECTOR		= 18;
-const int NPC_TALENT_C					= 19;
+//const int NPC_TALENT_C					= 19;
+const int NPC_TALENT_SHARP 				= 19;
 const int NPC_TALENT_D					= 20;
 const int NPC_TALENT_E					= 21;
 

@@ -18,12 +18,12 @@ instance PC_Hero (NPC_DEFAULT)
 	lp				= 0;
 	
 	// ------ Attribute ------
-	attribute[ATR_STRENGTH] 		= 10;
-	attribute[ATR_DEXTERITY] 		= 10;
-	attribute[ATR_MANA_MAX] 		= 10;
-	attribute[ATR_MANA] 			= 10;
-	attribute[ATR_HITPOINTS_MAX]	= 40;
-	attribute[ATR_HITPOINTS] 		= 40;
+	attribute[ATR_STRENGTH] 		= 50;
+	attribute[ATR_DEXTERITY] 		= 50;
+	attribute[ATR_MANA_MAX] 		= 100;
+	attribute[ATR_MANA] 			= 100;
+	attribute[ATR_HITPOINTS_MAX]	= 10000;
+	attribute[ATR_HITPOINTS] 		= 10000;
 	
 	// ------ visuals ------
 	//B_SetNpcVisual 		(self, MALE, "Hum_Head_Pony", FACE_N_Player, BodyTex_N, NO_ARMOR);
@@ -34,6 +34,24 @@ instance PC_Hero (NPC_DEFAULT)
 	
 	// ------ Kampf-Talente ------
 	B_SetFightSkills 	(self, 10); 
+	//DIFFICULTY_SETTINGS_configureNpcStats();
+	
+	aivar[4] = 1;
+	
+	CreateInvItems(self, ItRw_Arrow, 100);
+	//EquipItem(self, ItRw_Bow_L_01);
+	
+	
+	Npc_SetTalentSkill (self, NPC_TALENT_MAGE, 6);
+	CreateInvItems(self, ItRu_Telekinesis, 1);
+	CreateInvItems(self, ItRu_Levitation, 1);
+	CreateInvItems(self, ItSc_Icebolt, 10);
+	CreateInvItems(self, ItSc_Telekinesis, 1);
+	CreateInvItems(self, ItWr_FireEnchantment, 10);
+	CreateInvItems(self, ItMW_1h_vlk_dagger, 10);
+	CreateInvItems(self, ItRw_Bow_L_01, 1);
+	
+	Npc_SetTalentSkill 	(self, NPC_TALENT_SNEAK, 1);
 };
 
 

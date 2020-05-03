@@ -10,6 +10,7 @@
 // GLOBAL
 // *********
 
+
 func void STARTUP_GLOBAL()
 {
 	// wird fuer jede Welt aufgerufen (vor STARTUP_<LevelName>)
@@ -23,6 +24,9 @@ func void INIT_GLOBAL()
 	
 	MEM_InitAll();
 	LeGo_Init(LeGo_All & ~LeGo_Bloodsplats);
+	
+	NEC_INIT_GLOBAL();
+	MAGICWEAPON_init();
 };
 
 

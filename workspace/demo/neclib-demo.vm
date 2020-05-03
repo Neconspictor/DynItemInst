@@ -1,0 +1,10 @@
+[BEGINVDF]
+Comment=
+BaseDir=C:\Development\Repositories\NecPack\demo
+VDFName=C:\Development\Repositories\NecPack\demo\Data\modvdf\neclib-demo.mod
+[FILES]
+_work\Data\Anims\_compiled\* -r
+_work\Data\Scripts\_compiled\* -r
+[EXCLUDE]
+[INCLUDE]
+[ENDVDF]
