@@ -1,4 +1,7 @@
 
+/dist/source
+/dist/demo-source
+
 workspace/*
 !workspace/_work/
 workspace/_work/Data/Anims/*
