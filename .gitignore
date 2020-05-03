@@ -1,3 +1,45 @@
+
+workspace/*
+!workspace/_work/
+workspace/_work/Data/Anims/*
+!workspace/_work/Data/Anims/Levitation
+
+!workspace/_work/Data/Anims/HumanS.mds
+!workspace/_work/Data/Anims/*.ASC
+
+!workspace/_work/Data/Anims/_compiled/
+workspace/_work/Data/Anims/_compiled/*
+
+#include levitation animations
+!workspace/_work/Data/Anims/_compiled/Humans_Levitate*
+
+# include telekinesis animations 
+!workspace/_work/Data/Anims/_compiled/Human*tlk*
+
+# include HumanS.msb and HumanS.mdh
+!workspace/_work/Data/Anims/_compiled/HumanS.msb
+!workspace/_work/Data/Anims/_compiled/HumanS.mdh
+
+workspace/_work/Data/Meshes/_compiled/*
+workspace/_work/Data/Music/
+workspace/_work/Data/Presets/
+workspace/_work/Data/Scripts/_compiled/*
+workspace/_work/Data/Textures/
+workspace/_work/Data/Worlds/
+workspace/_work/Data/Video/
+workspace/_work/tools/
+workspace/_work/demo/
+
+!workspace/demo/
+
+!workspace/System/
+workspace/System/*
+!workspace/System/neclib-demo*
+!workspace/System/neclib
+workspace/System/neclib/neclib-log.txt
+
+
+
 /release/
 /debug/
 /doc/doxygen/
@@ -12,4 +54,5 @@
 *.vcxproj.filters
 *.vcxproj.user
 /obj/
-/demo/_work/
+
+
