@@ -174,55 +174,37 @@ func void TELEKINESIS_ClearInterpolators() {
 
 
 
-/*
- * Checks the state of the telekinesis interpolator and stops the spell
- */
-func void _Spell_Telekinesis_MoveTarget() {
-
-    // Another safety check
-    if (!Hlp_Is_oCItem(_TelekinesisData.pTarget)) {
-        return;
-    };
-
-    var oCItem oCTarget; oCTarget = _^(_TelekinesisData.pTarget);
-
-    // Continue movement
-    var int interpolatedPosition[3]; //same memory layout as zVEC3
-    
-    TELEKINESIS_Interpolate(_TelekinesisData.pInterpolator, _@(interpolatedPosition));
-    
-    // Update position of item
-    zCVobSetPositionWorld(_TelekinesisData.pTarget, _@(interpolatedPosition));
-};
-
 func int Spell_Logic_Telekinesis (var int manaInvested)
 {
     
-    if (manaInvested == 0 && self.attribute[ATR_MANA]<SPL_Cost_Telekinesis) 
+    var int startedSpell;
+    var oCItem oCTarget; 
+    var int interpolatedPosition[3];  //same memory layout as zVEC3
+    
+    startedSpell = manaInvested == 0;
+    
+    if (startedSpell && self.attribute[ATR_MANA]<SPL_Cost_Telekinesis) 
     {
         return SPL_DONTINVEST;  
     };
     
-    if (!Hlp_IsValidNpc(self)) {return SPL_DONTINVEST;};
+    if (!Hlp_IsValidNpc(self) || !Npc_IsPlayer(self)) {return SPL_DONTINVEST;};
     
     
     var oCNpc oCSelf; oCSelf = _^(_@(self));
+    if (startedSpell && oCSelf.focus_vob == 0) {return SPL_DONTINVEST;};
     
-    if (oCSelf.focus_vob == 0) {return SPL_DONTINVEST;};
-    
-    var oCItem oCFocus; oCFocus = _^(oCSelf.focus_vob);
-    
-    if (!Hlp_IsValidItem(oCFocus)) {return SPL_DONTINVEST;};
-    
-    var int canSee; canSee = TELEKINESIS_IsVobSeeable(_@(self), oCSelf.focus_vob);
-    //MEM_Warn(ConcatStrings("canSee = ", IntToString(canSee)));
-    
-    if (!canSee && (manaInvested == 0)) {
-        Print(PRINT_TO_FAR_AWAY);
-        return SPL_DONTINVEST;
+    if (startedSpell) {
+        if (!TELEKINESIS_IsVobSeeable(_@(self), oCSelf.focus_vob)) {
+            Print(PRINT_TO_FAR_AWAY);
+            return SPL_DONTINVEST;
+        };
     };
     
-    if (manaInvested == 0) {
+    if (startedSpell) {
+    
+        var oCItem oCFocus; oCFocus = _^(oCSelf.focus_vob);
+        if (!Hlp_IsValidItem(oCFocus)) {return SPL_DONTINVEST;};
     
         // we substract one mana point less for suppressing auto cast causing spell to stop prematurely 
         // Spell_Cast_Telekinesis substracts that missing point.
@@ -237,7 +219,7 @@ func int Spell_Logic_Telekinesis (var int manaInvested)
         _TelekinesisData.pTarget = oCSelf.focus_vob;
         
         
-        var oCItem oCTarget; oCTarget = _^(_TelekinesisData.pTarget);
+        oCTarget = _^(_TelekinesisData.pTarget);
         
         var int vobPosition[3];
         vobPosition[0] = oCTarget._zCVob_trafoObjToWorld[3];
@@ -270,8 +252,27 @@ func int Spell_Logic_Telekinesis (var int manaInvested)
             MEM_AssignInstSuppressNullWarning = FALSE;
         };
         
+    
     } else {
-        _Spell_Telekinesis_MoveTarget();
+
+        // NOTE: DO NOT change the focus vob!
+        // I don't know what is going on, but the user can still change the focus vob using the arrow keys.
+        // Somehow Gothic deletes than this focus vob (?!). 
+        // But everything works if we don't touch the focus vob.
+        //oCSelf.focus_vob = _TelekinesisData.pTarget;
+        
+        // Only manipulate if pTarget is valid    
+        if (!Hlp_Is_oCItem(_TelekinesisData.pTarget)) {
+            
+            MEM_Warn(ConcatStrings("neclib: not a valid item!!!", IntToString(_TelekinesisData.pTarget)));
+            return SPL_DONTINVEST;
+        };
+        
+        // Continue movement        
+        TELEKINESIS_Interpolate(_TelekinesisData.pInterpolator, _@(interpolatedPosition));
+        
+        // Update position of item
+        zCVobSetPositionWorld(_TelekinesisData.pTarget, _@(interpolatedPosition)); //_TelekinesisData.pTarget
     };
     
     return SPL_NEXTLEVEL;//SPL_NEXTLEVEL;
@@ -369,6 +370,8 @@ func void Spell_Telekinesis_Prio() {
 };
 
 
+
+
 /**
  * Inits the telekinesis module.
  */ 
@@ -396,9 +399,6 @@ func void TELEKINESIS_Init()
     
     // just for safety. Shouldn't be necessary
     TELEKINESIS_ClearInterpolators();
-    
-    
-    
     
     // _TelekinesisData is a global variable we only need to initialize once
     if (!_@(_TelekinesisData)) {
