@@ -293,8 +293,8 @@ func int Spell_Logic_Telekinesis (var int manaInvested)
 		
 	} else {
 		//MEM_Info(ConcatStrings("neclib: self.aivar[_SPELL_TELEKINESIS_AIV] = ", IntToString(self.aivar[_SPELL_TELEKINESIS_AIV])));
-		_Spell_Telekinesis_MoveTarget(-99999182939);
-		//_Spell_Telekinesis_MoveTarget(self.aivar[_SPELL_TELEKINESIS_AIV]);
+		//_Spell_Telekinesis_MoveTarget(-99999182939);
+		_Spell_Telekinesis_MoveTarget(self.aivar[_SPELL_TELEKINESIS_AIV]);
 	};
 	
 	return SPL_NEXTLEVEL;//SPL_NEXTLEVEL;
