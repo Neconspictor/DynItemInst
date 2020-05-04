@@ -308,7 +308,7 @@ bool util::existsDir(const std::string& path)
 	if (!(attributes & FILE_ATTRIBUTE_DIRECTORY))
 	{
 		mLogStream << "util::existsDir: " << path << " exists but isn't a directory!" << std::endl;
-		logFault(mLogStream);
+		logWarning(mLogStream);
 	}
 
 	return true;
@@ -403,14 +403,14 @@ void util::copyContentTo(std::string source, std::string dest, std::string patte
 	{
 		mLogStream << __FUNCTION__ << ": Couldn't copy files from " << source << " to "
 			<< dest << std::endl;
-		logFault(mLogStream);
+		logWarning(mLogStream);
 	}
 
 	if (s.fAnyOperationsAborted)
 	{
 		mLogStream << __FUNCTION__ << ": Any operation was aborted while copying " << source << " to "
 			<< dest << std::endl;
-		logFault(mLogStream);
+		logWarning(mLogStream);
 	}
 }
 
@@ -429,14 +429,14 @@ void util::deleteAllFiles(std::string folder, std::string pattern)
 	{
 		mLogStream << __FUNCTION__ << ": Couldn't delete files from " << folder << " with pattern "
 			<< pattern << std::endl;
-		logFault(mLogStream);
+		debug(mLogStream);
 	}
 
 	if (s.fAnyOperationsAborted)
 	{
 		mLogStream << __FUNCTION__ << ": Any operation was aborted while deleting files from " << folder << " with pattern "
 			<< pattern << std::endl;
-		logFault(mLogStream);
+		logWarning(mLogStream);
 	}
 };
 
@@ -479,7 +479,7 @@ void util::copyFileTo(std::string from, std::string to){
 		{
 			mLogStream << __FUNCTION__ << ": While copying from " << from << " to " << to <<
 				" an error occured: " << errorText << std::endl;
-			logFault(mLogStream);
+			logWarning(mLogStream);
 
 			// release memory allocated by FormatMessage()
 			LocalFree(errorText);

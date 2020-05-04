@@ -22,14 +22,14 @@ FUNC INT NEC_GetLibVersion() {
 
     //library couldn't be found?
     if (!adr) {
-		MEM_Error(ConcatStrings("neclib: NEC_GetLibVersion(): Library couldn't be loaded: ", NEC_relativeLibraryPath));
+        MEM_Error(ConcatStrings("neclib: NEC_GetLibVersion(): Library couldn't be loaded: ", NEC_relativeLibraryPath));
         return 0;
     };
 
     var int ret;
-	CALL_RetValIsFloat();
-	CALL_PutRetValTo(_@(ret));
-	CALL__cdecl(adr);
+    CALL_RetValIsFloat();
+    CALL_PutRetValTo(_@(ret));
+    CALL__cdecl(adr);
     return +ret;
 };
 
@@ -38,12 +38,15 @@ FUNC INT NEC_GetLibVersion() {
 // The return value will be float stored in an integer.
 // ****************************************************************
 FUNC INT _NEC_GetExpectedLibVersion() {
-    //expected lib version: 1.03
+    //expected lib version: 1.04
     var int integral;
     var int fraction;
-
+    
+    //BeginVersionMark
     integral = mkf(1);
     fraction = divf(4, 100);
+    //EndVersionMark
+    
     return addf(integral, fraction);
 };
 
@@ -51,32 +54,32 @@ FUNC INT _NEC_GetExpectedLibVersion() {
 func int oCNpcCanTalk(var C_NPC npc) {
     const int adr = 7065328;
     var int ret;
-	CALL_PutRetValTo(_@(ret));
-	CALL__thiscall(_@(npc), adr);
+    CALL_PutRetValTo(_@(ret));
+    CALL__thiscall(_@(npc), adr);
     return +ret;
 };
 
 //.text:00602930 ; public: void __thiscall zCVob::SetSleeping(int)
 func void zCVobSetSleeping(var int czvobPtr, var int setToSleep) {
-	const int adr = 6302000;
-	CALL_IntParam(setToSleep);
-	CALL__thiscall(czvobPtr, adr);
+    const int adr = 6302000;
+    CALL_IntParam(setToSleep);
+    CALL__thiscall(czvobPtr, adr);
 };
 
 
 //.text:0061D190 ; public: void __thiscall zCVob::SetPhysicsEnabled(int)
 func void zCVobSetPhysicsEnabled(var int czvobPtr, var int enablePhysics) {
-	const int adr = 6410640;
-	CALL_IntParam(enablePhysics);
-	CALL__thiscall(czvobPtr, adr);
+    const int adr = 6410640;
+    CALL_IntParam(enablePhysics);
+    CALL__thiscall(czvobPtr, adr);
 };
 
 
 //.text:0061BB70 ; void __thiscall zCVob::SetPositionWorld(zCVob *this, const struct zVEC3 *)
 func void zCVobSetPositionWorld(var int czvobPtr, var int zvec3Ptr) {
-	const int adr = 6404976;
-	CALL_IntParam(zvec3Ptr);
-	CALL__thiscall(czvobPtr, adr);
+    const int adr = 6404976;
+    CALL_IntParam(zvec3Ptr);
+    CALL__thiscall(czvobPtr, adr);
 };
 
 
