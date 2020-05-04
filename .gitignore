@@ -1,6 +1,11 @@
 
 /dist/source
 /dist/demo-source
+/dist/.vs
+/dist/.vscode
+/dist/__pycache__
+/dist/*.vm
+/dist/dist.bat
 
 workspace/*
 !workspace/_work/

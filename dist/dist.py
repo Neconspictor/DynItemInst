@@ -5,6 +5,9 @@ import traceback
 import colorama
 import os
 import zipfile
+import GothicVDFSExecuter
+import sys
+import argparse
 
 # Same as add_hook(always=True)
 import colored_traceback.always
@@ -171,7 +174,9 @@ def copyDemoSources(copier: Copier):
     pass
 
 
-def distNeclib(copier : Copier) -> None:
+def distNeclib(copier : Copier, version : str) -> None:
+
+    print("Building neclib distribution...")
 
     # gothic-file-changes
     source = copier.createFolderPathChecked("gothic-file-changes")
@@ -223,18 +228,42 @@ def distNeclib(copier : Copier) -> None:
 
     # zip file
     distOut = copier.createFolderPathChecked("dist/")
-    zipfolder(distOut / "neclib-test.zip", distOut / "source")
+    filename = "neclib-" + version + ".zip"
+    zipFile = distOut / filename
+    zipfolder(zipFile, distOut / "source")
+
+    print("neclib distribution: " + str(zipFile))
     pass
 
-def distDemo(copier : Copier) -> None:
+def distDemo(copier : Copier, version : str) -> None:
     dest = copier.createIfNotExist("dist/demo-source/System") 
     copier.copySystemFiles(dest)
 
     dest = copier.createIfNotExist("dist/demo-source/System/neclib") 
     copier.copyNeclib(dest)
 
+    #create build script
+    workspaceFolder = copier.getRoot() / "workspace"
+    demoModFile = workspaceFolder / "Data/modvdf/neclib-demo.mod"
+    buildScript = pathlib.Path('neclib-demo.vm')
+    buildDemoBuildScript(buildScript, workspaceFolder, demoModFile)
+
+    #build demo file
+    print("Building demo mod archive...")
+    GothicVDFSExecuter.execute(buildScript)
+
+    # copy demo mod to dist
+    source = copier.createFolderPathChecked("workspace/Data/modvdf")
+    dest = copier.createIfNotExist("dist/demo-source/Data/modvdf")
+    files = ["neclib-demo.mod"]
+    copier.copyFiles(source, dest, files)
+
     distOut = copier.createFolderPathChecked("dist/")
-    zipfolder(distOut / "neclib-demo-test.zip", distOut / "demo-source")
+    filename = "neclib-demo-" + version + ".zip"
+    zipFile = distOut / filename
+    zipfolder(distOut / filename, distOut / "demo-source")
+
+    print("neclib demo distribution: " + str(zipFile))
 
     pass
 
@@ -268,16 +297,67 @@ def clearSources(distFolder : pathlib.Path):
     pass       
 
 def clearDist(distFolder : pathlib.Path):
+    print("Deleting intermediate files...")
     clearSources(distFolder)
     deleteFileNoException(distFolder / "neclib-demo-test.zip")
     deleteFileNoException(distFolder / "neclib-test.zip")
     pass            
 
 
+def buildDemoBuildScript(destinationScriptFilePath : pathlib.Path, 
+    workspaceFolder : pathlib.Path, 
+    demoModFilePath : pathlib.Path):
+
+    print("Buildong demo build script...")
+
+    with open(str(destinationScriptFilePath.absolute()), "w") as file:
+
+        filesRegex = [
+            "_work\\Data\\Scripts\\_compiled\\VisualFX.dat -r",
+            "_work\\Data\\Scripts\\_compiled\\Gothic.dat -r",
+            "_work\\Data\\Anims\\_compiled\\*TLK* -r",
+            "_work\\Data\\Anims\\_compiled\\HUMANS_LEVITATE* -r",
+            "_work\\Data\\Anims\\_compiled\\HUMANS.MDH -r",
+            "_work\\Data\\Anims\\_compiled\\HUMANS.MSB -r"]
+
+        lines = [
+            "[BEGINVDF]",
+            "Comment=",
+            "BaseDir=" + str(workspaceFolder.absolute()),
+            "VDFName=" + str(demoModFilePath.absolute()),
+            "[FILES]"]
+
+        for regex in filesRegex:
+            lines.append(str(pathlib.Path(regex)))
+
+        lines.append("[EXCLUDE]")
+        lines.append("_backup-2.6_de\\* -r") 
+
+        lines += [    
+            "[INCLUDE]",
+            "[ENDVDF]"]
+
+        for line in lines:
+            file.write(line + '\n')
+
+    pass
+
+
+
+def parseArgs() -> argparse.Namespace:
+    print("Parsing arguments...")
+    parser = argparse.ArgumentParser(description='Build neclib distribution')
+    parser.add_argument("-v", "--version", required=True)
+    return parser.parse_args()
+
 
 """
 Main
 """
+args = parseArgs()
+version = args.version
+
+print("version = " + version)
 
 root_dest = "./neclib-dist"
 
@@ -287,8 +367,9 @@ neclibRoot = currentFolder.parent.absolute()
 copier = Copier(neclibRoot)
 distFolder = neclibRoot / "dist"
 
-
 clearDist(distFolder)
-distNeclib(copier)
-distDemo(copier)
+distNeclib(copier, version)
+distDemo(copier, version)
+
+print("Distribution building: Finished.")
 #clearSources(distFolder)
