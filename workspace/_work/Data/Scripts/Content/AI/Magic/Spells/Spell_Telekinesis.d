@@ -11,13 +11,6 @@ const int TELEKINESIS_MOVEMENT_DELAY = 2000; // (in ms) time to wait before the 
 
 const string PRINT_TO_FAR_AWAY = "Mmh, das Objekt kann ich nicht sehen...";
 
-const int _SPELL_TELEKINESIS_AIV = AIV_SpellLevel;
-
-/*
- * Pointer to the array holding all telekinesis spell instances
- */
-const int _Spell_Telekinesis_InstanceHtPtr = 0;
-
 
 INSTANCE Spell_Telekinesis (C_Spell_Proto)
 {
@@ -41,10 +34,12 @@ INSTANCE Spell_Telekinesis (C_Spell_Proto)
  */
 class Spell_Telekinesis_Data {
 	var int pTarget; // the target item
-	var int pInterpolator; // pointer to the telekinese Interpolator
+	var int pInterpolator; // handle to the telekinese Interpolator
 };
 
 instance Spell_Telekinesis_Data@(Spell_Telekinesis_Data);
+
+var Spell_Telekinesis_Data _TelekinesisData;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -179,36 +174,25 @@ func void TELEKINESIS_ClearInterpolators() {
 
 
 
-func void _Spell_Telekinesis_Data_Deleter(var int key, var int value) {
-
-	MEM_Info("neclib: _Spell_Telekinesis_Data_Deleter called.");
-	var Spell_Telekinesis_Data data; data = _^(value);
-	TELEKINESIS_DeleteInterpolator(data.pInterpolator);
-	MEM_Free(value);
-};
-
-
-
 /*
  * Checks the state of the telekinesis interpolator and stops the spell
  */
-func void _Spell_Telekinesis_MoveTarget(var int ptr) {
-    var Spell_Telekinesis_Data data; data = _^(ptr);
+func void _Spell_Telekinesis_MoveTarget() {
 
     // Another safety check
-    if (!Hlp_Is_oCItem(data.pTarget) || !data.pInterpolator) {
+    if (!Hlp_Is_oCItem(_TelekinesisData.pTarget)) {
         return;
     };
 
-    var oCItem oCTarget; oCTarget = _^(data.pTarget);
+    var oCItem oCTarget; oCTarget = _^(_TelekinesisData.pTarget);
 
     // Continue movement
 	var int interpolatedPosition[3]; //same memory layout as zVEC3
 	
-    TELEKINESIS_Interpolate(data.pInterpolator, _@(interpolatedPosition));
+    TELEKINESIS_Interpolate(_TelekinesisData.pInterpolator, _@(interpolatedPosition));
 	
 	// Update position of item
-	zCVobSetPositionWorld(data.pTarget, _@(interpolatedPosition));
+	zCVobSetPositionWorld(_TelekinesisData.pTarget, _@(interpolatedPosition));
 };
 
 func int Spell_Logic_Telekinesis (var int manaInvested)
@@ -250,12 +234,10 @@ func int Spell_Logic_Telekinesis (var int manaInvested)
 		};
 				
 
-		var int ptr; ptr = create(Spell_Telekinesis_Data@);
-        var Spell_Telekinesis_Data data; data = _^(ptr);
-        data.pTarget = oCSelf.focus_vob;
+        _TelekinesisData.pTarget = oCSelf.focus_vob;
 		
 		
-		var oCItem oCTarget; oCTarget = _^(data.pTarget);
+		var oCItem oCTarget; oCTarget = _^(_TelekinesisData.pTarget);
 		
 		var int vobPosition[3];
         vobPosition[0] = oCTarget._zCVob_trafoObjToWorld[3];
@@ -267,24 +249,21 @@ func int Spell_Logic_Telekinesis (var int manaInvested)
         npcPosition[1] = oCSelf._zCVob_trafoObjToWorld[7];
         npcPosition[2] = oCSelf._zCVob_trafoObjToWorld[11];
         
-        data.pInterpolator = TELEKINESIS_createInterpolator(_@(vobPosition[0]), 
+		// Delete the old interpolator
+		// Note: interpolators are handles. Thus, it is ok if the interpolator isn't valid, 
+		// since neclib checks the handle
+		TELEKINESIS_DeleteInterpolator(_TelekinesisData.pInterpolator);
+        _TelekinesisData.pInterpolator = TELEKINESIS_createInterpolator(_@(vobPosition[0]), 
                                                             _@(npcPosition[0]),
                                                             TELEKINESIS_UPMOVEMENT,
                                                             TELEKINESIS_SPEED,
 															TELEKINESIS_MOVEMENT_DELAY);
-
-        //MEM_ArrayInsert(_Spell_Telekinesis_InstanceArrayPtr, ptr);
-		
-		// store the telekinesis data in an unused aivar
-		
-		self.aivar[_SPELL_TELEKINESIS_AIV] = ptr;
-		_HT_Insert(_Spell_Telekinesis_InstanceHtPtr, ptr, ptr);
 		
 		// ensure that npcs react if hero tries to steal
 		if (Npc_IsPlayer(self)) {
 			var int itemBak; itemBak = _@(item); 
 
-			item = _^(data.pTarget);			
+			item = _^(_TelekinesisData.pTarget);			
 			Npc_SendPassivePerc(self, PERC_ASSESSTHEFT, self, self);
 			MEM_AssignInstSuppressNullWarning = TRUE;
 			item = _^(itemBak);
@@ -292,9 +271,7 @@ func int Spell_Logic_Telekinesis (var int manaInvested)
 		};
 		
 	} else {
-		//MEM_Info(ConcatStrings("neclib: self.aivar[_SPELL_TELEKINESIS_AIV] = ", IntToString(self.aivar[_SPELL_TELEKINESIS_AIV])));
-		//_Spell_Telekinesis_MoveTarget(-99999182939);
-		_Spell_Telekinesis_MoveTarget(self.aivar[_SPELL_TELEKINESIS_AIV]);
+		_Spell_Telekinesis_MoveTarget();
 	};
 	
 	return SPL_NEXTLEVEL;//SPL_NEXTLEVEL;
@@ -302,6 +279,8 @@ func int Spell_Logic_Telekinesis (var int manaInvested)
 
 func void Spell_Cast_Telekinesis(var int spellLevel)
 {		
+	MEM_Info("neclib: Spell_Cast_Telekinesis: called.");
+
 	// substract the last missing mana point.
 	self.attribute[ATR_MANA] = (self.attribute[ATR_MANA] - 1);
 
@@ -310,18 +289,20 @@ func void Spell_Cast_Telekinesis(var int spellLevel)
 		self.attribute[ATR_MANA]=0;
 	};
 	
-	// delete telekinesis data
-	var int ptr; ptr = self.aivar[_SPELL_TELEKINESIS_AIV];
-	var Spell_Telekinesis_Data data; data = _^(ptr);
+	// Only do something if the player uses the spell
+	if (!Npc_IsPlayer(self)) {
+		return;
+	};
 	
-	zCVobSetSleeping(data.pTarget, FALSE);
-    zCVobSetPhysicsEnabled(data.pTarget, TRUE);    
+	// delete telekinesis data	
+	TELEKINESIS_DeleteInterpolator(_TelekinesisData.pInterpolator);
 	
-	_Spell_Telekinesis_Data_Deleter(ptr, ptr);
-	self.aivar[_SPELL_TELEKINESIS_AIV] = 0;
-	_HT_Remove(_Spell_Telekinesis_InstanceHtPtr, ptr);
+	var oCItem target; target = _^(_TelekinesisData.pTarget);
 	
-	MEM_Info("neclib: Spell_Cast_Telekinesis: called.");
+	if (!Hlp_IsValidItem(target)) {return;};
+	
+	zCVobSetSleeping(_TelekinesisData.pTarget, FALSE);
+    zCVobSetPhysicsEnabled(_TelekinesisData.pTarget, TRUE);    
 };
 
 
@@ -402,17 +383,6 @@ func void TELEKINESIS_Init()
     const int oCSpell__IsTargetTypeValid_G2    = 4743108; //0x485FC4
 	const int oCNpcFocus__focuslist_G1         =  9283120; //0x8DA630
     const int oCNpcFocus__focuslist_G2         = 11208440; //0xAB06F8
-	
-	
-	// Reset the hash table  at every level change, loading and new game
-    if (_Spell_Telekinesis_InstanceHtPtr) {
-		_HT_ForEach(_Spell_Telekinesis_InstanceHtPtr, _Spell_Telekinesis_Data_Deleter);
-		_HT_Destroy(_Spell_Telekinesis_InstanceHtPtr);
-    };
-	_Spell_Telekinesis_InstanceHtPtr = _HT_Create();
-
-    // Start the "global" FrameFunction only once ever
-    //FF_ApplyOnce(_Spell_Telekinesis_Handler);
 
 
     HookEngineF(oCSpell__Setup_G2, 7, Spell_Telekinesis_Prio);
@@ -427,7 +397,17 @@ func void TELEKINESIS_Init()
 		
     };
 	
+	// just for safety. Shouldn't be necessary
 	TELEKINESIS_ClearInterpolators();
+	
+	// _TelekinesisData is a global variable we only need to initialize once
+	var int dataPtr; dataPtr = _@(_TelekinesisData);
+	if (!_@(_TelekinesisData)) {
+	
+		dataPtr = create(Spell_Telekinesis_Data@);
+		_TelekinesisData = _^(dataPtr);
+		MEM_Info("neclib: TELEKINESIS_Init: assigned _TelekinesisData to a new Spell_Telekinesis_Data@ instance");
+	};
 	
 	MEM_Info("neclib: TELEKINESIS_Init: done.");
 };
