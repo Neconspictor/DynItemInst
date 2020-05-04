@@ -308,7 +308,44 @@ func void Spell_Cast_Telekinesis(var int spellLevel)
 
 
 /*
- * Enable focusing mob when using the spell
+ * Reset Focus_Magic instance
+ * This function is called if (and only if) the active spell changes
+ * Source: https://forum.worldofplayers.de/forum/threads/1547129
+ */
+func void Spell_Telekinesis_ResetFocus() {
+    var oCMag_Book mb; mb = _^(ECX);
+    if (!mb.owner) {
+        return;
+    };
+    var C_Npc slf; slf = _^(mb.owner);
+    if (!Npc_IsPlayer(slf)) {
+        return;
+    };
+
+    // Should never happen, but safety first
+    if (!_@(Focus_Magic)) {
+        return;
+    };
+
+    // Backup/reset Focus_Magic completely
+    const int focusCopy = 0;
+    const int sizeof_oCNpcFocus = 80;
+    if (!focusCopy) {
+        // Create one-time backup per session
+        MEM_Info("neclib: Spell_Telekinesis: Backing up original Focus_Magic values");
+        focusCopy = MEM_Alloc(sizeof_oCNpcFocus);
+        MEM_CopyBytes(_@(Focus_Magic), focusCopy, sizeof_oCNpcFocus);
+    } else {
+        // Reset on every spell change
+        MEM_CopyBytes(focusCopy, _@(Focus_Magic), sizeof_oCNpcFocus);
+    };
+};
+
+
+
+/*
+ * Enable focusing item when using the spell
+ * Modified from https://forum.worldofplayers.de/forum/threads/1547129
  */
 func void Spell_Telekinesis_Prio() {
     var int caster; caster = MEM_ReadInt(ESP+4);
@@ -319,51 +356,17 @@ func void Spell_Telekinesis_Prio() {
     if (!Npc_IsPlayer(slf)) {
         return;
     };
-    
-	const int npc_prio_backup = 42; // 42 == not initialized yet
-	const int item_range2_backup = 42; // 42 == not initialized yet
-	const int item_azi_backup = 42; // 42 == not initialized yet
-	const int item_elevup_backup = 42; // 42 == not initialized yet
-	const int item_elevdo_backup = 42; // 42 == not initialized yet
-	const int item_prio_backup = 42; // 42 == not initialized yet
-	
-	
-    if (item_prio_backup == 42) {
-		npc_prio_backup = Focus_Magic.npc_prio;
-		item_range2_backup = castToIntf(Focus_Magic.item_range2);
-		item_azi_backup = castToIntf(Focus_Magic.item_azi);
-		item_elevup_backup = castToIntf(Focus_Magic.item_elevup);
-		item_elevdo_backup = castToIntf(Focus_Magic.item_elevdo);
-		item_prio_backup = Focus_Magic.item_prio;
-    };
 
     var int spellID; spellID = MEM_ReadInt(/*oCSpell*/ECX+/*spellID*/84);
     if (spellID == SPL_Telekinesis) {
-        // Adjust the global(!) focus priorities temporarily(!)
-		// Note: item_range1 and item_range2 are stored in squared 
-		//Focus_Magic.item_range2 = castFromIntf(mulf(castToIntf(3500.0), castToIntf(3500.0)));
-		Focus_Magic.npc_prio = -1;
-		Focus_Magic.item_azi = 90.0;	
-		Focus_Magic.item_elevup = 90.0;	
-		Focus_Magic.item_elevdo = -89.0;
-		Focus_Magic.item_prio = 1;
-		//MEM_Info("neclib: Spell_Telekinesis_Prio: changed Focus_Magic");
-		
-    } else if (item_prio_backup != 42) {
-        // Reset the focus priorities for all other spells!
-		Focus_Magic.npc_prio = npc_prio_backup;
-        Focus_Magic.item_range2 = castFromIntf(item_range2_backup);
-		Focus_Magic.item_azi = castFromIntf(item_azi_backup);
-		Focus_Magic.item_elevup = castFromIntf(item_elevup_backup);
-		Focus_Magic.item_elevdo = castFromIntf(item_elevdo_backup);
-		Focus_Magic.item_prio = item_prio_backup;
+        // Adjust the global(!) focus priorities temporarily(!) = until the active spell changes
+        Focus_Magic.npc_prio = -1;
+        Focus_Magic.item_azi = 90.0;    
+        Focus_Magic.item_elevup = 90.0; 
+        Focus_Magic.item_elevdo = -89.0;
+        Focus_Magic.item_prio = 1;
     };
-	
-	
-	var int range1; range1 = truncf(castToIntf(Focus_Magic.item_range1));
-	var int range2; range2 = truncf(castToIntf(Focus_Magic.item_range2));
 };
-
 
 
 /**
@@ -377,35 +380,26 @@ func void TELEKINESIS_Init()
     };
 
 
-	const int oCSpell__Setup_G1                = 4703664; //0x47C5B0
-    const int oCSpell__Setup_G2                = 4737328; //0x484930
-	const int oCSpell__IsTargetTypeValid_G1    = 4709316; //0x47DBC4
-    const int oCSpell__IsTargetTypeValid_G2    = 4743108; //0x485FC4
-	const int oCNpcFocus__focuslist_G1         =  9283120; //0x8DA630
-    const int oCNpcFocus__focuslist_G2         = 11208440; //0xAB06F8
-
-
+	// Setup hooks for focus
+    const int oCSpell__Setup_G2            = 4737328; //0x484930
+    const int oCMag_Book__SetFrontSpell_G2 = 4688320; //004789C0
     HookEngineF(oCSpell__Setup_G2, 7, Spell_Telekinesis_Prio);
-	// Make sure Focus_Magic is initialized (necessary for Spell_Telekinesis_Prio). For details see GothicFreeAim
+    HookEngineF(oCMag_Book__SetFrontSpell_G2, 7, Spell_Telekinesis_ResetFocus);
 
-
-    var int fMagicPtr; fMagicPtr = MEM_ReadIntArray(+MEMINT_SwitchG1G2(oCNpcFocus__focuslist_G1,
-																		oCNpcFocus__focuslist_G2),  5); ///Focus_Magic
+    // Ensure that Focus_Magic is not empty (necessary for Spell_Telekinesis_Prio). For details see GothicFreeAim
+    const int oCNpcFocus__focuslist_G2     = 11208440; //0xAB06F8
+    var int fMagicPtr; fMagicPtr = MEM_ReadIntArray(oCNpcFocus__focuslist_G2, /*Focus_Magic*/ 5);
     if (fMagicPtr) {
-        MEM_Info("neclib: TELEKINESIS_Init: Reinitializing Focus_Magic instance");
+        MEM_Info("neclib: Spell_Telekinesis: Reassigning Focus_Magic instance");
         Focus_Magic = _^(fMagicPtr);
-		
     };
 	
 	// just for safety. Shouldn't be necessary
 	TELEKINESIS_ClearInterpolators();
 	
 	// _TelekinesisData is a global variable we only need to initialize once
-	var int dataPtr; dataPtr = _@(_TelekinesisData);
 	if (!_@(_TelekinesisData)) {
-	
-		dataPtr = create(Spell_Telekinesis_Data@);
-		_TelekinesisData = _^(dataPtr);
+		_TelekinesisData = _^(create(Spell_Telekinesis_Data@));
 		MEM_Info("neclib: TELEKINESIS_Init: assigned _TelekinesisData to a new Spell_Telekinesis_Data@ instance");
 	};
 	
