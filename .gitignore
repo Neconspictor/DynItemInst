@@ -21,8 +21,8 @@ workspace/_work/Data/Anims/_compiled/*
 #include levitation animations
 !workspace/_work/Data/Anims/_compiled/Humans_Levitate*
 
-# include telekinesis animations 
-!workspace/_work/Data/Anims/_compiled/Human*tlk*
+# include telekinesis animations
+!workspace/_work/Data/Anims/_compiled/Human*TEL*
 
 # include HumanS.msb and HumanS.mdh
 !workspace/_work/Data/Anims/_compiled/HumanS.msb
