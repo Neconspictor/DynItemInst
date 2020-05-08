@@ -88,7 +88,7 @@ def copyDemoSources(copier: Copier):
     #Anims
     source = copier.createFolderPathChecked("workspace/_work/Data/Anims")
     dest = copier.createIfNotExist("dist/source/demo/_work/Data/Anims")
-    files = ["HUM_BODY_NAKED0.ASC", "HUM_MAGPETRIFY_M01.ASC", "HumanS.mds"]
+    files = ["HUM_BODY_NAKED0.ASC", "HUM_MAGTEL_M01.ASC", "HumanS.mds"]
     copier.copyFiles(source, dest, files)
 
     #Anims/_compiled
@@ -96,7 +96,7 @@ def copyDemoSources(copier: Copier):
     dest = copier.createIfNotExist("dist/source/demo/_work/Data/Anims/_compiled")
     files = ["HUMANS.MDH", "HUMANS.MSB"]
     copier.copyFiles(source, dest, files)
-    copier.copyFolder(source, dest, False, "*TLK*")
+    copier.copyFolder(source, dest, False, "*_TEL*")
     copier.copyFolder(source, dest, False, "HUMANS_LEVITATE*")
 
     #Anims/Levitation
@@ -217,12 +217,12 @@ def distNeclib(copier : Copier, version : str) -> None:
     #Telekinesis/Anims/_compiled
     source = copier.createFolderPathChecked("workspace/_work/Data/Anims/_compiled")
     dest = copier.createIfNotExist("dist/source/Telekinesis/Anims/_compiled")
-    copier.copyFolder(source, dest, False, "*TLK*")
+    copier.copyFolder(source, dest, False, "*_TEL*")
 
     #Telekinesis/Anims
     source = copier.createFolderPathChecked("workspace/_work/Data/Anims")
     dest = copier.createIfNotExist("dist/source/Telekinesis/Anims")
-    files = ["HUM_MAGPETRIFY_M01.ASC"]
+    files = ["HUM_MAGTEL_M01.ASC"]
     copier.copyFiles(source, dest, files)
 
 
@@ -315,7 +315,7 @@ def buildDemoBuildScript(destinationScriptFilePath : pathlib.Path,
         filesRegex = [
             "_work\\Data\\Scripts\\_compiled\\VisualFX.dat -r",
             "_work\\Data\\Scripts\\_compiled\\Gothic.dat -r",
-            "_work\\Data\\Anims\\_compiled\\*TLK* -r",
+            "_work\\Data\\Anims\\_compiled\\*_TEL* -r",
             "_work\\Data\\Anims\\_compiled\\HUMANS_LEVITATE* -r",
             "_work\\Data\\Anims\\_compiled\\HUMANS.MDH -r",
             "_work\\Data\\Anims\\_compiled\\HUMANS.MSB -r"]
