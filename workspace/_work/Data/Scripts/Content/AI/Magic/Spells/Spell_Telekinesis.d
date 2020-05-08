@@ -2,12 +2,13 @@
 // SPL_Telekinesis
 // ***************
 
-const int SPL_Cost_Telekinesis      = 10;
-const int STEP_Telekinesis          = 1;
-const int SPL_Damage_Telekinesis        = 0;
-const int TELEKINESIS_UPMOVEMENT = 50; // (in cm) the focus item is moved upwards when starting the spell.
-const int TELEKINESIS_SPEED = 150; // (in cm/s) the traveling speed of the focus item.
-const int TELEKINESIS_MOVEMENT_DELAY = 2000; // (in ms) time to wait before the focus item travels
+const int SPL_Cost_Telekinesis                  = 10;
+const int STEP_Telekinesis                      = 1;
+const int SPL_Damage_Telekinesis                = 0;
+const int TELEKINESIS_UPMOVEMENT                = 50;   // (in cm) the focus item is moved upwards when starting the spell.
+const int TELEKINESIS_SPEED                     = 150;  // (in cm/s) the traveling speed of the focus item.
+const int TELEKINESIS_MOVEMENT_DELAY            = 2000; // (in ms) time to wait before the focus item travels
+const int TELEKINESIS_NEAREST_DISTANCE_LIMIT    = 150;   //(in cm) the maximum nearest distance the item gets moved toward the caster.
 
 const string PRINT_TO_FAR_AWAY = "Mmh, das Objekt kann ich nicht sehen...";
 
@@ -174,6 +175,26 @@ func void TELEKINESIS_ClearInterpolators() {
 
 
 
+func void _Spell_Telekinesis_calcTargetPosition(var oCNpc oCSelf) {
+        var int targetPosition[3];
+        targetPosition[0] = oCSelf._zCVob_trafoObjToWorld[3];
+        targetPosition[1] = oCSelf._zCVob_trafoObjToWorld[7];
+        targetPosition[2] = oCSelf._zCVob_trafoObjToWorld[11];
+        
+        
+};
+
+//.text:00498A20 ; struct zVEC3 *__thiscall zVEC3::NormalizeSafe(zVEC3 *__hidden this)
+func int zVEC3NormalizeSafe(var int pzVec3) {
+    const int adr = 4819488;
+    
+    var int ret;
+    CALL_PutRetValTo(_@(ret));
+    CALL__thiscall(pzVec3, adr);
+    return +ret;
+};
+
+
 func int Spell_Logic_Telekinesis (var int manaInvested)
 {
     
@@ -226,17 +247,36 @@ func int Spell_Logic_Telekinesis (var int manaInvested)
         vobPosition[1] = oCTarget._zCVob_trafoObjToWorld[7];
         vobPosition[2] = oCTarget._zCVob_trafoObjToWorld[11];
         
-        var int npcPosition[3];
-        npcPosition[0] = oCSelf._zCVob_trafoObjToWorld[3];
-        npcPosition[1] = oCSelf._zCVob_trafoObjToWorld[7];
-        npcPosition[2] = oCSelf._zCVob_trafoObjToWorld[11];
+        var int targetPosition[3];
+        targetPosition[0] = oCSelf._zCVob_trafoObjToWorld[3];
+        targetPosition[1] = oCSelf._zCVob_trafoObjToWorld[7];
+        targetPosition[2] = oCSelf._zCVob_trafoObjToWorld[11];
+        
+        //get normalized direction vector toward vob
+        var int direction[3];
+        direction[0] = subf(vobPosition[0], targetPosition[0]);
+        direction[1] = subf(vobPosition[1], targetPosition[1]);
+        direction[2] = subf(vobPosition[2], targetPosition[2]);
+        zVEC3NormalizeSafe(_@(direction[0]));
+        
+        //multiply by nearest distance limit
+        var int nearestDistancef; nearestDistancef = mkf(TELEKINESIS_NEAREST_DISTANCE_LIMIT);
+        direction[0] = mulf(direction[0], nearestDistancef);
+        direction[1] = mulf(direction[1], nearestDistancef);
+        direction[2] = mulf(direction[2], nearestDistancef);
+        
+        // shift target position
+        targetPosition[0] = addf(targetPosition[0], direction[0]);
+        targetPosition[1] = addf(targetPosition[1], direction[1]);
+        targetPosition[2] = addf(targetPosition[2], direction[2]);
+        
         
         // Delete the old interpolator
         // Note: interpolators are handles. Thus, it is ok if the interpolator isn't valid, 
         // since neclib checks the handle
         TELEKINESIS_DeleteInterpolator(_TelekinesisData.pInterpolator);
         _TelekinesisData.pInterpolator = TELEKINESIS_createInterpolator(_@(vobPosition[0]), 
-                                                            _@(npcPosition[0]),
+                                                            _@(targetPosition[0]),
                                                             TELEKINESIS_UPMOVEMENT,
                                                             TELEKINESIS_SPEED,
                                                             TELEKINESIS_MOVEMENT_DELAY);
